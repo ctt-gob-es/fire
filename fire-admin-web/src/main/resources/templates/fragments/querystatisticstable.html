@@ -1,122 +1,144 @@
 <!-- Tabla resumen -->
-		<h4 th:if="${queryStatisticsResult != ''}" class="c-grey-900 mB-20 mt-5" th:text="${tableStatisticsTitle}"></h4>
+<h4 th:if="${queryStatisticsResult != ''}" class="c-grey-900 mB-20 mt-5" th:text="${tableStatisticsTitle}"></h4>
+<div class="statsViewControl">
+	<button class="statsViewControlButton" id="statsViewButtonTable">
+		<span class="icon-holder mR-10">
+          <i class="ti-layout"></i>
+        </span> Table
+    </button>
+	<button class="statsViewControlButton" id="statsViewButtonDoughnut">
+		<span class="icon-holder mR-10">
+          <i class="ti-pie-chart"></i>
+        </span> Donut
+	</button>
+	<button class="statsViewControlButton" id="statsViewButtonBar">
+		<span class="icon-holder mR-10">
+          <i class="ti-bar-chart"></i>
+        </span> Barras
+	</button>
+</div>
 
-		<div class="masonry-sizer col-md-12 bgc-white">
-			<table id="queryStatisticsTable" class="display" style="cellspacing: 0; width: 100%;">
-				<thead th:if="${isQueryByAppOrProvider}">
-					<tr>
-						<th th:text="#{table.statistics.name}">Nombre</th>
-						<th th:text="#{table.statistics.correct}">Correctas</th>
-						<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
-						<th th:text="#{table.statistics.total}">Total</th>
-					</tr>
-				</thead>
-				<tbody th:if="${isQueryByAppOrProvider}">
-					<tr th:each="result : ${queryStatisticsResult}">
-						<td th:text="${result.name}"></td>
-						<td th:text="${result.corrects}"></td>
-						<td th:text="${result.incorrects}"></td>
-						<td th:text="${result.total}"></td>
-					</tr>
-				</tbody>
-				
-				<thead th:if="${isQueryByDatesSize}">
-					<tr>
-						<th th:text="#{table.statistics.name}">Nombre</th>
-						<th th:text="#{table.statistics.size}">Megabyte</th>
-					</tr>
-				</thead>
-				<tbody th:if="${isQueryByDatesSize}">
-					<tr th:each="result : ${queryStatisticsResult}">
-						<td th:text="${result.name}"></td>
-						<td th:text="${result.sizeBytes}"></td>
-					</tr>
-				</tbody>
-				
-				<thead th:if="${isQueryByOperation}">
-				
-					<tr>
-		                <th colspan="1"></th>
-		                <th colspan="3" th:text="#{table.statistics.operation.simple}" style="text-align: center;">Oper. Simple</th>
-		                <th colspan="3" th:text="#{table.statistics.operation.lotes}" style="text-align: center;">Oper. Lotes</th>
-		            </tr>
-					<tr>
-						<th th:text="#{table.statistics.name}">Nombre</th>
-						<th th:text="#{table.statistics.correct}">Correctas</th>
-						<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
-						<th th:text="#{table.statistics.total}">Total</th>
-						<th th:text="#{table.statistics.correct}">Correctas</th>
-						<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
-						<th th:text="#{table.statistics.total}">Total</th>
-					</tr>
-				</thead>
-				<tbody th:if="${isQueryByOperation}">
-					<tr th:each="result : ${queryStatisticsResult}">
-						<td th:text="${result.name}"></td>
-						<td th:text="${result.correctSimpleSignatures}"></td>
-						<td th:text="${result.incorrectSimpleSignatures}"></td>
-						<td th:text="${result.totalSimple}"></td>
-						<td th:text="${result.correctBatchSignatures}"></td>
-						<td th:text="${result.incorrectBatchSignatures}"></td>
-						<td th:text="${result.totalBatch}"></td>
-					</tr>
-				</tbody>
-				<thead th:if="${isSignatureQuery}">
-					<tr>
-						<th th:text="#{table.statistics.name}">Nombre</th>
-						<th th:text="#{table.statistics.correct}">Correctas</th>
-						<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
-						<th th:text="#{table.statistics.total}">Total</th>
-					</tr>
-				</thead>
-				<tbody th:if="${isSignatureQuery}">
-					<tr th:each="result : ${queryStatisticsResult}">
-						<td th:text="${result.name}"></td>
-						<td th:text="${result.corrects}"></td>
-						<td th:text="${result.incorrects}"></td>
-						<td th:text="${result.total}"></td>
-					</tr>
-				</tbody>
-			</table>
-		</div>
-		<!-- Fin tabla resumen -->
+<!-- Contenedor de la vista Table -->
+<div id="tableContainer" class="masonry-sizer p-20 bgc-white">
+	<table id="queryStatisticsTable" class="display" style="cellspacing: 0; width: 100%;">
+		<thead th:if="${isQueryByAppOrProvider}">
+			<tr>
+				<th th:text="#{table.statistics.name}">Nombre</th>
+				<th th:text="#{table.statistics.correct}">Correctas</th>
+				<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+				<th th:text="#{table.statistics.total}">Total</th>
+			</tr>
+		</thead>
+		<tbody th:if="${isQueryByAppOrProvider}">
+			<tr th:each="result : ${queryStatisticsResult}">
+				<td th:text="${result.name}"></td>
+				<td th:text="${result.corrects}"></td>
+				<td th:text="${result.incorrects}"></td>
+				<td th:text="${result.total}"></td>
+			</tr>
+		</tbody>
 		
-		<!-- Graficos de datos -->	
-		<!-- <div id="ChartsContend" style="display: inline-block; width:49%;"><br></div>
+		<thead th:if="${isQueryByDatesSize}">
+			<tr>
+				<th th:text="#{table.statistics.name}">Nombre</th>
+				<th th:text="#{table.statistics.size}">Megabyte</th>
+			</tr>
+		</thead>
+		<tbody th:if="${isQueryByDatesSize}">
+			<tr th:each="result : ${queryStatisticsResult}">
+				<td th:text="${result.name}"></td>
+				<td th:text="${result.sizeBytes}"></td>
+			</tr>
+		</tbody>
 		
-		<div id="pie-container" style=" display: inline-block;text-align:center;width:49%;position: absolute;">
-		    <div id="pie-chart"></div>
-		</div> -->
-		
-<!-- <script type="text/javascript" th:src="@{js/statistics/statistics.js}"></script> -->
-<!-- <script type="text/javascript" th:src="@{/chartist/chartist.js}"></script>
-<script type="text/javascript" th:src="@{/chartist/chartist.min.js}"></script>
-<script type="text/javascript" th:src="@{/chartist/chartist.min.js.map}"></script>
-<link type="text/css" rel="stylesheet" th:href="@{/chartist/chartist.css}" />
-<link type="text/css" rel="stylesheet" th:href="@{/chartist/chartist.min.css}" />
-<link type="text/css" rel="stylesheet" th:href="@{/chartist/chartist.css.map}" /> -->
+		<thead th:if="${isQueryByOperation}">
+			<tr>
+                <th colspan="1"></th>
+                <th colspan="3" th:text="#{table.statistics.operation.simple}" style="text-align: center;">Oper. Simple</th>
+                <th colspan="3" th:text="#{table.statistics.operation.lotes}" style="text-align: center;">Oper. Lotes</th>
+            </tr>
+			<tr>
+				<th th:text="#{table.statistics.name}">Nombre</th>
+				<th th:text="#{table.statistics.correct}">Correctas</th>
+				<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+				<th th:text="#{table.statistics.total}">Total</th>
+				<th th:text="#{table.statistics.correct}">Correctas</th>
+				<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+				<th th:text="#{table.statistics.total}">Total</th>
+			</tr>
+		</thead>
+		<tbody th:if="${isQueryByOperation}">
+			<tr th:each="result : ${queryStatisticsResult}">
+				<td th:text="${result.name}"></td>
+				<td th:text="${result.correctSimpleSignatures}"></td>
+				<td th:text="${result.incorrectSimpleSignatures}"></td>
+				<td th:text="${result.totalSimple}"></td>
+				<td th:text="${result.correctBatchSignatures}"></td>
+				<td th:text="${result.incorrectBatchSignatures}"></td>
+				<td th:text="${result.totalBatch}"></td>
+			</tr>
+		</tbody>
+		<thead th:if="${isSignatureQuery}">
+			<tr>
+				<th th:text="#{table.statistics.name}">Nombre</th>
+				<th th:text="#{table.statistics.correct}">Correctas</th>
+				<th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+				<th th:text="#{table.statistics.total}">Total</th>
+			</tr>
+		</thead>
+		<tbody th:if="${isSignatureQuery}">
+			<tr th:each="result : ${queryStatisticsResult}">
+				<td th:text="${result.name}"></td>
+				<td th:text="${result.corrects}"></td>
+				<td th:text="${result.incorrects}"></td>
+				<td th:text="${result.total}"></td>
+			</tr>
+		</tbody>
+	</table>
+</div>
+
+<!-- Contenedor de la vista Doughnut -->
+<div id="doughnutChartContainer" class="masonry-sizer p-20 bgc-white" style="display: none;">
+  <div style="display: flex; justify-content: space-around; align-items: flex-start; flex-wrap: wrap;">
+    <!-- Gráfico Donut para Correctas vs Incorrectas -->
+    <div style="width: 45%; text-align: center;">
+      <h3>Correctas vs Incorrectas</h3>
+      <canvas id="doughnutChartCorrectas"></canvas>
+    </div>
+    <!-- Gráfico Donut para Distribución Total por Nombre -->
+    <div style="width: 45%; text-align: center;">
+      <h3>Total por Nombre</h3>
+      <canvas id="doughnutChartTotales"></canvas>
+    </div>
+  </div>
+</div>
+
+<!-- Contenedor de la vista Bar -->
+<div id="barChartContainer" class="masonry-sizer p-20 bgc-white" style="display: none;">
+	<canvas id="barChart"></canvas>
+</div>
 
 <script th:inline="javascript">
+var doughnutChart, doughnutChartTotales, barChart; // Variables para almacenar las instancias de Chart.js
 
-function str2bytes (str) {
-	   var bytes = new Uint8Array(str.length);
-	   for (var i=0; i<str.length; i++) {
-	      bytes[i] = str.charCodeAt(i);
-	    }
-	    return bytes;
-	}
+function str2bytes(str) {
+   var bytes = new Uint8Array(str.length);
+   for (var i=0; i<str.length; i++) {
+      bytes[i] = str.charCodeAt(i);
+    }
+    return bytes;
+}
 
 $(document).ready(function() {
-	
 	var buttonCommon = {
-	        exportOptions: {
-	            format: {
-	                body: function ( data, row, column, node ) {
-	                    return data;
-	                }
-	            }
-	        }
-	    };
+        exportOptions: {
+            format: {
+                body: function ( data, row, column, node ) {
+                    return data;
+                }
+            }
+        }
+    };
 	
 	var titleTable = [[${tableStatisticsTitle}]];
 	
@@ -169,7 +191,6 @@ $(document).ready(function() {
             }  
             )*/
             {text: 'Exportar a PDF',name: 'pdf',
-            	
             	action: function ( e, dt, node, config ) {	    				  
   				   				  
   				  var query = $("#query option:selected").val();
@@ -222,8 +243,414 @@ $(document).ready(function() {
 	
 	$("thead tr").css("border-bottom","1px solid #000");
 	
+	// Botón Table: muestra la tabla y oculta los gráficos
+    $("#statsViewButtonTable").click(function(){
+      $("#tableContainer").show();
+      $("#doughnutChartContainer").hide();
+      $("#barChartContainer").hide();
+    });
 	
+ 	// Botón Doughnut: muestra los gráficos Doughnut y oculta las demás vistas
+	$("#statsViewButtonDoughnut").click(function() {
+		$("#tableContainer").hide();
+		$("#barChartContainer").hide();
+		$("#doughnutChartContainer").show();
+		
+		var results = /*[[${queryStatisticsResult}]]*/ [];
+		var totalCorrect = 0;
+		var totalIncorrect = 0;
+		var names = [];
+		var totals = [];
+		var isApplicable = /*[[${isSignatureQuery} or ${isQueryByAppOrProvider}]]*/ false;
+	    
+      	if (isApplicable) {
+      		for (var i = 0; i < results.length; i++) {
+    			totalCorrect += results[i].corrects;
+    			totalIncorrect += results[i].incorrects;
+    			names.push(results[i].name);
+    			totals.push(results[i].total);
+    		}
+    		
+    		// Gráfico 1: Proporción global de Correctas vs Incorrectas
+    		var ctxCorrectas = document.getElementById("doughnutChartCorrectas").getContext("2d");
+    		doughnutChart = new Chart(ctxCorrectas, {
+    			type: 'doughnut',
+    			data: {
+    				labels: ['Correctas', 'Incorrectas'],
+    				datasets: [{
+    					data: [totalCorrect, totalIncorrect],
+    					backgroundColor: ['#36A2EB', '#FF6384']
+    				}]
+    			},
+    			options: {
+    				responsive: true,
+    				title: {
+    					display: true,
+    					text: 'Proporción Global de Correctas vs Incorrectas'
+    				},
+    				tooltips: {
+    					callbacks: {
+    						label: function(tooltipItem, data) {
+    							var dataset = data.datasets[tooltipItem.datasetIndex];
+    							var total = dataset.data.reduce(function(prev, curr) { return prev + curr; });
+    							var currentValue = dataset.data[tooltipItem.index];
+    							var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+    							return data.labels[tooltipItem.index] + ": " + percentage + "%";
+    						}
+    					}
+    				}
+    			}
+    		});
+    		
+    		
+    		// Gráfico 2: Distribución total por Nombre
+    		var ctxTotales = document.getElementById("doughnutChartTotales").getContext("2d");
+    		doughnutChartTotales = new Chart(ctxTotales, {
+    			type: 'doughnut',
+    			data: {
+    				labels: names,
+    				datasets: [{
+    					data: totals,
+    					backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+    				}]
+    			},
+    			options: {
+    				responsive: true,
+    				title: {
+    					display: true,
+    					text: 'Distribución Total por Nombre'
+    				},
+    				tooltips: {
+    					callbacks: {
+    						label: function(tooltipItem, data) {
+    							var dataset = data.datasets[tooltipItem.datasetIndex];
+    							var total = dataset.data.reduce(function(prev, curr) { return prev + curr; });
+    							var currentValue = dataset.data[tooltipItem.index];
+    							var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+    							return data.labels[tooltipItem.index] + ": " + percentage + "%";
+    						}
+    					}
+    				}
+    			}
+    		});
+      	} else {
+			var isQueryByOperation = /*[[${isQueryByOperation}]]*/ false;
+	    	
+	    	if (isQueryByOperation) {
+	    		var results = /*[[${queryStatisticsResult}]]*/ [];
+	    		  
+				var simpleTotalCorrect = 0;
+				var simpleTotalIncorrect = 0;
+				var batchTotalCorrect = 0;
+				var batchTotalIncorrect = 0;
+				var labels = [];
+				var totalsSimple = [];
+				var totalsBatch = [];
+				
+				for (var i = 0; i < results.length; i++) {
+					simpleTotalCorrect += results[i].correctSimpleSignatures;
+					simpleTotalIncorrect += results[i].incorrectSimpleSignatures;
+					batchTotalCorrect += results[i].correctBatchSignatures;
+					batchTotalIncorrect += results[i].incorrectBatchSignatures;
+					labels.push(results[i].name);
+					totalsSimple.push(results[i].totalSimple);
+					totalsBatch.push(results[i].totalBatch);
+				}
+				
+				var ctx = document.getElementById("doughnutChartCorrectas").getContext("2d");
+				doughnutChart = new Chart(ctx, {
+				    type: 'doughnut',
+				    data: {
+				      labels: ['Correctas', 'Incorrectas'],
+				      datasets: [
+				        {
+				          label: 'Simple',
+				          data: [simpleTotalCorrect, simpleTotalIncorrect],
+				          backgroundColor: ['#36A2EB', '#FF6384']
+				        },
+				        {
+				          label: 'Batch',
+				          data: [batchTotalCorrect, batchTotalIncorrect],
+				          backgroundColor: ['#4BC0C0', '#FFCE56']
+				        }
+				      ]
+				    },
+				    options: {
+				      responsive: true,
+				      title: {
+				        display: true,
+				        text: 'Distribución de Firmas: Simple vs Batch'
+				      },
+				      tooltips: {
+				        callbacks: {
+				          label: function(tooltipItem, data) {
+				            var datasetIndex = tooltipItem.datasetIndex;
+				            var datasetLabel = data.datasets[datasetIndex].label;
+				            var currentValue = data.datasets[datasetIndex].data[tooltipItem.index];
+				            var total = data.datasets[datasetIndex].data.reduce(function(prev, curr) {
+				              return prev + curr;
+				            }, 0);
+				            var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+				            return datasetLabel + " - " + data.labels[tooltipItem.index] + ": " + percentage + "% (" + currentValue + ")";
+				          }
+				        }
+				      }
+				    }
+				  });
+				
+				
+				
+				// Gráfico 2: Distribución total por Nombre
+	    		var ctxTotales = document.getElementById("doughnutChartTotales").getContext("2d");
+				
+	    		doughnutChartTotales = new Chart(ctxTotales, {
+	    		    type: 'doughnut',
+	    		    data: {
+	    		      labels: labels,
+	    		      datasets: [
+	    		        {
+	    		          label: 'Simple',
+	    		          data: totalsSimple,
+	    		          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+	    		        },
+	    		        {
+	    		          label: 'Batch',
+	    		          data: totalsBatch,
+	    		          backgroundColor: ['#4BC0C0', '#FF6384', '#FFCE56', '#36A2EB', '#9966FF']
+	    		        }
+	    		      ]
+	    		    },
+	    		    options: {
+	    		      responsive: true,
+	    		      title: {
+	    		        display: true,
+	    		        text: 'Total de Entradas Simple y Batch por Nombre'
+	    		      },
+	    		      tooltips: {
+	    		        callbacks: {
+	    		          label: function(tooltipItem, data) {
+	    		            var dsIndex = tooltipItem.datasetIndex;
+	    		            var dataset = data.datasets[dsIndex];
+	    		            var currentValue = dataset.data[tooltipItem.index];
+	    		            var total = dataset.data.reduce(function(prev, curr) { return prev + curr; }, 0);
+	    		            var percentage = Math.floor((currentValue / total) * 100 + 0.5);
+	    		            return dataset.label + " - " + data.labels[tooltipItem.index] + ": " + percentage + "% (" + currentValue + ")";
+	    		          }
+	    		        }
+	    		      }
+	    		    }
+	    		  });
+	    	} else {
+	    	    var results = /*[[${queryStatisticsResult}]]*/ [];
+	    	    results.sort(function(a, b) {
+	    	      return a.sizeBytes - b.sizeBytes;
+	    	    });
+	    	    
+	    	    var labels = results.map(function(item) {
+	    	      return item.name;
+	    	    });
+	    	    
+	    	    var sizes = results.map(function(item) {
+	    	      return item.sizeBytes;
+	    	    });
+	    	    
+	    	    var ctx = document.getElementById("doughnutChartCorrectas").getContext("2d");
+	    	    doughnutChart = new Chart(ctx, {
+	    	      type: 'doughnut',
+	    	      data: {
+	    	        labels: labels,
+	    	        datasets: [{
+	    	          data: sizes,
+	    	          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+	    	        }]
+	    	      },
+	    	      options: {
+	    	        responsive: true,
+	    	        title: {
+	    	          display: true,
+	    	          text: 'Distribución de Tamaños (ordenados de menor a mayor)'
+	    	        },
+	    	        tooltips: {
+	    	          callbacks: {
+	    	            label: function(tooltipItem, data) {
+	    	              var dataset = data.datasets[tooltipItem.datasetIndex];
+	    	              var total = dataset.data.reduce(function(prev, curr) { return prev + curr; }, 0);
+	    	              var currentValue = dataset.data[tooltipItem.index];
+	    	              var percentage = Math.floor(((currentValue / total) * 100) + 0.5);
+	    	              return data.labels[tooltipItem.index] + ": " + percentage + "% (" + currentValue + " Bytes)";
+	    	            }
+	    	          }
+	    	        }
+	    	      }
+	    	    });
+	    	}
+      	}
+	});
 	
+	// Botón Bar: muestra el gráfico de barras apilado y oculta las demás vistas
+	$("#statsViewButtonBar").click(function(){
+	  $("#tableContainer").hide();
+	  $("#doughnutChartContainer").hide();
+	  $("#barChartContainer").show();
+	  var isApplicable = /*[[${isSignatureQuery} or ${isQueryByAppOrProvider}]]*/ false;
+	    
+      if (isApplicable) {
+	      var results = /*[[${queryStatisticsResult}]]*/ [];
+	      var names = [];
+	      var corrects = [];
+	      var incorrects = [];
+	      
+	      for (var i = 0; i < results.length; i++) {
+	        names.push(results[i].name);
+	        corrects.push(results[i].corrects);
+	        incorrects.push(results[i].incorrects);
+	      }
+	      
+	      var ctx = document.getElementById("barChart").getContext("2d");
+	      barChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	          labels: names,
+	          datasets: [
+	            {
+	              label: 'Correctas',
+	              data: corrects,
+	              backgroundColor: '#36A2EB'
+	            },
+	            {
+	              label: 'Incorrectas',
+	              data: incorrects,
+	              backgroundColor: '#FF6384'
+	            }
+	          ]
+	        },
+	        options: {
+	          responsive: true,
+	          title: {
+	            display: true,
+	            text: 'Gráfico de Barras Apilado'
+	          },
+	          scales: {
+	            xAxes: [{
+	              stacked: true
+	            }],
+	            yAxes: [{
+	              stacked: true
+	            }]
+	          }
+	        }
+	      });
+	      
+	    } else {
+	    	var isQueryByOperation = /*[[${isQueryByOperation}]]*/ false;
+	    	
+	    	if (isQueryByOperation) {
+	    		var results = /*[[${queryStatisticsResult}]]*/ [];
+	    		var labels = [];
+				var simpleCorrect = [];
+				var simpleIncorrect = [];
+				var batchCorrect = [];
+				var batchIncorrect = [];
+				
+				for (var i = 0; i < results.length; i++) {
+					labels.push(results[i].name);
+					simpleCorrect.push(results[i].correctSimpleSignatures);
+					simpleIncorrect.push(results[i].incorrectSimpleSignatures);
+					batchCorrect.push(results[i].correctBatchSignatures);
+					batchIncorrect.push(results[i].incorrectBatchSignatures);
+				}
+				
+				var ctx = document.getElementById("barChart").getContext("2d");
+			      barChart = new Chart(ctx, {
+			        type: 'bar',
+			        data: {
+			          labels: labels,
+			          datasets: [
+			            {
+			              label: 'Simple Correctas',
+			              data: simpleCorrect,
+			              backgroundColor: '#36A2EB',
+			              stack: 'Stack 1'
+			            },
+			            {
+			              label: 'Simple Incorrectas',
+			              data: simpleIncorrect,
+			              backgroundColor: '#FF6384',
+			              stack: 'Stack 1'
+			            },
+			            {
+			              label: 'Batch Correctas',
+			              data: batchCorrect,
+			              backgroundColor: '#4BC0C0',
+			              stack: 'Stack 2'
+			            },
+			            {
+			              label: 'Batch Incorrectas',
+			              data: batchIncorrect,
+			              backgroundColor: '#FFCE56',
+			              stack: 'Stack 2'
+			            }
+			          ]
+			        },
+			        options: {
+			          responsive: true,
+			          title: {
+			            display: true,
+			            text: 'Stacked Bar Chart with Groups'
+			          },
+			          scales: {
+			            xAxes: [{
+			              stacked: true
+			            }],
+			            yAxes: [{
+			              stacked: true
+			            }]
+			          }
+			        }
+			      });
+	    	} else {
+	    		var results = /*[[${queryStatisticsResult}]]*/ [];
+	    	    results.sort(function(a, b) {
+	    	      return a.sizeBytes - b.sizeBytes;
+	    	    });
+	    	    
+	    	    var labels = results.map(function(item) {
+	    	      return item.name;
+	    	    });
+	    	    
+	    	    var sizes = results.map(function(item) {
+	    	      return item.sizeBytes;
+	    	    });
+	    	    
+	    	    var ctx = document.getElementById("barChart").getContext("2d");
+	    	    barChart = new Chart(ctx, {
+	    	      type: 'bar',
+	    	      data: {
+	    	        labels: labels,
+	    	        datasets: [{
+	    	          label: 'Tamaño (Bytes)',
+	    	          data: sizes,
+	    	          backgroundColor: '#36A2EB'
+	    	        }]
+	    	      },
+	    	      options: {
+	    	        responsive: true,
+	    	        title: {
+	    	          display: true,
+	    	          text: 'Tamaño de Transacciones ordenadas de menor a mayor'
+	    	        },
+	    	        scales: {
+	    	          yAxes: [{
+	    	            ticks: {
+	    	              beginAtZero: true
+	    	            }
+	    	          }]
+	    	        }
+	    	      }
+	    	    });
+	    	}
+	    }
+	});
 });
 					
 

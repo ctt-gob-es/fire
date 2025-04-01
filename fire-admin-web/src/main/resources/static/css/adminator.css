@@ -50369,3 +50369,15 @@ footer {
   margin: 0;
   line-height: 1.5;
 }
+
+.statsViewControl {
+	padding: 1rem;
+}
+
+.statsViewControlButton {
+	padding: 0.3rem 1rem;
+	border-radius: 0.3rem;
+	border: 1px solid #aaa;
+	color: white;
+	background-color: #6c757d;
+}

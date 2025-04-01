@@ -123,7 +123,6 @@ public class StatisticsController {
 		List<TransactionDTO> transactions = null;
 		List<SignatureDTO> signatures = null;
 
-
 		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate)) {
 			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
 			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
@@ -156,6 +155,7 @@ public class StatisticsController {
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getId());
 			}
+			
 			// Consulta de firmas
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year).spliterator(), false).collect(Collectors.toList());
@@ -182,13 +182,6 @@ public class StatisticsController {
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getId());
 			}
 			model.addAttribute("tableStatisticsTitle", query + " para el mes " + monthDate);
-
-			/*Map<String, Integer> data = new LinkedHashMap<String, Integer>();
-	        data.put("Prueba", 3);
-	        data.put("Ruby", 20);
-	        data.put("Python", 30);
-
-	        model.addAttribute("data", data);*/
 		}
         return "fragments/querystatisticstable.html";
     }
