@@ -164,6 +164,13 @@ public class TransactionRecorder {
 			dir3Code = UNDEFINED_VALUE;
 		}
 		transactionCube.setDir3Code(dir3Code);
+		
+		// Organizacion
+		String organization = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION);
+		if (organization == null) {
+			organization = UNDEFINED_VALUE;
+		}
+		transactionCube.setOrganization(organization);
 
 		// Operacion
 		TransactionType type = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);

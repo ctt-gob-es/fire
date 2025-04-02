@@ -71,6 +71,7 @@ public class ConfigFileApplicationsDAO implements ApplicationsDAO {
 				configuredAppId,
 				true,
 				digestInfo != null ? new DigestInfo[] { digestInfo } : null ,
+				null,
 				null);
 	}
 

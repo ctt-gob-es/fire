@@ -175,6 +175,13 @@ public class SignatureRecorder {
 			dir3Code = UNDEFINED_VALUE;
 		}
 		signatureCube.setDir3Code(dir3Code);
+		
+		// Organizacion
+		String organization = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION);
+		if (organization == null) {
+			organization = UNDEFINED_VALUE;
+		}
+		signatureCube.setOrganization(organization);
 
 		// Resultado
 		signatureCube.setResultSign(result);

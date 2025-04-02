@@ -12,6 +12,7 @@ public class SignatureCube {
 	private Date date;
 	private String application;
 	private String dir3Code;
+	private String organization;
 	private String format;
 	private String improvedFormat;
 	private String algorithm;
@@ -56,30 +57,33 @@ public class SignatureCube {
 		
 		// Codigo DIR3
 		sign.setDir3Code(cube[1]);
+		
+		// Organizacion
+		sign.setOrganization(cube[2]);
 
 		// Formato
-		sign.setFormat(cube[2]);
+		sign.setFormat(cube[3]);
 
 		// Formato Mejorado
-		sign.setImprovedFormat(cube[3].isEmpty() ? null : cube[3]);
+		sign.setImprovedFormat(cube[4].isEmpty() ? null : cube[4]);
 
 		// Algoritmo
-		sign.setAlgorithm(cube[4]);
+		sign.setAlgorithm(cube[5]);
 
 		// Proveedor
-		sign.setProvider(cube[5]);
+		sign.setProvider(cube[6]);
 
 		// Navegador
-		sign.setBrowser(cube[6]);
+		sign.setBrowser(cube[7]);
 
 		// Resultado de la firma
-		sign.setResultSign("1".equals(cube[7])); //$NON-NLS-1$
+		sign.setResultSign("1".equals(cube[8])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
-		sign.setIdTransaction(cube[8]);
+		sign.setIdTransaction(cube[9]);
 
 		// Tamano de la firma
-		sign.setDataSize(Long.parseLong(cube[9]));
+		sign.setDataSize(Long.parseLong(cube[10]));
 
 		return sign;
 	}
@@ -93,14 +97,14 @@ public class SignatureCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		if (registryDatas == null || registryDatas.length != 10) {
+		if (registryDatas == null || registryDatas.length != 11) {
 			return false;
 		}
 
 		for (int i = 0; i < registryDatas.length; i++) {
 
 			// El campo de formato mejorado puede estar vacio
-			if (i == 3) {
+			if (i == 4) {
 				continue;
 			}
 
@@ -261,7 +265,7 @@ public class SignatureCube {
 
 	/**
 	 * Establece el c&oacute;digo DIR3 de la aplicaci&oacute;n.
-	 * @param aplication C&oacute;digo DIR3 de la aplicaci&oacute;n.
+	 * @param dir3Code C&oacute;digo DIR3 de la aplicaci&oacute;n.
 	 */
 	public final void setDir3Code(final String dir3Code) {
 		this.dir3Code = dir3Code;
@@ -273,6 +277,22 @@ public class SignatureCube {
 	 */
 	public final String getDir3Code() {
 		return this.dir3Code;
+	}
+	
+	/**
+	 * Establece la organizaci&oacute;n de la aplicaci&oacute;n.
+	 * @param organization Nombre de la organizaci&oacute;n.
+	 */
+	public final void setOrganization(final String organization) {
+		this.organization = organization;
+	}
+	
+	/**
+	 * Recupera el nombre de la organizaci&oacute;n.
+	 * @return Nombre de la organizaci&oacute;n.
+	 */
+	public final String getOrganization() {
+		return this.organization;
 	}
 
 	/**
@@ -322,6 +342,12 @@ public class SignatureCube {
 		// Codigo DIR3
 		if (getDir3Code() != null) {
 			result.append(clean(getDir3Code(), 50));
+		}
+		result.append(";");//$NON-NLS-1$
+		
+		// Organizacion
+		if (getOrganization() != null) {
+			result.append(clean(getOrganization(), 255));
 		}
 		result.append(";");//$NON-NLS-1$
 
@@ -406,6 +432,12 @@ public class SignatureCube {
 		// Codigo DIR3
 		if (!(getDir3Code() == null && signature.getDir3Code() == null ||
 				getDir3Code() != null && getDir3Code().equals(signature.getDir3Code()))) {
+			return false;
+		}
+		
+		// Organizacion
+		if (!(getOrganization() == null && signature.getOrganization() == null ||
+				getOrganization() != null && getOrganization().equals(signature.getOrganization()))) {
 			return false;
 		}
 

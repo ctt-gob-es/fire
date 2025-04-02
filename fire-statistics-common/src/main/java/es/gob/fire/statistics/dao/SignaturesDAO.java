@@ -24,8 +24,8 @@ public class SignaturesDAO {
 
 	/** SQL para insertar una firma. */
 	private static final String ST_INSERT_SIGNATURE = "INSERT INTO TB_FIRMAS " //$NON-NLS-1$
-			+ "(fecha, formato, formato_mejorado, algoritmo, proveedor, navegador, correcta, total, aplicacion, dir3_code) " //$NON-NLS-1$
-			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
+			+ "(fecha, formato, formato_mejorado, algoritmo, proveedor, navegador, correcta, total, aplicacion, dir3_code, organization) " //$NON-NLS-1$
+			+ "VALUES(?, ?, ?, ?, ?, ?, ?, ?, ?, ?, ?)"; //$NON-NLS-1$
 
 	/*Consultas estadisticas de firmas*/
 
@@ -112,6 +112,7 @@ public class SignaturesDAO {
 			st.setLong(8, total);
 			st.setString(9, signature.getApplication());
 			st.setString(10, signature.getDir3Code());
+			st.setString(11, signature.getOrganization());
 			if (st.executeUpdate() < 1) {
 				throw new SQLException("No se insertaron registros en la tabla de firmas"); //$NON-NLS-1$
 			}

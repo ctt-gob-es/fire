@@ -166,6 +166,8 @@ public class ServiceParams {
     public static final String SESSION_PARAM_LANGUAGE = "language"; //$NON-NLS-1$
     /** Par&aacute;metro con el c&oacute;digo DIR 3. */
     public static final String SESSION_PARAM_DIR3_CODE = "dir3Code"; //$NON-NLS-1$
+    /** Par&aacute;metro con el nombre de la organizai&oacute;n. */
+    public static final String SESSION_PARAM_APPLICATION_ORGANIZATION = "appOrganization"; //$NON-NLS-1$
 
     /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
     public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$

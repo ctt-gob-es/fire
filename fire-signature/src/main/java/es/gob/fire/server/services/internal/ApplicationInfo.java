@@ -7,11 +7,14 @@ public class ApplicationInfo {
 	private final String name;
 	
 	private final String dir3Code;
+	
+	private final String organization;
 
-	public ApplicationInfo(final String id, final String name, final String dir3Code) {
+	public ApplicationInfo(final String id, final String name, final String dir3Code, final String organization) {
 		this.id = id;
 		this.name = name;
 		this.dir3Code = dir3Code;
+		this.organization = organization;
 	}
 
 	public String getId() {
@@ -24,5 +27,9 @@ public class ApplicationInfo {
 	
 	public String getDir3Code() {
 		return this.dir3Code;
+	}
+	
+	public String getOrganization() {
+		return this.organization;
 	}
 }

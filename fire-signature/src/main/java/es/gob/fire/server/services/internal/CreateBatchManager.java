@@ -177,6 +177,10 @@ public class CreateBatchManager {
         if (appInfo.getDir3Code() != null && !appInfo.getDir3Code().isEmpty()) {
     		session.setAttribute(ServiceParams.SESSION_PARAM_DIR3_CODE, appInfo.getDir3Code());
     	}
+        
+        if (appInfo.getOrganization() != null && !appInfo.getOrganization().isEmpty()) {
+    		session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION, appInfo.getOrganization());
+    	}
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto

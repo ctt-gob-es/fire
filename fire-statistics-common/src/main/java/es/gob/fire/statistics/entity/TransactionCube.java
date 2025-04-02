@@ -11,6 +11,7 @@ public class TransactionCube {
 
 	private String application;
 	private String dir3Code;
+	private String organization;
 	private String operation;
 	private String  provider;
 	private  boolean mandatoryProvider = false;
@@ -59,21 +60,24 @@ public class TransactionCube {
 		
 		// Codigo DIR3
 		trans.setDir3Code(cube[1]);
+		
+		// Organizacion
+		trans.setOrganization(cube[2]);
 
 		// Operacion
-		trans.setOperation(cube[2]);
+		trans.setOperation(cube[3]);
 
 		// Proveedor
-		trans.setProvider(cube[3]);
+		trans.setProvider(cube[4]);
 
 		// Proveedor forzado
-		trans.setMandatoryProvider("1".equals(cube[4])); //$NON-NLS-1$
+		trans.setMandatoryProvider("1".equals(cube[5])); //$NON-NLS-1$
 
 		// Resultado de la transaccion
-		trans.setResultTransaction("1".equals(cube[5])); //$NON-NLS-1$
+		trans.setResultTransaction("1".equals(cube[6])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
-		trans.setIdTransaction(cube[6]);
+		trans.setIdTransaction(cube[7]);
 
 		return trans;
 	}
@@ -88,7 +92,7 @@ public class TransactionCube {
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		if (registryDatas == null || registryDatas.length != 7) {
+		if (registryDatas == null || registryDatas.length != 8) {
 			return false;
 		}
 
@@ -116,6 +120,14 @@ public class TransactionCube {
 
 	public final void setDir3Code(final String dir3Code) {
 		this.dir3Code = dir3Code;
+	}
+	
+	public final String getOrganization() {
+		return this.organization;
+	}
+
+	public final void setOrganization(final String organization) {
+		this.organization = organization;
 	}
 
 	public final String getOperation() {
@@ -196,6 +208,11 @@ public class TransactionCube {
 			result.append(clean(getDir3Code(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
+		
+		if (getOrganization() != null) {
+			result.append(clean(getOrganization(), 255));
+		}
+		result.append(";");//$NON-NLS-1$
 
 		if (getOperation() != null) {
 			result.append(clean(getOperation(), 10));
@@ -255,6 +272,12 @@ public class TransactionCube {
 		// Codigo DIR3
 		if (!(getDir3Code() == null && transaction.getDir3Code() == null ||
 				getDir3Code() != null && getDir3Code().equals(transaction.getDir3Code()))) {
+			return false;
+		}
+		
+		// Organizacion
+		if (!(getOrganization() == null && transaction.getOrganization() == null ||
+				getOrganization() != null && getOrganization().equals(transaction.getOrganization()))) {
 			return false;
 		}
 
