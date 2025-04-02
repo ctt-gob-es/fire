@@ -38,7 +38,9 @@ public enum QueryEnum {
 	DOCUMENTS_SIGNED_BY_APP(5L, "Documentos firmados por cada aplicacion"),
 	DOCUMENTS_SIGNED_BY_PROVIDER(6L, "Documentos firmados por cada origen de certificados/proveedor"),
 	DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT(7L, "Documentos firmados en cada formato de firma"),
-	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos firmados que utilizan cada formato de firma longevo");
+	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos firmados que utilizan cada formato de firma longevo"),
+	TRANSACTIONS_ENDED_BY_ORGANISM(9L, "Transacciones finalizadas por cada organismo"),
+	DOCUMENTS_SIGNED_BY_ORGANISM(10L, "Documentos firmados por cada organismo");
 
 	/**
 	 * Attribute that represents the enumerate id.

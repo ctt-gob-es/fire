@@ -38,6 +38,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
+import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 import es.gob.fire.persistence.repository.TransactionRepository;
@@ -386,4 +387,63 @@ public class TransactionService implements ITransactionService {
 	    return transactions;
 	}
 
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByOrganism(Integer month, Integer year) {
+		List<TransactionDTO> transactions = null;
+	    final Query nativeQuery = this.entityManager.createNativeQuery(
+	            "SELECT t.DIR3_CODE, " +
+	            " SUM(t.correcta) AS corrects, " +
+	            " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects " +
+	            " FROM tb_transacciones t" +
+	            " WHERE EXTRACT(MONTH FROM t.fecha) = ? AND EXTRACT(YEAR FROM t.fecha) = ? " +
+	            " GROUP BY t.DIR3_CODE");
+
+	    nativeQuery.setParameter(1, month);
+	    nativeQuery.setParameter(2, year);
+
+	    final List<Object[]> results = nativeQuery.getResultList();
+
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+
+	    return transactions;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<TransactionDTO> getTransactionsByOrganism(Integer startMonth, Integer startYear, Integer endMonth,
+			Integer endYear) {
+		List<TransactionDTO> transactions = null;
+	    final Query nativeQuery = this.entityManager.createNativeQuery(
+	            "SELECT t.DIR3_CODE, " +
+	            " SUM(t.correcta) AS corrects, " +
+	            " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects " +
+	            " FROM tb_transacciones t" +
+	            " WHERE (EXTRACT(YEAR FROM t.fecha) * 100 + EXTRACT(MONTH FROM t.fecha)) BETWEEN ? AND ? " +
+	            " GROUP BY t.DIR3_CODE");
+
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+
+	    final List<Object[]> results = nativeQuery.getResultList();
+
+	    transactions = results.stream()
+	            .map(result -> new TransactionDTO(
+	                    (String) result[0],
+	                    ((BigDecimal) result[1]).intValue(),
+	                    ((BigDecimal) result[2]).intValue(),
+	                    ((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+	            .collect(Collectors.toList());
+
+	    return transactions;
+	}
 }

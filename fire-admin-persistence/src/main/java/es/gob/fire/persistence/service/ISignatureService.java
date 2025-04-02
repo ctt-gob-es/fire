@@ -29,6 +29,7 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.entity.Signature;
 
@@ -151,4 +152,8 @@ public interface ISignatureService {
 	 * @return a list of {@link SignatureDTO} objects matching the specified date range and improved format
 	 */
 	List<SignatureDTO> getSignaturesByImprovedFormat(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+
+	List<SignatureDTO> getSignaturesByOrganism(Integer month, Integer year);
+	
+	List<SignatureDTO> getSignaturesByOrganism(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
 }

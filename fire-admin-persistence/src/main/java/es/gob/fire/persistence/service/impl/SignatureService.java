@@ -38,6 +38,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
+import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.entity.Signature;
 import es.gob.fire.persistence.repository.SignatureRepository;
@@ -381,5 +382,66 @@ public class SignatureService implements ISignatureService {
 	            .collect(Collectors.toList());
 	    
 	    return signatures;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByOrganism(Integer month, Integer year) {
+		List<SignatureDTO> signatures = null;
+		Query nativeQuery = entityManager.createNativeQuery(
+				"select  f.dir3_code, " 
+						+ " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+						+ " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+						+ " from tb_firmas f"
+						+ " where extract(month from f.fecha) = ? and extract(year from f.fecha) = ? "
+						+ " group by f.dir3_code ");
+
+		nativeQuery.setParameter(1, month);
+		nativeQuery.setParameter(2, year);
+
+		List<Object[]> results = nativeQuery.getResultList();
+
+		signatures = results.stream()
+				.map(result -> new SignatureDTO(
+						(String) result[0], 
+						((BigDecimal) result[1]).intValue(),
+						((BigDecimal) result[2]).intValue(), 
+						((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+				.collect(Collectors.toList());
+
+		return signatures;
+	}
+
+	@Override
+	@SuppressWarnings("unchecked")
+	public List<SignatureDTO> getSignaturesByOrganism(Integer startMonth, Integer startYear, Integer endMonth,
+			Integer endYear) {
+		List<SignatureDTO> signatures = null;
+		Query nativeQuery = entityManager.createNativeQuery(
+				"select  f.dir3_code, " 
+						+ " sum(case when f.correcta = '1' then total else 0 end) as corrects, "
+						+ " sum(case when f.correcta = '0' then total else 0 end) as incorrects "
+						+ " from tb_firmas f"
+						+ " where (EXTRACT(YEAR FROM f.fecha) * 100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN ? AND ? "
+						+ " group by f.dir3_code ");
+
+		// Construir los límites inferior y superior en formato AAAAMM.
+	    final Integer startBoundary = startYear * 100 + startMonth;
+	    final Integer endBoundary = endYear * 100 + endMonth;
+	    
+	    nativeQuery.setParameter(1, startBoundary);
+	    nativeQuery.setParameter(2, endBoundary);
+
+		List<Object[]> results = nativeQuery.getResultList();
+
+		signatures = results.stream()
+				.map(result -> new SignatureDTO(
+						(String) result[0], 
+						((BigDecimal) result[1]).intValue(),
+						((BigDecimal) result[2]).intValue(), 
+						((BigDecimal) result[1]).intValue() + ((BigDecimal) result[2]).intValue()))
+				.collect(Collectors.toList());
+
+		return signatures;
 	}
 }

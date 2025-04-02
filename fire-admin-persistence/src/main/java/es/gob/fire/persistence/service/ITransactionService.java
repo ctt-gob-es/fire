@@ -29,6 +29,7 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.commons.utils.QueryEnum;
 import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 
@@ -151,4 +152,8 @@ public interface ITransactionService {
 	 * @return a list of {@link TransactionDTO} objects matching the specified operation and date range
 	 */
 	List<TransactionDTO> getTransactionsByOperation(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
+
+	List<TransactionDTO> getTransactionsByOrganism(Integer month, Integer year);
+	
+	List<TransactionDTO> getTransactionsByOrganism(final Integer startMonth, final Integer startYear, final Integer endMonth, final Integer endYear);
 }
