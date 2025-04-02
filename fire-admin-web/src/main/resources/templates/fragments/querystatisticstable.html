@@ -19,7 +19,7 @@
 	<button class="statsViewControlButton" id="statsViewButtonBarTimeEvolution" th:if="${enableBarTimeChart}">
 		<span class="icon-holder mR-10">
           <i class="ti-bar-chart"></i>
-        </span> Barras Evolución
+        </span> Barras Evolucion
 	</button>
 </div>
 
@@ -105,12 +105,12 @@
 <!-- Contenedor de la vista Doughnut -->
 <div id="doughnutChartContainer" class="masonry-sizer p-20 bgc-white" style="display: none;">
   <div style="display: flex; justify-content: space-around; align-items: flex-start; flex-wrap: wrap;">
-    <!-- Gráfico Donut para Correctas vs Incorrectas -->
+    <!-- Grafico Donut para Correctas vs Incorrectas -->
     <div style="width: 45%; text-align: center;">
       <h3>Correctas vs Incorrectas</h3>
       <canvas id="doughnutChartCorrectas"></canvas>
     </div>
-    <!-- Gráfico Donut para Distribución Total por Nombre -->
+    <!-- Grafico Donut para Distribucion Total por Nombre -->
     <div style="width: 45%; text-align: center;">
       <h3>Total por Nombre</h3>
       <canvas id="doughnutChartTotales"></canvas>
@@ -272,7 +272,7 @@ $(document).ready(function() {
 	
 	$("thead tr").css("border-bottom","1px solid #000");
 	
-	// Botón Table: muestra la tabla y oculta los gráficos
+	// Boton Table: muestra la tabla y oculta los graficos
     $("#statsViewButtonTable").click(function(){
       $("#tableContainer").show();
       $("#doughnutChartContainer").hide();
@@ -280,7 +280,7 @@ $(document).ready(function() {
       $("#barTimeEvolutionChartContainer").hide();
     });
 	
- 	// Botón Doughnut: muestra los gráficos Doughnut y oculta las demás vistas
+ 	// Boton Doughnut: muestra los graficos Doughnut y oculta las demas vistas
 	$("#statsViewButtonDoughnut").click(function() {
 		$("#tableContainer").hide();
 		$("#barChartContainer").hide();
@@ -302,7 +302,7 @@ $(document).ready(function() {
     			totals.push(results[i].total);
     		}
     		
-    		// Gráfico 1: Proporción global de Correctas vs Incorrectas
+    		// Grafico 1: Proporcion global de Correctas vs Incorrectas
     		var ctxCorrectas = document.getElementById("doughnutChartCorrectas").getContext("2d");
     		doughnutChart = new Chart(ctxCorrectas, {
     			type: 'doughnut',
@@ -317,7 +317,7 @@ $(document).ready(function() {
     				responsive: true,
     				title: {
     					display: true,
-    					text: 'Proporción Global de Correctas vs Incorrectas'
+    					text: 'Proporcion Global de Correctas vs Incorrectas'
     				},
     				tooltips: {
     					callbacks: {
@@ -333,8 +333,17 @@ $(document).ready(function() {
     			}
     		});
     		
+    		var colors = [];
+    		var index = 0;
+    		for (var i = 0; i < totals.length; i++) {
+    			var hue = generateBaseHue(index, totals.length);
+        		var correctColor = generateCorrectColor(hue);
+        		
+    		    colors.push(correctColor);
+    		    index++;
+    		}
     		
-    		// Gráfico 2: Distribución total por Nombre
+    		// Grafico 2: Distribucion total por Nombre
     		var ctxTotales = document.getElementById("doughnutChartTotales").getContext("2d");
     		doughnutChartTotales = new Chart(ctxTotales, {
     			type: 'doughnut',
@@ -342,14 +351,14 @@ $(document).ready(function() {
     				labels: names,
     				datasets: [{
     					data: totals,
-    					backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4BC0C0', '#9966FF']
+    					backgroundColor: colors
     				}]
     			},
     			options: {
     				responsive: true,
     				title: {
     					display: true,
-    					text: 'Distribución Total por Nombre'
+    					text: 'Distribucion Total por Nombre'
     				},
     				tooltips: {
     					callbacks: {
@@ -410,7 +419,7 @@ $(document).ready(function() {
 				      responsive: true,
 				      title: {
 				        display: true,
-				        text: 'Distribución de Firmas: Simple vs Batch'
+				        text: 'Distribucion de Firmas: Simple vs Batch'
 				      },
 				      tooltips: {
 				        callbacks: {
@@ -429,9 +438,27 @@ $(document).ready(function() {
 				    }
 				  });
 				
+				var simpleColors = [];
+				var batchColors = [];
+	    		var index = 0;
+	    		for (var i = 0; i < totalsSimple.length; i++) {
+	    			var hue = generateBaseHue(index, totalsSimple.length);
+	        		var simpleColor = generateCorrectColor(hue);
+	        		
+	        		simpleColors.push(simpleColor);
+	        		index++;
+	    		}
+
+	    		index = 0;
+	    		for (var i = 0; i < totalsBatch.length; i++) {
+	    			var hue = generateBaseHue(index, totalsBatch.length);
+	        		var batchColor = generateCorrectBatchColor(hue);
+	        		
+	        		batchColors.push(batchColor);
+	        		index++;
+	    		}
 				
-				
-				// Gráfico 2: Distribución total por Nombre
+				// Grafico 2: Distribucion total por Nombre
 	    		var ctxTotales = document.getElementById("doughnutChartTotales").getContext("2d");
 				
 	    		doughnutChartTotales = new Chart(ctxTotales, {
@@ -442,12 +469,12 @@ $(document).ready(function() {
 	    		        {
 	    		          label: 'Simple',
 	    		          data: totalsSimple,
-	    		          backgroundColor: ['#36A2EB', '#FF6384', '#FFCE56', '#4BC0C0', '#9966FF']
+	    		          backgroundColor: simpleColors
 	    		        },
 	    		        {
 	    		          label: 'Batch',
 	    		          data: totalsBatch,
-	    		          backgroundColor: ['#4BC0C0', '#FF6384', '#FFCE56', '#36A2EB', '#9966FF']
+	    		          backgroundColor: batchColors
 	    		        }
 	    		      ]
 	    		    },
@@ -499,7 +526,7 @@ $(document).ready(function() {
 	    	        responsive: true,
 	    	        title: {
 	    	          display: true,
-	    	          text: 'Distribución de Tamaños (ordenados de menor a mayor)'
+	    	          text: 'Distribucion de Tamaños (ordenados de menor a mayor)'
 	    	        },
 	    	        tooltips: {
 	    	          callbacks: {
@@ -518,7 +545,7 @@ $(document).ready(function() {
       	}
 	});
 	
-	// Botón Bar: muestra el gráfico de barras apilado y oculta las demás vistas
+	// Boton Bar: muestra el Grafico de barras apilado y oculta las demas vistas
 	$("#statsViewButtonBar").click(function(){
 	  $("#tableContainer").hide();
 	  $("#doughnutChartContainer").hide();
@@ -561,7 +588,7 @@ $(document).ready(function() {
 	          responsive: true,
 	          title: {
 	            display: true,
-	            text: 'Gráfico de Barras Apilado'
+	            text: 'Grafico de Barras Apilado'
 	          },
 	          scales: {
 	            xAxes: [{
@@ -685,7 +712,7 @@ $(document).ready(function() {
 	    }
 	});
 	
-	// Botón Table: muestra la tabla y oculta los gráficos
+	// Boton Table: muestra la tabla y oculta los graficos
     $("#statsViewButtonBarTimeEvolution").click(function(){
       $("#tableContainer").hide();
       $("#doughnutChartContainer").hide();
@@ -749,9 +776,9 @@ $(document).ready(function() {
 	       	        backgroundColor: correctColor ,
 	       	        borderColor: correctColor ,
 	       	        borderWidth: 1,
-	       	        stack: entry  // Mismo stack para agrupar correctas e incorrectas de la misma aplicación
+	       	        stack: entry  // Mismo stack para agrupar correctas e incorrectas de la misma aplicacion
 	       	    });
-	       	    // Dataset para transacciones incorrectas de la aplicación
+	       	    // Dataset para transacciones incorrectas de la aplicacion
 	       	    datasets.push({
 	       	        label: entry + " - Incorrectas",
 	       	        data: data[entry].incorrects,
@@ -786,7 +813,7 @@ $(document).ready(function() {
                     beginAtZero: true,
                     title: {
                       display: true,
-                      text: 'Número de Transacciones'
+                      text: 'Numero de Transacciones'
                     }
                   }
                 }
@@ -805,7 +832,7 @@ $(document).ready(function() {
 	      	      return (yearA - yearB) || (monthA - monthB);
 	      	    });
     			
-     	    	// 2. Obtener la lista única de nombres de aplicaciones
+     	    	// 2. Obtener la lista unica de nombres de aplicaciones
      	       var appSet = {};
      	       labels.forEach(function(monthKey) {
      	         statisticsByMonth[monthKey].forEach(function(entry) {
@@ -814,7 +841,7 @@ $(document).ready(function() {
      	       });
      	       var appNames = Object.keys(appSet);
      	       
-    	   		// 3. Preparar la estructura de datos por aplicación
+    	   		// 3. Preparar la estructura de datos por aplicacion
      	      var appData = {};
      	      appNames.forEach(function(app) {
      	        appData[app] = {
@@ -825,7 +852,7 @@ $(document).ready(function() {
      	        };
      	      });
      	      
-     	  		// 4. Rellenar los arrays según los datos de cada mes
+     	  		// 4. Rellenar los arrays segun los datos de cada mes
      	     labels.forEach(function(monthKey, monthIndex) {
      	       statisticsByMonth[monthKey].forEach(function(entry) {
      	         var app = entry.name;
@@ -875,7 +902,7 @@ $(document).ready(function() {
 		      });
 		    });
 		    
-	 		// 6. Configurar el gráfico de barras apiladas
+	 		// 6. Configurar el Grafico de barras apiladas
 		    var timeEvolutionCtx = document.getElementById('barTimeEvolutionChart').getContext('2d');
           
           	var timeEvolutionChart = new Chart(timeEvolutionCtx, {
@@ -889,7 +916,7 @@ $(document).ready(function() {
 		        plugins: {
 		          title: {
 		            display: true,
-		            text: 'Evolución Mensual de Firmas por Aplicación'
+		            text: 'Evolucion Mensual de Firmas por Aplicacion'
 		          }
 		        },
 		        scales: {
@@ -905,7 +932,7 @@ $(document).ready(function() {
 		            beginAtZero: true,
 		            title: {
 		              display: true,
-		              text: 'Número de Firmas'
+		              text: 'Numero de Firmas'
 		            }
 		          }
 		        }
@@ -922,7 +949,7 @@ $(document).ready(function() {
     		      return (yearA - yearB) || (monthA - monthB);
     		    });
     			
-    		 	// 2. Extraer la lista única de aplicaciones
+    		 	// 2. Extraer la lista unica de aplicaciones
     		    var appSet = {};
     		    labels.forEach(function(monthKey) {
     		      statisticsByMonth[monthKey].forEach(function(entry) {
@@ -931,13 +958,13 @@ $(document).ready(function() {
     		    });
     		    var appNames = Object.keys(appSet);
     		    
-    		 	// 3. Preparar la estructura de datos para cada aplicación
+    		 	// 3. Preparar la estructura de datos para cada aplicacion
     		    var appData = {};
     		    appNames.forEach(function(app) {
     		      appData[app] = new Array(labels.length).fill(0);
     		    });
     		    
-    		 	// 4. Rellenar la estructura: para cada mes, asignar el valor de sizeBytes para cada aplicación
+    		 	// 4. Rellenar la estructura: para cada mes, asignar el valor de sizeBytes para cada aplicacion
     		    labels.forEach(function(monthKey, index) {
     		      statisticsByMonth[monthKey].forEach(function(entry) {
     		        var app = entry.name;
@@ -945,7 +972,7 @@ $(document).ready(function() {
     		      });
     		    });
     		    
-    		 	// 5. Construir los datasets para Chart.js: un dataset por aplicación
+    		 	// 5. Construir los datasets para Chart.js: un dataset por aplicacion
     		    var datasets = [];
     		    var totalApps = appNames.length;
     		    appNames.forEach(function(app, index) {
@@ -960,7 +987,7 @@ $(document).ready(function() {
     		      });
     		    });
     		    
-    		 	// 7. Crear el gráfico de barras
+    		 	// 7. Crear el Grafico de barras
     		    var timeEvolutionCtx = document.getElementById('barTimeEvolutionChart').getContext('2d');
           
           		var timeEvolutionChart = new Chart(timeEvolutionCtx, {

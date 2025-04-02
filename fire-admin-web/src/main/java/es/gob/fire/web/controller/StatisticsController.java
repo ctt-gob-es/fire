@@ -171,7 +171,7 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_ORGANISM.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOrganism(month, year).spliterator(), false).collect(Collectors.toList());
-				model.addAttribute("isQueryByOperation", Boolean.TRUE);
+				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_ORGANISM.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
