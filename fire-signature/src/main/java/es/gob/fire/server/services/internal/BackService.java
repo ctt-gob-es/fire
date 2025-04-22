@@ -25,7 +25,6 @@ public class BackService extends HttpServlet {
 
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-
 		// Leemos los parametros de la peticion
 		final RequestParameters params;
 		try {
@@ -41,7 +40,7 @@ public class BackService extends HttpServlet {
 		final String trId = params.getTransactionId();
 		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
@@ -53,7 +52,7 @@ public class BackService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
@@ -64,21 +63,21 @@ public class BackService extends HttpServlet {
 		// Comprobamos que se haya indicado el identificador de usuario
 		if (subjectRef == null || subjectRef.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la referencia del usuario")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
 		// Comprobamos que se haya indicado la pagina de retorno
 		if (returnPage == null || returnPage.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la pagina de retorno")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
 		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 

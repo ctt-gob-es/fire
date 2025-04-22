@@ -76,7 +76,7 @@ public final class BatchPostsigner extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la comprobacion de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 

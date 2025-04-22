@@ -6,6 +6,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Hashtable;
@@ -21,7 +22,7 @@ import es.gob.fire.signature.TempConfigLoader;
 
 public class DBOperationConfigLoader {
 
-	private static final String SQL_SELECT_DEFAULT_PROVIDERS = "SELECT nombre, obligatorio FROM tb_proveedores WHERE habilitado = 1 ORDER BY orden"; //$NON-NLS-1$
+	private static final String SQL_SELECT_DEFAULT_PROVIDERS = "SELECT id_proveedor, obligatorio FROM tb_proveedores WHERE habilitado = 1 ORDER BY orden"; //$NON-NLS-1$
 	private static final String SQL_SELECT_DEFAULT_PROPERTIES = "SELECT clave, valor_numerico FROM tb_propiedades WHERE tipo = 'NUMBER'"; //$NON-NLS-1$
 
 	private static final String SQL_SELECT_APP_PROPERTIES = "SELECT id, tamano_maximo_documento, tamano_maximo_peticion, cantidad_maxima_documentos FROM tb_aplicaciones WHERE tamano_personalizado = 1"; //$NON-NLS-1$
@@ -135,14 +136,14 @@ public class DBOperationConfigLoader {
 
 			try (final PreparedStatement st = conn.prepareStatement(SQL_SELECT_DEFAULT_PROVIDERS);
 					ResultSet rs = st.executeQuery()) {
-				if (!rs.next()) {
-					throw new ConfigException("No se han encontrado proveedores configurados"); //$NON-NLS-1$
-				}
-
 				while (rs.next()) {
 					final ProviderElement prov = new ProviderElement(rs.getString(1), rs.getBoolean(2));
 					providers.add(prov);
 				}
+			}
+
+			if (providers.isEmpty()) {
+				throw new ConfigException("No se han encontrado proveedores configurados"); //$NON-NLS-1$
 			}
 
 			return providers.toArray(new ProviderElement[0]);
@@ -167,6 +168,8 @@ public class DBOperationConfigLoader {
 				final List<ProviderElement> providersConfig = providers.get(appId);
 				if (providersConfig != null && !providersConfig.isEmpty()) {
 					config.setProviders(providersConfig.toArray(new ProviderElement[0]));
+				} else {
+					config.setProviders(Arrays.copyOf(defaultConfig.getProviders(), defaultConfig.getProviders().length));
 				}
 				configs.put(appId, config);
 			});

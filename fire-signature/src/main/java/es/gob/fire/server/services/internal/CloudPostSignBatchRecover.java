@@ -55,7 +55,7 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
     	// ID que pudieran haberse hecho para evitar problemas con los ID repetidos
     	final TriphaseData currentTd = new TriphaseData();
         for (final TriSign triSign : this.partialTd.getTriSigns()) {
-        	if (this.docId.equals(FIReTriSignIdProcessor.unmake(triSign.getId()))) {
+        	if (this.docId.equals(triSign.getSignatureId()) || this.docId.equals(FIReTriSignIdProcessor.unmake(triSign.getId()))) {
         		currentTd.addSignOperation(triSign);
         	}
         }

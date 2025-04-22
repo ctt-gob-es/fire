@@ -55,7 +55,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		final String trId = params.getTransactionId();
 		if (trId == null || trId.isEmpty()) {
 			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
@@ -67,7 +67,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
@@ -76,7 +76,7 @@ public class MiniAppletErrorService extends HttpServlet {
 		// Comprobamos que se hayan prorcionado los parametros indispensables
         if (userRef == null || userRef.isEmpty()) {
         	LOGGER.warning("No se han proporcionado los parametros necesarios"); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
+        	Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
@@ -86,7 +86,7 @@ public class MiniAppletErrorService extends HttpServlet {
 
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 		try {
