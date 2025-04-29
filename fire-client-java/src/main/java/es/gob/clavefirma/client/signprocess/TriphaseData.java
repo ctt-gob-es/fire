@@ -52,30 +52,54 @@ public final class TriphaseData {
 
 		private final Map<String,String> dict;
 		private final String id;
+		private final String signatureId;
 
-		/** Constructor de copia. Crea una firma trif&aacute;sica individual a partir
+		/**
+		 * Constructor de copia. Crea una firma trif&aacute;sica individual a partir
 		 * de otra, de forma completamente inmutable.
-		 * @param ts Firma trif&aacute;sica original. */
+		 * @param ts Firma trif&aacute;sica original.
+		 */
 		public TriSign(final TriSign ts) {
 			this.id = ts.getId();
-			this.dict = new ConcurrentHashMap<String, String>(ts.getDict().size());
+			this.signatureId = ts.getSignatureId();
+			this.dict = new ConcurrentHashMap<>(ts.getDict().size());
 			final Set<String> keys = ts.getDict().keySet();
 			for (final String key : keys) {
 				this.dict.put(key, ts.getProperty(key));
 			}
 		}
 
-		/** Crea los datos de una firma trif&aacute;sica individual.
+		/**
+		 * Crea los datos de una firma trif&aacute;sica individual.
 		 * @param d Propiedades de la firma.
-		 * @param i Identificador de la firma. */
-		public TriSign(final Map<String, String> d, final String i) {
+		 * @param id Identificador de la firma.
+		 */
+		public TriSign(final Map<String, String> d, final String id) {
 			if (d == null) {
 				throw new IllegalArgumentException(
 					"El diccionario de propiedades de la firma no puede ser nulo" //$NON-NLS-1$
 				);
 			}
 			this.dict = d;
-			this.id = i != null ? i : UUID.randomUUID().toString();
+			this.id = id != null ? id : UUID.randomUUID().toString();
+			this.signatureId = null;
+		}
+
+		/**
+		 * Crea los datos de una firma trif&aacute;sica individual.
+		 * @param d Propiedades de la firma.
+		 * @param i Identificador de la firma.
+		 * @param signId Identificador de la firma concreta.
+		 */
+		public TriSign(final Map<String, String> d, final String id, final String signId) {
+			if (d == null) {
+				throw new IllegalArgumentException(
+					"El diccionario de propiedades de la firma no puede ser nulo" //$NON-NLS-1$
+				);
+			}
+			this.dict = d;
+			this.id = id != null ? id : UUID.randomUUID().toString();
+			this.signatureId = signId;
 		}
 
 		@Override
@@ -83,10 +107,20 @@ public final class TriphaseData {
 			return "Firma trifasica individual con identificador " + getId(); //$NON-NLS-1$
 		}
 
-		/** Obtiene el identificador de la firma.
-		 * @return Identificador de la firma. */
+		/**
+		 * Obtiene el identificador de la firma.
+		 * @return Identificador de la firma.
+		 */
 		public String getId() {
 			return this.id;
+		}
+
+		/**
+		 * Obtiene el identificador de la firma concreta.
+		 * @return Identificador de la firma concreta.
+		 */
+		public String getSignatureId() {
+			return this.signatureId;
 		}
 
 		/** Obtiene una propiedad de la firma.
@@ -199,7 +233,7 @@ public final class TriphaseData {
 				"El ID de la firma no puede ser nulo" //$NON-NLS-1$
 			);
 		}
-		final List<TriSign> tsl = new ArrayList<TriphaseData.TriSign>();
+		final List<TriSign> tsl = new ArrayList<>();
 		for (final TriSign ts : this.signs) {
 			if (signId.equals(ts.getId())) {
 				tsl.add(new TriSign(ts));
@@ -221,7 +255,7 @@ public final class TriphaseData {
 
 	/** Construye unos datos de sesi&oacute;n trif&aacute;sica vac&iacute;os. */
 	public TriphaseData() {
-		this.signs = new ArrayList<TriSign>();
+		this.signs = new ArrayList<>();
 		this.format = null;
 	}
 
@@ -328,24 +362,30 @@ public final class TriphaseData {
 
 		final NodeList childNodes = signsNode.getChildNodes();
 
-		final List<TriSign> signs = new ArrayList<TriSign>();
+		final List<TriSign> signs = new ArrayList<>();
 		int idx = nextNodeElementIndex(childNodes, 0);
 		while (idx != -1) {
 			final Node currentNode = childNodes.item(idx);
 
 			String id = null;
+			String signid = null;
 
 			final NamedNodeMap nnm = currentNode.getAttributes();
 			if (nnm != null) {
-				final Node tmpNode = nnm.getNamedItem("Id"); //$NON-NLS-1$
+				Node tmpNode = nnm.getNamedItem("Id"); //$NON-NLS-1$
 				if (tmpNode != null) {
 					id = tmpNode.getNodeValue();
+				}
+				tmpNode = nnm.getNamedItem("signid"); //$NON-NLS-1$
+				if (tmpNode != null) {
+					signid = tmpNode.getNodeValue();
 				}
 			}
 			signs.add(
 				new TriSign(
 					parseParamsListNode(currentNode),
-					id
+					id,
+					signid
 				)
 			);
 			idx = nextNodeElementIndex(childNodes, idx + 1);
@@ -361,7 +401,7 @@ public final class TriphaseData {
 
 		final NodeList childNodes = paramsNode.getChildNodes();
 
-		final Map<String, String> params = new ConcurrentHashMap<String, String>();
+		final Map<String, String> params = new ConcurrentHashMap<>();
 		int idx = nextNodeElementIndex(childNodes, 0);
 		while (idx != -1) {
 			final Node paramNode = childNodes.item(idx);
@@ -416,6 +456,11 @@ public final class TriphaseData {
 			if (signConfig.getId() != null) {
 				builder.append(" Id=\""); //$NON-NLS-1$
 				builder.append(signConfig.getId());
+				builder.append("\""); //$NON-NLS-1$
+			}
+			if (signConfig.getSignatureId() != null) {
+				builder.append(" signid=\""); //$NON-NLS-1$
+				builder.append(signConfig.getSignatureId());
 				builder.append("\""); //$NON-NLS-1$
 			}
 
