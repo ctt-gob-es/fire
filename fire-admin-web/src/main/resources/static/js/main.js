@@ -324,17 +324,36 @@ function clearValidationResult(formId) {
 	});
 }
 
-function closeButton(btnId){
-	$('#' + btnId).modal('hide');
-	$('#' + btnId).remove();
-	$('.modal-backdrop').remove();
+function closeButton(btnId) {
+  var $modal = $('#' + btnId);
+
+  // Evita handlers duplicados y elimina el modal tras ocultarse
+  $modal
+    .off('hidden.bs.modal')
+    .on('hidden.bs.modal', function() {
+      $(this).remove();
+    })
+    .modal('hide');
+
+  // Limpia backdrop y restaura scroll
+  $('.modal-backdrop').remove();
+  $('body').removeClass('modal-open');
 }
 
 function closeModal(modalIn) {
-	$('#' + modalIn).modal('hide');
-	$('#' + modalIn).remove();
-	$('.modal-backdrop').remove();
+  var $modal = $('#' + modalIn);
 
+  // Cuando termine de ocultarse, eliminamos el propio modal
+  $modal
+    .off('hidden.bs.modal')                    // evitamos duplicados de handler
+    .on('hidden.bs.modal', function () {
+      $(this).remove();
+    })
+    .modal('hide');                            // oculta el modal via Bootstrap
+
+  // Eliminamos el backdrop y restauramos el scroll del body
+  $('.modal-backdrop').remove();
+  $('body').removeClass('modal-open');
 }
 
 /*

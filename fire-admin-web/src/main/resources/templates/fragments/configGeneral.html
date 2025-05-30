@@ -8,6 +8,15 @@
                     <form name="altEditor-form" role="form" id="generalConfig" th:object="${generalConfig}" method="post" action="">
                         <div id="messageGeneralConfig" role="alert"></div>
                         
+                        <!-- ConfiguraciÛn de gr·ficos -->
+						<h5 class="c-grey-900 mB-10" th:text="#{config.general.section.grouping}"></h5>
+						<div class="form-group row">
+						    <div class="col-md-4">
+						        <label for="maxEntitiesBeforeGrouping" class="col-form-label" th:text="#{config.general.field.maxEntitiesBeforeGrouping}"></label>
+						        <input type="text" id="maxEntitiesBeforeGrouping" th:field="*{maxEntitiesBeforeGrouping}" class="form-control" />
+						    </div>
+						</div>
+                        
                         <!-- Secci√≥n Configuraci√≥n General -->
                         <h5 class="c-grey-900 mB-10" th:text="#{config.general.section.size}"></h5>
                         <div class="form-group row">
@@ -157,11 +166,12 @@ $(document).ready(function() {
         
         // Capturar datos del formulario
         let formData = {
-            maxSizeDoc: $('#maxSizeDoc').val(),
-            maxSizePetition: $('#maxSizePetition').val(),
-            maxAmountDocs: $('#maxAmountDocs').val(),
-            providers: []
-        };
+		    maxSizeDoc: $('#maxSizeDoc').val(),
+		    maxSizePetition: $('#maxSizePetition').val(),
+		    maxAmountDocs: $('#maxAmountDocs').val(),
+		    maxEntitiesBeforeGrouping: $('#maxEntitiesBeforeGrouping').val(),
+		    providers: []
+		};
 
         let hasEnabledProvider = false; // Bandera para validar que al menos un proveedor est√© habilitado
         

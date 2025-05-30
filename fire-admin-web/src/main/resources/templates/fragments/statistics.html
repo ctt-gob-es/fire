@@ -1,247 +1,2221 @@
 <div class="row gap-20 masonry pos-r">
-	<div class="masonry-sizer col-md-12"></div>
-	<div class="masonry-item col-md-12">
-		<div class="bgc-white p-20 bd">
-			<h4 class="c-grey-900" th:text="#{query.statistics.admin}"></h4>
-			<div class="mT-30">
-				<form id="statisticsForm" name="statisticsForm" role="form"
-					th:action="@{/statistics}" method="post">
+  <div class="masonry-item col-md-12">
+    <div class="bgc-white p-20 bd full-height-root">
+      <h4 class="c-grey-900" th:text="#{query.statistics.admin}"></h4>
+      
+      <input type="hidden" id="maxEntitiesBeforeGrouping" th:value="${maxEntitiesBeforeGrouping}" class="form-control" />
 
-					<div class="form-row">
-						<div class="form-group col-md-5">
-							<label for="query" th:text="#{form.statistics.query}"></label> <select
-								id="query" name="query" class="form-control">
-								<option selected="selected" value=""
-									th:text="#{form.statistics.select.query}"></option>
-								<option th:each="q: ${queries}" th:value="${q.name}"
-									th:text="${q.name}"></option>
-							</select>
-							<div id="invalid-query" class="invalid-feedback">Se debe seleccionar una consulta.</div>
-						</div>
+      <!-- Botón para mostrar/ocultar filtros -->
+      <div class="mb-3">
+        <button
+          id="showFilterBtn"
+          type="button"
+          class="btn btn-primary"
+        >
+        <span class="icon-holder mR-10"><i class="ti-search"></i></span>
+        <span th:text="#{button.statistics.query}"></span>
+        </button>
+      </div>
+      
+      <div id="noResultsContainer" style="display:none;">
+		  <div class="no-results-card">
+		    <div class="icon-container">
+		      <i class="ti-alert big-icon"></i>
+		    </div>
+		    <h5 class="no-results-title" th:text="#{form.statistics.noResultsTitle}"></h5>
+		    <p class="no-results-message" th:text="#{form.statistics.noResultsMessage}">
+		    </p>
+		    <div class="filters-used">
+		      <h6 th:text="#{form.statistics.appliedFiltersTitle}"></h6>
+		      <div id="noResultsFiltersContainer">
+		        <!-- Aquí se insertan dinámicamente las burbujas de filtro -->
+		      </div>
+		    </div>
+		  </div>
+	  </div>
 
-						<!--  Mes de inicio -->
-						<div class="form-group col-md-statistics-month stats-datepicker" >
-							<div id="datepicker-statistics-pane">
-								<label for="month-datepicker-statistics"
-									th:text="#{form.statistics.startMonth}"></label> <input type="text"
-									id="month-datepicker-statistics" name="monthDate"
-									class="form-control" style="overflow: hidden"
-									onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
-								<div id="invalid-month-date-statistics" class="invalid-feedback">El
-									formato de la fecha no es v&aacute;lido.</div>
-							</div>
-						</div>
-						
-						<!--  Mes de fin -->
-						<div class="form-group col-md-statistics-month stats-datepicker">
-							<div id="datepicker-statistics-pane">
-								<label for="endMonth-datepicker-statistics"
-									th:text="#{form.statistics.endMonth}"></label> <input type="text"
-									id="endMonth-datepicker-statistics" name="endMonthDate"
-									class="form-control" style="overflow: hidden"
-									onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
-								<div id="invalid-month-date-statistics" class="invalid-feedback">El
-									formato de la fecha no es v&aacute;lido.</div>
-							</div>
-						</div>
 
-					</div>
-
-					<button id="statisticsBtn" type="submit" class="btn btn-primary"
-						th:text="#{button.statistics.query}"></button>
-					<button type="button" id="cleanQueryStatisticsBtn"
-						class="btn btn-primary" th:text="#{button.cleanForm}"></button>
-				</form>
-			</div>
+      <!-- Sección de filtros aplicados y control de vistas -->
+      <div id="filtersAndViews">
+		  <!-- Filtros aplicados a la izquierda -->
+		  <div id="activeFiltersSection">
+		    <h6 th:text="#{section.statistics.activeFilters.title}">Filtros aplicados</h6>
+		    <div id="activeFiltersContainer">
+		      <!-- Aquí se insertan dinámicamente los filtros -->
+		    </div>
+		  </div>
+		
+		  <!-- Sección de control de vistas a la derecha, con título y botones en línea -->
+		  <div id="statsViewSection">
+		    <h6 th:text="#{section.statistics.viewControls.title}">Control de vistas</h6>
+		    <div id="statsViewControl">
+		      <button class="statsViewControlButton" id="statsViewButtonTable">
+		        <span class="icon-holder mR-10"><i class="ti-layout"></i></span>
+		        <span th:text="#{button.statistics.view.table}">Tabla</span>
+		      </button>
+		      <button class="statsViewControlButton" id="statsViewButtonDoughnut">
+		        <span class="icon-holder mR-10"><i class="ti-pie-chart"></i></span>
+		        <span th:text="#{button.statistics.view.doughnut}">Dona</span>
+		      </button>
+		      <button class="statsViewControlButton" id="statsViewButtonBar">
+		        <span class="icon-holder mR-10"><i class="ti-bar-chart"></i></span>
+		        <span th:text="#{button.statistics.view.bar}">Barras</span>
+		      </button>
+		      <button class="statsViewControlButton" id="statsViewButtonBarTimeEvolution">
+		        <span class="icon-holder mR-10"><i class="ti-bar-chart"></i></span>
+		        <span th:text="#{button.statistics.view.barTimeEvolution}">Evolución</span>
+		      </button>
+		    </div>
+		  </div>
 		</div>
 
-		<div id="queryStatisticsTableDiv"></div>
-	</div>
+      <div id="statisticsResultContainer">
+        <!-- Tabla -->
+        <div id="tableContainer" class="masonry-sizer bgc-white">
+          <table id="queryStatisticsTable" class="display" cellspacing="0" width="100%">
+            <thead><!-- dinámico --></thead>
+            <tbody></tbody>
+          </table>
+        </div>
 
+        <!-- Donut -->
+        <div id="doughnutChartContainer" class="masonry-sizer bgc-white" style="display: none;">
+          <div class="d-flex flex-wrap justify-content-around">
+            <div style="width:45%; text-align:center">
+              <h3 th:text="#{chart.statistics.correctVsIncorrectas}"></h3>
+              <canvas id="doughnutChartCorrectas"></canvas>
+            </div>
+            <div style="width:45%; text-align:center">
+              <h3 th:text="#{chart.statistics.totalPorNombre}"></h3>
+              <canvas id="doughnutChartTotales"></canvas>
+            </div>
+          </div>
+        </div>
+
+        <!-- Barras -->
+        <div id="barChartContainer" class="masonry-sizer bgc-white" style="display: none;">
+          <canvas id="barChart"></canvas>
+        </div>
+
+        <!-- Evolución en el tiempo -->
+        <div id="barTimeEvolutionChartContainer" class="masonry-sizer bgc-white" style="display: none;">
+          <canvas id="barTimeEvolutionChart"></canvas>
+        </div>
+      </div>
+    </div>
+  </div>
 </div>
 
-<link type="text/css" rel="stylesheet"
-	th:href="@{css/jquery-ui.min.css}" />
-<link type="text/css" rel="stylesheet"
-	th:href="@{css/jquery-ui.theme.min.css}" />
-<link type="text/css" rel="stylesheet"
-	th:href="@{css/jquery.ui.timepicker.css}" />
+ <!-- Plantillas para las cabeceras (se activan según los flags devueltos en el DTO) -->
+ <script type="text/template" id="header-appOrProvider">
+  <tr>
+    <th th:text="#{table.statistics.name}">Nombre</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-datesSize">
+  <tr>
+    <th th:text="#{table.statistics.name}">Nombre</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.size}">Megabyte</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-operation">
+  <tr>
+    <th colspan="1"></th>
+	<th colspan="1"></th>
+    <th colspan="3" th:text="#{table.statistics.operation.simple}" style="text-align: center;">Oper. Simple</th>
+    <th colspan="3" th:text="#{table.statistics.operation.lotes}" style="text-align: center;">Oper. Lotes</th>
+  </tr>
+  <tr>
+    <th th:text="#{table.statistics.name}">Nombre</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature">
+  <tr>
+    <th th:text="#{table.statistics.name}">Nombre</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-organization">
+  <tr>
+    <th th:text="#{table.statistics.name}">Nombre</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
 
 <script th:inline="javascript">
-
-$(function() {
-	var yearDef = new Date().getFullYear();
-	var monthDef = new Date().getMonth()-1;
-
+	var statisticsResponse;
+	var doughnutChart, doughnutChartTotales, barChart;
 	
-     $('#month-datepicker-statistics').datepicker({
-	    dateFormat: "mm/yy",
-	    changeMonth: true,
-	    changeYear: true,                 
-	    showButtonPanel: true,
-	    defaultDate: new Date(yearDef, monthDef, 1),
-	    closeText: 'Cerrar',
-		prevText: '<Ant',
-		nextText: 'Sig>',
-		currentText: 'Hoy',
-		monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-		monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
-	    onClose: function(dateText, inst) {
-	        function isDonePressed(){
-	            return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
-	        }
-	        if (isDonePressed()){
-	            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-	            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-	            $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
-	            $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
-	        }
-	    },
-	    beforeShow : function(input, inst) {
-	        inst.dpDiv.addClass('month_year_datepicker')
-	        if ((datestr = $(this).val()).length > 0) {
-	            year = datestr.substring(datestr.length-4, datestr.length);
-	            month = datestr.substring(0, 2);
-	            $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
-	            $(this).datepicker('setDate', new Date(year, month-1, 1));
-	            $(".ui-datepicker-calendar").hide();
-	        }
+	function str2bytes(str) {
+	   var bytes = new Uint8Array(str.length);
+	   for (var i=0; i<str.length; i++) {
+	      bytes[i] = str.charCodeAt(i);
 	    }
-	})
-	
-	$('#endMonth-datepicker-statistics').datepicker({
-	    dateFormat: "mm/yy",
-	    changeMonth: true,
-	    changeYear: true,                 
-	    showButtonPanel: true,
-	    defaultDate: new Date(yearDef, monthDef, 1),
-	    closeText: 'Cerrar',
-		prevText: '<Ant',
-		nextText: 'Sig>',
-		currentText: 'Hoy',
-		monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
-		monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
-	    onClose: function(dateText, inst) {
-	        function isDonePressed(){
-	            return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
-	        }
-	        if (isDonePressed()){
-	            var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
-	            var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
-	            $(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
-	            $('.date-picker').focusout()//Added to remove focus from datepicker input box on selecting date
-	        }
-	    },
-	    beforeShow : function(input, inst) {
-	        inst.dpDiv.addClass('month_year_datepicker')
-	        if ((datestr = $(this).val()).length > 0) {
-	            year = datestr.substring(datestr.length-4, datestr.length);
-	            month = datestr.substring(0, 2);
-	            $(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
-	            $(this).datepicker('setDate', new Date(year, month-1, 1));
-	            $(".ui-datepicker-calendar").hide();
-	        }
-	    }
-	})
-});
-
-$("#query").change(function() {
-	if (!$('select[name=query] option').filter(':selected').val() == "") {
-		  error = true;
-		  if (!$("#invalid-query").is("visible")) {
-			  $('#query').removeClass("is-invalid");
-			  $("#invalid-query").hide();
-		} 
-	}
-});
-
-$( "#statisticsBtn" ).click(function( event ) {
-	  hide();
-	  event.preventDefault();
-	  var error = false;
-	  if ($('#month-datepicker-statistics').val() == '') {
-		  error = true;
-		if (!$("#invalid-month-date-statistics").is("visible")) {
-				$('#month-datepicker-statistics').addClass("is-invalid");
-				$("#invalid-month-date-statistics").show();
-		}
-	  }
-	  
-	  if ($('select[name=query] option').filter(':selected').val() == "") {
-		  error = true;
-		  if (!$("#invalid-query").is("visible")) {
-			  $('#query').addClass("is-invalid");
-			  $("#invalid-query").show();
-		} 
-	  }
-	  
-	  if (!error) {
-		  if ($("#statisticsForm")[0].checkValidity()) {
-			  $('#statisticsForm *').filter(':input').each(function(){
-				  $("#" + $(this).attr('id')).removeClass("has-error");
-			  });
-			  
-			  var actionQuery = /*[[@{/statisticsresult}]]*/;
-			  loadIntoAjax('statisticsForm', actionQuery, 'queryStatisticsTableDiv', 'GET', null, true);
-		  }	else {
-		  
-			$('#statisticsForm *').filter(':input').each(function(){
-		      	    
-		          if(!$(this)[0].checkValidity()){
-		      	   	$("#" + $(this).attr('id')).addClass("has-error");
-		      	  } else {
-		      	   	$("#" + $(this).attr('id')).removeClass("has-error");
-		      	  }
-	      	    
-	      	  });
-		   }  
-	  }
-	});
-	
-	$( "#cleanQueryStatisticsBtn" ).click(function( event ) {
-		$('#query').prop('selectedIndex', '');
-		$('#month-datepicker-statistics').val('');
-		$('#month-datepicker-statistics').removeClass("is-invalid");
-		if ($("#invalid-month-date-statistics").is("visible")) {
-			$("#invalid-month-date-statistics").hide();
-			$("#invalid-month-date-statistics").css("display", "block");
-		}
-		$('#endMonth-datepicker-statistics').val('');
-		$('#endMonth-datepicker-statistics').removeClass("is-invalid");
-		if ($("#invalid-month-date-statistics").is("visible")) {
-			$("#invalid-month-date-statistics").hide();
-			$("#invalid-month-date-statistics").css("display", "block");
-		}
-		$('#query').removeClass("is-invalid");
-		if ($("#invalid-query").is("visible")) {
-			$("#invalid-query").hide();
-			$("#invalid-query").css("display", "block");
-		}
-		$('#queryStatisticsTableDiv').hide();
-	});
-	
-	function validateMonthDate(obj) {
-		var valid;
-	  	if (!obj.checkValidity()) {
-			$("#" + $(obj).attr('id')).addClass("is-invalid");
-			valid = false;
-			if (!$("#invalid-month-date-statistics").is("visible")) {
-				$("#invalid-month-date-statistics").show();
-			}
-	  	} else {
-			$("#" + $(obj).attr('id')).removeClass("is-invalid");
-			valid = true;
-			if ($("#invalid-month-date-statistics").is("visible")) {
-				$("#invalid-month-date-statistics").hide();
-			}
-	  	}
-		return valid;
+	    return bytes;
 	}
 	
+	function generateBaseHue(index, total) {
+	  return index * 360 / total;
+	}
+	
+	function generateCorrectColor(hue) {
+	  return `hsl(${hue}, 70%, 50%)`;
+	}
+	
+	function generateIncorrectColor(hue) {
+	  return `hsl(${hue}, 70%, 70%)`;
+	}
+	
+	function generateCorrectBatchColor(hue) {
+	  return `hsl(${hue}, 80%, 50%)`;
+	}
+	function generateIncorrectBatchColor(hue) {
+	  return `hsl(${hue}, 80%, 70%)`;
+	}
+
+    // Instancias de Chart.js para poder destruirlas antes de regenerar
+    var doughnutChartCorrect, doughnutChartTotals, barChart, timeEvolutionChart;
+
+    $(document).ready(function () {
+        // Configurar visibilidad inicial de botones según flags
+        configureViewButtons();
+
+        // Manejar clicks de la botonera de vistas
+        $('#statsViewButtonTable').click(function () {
+            showView('table');
+        });
+        $('#statsViewButtonDoughnut').click(function () {
+            showView('doughnut');
+            handleDoughnutView();
+        });
+        $('#statsViewButtonBar').click(function () {
+        	showView('bar');
+            handleBarView();
+        });
+        $('#statsViewButtonBarTimeEvolution').click(function () {
+            showView('barTimeEvolution');
+            handleBarTimeEvolutionView();
+        });
+        
+        loadFilterModal();
+    });
+    
+    $("#showFilterBtn").click(function(event) {
+		var actionStatisticsFilterModal = /*[[@{/statisticsFilter}]]*/;
+		event.preventDefault();
+
+        $('#noResultsContainer').hide();
+	    $('#filtersAndViews').hide();
+	    $('#statisticsResultContainer').hide();
+        
+		$.ajax({
+			url : actionStatisticsFilterModal,
+			type : 'GET',
+			cache : false,
+			success : function(data) {
+				hide();
+				$('#modal').html(data);
+				$('#statisticsFilterModal').modal('show');														
+			},
+			error : function() {}
+		});
+	});
+    
+    function loadFilterModal() {
+        setTimeout(function () {
+            $('#showFilterBtn').trigger('click');
+        }, 500);
+    }
+
+ 	// Oculta todos los botones de vista; sólo mostrará tabla tras cargar datos
+    function configureViewButtons() {
+        $('#filtersAndViews').hide();
+        if (!statisticsResponse) return;
+        // siempre mostrar botón de tabla cuando ya haya datos
+        $('#statsViewButtonTable').show();
+        if (statisticsResponse.enableDonutChart)      $('#statsViewButtonDoughnut').show();
+        if (statisticsResponse.enableBarChart)        $('#statsViewButtonBar').show();
+        if (statisticsResponse.enableBarTimeChart)    $('#statsViewButtonBarTimeEvolution').show();
+    }
+
+    // Oculta todos los contenedores y muestra el solicitado
+    function showView(viewType) {
+        $('#tableContainer, #doughnutChartContainer, #barChartContainer, #barTimeEvolutionChartContainer').hide();
+        switch (viewType) {
+            case 'table':
+                $('#tableContainer').show();
+                break;
+            case 'doughnut':
+                $('#doughnutChartContainer').show();
+                break;
+            case 'bar':
+                $('#barChartContainer').show();
+                break;
+            case 'barTimeEvolution':
+                $('#barTimeEvolutionChartContainer').show();
+                break;
+        }
+    }
+
+    function handleDoughnutView() {
+        if (doughnutChartCorrect) doughnutChartCorrect.destroy();
+        if (doughnutChartTotals)  doughnutChartTotals.destroy();
+        
+        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
+
+        var datosGenerales = statisticsResponse.isSignatureQuery
+            ? statisticsResponse.signatures
+            : statisticsResponse.transactions;
+
+        if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
+        	const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawDoughnutCorrectVsIncorrect(groupedFromValues);
+            drawDoughnutTotalsByAppOrg(groupedFromValues);
+        } else if (statisticsResponse.isQueryByOperation) {
+			const groupedFromValues = groupTopEntitiesFromSignatureSources(datosGenerales, max);
+        	
+        	console.log(groupedFromValues);
+        	
+        	drawDoughnutOperationCharts(groupedFromValues);
+        } else if (statisticsResponse.isQueryBySize) {
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawDoughnutSizeChart(groupedFromValues);
+        } else if (statisticsResponse.isQueryByOrganization) {
+            var datosOrg = (statisticsResponse.signatures && statisticsResponse.signatures.length)
+                ? statisticsResponse.signatures
+                : statisticsResponse.transactions;
+            
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawDoughnutCorrectVsIncorrect(groupedFromValues);
+            drawDoughnutOrganizationChart(groupedFromValues);
+        } else {
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawDoughnutTotalsByAppOrg(groupedFromValues);
+        }
+    }
+
+    // Correctas vs Incorrectas
+    function drawDoughnutCorrectVsIncorrect(data) {
+        var corr = 0, incorr = 0;
+        data.forEach(function (item) {
+            corr += item.corrects || 0;
+            incorr += item.incorrects || 0;
+        });
+        var ctx = document.getElementById('doughnutChartCorrectas').getContext('2d');
+        doughnutChartCorrect = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: ['Correctas', 'Incorrectas'],
+                datasets: [{
+                    data: [corr, incorr],
+                    backgroundColor: ['#36A2EB', '#FF6384']
+                }]
+            },
+            options: {
+                responsive: true,
+                title: { display: true, text: 'Correctas vs Incorrectas' },
+                tooltips: {
+                    callbacks: {
+                        label: function (t, d) {
+                            var label = d.labels[t.index];
+                            var value = d.datasets[t.datasetIndex].data[t.index];
+                            return label + ': ' + value;
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Totales por App (agrupa orgs) y muestra cada segmento App (Org)
+	function drawDoughnutTotalsByAppOrg(data) {
+	    // 1) Ordenar para agrupar segmentos por name
+	    var sortedData = data.slice().sort(function(a, b) {
+	        return a.name.localeCompare(b.name);
+	    });
+	
+	    // 2) Generar labels completos para tooltip y valores
+	    var fullLabels = sortedData.map(function(item) {
+	        return item.name + ' (' + item.organization + ')';
+	    });
+	    var values = sortedData.map(function(item) {
+	        return item.total || 0;
+	    });
+	
+	    // 3) Crear mapa de color único por name
+	    var uniqueNames = Array.from(new Set(sortedData.map(function(item) {
+	        return item.name;
+	    })));
+	    var colorMap = {};
+	    uniqueNames.forEach(function(name, i) {
+	        colorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+	    });
+	
+	    // 4) Asignar color a cada segmento según su name
+	    var colors = sortedData.map(function(item) {
+	        return colorMap[item.name];
+	    });
+	
+	    // 5) Dibujar el gráfico
+	    var ctx = document.getElementById('doughnutChartTotales').getContext('2d');
+	    doughnutChartTotals = new Chart(ctx, {
+	        type: 'doughnut',
+	        data: {
+	            labels: fullLabels,
+	            datasets: [{ data: values, backgroundColor: colors }]
+	        },
+	        options: {
+	            responsive: true,
+	            title: { display: true, text: 'Totales por Aplicación y Organización' },
+	            plugins: {
+	            	legend: {
+	                    labels: {
+	                        generateLabels: function(chart) {
+	                            const bg = chart.data.datasets[0].backgroundColor;
+	                            const idxPorNombre = {};
+	                            chart.data.labels.forEach((full, i) => {
+	                                const nombre = full.split(' (')[0];
+	                                if (idxPorNombre[nombre] === undefined) {
+	                                    idxPorNombre[nombre] = i;
+	                                }
+	                            });
+	                            return Object.keys(idxPorNombre).map(nombre => {
+	                                const idx = idxPorNombre[nombre];
+	                                return {
+	                                    text: nombre,
+	                                    fillStyle: bg[idx],
+	                                    hidden: false,
+	                                    index: idx
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        const chart = legend.chart;
+	                        const nombreClicado = legendItem.text;
+	                        // alternar visibilidad de TODOS los segmentos con ese nombre
+	                        chart.data.labels.forEach((full, i) => {
+	                            if (full.split(' (')[0] === nombreClicado) {
+	                                const meta = chart.getDatasetMeta(0);
+	                                meta.data[i].hidden = !meta.data[i].hidden;
+	                            }
+	                        });
+	                        chart.update();
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(t, data) {
+	                        const lbl = data.labels[t.index];
+	                        const val = data.datasets[0].data[t.index];
+	                        return lbl + ': ' + val;
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+    // Simple vs Batch (Correct/Incorrect) + Totales Simple/Batch por App (Org)
+	function drawDoughnutOperationCharts(data) {
+	    // 1) calcular totales para el primer doughnut (Simple vs Batch)
+	    var simpleCorrect = 0, simpleIncorrect = 0, batchCorrect = 0, batchIncorrect = 0;
+	    data.forEach(function(item) {
+	        simpleCorrect   += item.correctSimpleSignatures   || 0;
+	        simpleIncorrect += item.incorrectSimpleSignatures || 0;
+	        batchCorrect    += item.correctBatchSignatures    || 0;
+	        batchIncorrect  += item.incorrectBatchSignatures  || 0;
+	    });
+	
+	    // 2) ordenar data por name para agrupar segmentos en el segundo doughnut
+	    var sorted = data.slice().sort(function(a, b) {
+	        return a.name.localeCompare(b.name);
+	    });
+	
+	    // 3) construir labels completos y valores para Totales por App (Org)
+	    var fullLabels = sorted.map(function(item) {
+	        return item.name + ' (' + item.organization + ')';
+	    });
+	    var valsSimple = sorted.map(function(item) {
+	        return item.totalSimple || 0;
+	    });
+	    var valsBatch  = sorted.map(function(item) {
+	        return item.totalBatch  || 0;
+	    });
+	
+	    // 4) generar color único por name
+	    var uniqueNames = Array.from(new Set(sorted.map(function(item) {
+	        return item.name;
+	    })));
+	    var nameColorMap = {};
+	    uniqueNames.forEach(function(name, i) {
+	        nameColorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+	    });
+	    // asignar color a cada segmento
+	    var segmentColors = sorted.map(function(item) {
+	        return nameColorMap[item.name];
+	    });
+	
+	    // === Primer doughnut: Simple vs Batch (Correctas/Incorrectas) ===
+	    var ctx1 = document.getElementById('doughnutChartCorrectas').getContext('2d');
+		if (doughnutChartCorrect) doughnutChartCorrect.destroy();
+		
+		// definimos los hue para los colores
+		var hueSimple = 207;
+		var hueBatch  = 174;
+	    doughnutChartCorrect = new Chart(ctx1, {
+	        type: 'doughnut',
+	        data: {
+	            labels: ['Correctas', 'Incorrectas'],
+	            datasets: [
+	                {
+	                    label: 'Simple',
+	                    data: [simpleCorrect, simpleIncorrect],
+	                    backgroundColor: [
+	                        '#36A2EB',
+	                        generateIncorrectColor(hueSimple)
+	                    ]
+	                },
+	                {
+	                    label: 'Batch',
+	                    data: [batchCorrect, batchIncorrect],
+	                    backgroundColor: [
+	                        '#4BC0C0',
+	                        generateIncorrectColor(hueBatch)
+	                    ]
+	                }
+	            ]
+	        },
+	        options: {
+	            responsive: true,
+	            title: { display: true, text: 'Firmas Simple vs Batch' },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(t, d) {
+	                        var ds = d.datasets[t.datasetIndex];
+	                        return ds.label + ' - ' + d.labels[t.index] + ': ' + ds.data[t.index];
+	                    }
+	                }
+	            }
+	        }
+	    });
+	
+	 // === Segundo doughnut: Totales Simple/Batch por App (Org) ===
+	    var ctx2 = document.getElementById('doughnutChartTotales').getContext('2d');
+	    if (doughnutChartTotals) doughnutChartTotals.destroy();
+	    doughnutChartTotals = new Chart(ctx2, {
+	        type: 'doughnut',
+	        data: {
+	            labels: fullLabels,
+	            datasets: [
+	                { label: 'Simple', data: valsSimple, backgroundColor: segmentColors },
+	                { label: 'Batch',  data: valsBatch,  backgroundColor: segmentColors }
+	            ]
+	        },
+	        options: {
+	            responsive: true,
+	            title: {
+	                display: true,
+	                text: 'Totales Simple vs Batch por Aplicación y Organización'
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        generateLabels: function(chart) {
+	                            var bg = chart.data.datasets[0].backgroundColor;
+	                            var nameIndexMap = {};
+	                            chart.data.labels.forEach(function(full, i) {
+	                                var name = full.split(' (')[0];
+	                                if (nameIndexMap[name] === undefined) {
+	                                    nameIndexMap[name] = i;
+	                                }
+	                            });
+	                            return Object.keys(nameIndexMap).map(function(name) {
+	                                var i = nameIndexMap[name];
+	                                return {
+	                                    text: name,
+	                                    fillStyle: bg[i],
+	                                    hidden: false,
+	                                    index: i
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var chart = legend.chart;
+	                        var clickedName = legendItem.text;
+	                        chart.data.labels.forEach(function(full, i) {
+	                            if (full.split(' (')[0] === clickedName) {
+	                                [0, 1].forEach(function(dsIndex) {
+	                                    var meta = chart.getDatasetMeta(dsIndex);
+	                                    meta.data[i].hidden = !meta.data[i].hidden;
+	                                });
+	                            }
+	                        });
+	                        chart.update();
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(tooltipItem, data) {
+	                        var lbl = data.labels[tooltipItem.index];
+	                        var val = data.datasets[tooltipItem.datasetIndex].data[tooltipItem.index];
+	                        return lbl + ': ' + val;
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+    // Tamaño en bytes
+	function drawDoughnutSizeChart(data) {
+	    // 1) ordenar por name y luego por tamaño para agrupar segmentos
+	    var sorted = data.slice().sort(function(a, b) {
+	        var cmp = a.name.localeCompare(b.name);
+	        return cmp !== 0 ? cmp : (a.sizeBytes - b.sizeBytes);
+	    });
+	
+	    // 2) construir etiquetas completas y valores
+	    var fullLabels = sorted.map(function(item) {
+	        return item.name + ' (' + item.organization + ')';
+	    });
+	    var values = sorted.map(function(item) {
+	        return item.sizeBytes || 0;
+	    });
+	
+	    // 3) generar color único por name
+	    var uniqueNames = Array.from(new Set(sorted.map(function(item) {
+	        return item.name;
+	    })));
+	    var colorMap = {};
+	    uniqueNames.forEach(function(name, i) {
+	        colorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+	    });
+	    // asignar color a cada segmento
+	    var colors = sorted.map(function(item) {
+	        return colorMap[item.name];
+	    });
+	
+	    // 4) dibujar gráfico
+	    var ctx = document.getElementById('doughnutChartTotales').getContext('2d');
+	    if (doughnutChartCorrect) doughnutChartCorrect.destroy();
+	    doughnutChartCorrect = new Chart(ctx, {
+	        type: 'doughnut',
+	        data: {
+	            labels: fullLabels,
+	            datasets: [{ data: values, backgroundColor: colors }]
+	        },
+	        options: {
+	            responsive: true,
+	            title: { display: true, text: 'Distribución por Tamaño (Bytes)' },
+	            legend: {
+	                labels: {
+	                    generateLabels: function(chart) {
+	                        var bg = chart.data.datasets[0].backgroundColor;
+	                        var seen = {};
+	                        return chart.data.labels.map(function(fullLabel, idx) {
+	                            var name = fullLabel.split(' (')[0];
+	                            if (seen[name]) return null;
+	                            seen[name] = true;
+	                            return {
+	                                text: name,
+	                                fillStyle: bg[idx],
+	                                hidden: false,
+	                                index: idx
+	                            };
+	                        }).filter(Boolean);
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(tooltipItem, data) {
+	                        var label = data.labels[tooltipItem.index];
+	                        var value = data.datasets[0].data[tooltipItem.index];
+	                        return label + ': ' + value;
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+
+    // Totales agrupados por organización
+	function drawDoughnutOrganizationChart(data) {
+	    // 1) Agrupar totales por organización
+	    var orgTotals = {};
+	    data.forEach(function(item) {
+	        orgTotals[item.name] = (orgTotals[item.name] || 0) + (item.total || 0);
+	    });
+	
+	    // 2) Convertir a array y ordenar por nombre de organización
+	    var entries = Object.keys(orgTotals).map(function(org) {
+	        return { org: org, total: orgTotals[org] };
+	    });
+	    entries.sort(function(a, b) {
+	        return a.org.localeCompare(b.org);
+	    });
+	
+	    // 3) Preparar labels, valores y colores
+	    var labels = entries.map(function(e) { return e.org; });
+	    var values = entries.map(function(e) { return e.total; });
+	    var colors = labels.map(function(org, i) {
+	        var hue = generateBaseHue(i, labels.length);
+	        return generateCorrectColor(hue);
+	    });
+	
+	    // 4) Crear/rehacer el gráfico
+	    var ctx = document.getElementById('doughnutChartTotales').getContext('2d');
+	    if (doughnutChartTotals) doughnutChartTotals.destroy();
+	    doughnutChartTotals = new Chart(ctx, {
+	        type: 'doughnut',
+	        data: {
+	            labels: labels,
+	            datasets: [{ data: values, backgroundColor: colors }]
+	        },
+	        options: {
+	            responsive: true,
+	            title: {
+	                display: true,
+	                text: 'Totales por Organización'
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        generateLabels: function(chart) {
+	                            const bg = chart.data.datasets[0].backgroundColor;
+	                            return chart.data.labels.map((label, idx) => ({
+	                                text: label,
+	                                fillStyle: bg[idx],
+	                                hidden: false,
+	                                index: idx
+	                            }));
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        const chart = legend.chart;
+	                        const nombre = legendItem.text;
+	                        // alterna visibilidad de todos los segmentos con ese nombre
+	                        chart.data.labels.forEach((lbl, i) => {
+	                            if (lbl === nombre) {
+	                                const meta = chart.getDatasetMeta(0);
+	                                meta.data[i].hidden = !meta.data[i].hidden;
+	                            }
+	                        });
+	                        chart.update();
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(tooltipItem, data) {
+	                        const lbl = data.labels[tooltipItem.index];
+	                        const val = data.datasets[0].data[tooltipItem.index];
+	                        return lbl + ': ' + val;
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+    
+    function handleBarView() {
+        if (barChart) barChart.destroy();
+
+        var datosBase = statisticsResponse.isSignatureQuery
+            ? statisticsResponse.signatures
+            : statisticsResponse.transactions;
+        
+        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
+
+        if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosBase, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawBarCorrectVsIncorrect(groupedFromValues);
+        } else if (statisticsResponse.isQueryByOperation) {
+			const groupedFromValues = groupTopEntitiesFromSignatureSources(datosBase, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawBarOperationChart(groupedFromValues);
+        } else if (statisticsResponse.isQueryBySize) {
+        	const topNames = getTopNamesBySizeBytesFlat(datosBase, max);
+			const groupedFromValues = groupByTopNamesSizeBytesFlat(datosBase, topNames);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawBarSizeChart(groupedFromValues);
+        } else if (statisticsResponse.isQueryByOrganization) {
+            var datosOrg = (statisticsResponse.signatures && statisticsResponse.signatures.length)
+                ? statisticsResponse.signatures
+                : statisticsResponse.transactions;
+            
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosOrg, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawBarOrganizationChart(groupedFromValues);
+        } else {
+			const groupedFromValues = groupTopEntitiesByCorrectValues(datosBase, max);
+        	
+        	console.log(groupedFromValues);
+        	
+            drawBarTotalsByAppOrg(groupedFromValues);
+        }
+    }
+
+    
+ 	// Bar: Correctas vs Incorrectas
+	function drawBarCorrectVsIncorrect(data) {
+	    // 1) lista única de nombres (eje X)
+	    var nombres = Array.from(new Set(data.map(item => item.name)));
+	
+	    // 2) agrupar correctas/incorrectas por name y organización
+	    var estadisticas = {};
+	    nombres.forEach(n => estadisticas[n] = {});
+	    data.forEach(item => {
+	        var n = item.name, o = item.organization;
+	        if (!estadisticas[n][o]) estadisticas[n][o] = { correctas: 0, incorrectas: 0 };
+	        estadisticas[n][o].correctas   += item.corrects   || 0;
+	        estadisticas[n][o].incorrectas += item.incorrects || 0;
+	    });
+	
+	    // 3) crear datasets: para cada nombre, primero todos los segmentos de correctas y luego los de incorrectas
+	    var datasets = [], stackId = 'stack';
+	    nombres.forEach((nombre, idx) => {
+	        var orgs       = Object.keys(estadisticas[nombre]);
+	        var hue        = generateBaseHue(idx, nombres.length);
+	        var colorC     = generateCorrectColor(hue);
+	        var colorI     = generateIncorrectColor(hue);
+	
+	        // segmentos de correctas
+	        orgs.forEach(org => {
+	            var valor = estadisticas[nombre][org].correctas;
+	            var dataC = nombres.map((_, i) => i === idx ? valor : 0);
+	            datasets.push({
+	                label: nombre + ' (' + org + ') – Correctas',
+	                data: dataC,
+	                backgroundColor: colorC,
+	                stack: stackId
+	            });
+	        });
+	
+	        // segmentos de incorrectas
+	        orgs.forEach(org => {
+	            var valor = estadisticas[nombre][org].incorrectas;
+	            var dataI = nombres.map((_, i) => i === idx ? valor : 0);
+	            datasets.push({
+	                label: nombre + ' (' + org + ') – Incorrectas',
+	                data: dataI,
+	                backgroundColor: colorI,
+	                stack: stackId
+	            });
+	        });
+	    });
+	
+	    // 4) dibujar gráfico apilado y ocupar todo el ancho de cada categoría
+	    var ctx = document.getElementById('barChart').getContext('2d');
+	    if (barChart) barChart.destroy();
+	    barChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	            labels: nombres,
+	            datasets: datasets
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            scales: {
+	                x: [{ stacked: true }],
+	                y: [{ stacked: true, beginAtZero: true }]
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        // Una sola etiqueta por nombre de aplicación
+	                        generateLabels: function(chart) {
+	                            return chart.data.labels.map(function(nombre) {
+	                                // buscar el primer dataset correspondiente a este nombre
+	                                var dsIdx = chart.data.datasets.findIndex(function(ds) {
+	                                    return ds.label.split(' (')[0] === nombre;
+	                                });
+	                                return {
+	                                    text: nombre,
+	                                    fillStyle: chart.data.datasets[dsIdx].backgroundColor,
+	                                    hidden: false,
+	                                    datasetIndex: dsIdx
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var chart = legend.chart;
+	                        var nombre = legendItem.text;
+	                        // alternar visibilidad de todos los datasets de ese nombre
+	                        chart.data.datasets.forEach(function(ds) {
+	                            if (ds.label.split(' (')[0] === nombre) {
+	                                ds.hidden = !ds.hidden;
+	                            }
+	                        });
+	                        chart.update();
+	                    }
+	                },
+	                tooltip: {
+	                    callbacks: {
+	                        label: function(ctx) {
+	                            var ds = ctx.dataset;
+	                            return ds.label + ': ' + ds.data[ctx.dataIndex];
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    });
+
+	    setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+	}
+
+    // Bar: Totales por App (Org)
+    function drawBarTotalsByAppOrg(data) {
+        var sorted = data.slice().sort((a, b) => a.name.localeCompare(b.name));
+        var fullLabels = sorted.map(i => i.name + ' (' + i.organization + ')');
+        var values     = sorted.map(i => i.total     || 0);
+
+        var uniqueNames = Array.from(new Set(sorted.map(i => i.name)));
+        var colorMap = {};
+        uniqueNames.forEach(function(name, i) {
+            colorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+        });
+        var colors = sorted.map(i => colorMap[i.name]);
+
+        var ctx = document.getElementById('barChart').getContext('2d');
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: fullLabels,
+                datasets: [{ label: 'Total', data: values, backgroundColor: colors }]
+            },
+            options: {
+                responsive: true,
+	            maintainAspectRatio: false,
+                title: { display: true, text: 'Totales por Aplicación y Organización' },
+                legend: {
+                    labels: {
+                        generateLabels: function(chart) {
+                            var bg = chart.data.datasets[0].backgroundColor;
+                            var seen = {};
+                            return chart.data.labels.map(function(fullLabel, idx) {
+                                var name = fullLabel.split(' (')[0];
+                                if (seen[name]) return null;
+                                seen[name] = true;
+                                return { text: name, fillStyle: bg[idx], hidden: false, index: idx };
+                            }).filter(Boolean);
+                        }
+                    }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(t, d) {
+                            return d.labels[t.index] + ': ' + d.datasets[0].data[t.index];
+                        }
+                    }
+                },
+                scales: {
+                    xAxes: [{ ticks: { autoSkip: false } }],
+                    yAxes: [{ ticks: { beginAtZero: true } }]
+                }
+            }
+        });
+    }
+
+    // Bar: Simple vs Batch por App (Org)
+    function drawBarOperationChart(datos) {
+        // 1) lista única de nombres (eje X)
+        const nombres = Array.from(new Set(datos.map(item => item.name)));
+
+        // 2) categorías "Nombre - Simple" y "Nombre - Batch"
+        const categorias = [];
+        nombres.forEach(nombre => {
+            categorias.push(`${nombre} - Simple`);
+            categorias.push(`${nombre} - Batch`);
+        });
+
+        // 3) agrupar correctas/incorrectas por nombre y organización
+        const estadisticasSimple = {};
+        const estadisticasBatch  = {};
+        nombres.forEach(nombre => {
+            estadisticasSimple[nombre] = {};
+            estadisticasBatch[nombre]  = {};
+        });
+        datos.forEach(item => {
+            const n = item.name, o = item.organization;
+            if (!estadisticasSimple[n][o]) estadisticasSimple[n][o] = { correctas: 0, incorrectas: 0 };
+            if (!estadisticasBatch[n][o])  estadisticasBatch[n][o]  = { correctas: 0, incorrectas: 0 };
+
+            estadisticasSimple[n][o].correctas   += item.correctSimpleSignatures   || 0;
+            estadisticasSimple[n][o].incorrectas += item.incorrectSimpleSignatures || 0;
+            estadisticasBatch[n][o].correctas    += item.correctBatchSignatures    || 0;
+            estadisticasBatch[n][o].incorrectas  += item.incorrectBatchSignatures  || 0;
+        });
+
+        // 4) crear datasets apilados: primero todos los Correctas, luego todos los Incorrectas
+        const datasets = [];
+        const idPila   = 'pila';
+
+        nombres.forEach((nombre, idx) => {
+            const orgs          = Object.keys(estadisticasSimple[nombre]);
+            const matiz         = generateBaseHue(idx, nombres.length);
+            const colorCorr     = generateCorrectColor(matiz);
+            const colorIncorr   = generateIncorrectColor(matiz);
+            const posSimple     = idx * 2;
+            const posBatch      = idx * 2 + 1;
+
+            // 4.1) primero los datasets de Correctas
+            orgs.forEach(org => {
+                const sS = estadisticasSimple[nombre][org];
+                const sB = estadisticasBatch[nombre][org];
+                const datosC = categorias.map((_, i) => {
+                    if (i === posSimple) return sS.correctas;
+                    if (i === posBatch)  return sB.correctas;
+                    return 0;
+                });
+                datasets.push({
+                    label: `${nombre} (${org}) – Correctas`,
+                    data: datosC,
+                    backgroundColor: colorCorr,
+                    stack: idPila
+                });
+            });
+
+            // 4.2) luego los datasets de Incorrectas
+            orgs.forEach(org => {
+                const sS = estadisticasSimple[nombre][org];
+                const sB = estadisticasBatch[nombre][org];
+                const datosI = categorias.map((_, i) => {
+                    if (i === posSimple) return sS.incorrectas;
+                    if (i === posBatch)  return sB.incorrectas;
+                    return 0;
+                });
+                datasets.push({
+                    label: `${nombre} (${org}) – Incorrectas`,
+                    data: datosI,
+                    backgroundColor: colorIncorr,
+                    stack: idPila
+                });
+            });
+        });
+
+        // 5) dibujar gráfico con Chart.js v3+
+        const ctx = document.getElementById('barChart').getContext('2d');
+        if (barChart) barChart.destroy();
+        barChart = new Chart(ctx, {
+            type: 'bar',
+            data: {
+                labels: categorias,
+                datasets: datasets
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: { stacked: true },
+                    y: { stacked: true, beginAtZero: true }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            // una etiqueta de leyenda por nombre
+                            generateLabels(chart) {
+                                return nombres.map(nombre => {
+                                    const idxDs = chart.data.datasets.findIndex(ds =>
+                                        ds.label.split(' (')[0] === nombre
+                                    );
+                                    return {
+                                        text: nombre,
+                                        fillStyle: chart.data.datasets[idxDs].backgroundColor,
+                                        hidden: false,
+                                        datasetIndex: idxDs
+                                    };
+                                });
+                            }
+                        },
+                        onClick(evt, legendItem, legend) {
+                            const chart = legend.chart;
+                            const nombre = legendItem.text;
+                            chart.data.datasets.forEach(ds => {
+                                if (ds.label.split(' (')[0] === nombre) {
+                                    ds.hidden = !ds.hidden;
+                                }
+                            });
+                            chart.update();
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label(ctx) {
+                                return `${ctx.dataset.label}: ${ctx.dataset.data[ctx.dataIndex]}`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+
+        // forzar ajuste al contenedor
+        setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+    }
+
+    // Bar: Distribución por Tamaño
+    function drawBarSizeChart(data) {
+	    // 1) ordenar y obtener nombres únicos
+	    var sorted = data.slice().sort(function(a, b) {
+	        var cmp = a.name.localeCompare(b.name);
+	        return cmp !== 0 ? cmp : a.sizeBytes - b.sizeBytes;
+	    });
+	    var uniqueNames = Array.from(new Set(sorted.map(function(i) { return i.name; })));
+	
+	    // 2) mapa de colores por nombre
+	    var colorMap = {};
+	    uniqueNames.forEach(function(name, i) {
+	        colorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+	    });
+	
+	    // 3) construir datasets apilados, excluyendo valores cero
+	    var datasets = sorted
+	        .filter(function(item) { return (item.sizeBytes || 0) > 0; })
+	        .map(function(item) {
+	            var idx = uniqueNames.indexOf(item.name);
+	            var dataArr = uniqueNames.map(function(_, i) {
+	                return i === idx ? item.sizeBytes : 0;
+	            });
+	            return {
+	                label: item.name + ' (' + item.organization + ')',
+	                data: dataArr,
+	                backgroundColor: colorMap[item.name],
+	                stack: item.name
+	            };
+	        });
+	
+	    // 4) (re)crear gráfico
+	    datasets.forEach(ds => ds.stack = 'stack');
+
+	    if (barChart) barChart.destroy();
+	    var ctx = document.getElementById('barChart').getContext('2d');
+	    barChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: { labels: uniqueNames, datasets: datasets },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            scales: {
+	                x: {
+	                    stacked: true,
+	                    barPercentage: 1.0,
+	                    categoryPercentage: 1.0
+	                },
+	                y: {
+	                    stacked: true,
+	                    beginAtZero: true
+	                }
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        // única etiqueta por nombre
+	                        generateLabels: function(chart) {
+	                            var idxPorNombre = {};
+	                            chart.data.datasets.forEach((ds,i) => {
+	                                var n = ds.label.split(' (')[0];
+	                                if (idxPorNombre[n]===undefined) idxPorNombre[n]=i;
+	                            });
+	                            return Object.keys(idxPorNombre).map(n => {
+	                                var i = idxPorNombre[n];
+	                                return {
+	                                    text: n,
+	                                    fillStyle: chart.data.datasets[i].backgroundColor,
+	                                    hidden: false,
+	                                    index: i
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, item, legend) {
+	                        var c = legend.chart, nombre = item.text;
+	                        c.data.datasets.forEach(ds => {
+	                            if (ds.label.split(' (')[0] === nombre) ds.hidden = !ds.hidden;
+	                        });
+	                        c.update();
+	                    }
+	                },
+	                tooltip: {
+	                    callbacks: {
+	                        label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + ' B'
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+    // Bar: Totales por Organización
+    function drawBarOrganizationChart(data) {
+	    // 1) Agrupar totales por organización
+	    var orgTotals = {};
+	    data.forEach(function(item) {
+	        orgTotals[item.name] = (orgTotals[item.name] || 0) + (item.total || 0);
+	    });
+	
+	    // 2) Convertir a array y ordenar por nombre de organización
+	    var entries = Object.keys(orgTotals).map(function(org) {
+	        return { org: org, total: orgTotals[org] };
+	    }).sort(function(a, b) {
+	        return a.org.localeCompare(b.org);
+	    });
+	
+	    // 3) Preparar labels, valores y colores
+	    var labels = entries.map(function(e) { return e.org; });
+	    var values = entries.map(function(e) { return e.total; });
+	    var colors = labels.map(function(_, i) {
+	        return generateCorrectColor(generateBaseHue(i, labels.length));
+	    });
+	
+	    // 4) Crear/rehacer el gráfico
+	    var ctx = document.getElementById('barChart').getContext('2d');
+	    if (barChart) barChart.destroy();
+	    barChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	            labels: labels,
+	            datasets: [{
+	                label: '', // dejamos vacío para no repetir "Total"
+	                data: values,
+	                backgroundColor: colors
+	            }]
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        // genera una etiqueta por cada organización
+	                        generateLabels: function(chart) {
+	                            var bg = chart.data.datasets[0].backgroundColor;
+	                            return chart.data.labels.map(function(label, idx) {
+	                                return {
+	                                    text: label,
+	                                    fillStyle: bg[idx],
+	                                    hidden: false,
+	                                    index: idx
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var chart = legend.chart;
+	                        var idx   = legendItem.index;
+	                        // alterna visibilidad de la barra correspondiente
+	                        var meta = chart.getDatasetMeta(0);
+	                        meta.data[idx].hidden = !meta.data[idx].hidden;
+	                        chart.update();
+	                    }
+	                },
+	                tooltip: {
+	                    callbacks: {
+	                        label: function(context) {
+	                            return context.label + ': ' + context.parsed.y;
+	                        }
+	                    }
+	                }
+	            },
+	            scales: {
+	                x: { ticks: { autoSkip: false } },
+	                y: { beginAtZero: true }
+	            }
+	        }
+	    });
+	}
+
+ 	// Maneja la lógica de la vista BarTimeEvolution
+    function handleBarTimeEvolutionView() {
+        if (timeEvolutionChart) timeEvolutionChart.destroy();
+
+        var dataByMonth = statisticsResponse.isSignatureQuery
+            ? statisticsResponse.signaturesByMonth
+            : statisticsResponse.transactionsByMonth;
+        
+        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
+
+        if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
+        	const topNames = getTopNamesByCorrectsTotals(dataByMonth, max);
+        	const groupedByMonth = groupDataByMonthUsingTopNamesCorrects(dataByMonth, topNames);
+
+        	console.log(groupedByMonth);
+
+            drawTimeEvolutionCorrectVsIncorrect(groupedByMonth);
+        } else if (statisticsResponse.isQueryByOperation) {
+        	const topNames = getTopNamesFromAllMonths(dataByMonth, max);
+        	const groupedByMonth = groupDataByMonthUsingTopNames(dataByMonth, topNames);
+
+        	console.log(groupedByMonth);
+        	
+            drawTimeEvolutionOperationChart(groupedByMonth);
+        } else if (statisticsResponse.isQueryBySize) {
+        	const topNames = getTopNamesBySizeBytes(dataByMonth, max);
+        	const groupedByMonth = groupDataByMonthUsingTopNamesSizeBytes(dataByMonth, topNames);
+
+        	console.log(groupedByMonth);
+
+            drawTimeEvolutionSizeChart(groupedByMonth);
+        } else if (statisticsResponse.isQueryByOrganization) {
+            // si hay datos de firmas por mes, úsalos; si no, transacciones por mes
+            var datosOrgByMonth = (statisticsResponse.signaturesByMonth && Object.keys(statisticsResponse.signaturesByMonth).length)
+                ? statisticsResponse.signaturesByMonth
+                : statisticsResponse.transactionsByMonth;
+            
+        	const topNames = getTopNamesByCorrectsTotals(datosOrgByMonth, max);
+        	const groupedByMonth = groupDataByMonthUsingTopNamesCorrects(datosOrgByMonth, topNames);
+
+        	console.log(groupedByMonth);
+
+            drawTimeEvolutionOrganizationChart(groupedByMonth);
+        } else {
+        	const topNames = getTopNamesByCorrectsTotals(dataByMonth, max);
+        	const groupedByMonth = groupDataByMonthUsingTopNamesCorrects(dataByMonth, topNames);
+
+        	console.log(groupedByMonth);
+
+            drawTimeEvolutionCorrectVsIncorrect(groupedByMonth);
+        }
+    }
+ 	
+ 	// Evolución: Correctas vs Incorrectas apilado por aplicación
+    function drawTimeEvolutionCorrectVsIncorrect(dataByMonth) {
+	    var months = Object.keys(dataByMonth).sort(function(a, b) {
+	        var pa = a.split('/'), pb = b.split('/');
+	        return (parseInt(pa[1]) - parseInt(pb[1])) || (parseInt(pa[0]) - parseInt(pb[0]));
+	    });
+	
+	    // recolectar nombres únicos
+	    var apps = [];
+	    months.forEach(function(m) {
+	        dataByMonth[m].forEach(function(e) {
+	            if (apps.indexOf(e.name) < 0) apps.push(e.name);
+	        });
+	    });
+	
+	    // inicializar arrays
+	    var stats = {};
+	    apps.forEach(function(name) {
+	        stats[name] = {
+	            corrects: new Array(months.length).fill(0),
+	            incorrects: new Array(months.length).fill(0)
+	        };
+	    });
+	
+	    // rellenar datos
+	    months.forEach(function(month, i) {
+	        dataByMonth[month].forEach(function(e) {
+	            stats[e.name].corrects[i]   = e.corrects   || 0;
+	            stats[e.name].incorrects[i] = e.incorrects || 0;
+	        });
+	    });
+	
+	    // construir datasets filtrando valores cero y usando null para que no ocupen espacio
+	    var datasets = [];
+	    apps.forEach(function(name, idx) {
+	        var hue    = generateBaseHue(idx, apps.length);
+	        var cColor = generateCorrectColor(hue);
+	        var iColor = generateIncorrectColor(hue);
+	        var corrArr = stats[name].corrects;
+	        var incArr  = stats[name].incorrects;
+	
+	        // sustituir 0 por null
+	        var corrData = corrArr.map(function(v){ return v > 0 ? v : null; });
+	        var incData  = incArr .map(function(v){ return v > 0 ? v : null; });
+	
+	        if (corrArr.some(function(v){ return v > 0; })) {
+	            datasets.push({
+	                label: name + ' - Correctas',
+	                data: corrData,
+	                backgroundColor: cColor,
+	                borderColor:     cColor,
+	                borderWidth: 1,
+	                stack: name
+	            });
+	        }
+	        if (incArr.some(function(v){ return v > 0; })) {
+	            datasets.push({
+	                label: name + ' - Incorrectas',
+	                data: incData,
+	                backgroundColor: iColor,
+	                borderColor:     iColor,
+	                borderWidth: 1,
+	                stack: name
+	            });
+	        }
+	    });
+	
+	    var ctx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+	    if (timeEvolutionChart) timeEvolutionChart.destroy();
+	    timeEvolutionChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	            labels: months,
+	            datasets: datasets
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            scales: {
+	                xAxes: [{
+	                    stacked: true,
+	                    scaleLabel: { display: true, labelString: 'Mes/Año' }
+	                }],
+	                yAxes: [{
+	                    stacked: true,
+	                    ticks: { beginAtZero: true },
+	                    scaleLabel: { display: true, labelString: 'Número de Transacciones' }
+	                }]
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        generateLabels: function(chart) {
+	                            return apps.map(function(name, idx) {
+	                                var hue = generateBaseHue(idx, apps.length);
+	                                return {
+	                                    text: name,
+	                                    fillStyle: generateCorrectColor(hue),
+	                                    hidden: false,
+	                                    index: idx
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var clicked = legendItem.text;
+	                        legend.chart.data.datasets.forEach(function(ds) {
+	                            if (ds.stack === clicked) {
+	                                ds.hidden = !ds.hidden;
+	                            }
+	                        });
+	                        legend.chart.update();
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(t, d) {
+	                        return d.datasets[t.datasetIndex].label + ': ' + d.datasets[t.datasetIndex].data[t.index];
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+    // Evolución: Simple vs Batch apilado por aplicación
+    function drawTimeEvolutionOperationChart(dataByMonth) {
+	    // 1) ordenar meses
+	    var months = Object.keys(dataByMonth).sort(function(a, b) {
+	        var pa = a.split('/'), pb = b.split('/');
+	        return (parseInt(pa[1]) - parseInt(pb[1])) || (parseInt(pa[0]) - parseInt(pb[0]));
+	    });
+	
+	    // 2) obtener nombres únicos de apps
+	    var apps = [];
+	    months.forEach(function(m) {
+	        dataByMonth[m].forEach(function(e) {
+	            if (apps.indexOf(e.name) < 0) apps.push(e.name);
+	        });
+	    });
+	
+	    // 3) preparar stats por app
+	    var stats = {};
+	    apps.forEach(function(name) {
+	        stats[name] = {
+	            simpleC: new Array(months.length).fill(0),
+	            simpleI: new Array(months.length).fill(0),
+	            batchC:  new Array(months.length).fill(0),
+	            batchI:  new Array(months.length).fill(0)
+	        };
+	    });
+	    months.forEach(function(month, i) {
+	        dataByMonth[month].forEach(function(e) {
+	            stats[e.name].simpleC[i] = e.correctSimpleSignatures   || 0;
+	            stats[e.name].simpleI[i] = e.incorrectSimpleSignatures || 0;
+	            stats[e.name].batchC[i]  = e.correctBatchSignatures    || 0;
+	            stats[e.name].batchI[i]  = e.incorrectBatchSignatures  || 0;
+	        });
+	    });
+	
+	    // 4) construir datasets: dos barras por app (stack simple vs stack batch)
+	    var datasets = [];
+	    apps.forEach(function(name, idx) {
+	        var hue = generateBaseHue(idx, apps.length);
+	        // Simple
+	        if (stats[name].simpleC.some(v => v > 0) || stats[name].simpleI.some(v => v > 0)) {
+	            datasets.push({
+	                label: name + ' – Simple Correctas',
+	                data: stats[name].simpleC.map(v => v > 0 ? v : null),
+	                backgroundColor: generateCorrectColor(hue),
+	                stack: name + '_simple'
+	            });
+	            datasets.push({
+	                label: name + ' – Simple Incorrectas',
+	                data: stats[name].simpleI.map(v => v > 0 ? v : null),
+	                backgroundColor: generateIncorrectColor(hue),
+	                stack: name + '_simple'
+	            });
+	        }
+	        // Batch
+	        if (stats[name].batchC.some(v => v > 0) || stats[name].batchI.some(v => v > 0)) {
+	            datasets.push({
+	                label: name + ' – Batch Correctas',
+	                data: stats[name].batchC.map(v => v > 0 ? v : null),
+	                backgroundColor: generateCorrectBatchColor(hue),
+	                stack: name + '_batch'
+	            });
+	            datasets.push({
+	                label: name + ' – Batch Incorrectas',
+	                data: stats[name].batchI.map(v => v > 0 ? v : null),
+	                backgroundColor: generateIncorrectBatchColor(hue),
+	                stack: name + '_batch'
+	            });
+	        }
+	    });
+	
+	    // 5) (re)crear el gráfico
+	    var ctx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+	    if (timeEvolutionChart) timeEvolutionChart.destroy();
+	    timeEvolutionChart = new Chart(ctx, {
+	        type: 'bar',
+	        data: {
+	            labels: months,
+	            datasets: datasets
+	        },
+	        options: {
+	            responsive: true,
+	            maintainAspectRatio: false,
+	            scales: {
+	                x: {
+	                    stacked: false,                   // no apilamos simple & batch juntos
+	                    title: { display: true, text: 'Mes/Año' }
+	                },
+	                y: {
+	                    stacked: true,                    // sí apilamos correctas/incorrectas dentro de cada barra
+	                    beginAtZero: true,
+	                    title: { display: true, text: 'Número de Firmas' }
+	                }
+	            },
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        // una sola entrada por cada app
+	                        generateLabels: function(chart) {
+	                            return apps.map(function(name) {
+	                                var i = chart.data.datasets.findIndex(ds => ds.label.split(' – ')[0] === name);
+	                                return {
+	                                    text: name,
+	                                    fillStyle: chart.data.datasets[i].backgroundColor,
+	                                    hidden: false,
+	                                    index: i
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var clicked = legendItem.text;
+	                        // ocultar/mostrar todas las barras (simple & batch) de esa app
+	                        legend.chart.data.datasets.forEach(function(ds) {
+	                            if (ds.label.split(' – ')[0] === clicked) {
+	                                ds.hidden = !ds.hidden;
+	                            }
+	                        });
+	                        legend.chart.update();
+	                    }
+	                },
+	                tooltip: {
+	                    callbacks: {
+	                        // mantenemos el tooltip original
+	                        label: function(context) {
+	                            return context.dataset.label + ': ' + context.parsed.y;
+	                        }
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
+
+    // Evolución: tamaño bytes por aplicación (barras agrupadas)
+    function drawTimeEvolutionSizeChart(dataByMonth) {
+        // 1) ordenar meses
+        var months = Object.keys(dataByMonth).sort(function(a, b) {
+            var pa = a.split('/'), pb = b.split('/');
+            return (parseInt(pa[1]) - parseInt(pb[1])) || (parseInt(pa[0]) - parseInt(pb[0]));
+        });
+
+        // 2) recolectar apps únicas
+        var apps = [];
+        months.forEach(function(m) {
+            dataByMonth[m].forEach(function(e) {
+                if (apps.indexOf(e.name) < 0) apps.push(e.name);
+            });
+        });
+
+        // 3) llenar stats por app
+        var stats = {};
+        apps.forEach(function(name) {
+            stats[name] = new Array(months.length).fill(0);
+        });
+        months.forEach(function(month, i) {
+            dataByMonth[month].forEach(function(e) {
+                stats[e.name][i] = e.sizeBytes || 0;
+            });
+        });
+
+        // 4) construir datasets sin stack y con null en vez de 0
+        var datasets = apps.map(function(name, idx) {
+            var hue   = generateBaseHue(idx, apps.length);
+            var color = generateCorrectColor(hue);
+            return {
+                label: name,
+                data: stats[name].map(function(v) { return v > 0 ? v : null; }),
+                backgroundColor: color,
+                borderColor:     color,
+                borderWidth: 1
+            };
+        });
+
+        // 5) (re)crear gráfico
+        var ctx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+        if (timeEvolutionChart) timeEvolutionChart.destroy();
+        timeEvolutionChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: months, datasets: datasets },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                scales: {
+                    x: {
+                        stacked: false,
+                        title: { display: true, text: 'Mes/Año' }
+                    },
+                    y: {
+                        beginAtZero: true,
+                        title: { display: true, text: 'Bytes' }
+                    }
+                },
+                plugins: {
+                    legend: {
+                        labels: {
+                            generateLabels: function(chart) {
+                                return apps.map(function(name, idx) {
+                                    var hue   = generateBaseHue(idx, apps.length);
+                                    var color = generateCorrectColor(hue);
+                                    return {
+                                        text: name,
+                                        fillStyle: color,
+                                        hidden: false,
+                                        index: idx
+                                    };
+                                });
+                            }
+                        },
+                        onClick: function(evt, legendItem, legend) {
+                            var clicked = legendItem.text;
+                            legend.chart.data.datasets.forEach(function(ds) {
+                                if (ds.label === clicked) {
+                                    ds.hidden = !ds.hidden;
+                                }
+                            });
+                            legend.chart.update();
+                        }
+                    },
+                    tooltip: {
+                        callbacks: {
+                            label: function(context) {
+                                return context.dataset.label + ': ' + context.parsed.y + ' B';
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // Evolución: totales por organización
+    function drawTimeEvolutionOrganizationChart(dataByMonth) {
+        var months = Object.keys(dataByMonth).sort(function(a, b) {
+            var pa = a.split('/'), pb = b.split('/');
+            return (parseInt(pa[1]) - parseInt(pb[1])) || (parseInt(pa[0]) - parseInt(pb[0]));
+        });
+
+        var orgs = [];
+        months.forEach(function(m) {
+            dataByMonth[m].forEach(function(e) {
+                if (orgs.indexOf(e.name) < 0) orgs.push(e.name);
+            });
+        });
+
+        var stats = {};
+        orgs.forEach(function(org) {
+            stats[org] = new Array(months.length).fill(0);
+        });
+
+        months.forEach(function(month, i) {
+            dataByMonth[month].forEach(function(e) {
+                stats[e.name][i] += e.total || 0;
+            });
+        });
+
+        var datasets = orgs.map(function(org, idx) {
+            var hue = generateBaseHue(idx, orgs.length);
+            return {
+                label: org,
+                data: stats[org],
+                backgroundColor: generateCorrectColor(hue),
+                borderColor:     generateCorrectColor(hue),
+                borderWidth: 1
+            };
+        });
+
+        var ctx = document.getElementById('barTimeEvolutionChart').getContext('2d');
+        timeEvolutionChart = new Chart(ctx, {
+            type: 'bar',
+            data: { labels: months, datasets: datasets },
+            options: {
+                responsive: true,
+	            maintainAspectRatio: false,
+                scales: {
+                    xAxes: [{ stacked: false, scaleLabel: { display: true, labelString: 'Mes/Año' } }],
+                    yAxes: [{ ticks: { beginAtZero: true }, scaleLabel: { display: true, labelString: 'Total' } }]
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(t, d) {
+                            return d.datasets[t.datasetIndex].label + ': ' + d.datasets[t.datasetIndex].data[t.index];
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function groupTopEntitiesFromSignatureSources(data, maxEntities) {
+        const totalsByName = {};
+
+        data.forEach(item => {
+            const name = item.name || 'Desconocido';
+            const corrects = (item.correctSimpleSignatures || 0) + (item.correctBatchSignatures || 0);
+            const incorrects = (item.incorrectSimpleSignatures || 0) + (item.incorrectBatchSignatures || 0);
+
+            if (!totalsByName[name]) {
+                totalsByName[name] = 0;
+            }
+
+            totalsByName[name] += corrects + incorrects;
+        });
+
+        const topNames = Object.entries(totalsByName)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, maxEntities)
+            .map(([name]) => name);
+
+        const result = [];
+        const others = {
+            name: 'Otros',
+            corrects: 0,
+            incorrects: 0,
+            total: 0,
+            correctSimpleSignatures: 0,
+            incorrectSimpleSignatures: 0,
+            correctBatchSignatures: 0,
+            incorrectBatchSignatures: 0,
+            totalSimple: 0,
+            totalBatch: 0
+        };
+
+        data.forEach(item => {
+            const name = item.name || 'Desconocido';
+
+            const correctSimple = item.correctSimpleSignatures || 0;
+            const incorrectSimple = item.incorrectSimpleSignatures || 0;
+            const correctBatch = item.correctBatchSignatures || 0;
+            const incorrectBatch = item.incorrectBatchSignatures || 0;
+
+            const totalSimple = item.totalSimple || 0;
+            const totalBatch = item.totalBatch || 0;
+
+            const corrects = correctSimple + correctBatch;
+            const incorrects = incorrectSimple + incorrectBatch;
+            const total = totalSimple + totalBatch;
+
+            if (topNames.includes(name)) {
+                result.push({
+                    ...item,
+                    corrects,
+                    incorrects,
+                    total
+                });
+            } else {
+                others.corrects += corrects;
+                others.incorrects += incorrects;
+                others.total += total;
+
+                others.correctSimpleSignatures += correctSimple;
+                others.incorrectSimpleSignatures += incorrectSimple;
+                others.correctBatchSignatures += correctBatch;
+                others.incorrectBatchSignatures += incorrectBatch;
+                others.totalSimple += totalSimple;
+                others.totalBatch += totalBatch;
+            }
+        });
+
+        // Separar others del array y ordenar solo el resto
+        const orderedTop = result.sort((a, b) => (b.totalSimple + b.totalBatch) - (a.totalSimple + a.totalBatch));
+
+        if (others.corrects > 0 || others.incorrects > 0 || others.total > 0) {
+            orderedTop.push(others);
+        }
+
+        return orderedTop;
+    }
+
+    function groupTopEntitiesByCorrectValues(data, maxEntities) {
+        const totalsByName = {};
+
+        data.forEach(item => {
+            const name = item.name || 'Desconocido';
+            const corrects = item.corrects || 0;
+            const incorrects = item.incorrects || 0;
+
+            if (!totalsByName[name]) {
+                totalsByName[name] = 0;
+            }
+
+            totalsByName[name] += corrects + incorrects;
+        });
+
+        const topNames = Object.entries(totalsByName)
+            .sort((a, b) => b[1] - a[1])
+            .slice(0, maxEntities)
+            .map(([name]) => name);
+
+        const result = [];
+        const others = {
+            name: 'Otros',
+            corrects: 0,
+            incorrects: 0,
+            total: 0
+        };
+
+        data.forEach(item => {
+            const name = item.name || 'Desconocido';
+            const corrects = item.corrects || 0;
+            const incorrects = item.incorrects || 0;
+            const total = item.total || 0;
+
+            if (topNames.includes(name)) {
+                result.push({ ...item, corrects, incorrects, total });
+            } else {
+                others.corrects += corrects;
+                others.incorrects += incorrects;
+                others.total += total;
+            }
+        });
+
+     	// Separar others del array y ordenar solo el resto
+        const orderedTop = result.sort((a, b) => (b.total) - (a.total));
+
+        if (others.corrects > 0 || others.incorrects > 0 || others.total > 0) {
+            orderedTop.push(others);
+        }
+
+        return result;
+    }
+    
+  	//Función para obtener las top categorías para datos por mes
+    function getTopNamesByCorrectsTotals(dataByMonth, top) {
+   	  const totalsByName = {};
+
+   	  Object.values(dataByMonth).forEach(entries => {
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      const total =
+   	        (item.corrects ?? 0) + (item.incorrects ?? 0);
+
+   	      if (!totalsByName[name]) totalsByName[name] = 0;
+   	      totalsByName[name] += total;
+   	    });
+   	  });
+
+   	  return Object.entries(totalsByName)
+   	    .sort((a, b) => b[1] - a[1])
+   	    .slice(0, top)
+   	    .map(([name]) => name);
+   	}
+    
+    //Función para agrupar los datos en "Otros" si no están en las top categorías
+    function groupDataByMonthUsingTopNamesCorrects(dataByMonth, topNames) {
+   	  const result = {};
+
+   	  Object.entries(dataByMonth).forEach(([month, entries]) => {
+   	    const grouped = [];
+   	    const others = {
+   	      name: 'Otros',
+   	      corrects: 0,
+   	      incorrects: 0,
+   	      total: 0
+   	    };
+
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      if (topNames.includes(name)) {
+   	        grouped.push({ ...item });
+   	      } else {
+   	        others.corrects += item.corrects ?? 0;
+   	        others.incorrects += item.incorrects ?? 0;
+   	        others.total += item.total ?? 0;
+   	      }
+   	    });
+
+   	    if (others.corrects > 0 || others.incorrects > 0 || others.total > 0) {
+   	      grouped.push(others);
+   	    }
+
+   	    result[month] = grouped;
+   	  });
+
+   	  return result;
+   	}
+    
+  	//Función para obtener las top categorías para datos por mes
+    function getTopNamesFromAllMonths(dataByMonth, top) {
+   	  const totalsByName = {};
+
+   	  Object.values(dataByMonth).forEach(entries => {
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      const total =
+   	        (item.correctSimpleSignatures ?? 0) +
+   	        (item.incorrectSimpleSignatures ?? 0) +
+   	        (item.correctBatchSignatures ?? 0) +
+   	        (item.incorrectBatchSignatures ?? 0);
+
+   	      if (!totalsByName[name]) totalsByName[name] = 0;
+   	      totalsByName[name] += total;
+   	    });
+   	  });
+
+   	  return Object.entries(totalsByName)
+   	    .sort((a, b) => b[1] - a[1])
+   	    .slice(0, top)
+   	    .map(([name]) => name);
+   	}
+
+  	//Función para agrupar los datos en "Otros" si no están en las top categorías
+    function groupDataByMonthUsingTopNames(dataByMonth, topNames) {
+   	  const result = {};
+
+   	  Object.entries(dataByMonth).forEach(([month, entries]) => {
+   	    const grouped = [];
+   	    const others = {
+   	      name: 'Otros',
+   	      correctSimpleSignatures: 0,
+   	      incorrectSimpleSignatures: 0,
+   	      totalSimple: 0,
+   	      correctBatchSignatures: 0,
+   	      incorrectBatchSignatures: 0,
+   	      totalBatch: 0
+   	    };
+
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      if (topNames.includes(name)) {
+   	        grouped.push({ ...item });
+   	      } else {
+   	        others.correctSimpleSignatures += item.correctSimpleSignatures ?? 0;
+   	        others.incorrectSimpleSignatures += item.incorrectSimpleSignatures ?? 0;
+   	        others.totalSimple += item.totalSimple ?? 0;
+   	        others.correctBatchSignatures += item.correctBatchSignatures ?? 0;
+   	        others.incorrectBatchSignatures += item.incorrectBatchSignatures ?? 0;
+   	        others.totalBatch += item.totalBatch ?? 0;
+   	      }
+   	    });
+
+   	    if (
+   	      others.correctSimpleSignatures > 0 ||
+   	      others.incorrectSimpleSignatures > 0 ||
+   	      others.totalSimple > 0 ||
+   	      others.correctBatchSignatures > 0 ||
+   	      others.incorrectBatchSignatures > 0 ||
+   	      others.totalBatch > 0
+   	    ) {
+   	      grouped.push(others);
+   	    }
+
+   	    result[month] = grouped;
+   	  });
+
+   	  return result;
+   	}
+  	
+    function getTopNamesBySizeBytes(dataByMonth, top) {
+   	  const bytesByName = {};
+
+   	  Object.values(dataByMonth).forEach(entries => {
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      const size = item.sizeBytes ?? 0;
+
+   	      if (!bytesByName[name]) bytesByName[name] = 0;
+   	      bytesByName[name] += size;
+   	    });
+   	  });
+
+   	  return Object.entries(bytesByName)
+   	    .sort((a, b) => b[1] - a[1])
+   	    .slice(0, top)
+   	    .map(([name]) => name);
+   	}
+
+    function groupDataByMonthUsingTopNamesSizeBytes(dataByMonth, topNames) {
+   	  const result = {};
+
+   	  Object.entries(dataByMonth).forEach(([month, entries]) => {
+   	    const grouped = [];
+   	    const others = {
+   	      name: 'Otros',
+   	      sizeBytes: 0.0
+   	    };
+
+   	    entries.forEach(item => {
+   	      const name = item.name || 'Desconocido';
+   	      const size = item.sizeBytes ?? 0;
+
+   	      if (topNames.includes(name)) {
+   	        grouped.push({ ...item });
+   	      } else {
+   	        others.sizeBytes += size;
+   	      }
+   	    });
+
+   	    if (others.sizeBytes > 0) {
+   	      grouped.push(others);
+   	    }
+
+   	    result[month] = grouped;
+   	  });
+
+   	  return result;
+   	}
+    
+    function getTopNamesBySizeBytesFlat(data, top) {
+   	  const totalsByName = {};
+
+   	  data.forEach(item => {
+   	    const name = item.name || 'Desconocido';
+   	    const size = item.sizeBytes ?? 0;
+   	    if (!totalsByName[name]) totalsByName[name] = 0;
+   	    totalsByName[name] += size;
+   	  });
+
+   	  return Object.entries(totalsByName)
+   	    .sort((a, b) => b[1] - a[1])
+   	    .slice(0, top)
+   	    .map(([name]) => name);
+   	}
+
+    function groupByTopNamesSizeBytesFlat(data, topNames) {
+   	  const grouped = [];
+   	  const others = {
+   	    name: 'Otros',
+   	    sizeBytes: 0
+   	  };
+
+   	  data.forEach(item => {
+   	    const name = item.name || 'Desconocido';
+   	    if (topNames.includes(name)) {
+   	      grouped.push({ ...item });
+   	    } else {
+   	      others.sizeBytes += item.sizeBytes ?? 0;
+   	    }
+   	  });
+
+   	  if (others.sizeBytes > 0) {
+   	    grouped.push(others);
+   	  }
+
+   	  return grouped;
+   	}
+
 </script>
 
 <style>
-.ui-datepicker-calendar {
-	display: none;
-}
+    .ui-datepicker-calendar {
+        display: none;
+    }
+  
+  #tableContainer {
+    padding: 0 1rem;
+  }
+  
+  #doughnutChartCorrectas,
+  #doughnutChartTotales {
+    width: auto !important;
+  }
+  
+  	/* Ajustes para evitar deformación manteniendo la proporción natural del canvas */
+	#barChartContainer,
+	#barTimeEvolutionChartContainer {
+	    min-height: 350px;
+	    position: relative;
+	}
+	
+	#barChart,
+	#barTimeEvolutionChart {
+	    width: 100% !important;
+	    height: auto !important;  /* mantiene la relación de aspecto */
+	}
+
+  	/* Contenedor que agrupa filtros aplicados y control de vistas */
+	#filtersAndViews {
+	  display: flex;
+	  justify-content: space-between;
+	  align-items: flex-start;
+	  margin-bottom: 1.5rem;
+	  border-bottom: 1px solid #ccc;
+	  box-shadow: 0 4px 6px -4px rgba(0, 0, 0, 0.1);
+	  padding-bottom: 2rem;
+	}
+	
+	/* Sección de filtros aplicados */
+	#activeFiltersSection {
+	  flex: 1;
+	  margin-right: 1rem;
+	}
+	#activeFiltersSection h6 {
+	  margin: 0 0 0.5rem;
+	  font-size: 1.1rem;
+	}
+	
+	/* Burbujas de filtro */
+	#activeFiltersContainer {
+	  display: flex;
+	  gap: 0.5rem;
+	  flex-wrap: wrap;
+	}
+	.filter-bubble {
+	  position: relative;
+	  padding: 0.4rem 0.8rem;
+	  background-color: #e0e0e0;
+	  border-radius: 1rem;
+	  font-size: 0.9rem;
+	  cursor: default;
+	}
+	
+	/* Burbujas que tienen pop-over */
+	.filter-with-popover {
+	  cursor: pointer;
+	}
+	
+	/* Pop-over casero */
+	.filter-tooltip {
+	  display: none;
+	  position: absolute;
+	  top: calc(100% + 0.25rem);
+	  left: 50%;
+	  transform: translateX(-50%);
+	  background-color: #fff;
+	  border: 1px solid #ccc;
+	  border-radius: 4px;
+	  padding: 0.2rem 1rem;
+	  box-shadow: 0 5px 9px -4px rgba(0, 0, 0, 0.1);
+	  z-index: 1000;
+	  max-width: 200px;
+	  white-space: normal;
+	}
+	
+	/* Separador dentro del pop-over */
+	.filter-tooltip hr {
+	  margin: 0.5rem 0;
+	  border: none;
+	  border-top: 1px solid #ddd;
+	}
+	
+	#statsViewSection {
+	  flex: 1;
+	  margin-left: 1rem;
+	}
+	#statsViewSection h6 {
+	  margin: 0 0 0.5rem;
+	  font-size: 1.1rem;
+	}
+	
+	/* Botonera de control de vistas */
+	#statsViewControl {
+	  display: flex;
+	  gap: 0.75rem;
+      flex-wrap: wrap;
+	}
+	.statsViewControlButton {
+	  display: flex;
+	  align-items: center;
+	  cursor: pointer;
+	  transition: background-color 0.2s;
+	}
+	.statsViewControlButton:hover {
+	  background-color: #2196f3;
+	}
+	
+	/* Iconos dentro de los botones */
+	.statsViewControlButton .icon-holder {
+	  margin-right: 0.5rem;
+	  display: flex;
+	  align-items: center;
+	  font-size: 1.2rem;
+	}
 </style>

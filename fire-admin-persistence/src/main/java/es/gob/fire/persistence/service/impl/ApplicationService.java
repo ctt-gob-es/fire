@@ -60,6 +60,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.ProviderApplicationDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
@@ -710,5 +711,26 @@ public class ApplicationService implements IApplicationService{
 			}
 		}
 		return null;
+	}
+
+	@Override
+	public List<String> findOrganizationByDIR3(String dir3Code) {
+		return repository.findDistinctOrganizationsByDir3(dir3Code);
+	}
+
+	@Override
+	@Transactional
+    public int renameOrganizationByDir3Code(String dir3Code, String newOrganization) {
+        return repository.renameOrganizationByDir3Code(dir3Code, newOrganization);
+    }
+
+	@Override
+	public List<OrganizationDTO> findOrganizations() {
+		return repository.findDistinctOrganizationsDTO();
+	}
+
+	@Override
+	public List<Application> findAllApplicationsOrdered() {
+		return repository.findAllByOrderByAppNameAsc();
 	}
 }

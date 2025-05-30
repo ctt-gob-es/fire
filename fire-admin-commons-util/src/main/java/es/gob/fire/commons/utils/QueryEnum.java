@@ -20,62 +20,41 @@
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
  * <b>Date:</b><p>31/07/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 24/05/2021.
+ * @version 1.2, 30/05/2025.
  */
 package es.gob.fire.commons.utils;
 
 /**
- * <p>Enum that represents the query types.</p>
- * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
+ * <p>Enum que representa los tipos de consultas.</p>
+ * <b>Proyecto:</b><p>Aplicación para la firma de documentos de la suite @firma.</p>
  * @version 1.1, 24/05/2021.
  */
 public enum QueryEnum {
 
-	TRANSACTIONS_ENDED_BY_APP (1L, "Transacciones finalizadas por cada aplicacion"),
-	TRANSACTIONS_ENDED_BY_PROVIDER (2L, "Transacciones finalizadas  por cada origen de certificados/proveedor"),
-	TRANSACTIONS_BY_DATES_SIZE_APP(3L, "Transacciones segun el tama\u00F3no de los datos de cada aplicacion"),
-	TRANSACTIONS_BY_TYPE_TRANSACTION(4L, "Transacciones realizadas segun el tipo de transaccion (simple o lote)"),
-	DOCUMENTS_SIGNED_BY_APP(5L, "Documentos firmados por cada aplicacion"),
-	DOCUMENTS_SIGNED_BY_PROVIDER(6L, "Documentos firmados por cada origen de certificados/proveedor"),
-	DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT(7L, "Documentos firmados en cada formato de firma"),
-	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos firmados que utilizan cada formato de firma longevo"),
-	TRANSACTIONS_ENDED_BY_ORGANISM(9L, "Transacciones finalizadas por cada organismo"),
+	TRANSACTIONS_ENDED_BY_APP(1L, "Transacciones finalizadas por cada aplicación"),
+	TRANSACTIONS_ENDED_BY_PROVIDER(2L, "Transacciones finalizadas por cada origen de certificados/proveedor"),
+	TRANSACTIONS_BY_DATES_SIZE_APP(3L, "Transacciones según el tamaño de los datos de cada aplicación"),
+	TRANSACTIONS_BY_TYPE_TRANSACTION(4L, "Transacciones realizadas según el tipo de transacción (simple o lote)"),
+	TRANSACTIONS_ENDED_BY_ORGANISM(5L, "Transacciones finalizadas por cada organismo"),
+	DOCUMENTS_SIGNED_BY_APP(6L, "Documentos firmados por cada aplicación"),
+	DOCUMENTS_SIGNED_BY_PROVIDER(7L, "Documentos firmados por cada origen de certificados/proveedor"),
+	DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT(8L, "Documentos firmados en cada formato de firma"),
+	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(9L, "Documentos firmados que utilizan cada formato de firma longevo"),
 	DOCUMENTS_SIGNED_BY_ORGANISM(10L, "Documentos firmados por cada organismo");
 
-	/**
-	 * Attribute that represents the enumerate id.
-	 */
 	private final Long id;
-
-	/**
-	 * Attribute that represents the enumerate name.
-	 */
 	private final String name;
 
-	/**
-	 * Constructor method for the class QueryEnum.java.
-	 * @param id enumerate id
-	 * @param name enumerate name
-	 */
 	private QueryEnum(final Long id, final String name) {
 		this.id = id;
 		this.name = name;
 	}
 
-	/**
-	 * Get id.
-	 * @return id
-	 */
 	public Long getId() {
 		return this.id;
 	}
 
-	/**
-	 * Get name.
-	 * @return name
-	 */
 	public String getName() {
 		return this.name;
 	}
-
 }

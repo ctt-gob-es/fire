@@ -1,0 +1,736 @@
+<div class="modal fade" tabindex="-1" role="dialog" id="statisticsFilterModal">
+  <div class="modal-dialog modal-dialog-centered modal-lg" role="document">
+    <div class="modal-content" style="border-radius:10px;">
+      <div class="modal-header bg-primary text-white">
+        <div id="titleStatistics">
+          <h4 class="modal-title" th:text="#{form.statisticsFilter.title}">Filtro de Estadísticas</h4>
+        </div>
+        <button type="button" class="close text-white" data-dismiss="modal" onclick="closeModal('statisticsFilterModal')" aria-label="Cerrar">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+      
+      <div class="modal-body statisticFilterFormContainer">
+        <form name="statisticsFilterForm" id="statisticsFilterForm" th:object="${statisticFilter}" action="@{/saveaddapp}" method="post" enctype="multipart/form-data">
+	          <h5>
+	          	<span class="icon-holder mR-10"><i class="ti-search"></i></span>
+	          	<span th:text="#{form.statisticsFilter.querySection.title}"></span>
+	          </h5>
+	          <div class="form-group">
+	            <!-- <label for="query" th:text="#{form.statisticsFilter.querySection.title}"></label> -->
+	            <select id="query" name="query" class="form-control">
+	              <option value="" selected th:text="#{form.statisticsFilter.query.select}"></option>
+	              <option th:each="q : ${queries}" th:value="${q.name}" th:text="${q.name}"></option>
+	            </select>
+	            <div id="invalid-query" class="invalid-feedback" th:text="#{form.statisticsFilter.query.invalid}"></div>
+	          </div>
+	          
+	          <h5 class="mt-4">
+	          	<span class="icon-holder mR-10"><i class="ti-time"></i></span>
+	          	<span th:text="#{form.statisticsFilter.timeParametersSection.title}"></span>
+	          </h5>
+	          <div class="form-row">
+	            <div class="form-group col-md-6">
+	              <label for="month-datepicker-statistics" th:text="#{form.statistics.startMonth}"></label>
+	              <input type="text" id="month-datepicker-statistics" name="monthDate" class="form-control" onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
+	              <div id="invalid-month-date-statistics" class="invalid-feedback" th:text="#{form.statisticsFilter.monthPicker.invalid}"></div>
+	            </div>
+	
+	            <div class="form-group col-md-6">
+	              <label for="endMonth-datepicker-statistics" th:text="#{form.statistics.endMonth}"></label>
+	              <input type="text" id="endMonth-datepicker-statistics" name="endMonthDate" class="form-control" onblur="validateMonthDate(this);" pattern="\d{1,2}/\d{4}">
+	              <div id="invalid-month-date-statistics" class="invalid-feedback" th:text="#{form.statisticsFilter.monthPicker.invalid}"></div>
+	            </div>
+	            
+	            <div id="year-range-warning" class="bubble-info" style="display:none;">
+				  <i class="ti-info-alt info-icon"></i>
+				  <span th:text="#{warning.year.rangeExceeded(__start__, __end__)}"
+				        th:utext="#{warning.year.rangeExceeded}">
+				    El rango de fechas seleccionado excede los 2 años. Se aplicará el rango: <span class="year-warning-start">XXXX</span> – <span class="year-warning-end">YYYY</span>.
+				  </span>
+				</div>
+	          </div>
+	          
+	          <h5 class="mt-4">
+	          	<span class="icon-holder mR-10"><i class="ti-filter"></i></span>
+	          	<span th:text="#{form.statisticsFilter.filterSection.title}"></span>
+	          </h5>
+	          <div class="btn-group btn-group-toggle mb-3" data-toggle="buttons">
+	            <button type="button" id="btnOrganizationFilter" class="btn btn-primary" onclick="toggleFilter('organization');" th:text="#{form.statisticsFilter.filterEnable.organization}"></button>
+	            <button type="button" id="btnApplicationFilter" class="btn btn-secondary" onclick="toggleFilter('application');" th:text="#{form.statisticsFilter.filterEnable.application}"></button>
+	          </div>
+          
+          	<!-- Filtro Organismos -->
+			<div id="organizationFilterSection" style="display:none;">
+			  <h6 th:text="#{form.statisticsFilter.organizationFilter.label}"></h6>
+			  <input type="text" id="orgSearch" class="form-control mb-2" th:placeholder="#{form.statisticsFilter.organizationFilter.searchPlaceholder}">
+			  <div class="list-group" id="organizationList" style="max-height:250px;overflow-y:auto;border:1px solid #ddd;border-radius:5px;">
+			    <a href="#" th:each="org : ${organizations}"
+			       class="list-group-item list-group-item-action"
+			       th:data-dir3code="${org.dir3Code}"
+			       onclick="toggleOrganization(this); return false;">
+			      <span class="icon-placeholder"></span>
+			      <span class="item-text" th:text="${org.organization}"></span>
+			    </a>
+			  </div>
+			  <input type="hidden" name="selectedOrganization" id="selectedOrganization" value=""/>
+			</div>
+			
+			<!-- Filtro Aplicaciones -->
+			<div id="applicationFilterSection" style="display:none;">
+			  <h6 th:text="#{form.statisticsFilter.applicationFilter.label}"></h6>
+			  <input type="text" id="appSearch" class="form-control mb-2" th:placeholder="#{form.statisticsFilter.applicationFilter.searchPlaceholder}">
+			  <div class="list-group" id="applicationList" style="max-height:250px;overflow-y:auto;border:1px solid #ddd;border-radius:5px;">
+			    <a href="#" th:each="app : ${applications}"
+			       class="list-group-item list-group-item-action"
+			       th:data-appid="${app}"
+			       onclick="toggleApplication(this); return false;">
+			      <span class="icon-placeholder"></span>
+			      <span class="item-text" th:text="${app}"></span>
+			    </a>
+			  </div>
+			  <input type="hidden" name="selectedApplication" id="selectedApplication" value=""/>
+			</div>
+          
+        </form>
+      </div>
+      
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" onclick="closeModal('statisticsFilterModal')" th:text="#{form.statisticsFilter.controlButtons.close}"></button>
+        <button type="button" id="statisticsBtn" class="btn btn-primary" th:text="#{form.statisticsFilter.controlButtons.filter}"></button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<link type="text/css" rel="stylesheet" th:href="@{css/jquery-ui.min.css}" />
+<link type="text/css" rel="stylesheet" th:href="@{css/jquery-ui.theme.min.css}" />
+<link type="text/css" rel="stylesheet" th:href="@{css/jquery.ui.timepicker.css}" />
+
+<script th:inline="javascript">
+	function toggleFilter(filter) {
+	    if (filter === 'organization') {
+	      $('#organizationFilterSection').show();
+	      $('#applicationFilterSection').hide();
+	      $('#btnOrganizationFilter').removeClass('btn-secondary').addClass('btn-primary');
+	      $('#btnApplicationFilter').removeClass('btn-primary').addClass('btn-secondary');
+	    } else if (filter === 'application') {
+	      $('#applicationFilterSection').show();
+	      $('#organizationFilterSection').hide();
+	      $('#btnApplicationFilter').removeClass('btn-secondary').addClass('btn-primary');
+	      $('#btnOrganizationFilter').removeClass('btn-primary').addClass('btn-secondary');
+	    }
+	  }
+	  
+	$(document).ready(function(){
+	  	// Por defecto se activa el filtro por Organismo. Puedes cambiarlo a 'application' si lo prefieres.
+	  	toggleFilter('organization');
+	  
+		// Filtro dinámico para Organismos
+	    $('#orgSearch').on('keyup', function() {
+	      var query = $(this).val().toLowerCase();
+	      $('#organizationList a').each(function(){
+	        var text = $(this).text().toLowerCase();
+	        $(this).toggle(text.indexOf(query) !== -1);
+	      });
+	    });
+	    
+	    // Filtro dinámico para Aplicaciones
+	    $('#appSearch').on('keyup', function() {
+	      var query = $(this).val().toLowerCase();
+	      $('#applicationList a').each(function(){
+	        var text = $(this).text().toLowerCase();
+	        $(this).toggle(text.indexOf(query) !== -1);
+	      });
+	    });
+	});
+
+	$(function() {
+		var yearDef = new Date().getFullYear();
+		var monthDef = new Date().getMonth()-1;
+	
+		$('#month-datepicker-statistics').datepicker({
+			dateFormat: "mm/yy",
+			changeMonth: true,
+			changeYear: true,                 
+			showButtonPanel: true,
+			defaultDate: new Date(yearDef, monthDef, 1),
+			closeText: 'Cerrar',
+			prevText: '<Ant',
+			nextText: 'Sig>',
+			currentText: 'Hoy',
+			monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+			monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+			onClose: function(dateText, inst) {
+				function isDonePressed(){
+					return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+				}
+				if (isDonePressed()){
+					var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+					var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+					$(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
+					$('.date-picker').focusout(); // Se elimina el foco para ocultar el datepicker
+				}
+			},
+			beforeShow : function(input, inst) {
+				inst.dpDiv.addClass('month_year_datepicker');
+				if ((datestr = $(this).val()).length > 0) {
+					year = datestr.substring(datestr.length-4, datestr.length);
+					month = datestr.substring(0, 2);
+					$(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+					$(this).datepicker('setDate', new Date(year, month-1, 1));
+					$(".ui-datepicker-calendar").hide();
+				}
+			}
+		});
+		
+		$('#endMonth-datepicker-statistics').datepicker({
+			dateFormat: "mm/yy",
+			changeMonth: true,
+			changeYear: true,                 
+			showButtonPanel: true,
+			defaultDate: new Date(yearDef, monthDef, 1),
+			closeText: 'Cerrar',
+			prevText: '<Ant',
+			nextText: 'Sig>',
+			currentText: 'Hoy',
+			monthNames: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'],
+			monthNamesShort: ['Ene','Feb','Mar','Abr', 'May','Jun','Jul','Ago','Sep', 'Oct','Nov','Dic'],
+			onClose: function(dateText, inst) {
+				function isDonePressed(){
+					return ($('#ui-datepicker-div').html().indexOf('ui-datepicker-close ui-state-default ui-priority-primary ui-corner-all ui-state-hover') > -1);
+				}
+				if (isDonePressed()){
+					var month = $("#ui-datepicker-div .ui-datepicker-month :selected").val();
+					var year = $("#ui-datepicker-div .ui-datepicker-year :selected").val();
+					$(this).datepicker('setDate', new Date(year, month, 1)).trigger('change');                               
+					$('.date-picker').focusout(); // Se elimina el foco para ocultar el datepicker
+				}
+			},
+			beforeShow : function(input, inst) {
+				inst.dpDiv.addClass('month_year_datepicker');
+				if ((datestr = $(this).val()).length > 0) {
+					year = datestr.substring(datestr.length-4, datestr.length);
+					month = datestr.substring(0, 2);
+					$(this).datepicker('option', 'defaultDate', new Date(year, month-1, 1));
+					$(this).datepicker('setDate', new Date(year, month-1, 1));
+					$(".ui-datepicker-calendar").hide();
+				}
+			}
+		});
+	});
+	
+	$("#query").change(function() {
+		if (!$('select[name=query] option').filter(':selected').val() == "") {
+			error = true;
+			if (!$("#invalid-query").is("visible")) {
+				$('#query').removeClass("is-invalid");
+				$("#invalid-query").hide();
+			} 
+		}
+	});
+	
+	$("#cleanQueryStatisticsBtn").click(function(event) {
+		$('#query').prop('selectedIndex', '');
+		$('#month-datepicker-statistics').val('');
+		$('#month-datepicker-statistics').removeClass("is-invalid");
+		if ($("#invalid-month-date-statistics").is("visible")) {
+			$("#invalid-month-date-statistics").hide();
+			$("#invalid-month-date-statistics").css("display", "block");
+		}
+		$('#endMonth-datepicker-statistics').val('');
+		$('#endMonth-datepicker-statistics').removeClass("is-invalid");
+		if ($("#invalid-month-date-statistics").is("visible")) {
+			$("#invalid-month-date-statistics").hide();
+			$("#invalid-month-date-statistics").css("display", "block");
+		}
+		$('#query').removeClass("is-invalid");
+		if ($("#invalid-query").is("visible")) {
+			$("#invalid-query").hide();
+			$("#invalid-query").css("display", "block");
+		}
+		$('#queryStatisticsTableDiv').hide();
+	});
+	
+	function validateMonthDate(obj) {
+		var valid;
+		if (!obj.checkValidity()) {
+			$("#" + $(obj).attr('id')).addClass("is-invalid");
+			valid = false;
+			if (!$("#invalid-month-date-statistics").is("visible")) {
+				$("#invalid-month-date-statistics").show();
+			}
+		} else {
+			$("#" + $(obj).attr('id')).removeClass("is-invalid");
+			valid = true;
+			if ($("#invalid-month-date-statistics").is("visible")) {
+				$("#invalid-month-date-statistics").hide();
+			}
+		}
+		
+		showYearRangeWarningIfNeeded();
+		
+		return valid;
+	}
+	
+	$("#statisticsBtn").click(function(event) {
+	    hide();
+	    event.preventDefault();
+
+	    var error = false;
+
+	    if ($('#month-datepicker-statistics').val() == '') {
+	        error = true;
+	        if (!$("#invalid-month-date-statistics").is(":visible")) {
+	            $('#month-datepicker-statistics').addClass("is-invalid");
+	            $("#invalid-month-date-statistics").show();
+	        }
+	    }
+
+	    if ($('select[name=query] option:selected').val() == "") {
+	        error = true;
+	        if (!$("#invalid-query").is(":visible")) {
+	            $('#query').addClass("is-invalid");
+	            $("#invalid-query").show();
+	        }
+	    }
+
+	    if (!error) {
+	        // Remover la clase de error de todos los inputs del formulario
+	        $('#statisticsFilterForm :input').removeClass("has-error");
+	        $('#noResultsContainer').hide();
+	        
+	     	// Obtenemos el valor del input oculto y lo transformamos en una cadena ya filtrada (removiendo espacios y posibles comas extra)
+	        var rawApplications = $('#selectedApplication').val();
+	        var rawOrganizations = $('#selectedOrganization').val();
+
+	        // Normalizamos y filtramos: 
+	        // Si el valor es null o undefined, devolvemos cadena vacía; de lo contrario, lo eliminamos espacios extra
+	        var applicationsStr = rawApplications ? rawApplications.trim() : "";
+	        var organizationsStr = rawOrganizations ? rawOrganizations.trim() : "";
+
+	        // Construir el objeto con los datos del formulario
+	        var formData = {
+			    query: $('#query').val(),
+			    monthDate: $('#month-datepicker-statistics').val(),
+			    endMonthDate: $('#endMonth-datepicker-statistics').val(),
+			    // Enviar directamente la cadena obtenida; el endpoint se encargará de separar por comas
+			    applications: applicationsStr,
+			    organizations: organizationsStr,
+			    // Dependiendo de qué sección esté visible, se asignan los booleanos
+			    filterByApplications: $('#applicationFilterSection').is(':visible'),
+			    filterByOrganizations: $('#organizationFilterSection').is(':visible')
+			};
+
+	        // Endpoint definido mediante Thymeleaf
+	        var actionStatisticsFilterModal = /*[[@{/filterStatistics}]]*/;
+	        $.ajax({
+	            url: actionStatisticsFilterModal,
+	            type: 'POST',
+	            data: formData,
+	            success: function(response) {
+	            	
+	            	function hasResults(response) {
+            		  // transacciones
+            		  const t = Array.isArray(response.transactions) && response.transactions.length > 0;
+            		  // firmas
+            		  const s = Array.isArray(response.signatures) && response.signatures.length > 0;
+            		  // transacciones por mes
+            		  const tbm = response.transactionsByMonth &&
+            		    Object.values(response.transactionsByMonth)
+            		      .some(arr => Array.isArray(arr) && arr.length > 0);
+            		  // firmas por mes
+            		  const sbm = response.signaturesByMonth &&
+            		    Object.values(response.signaturesByMonth)
+            		      .some(arr => Array.isArray(arr) && arr.length > 0);
+
+            		  // devuelve true si al menos uno tiene resultados
+            		  return t || s || tbm || sbm;
+            		}
+
+	                  if (!hasResults(response)) {
+	                    // No hay datos: mostrar mensaje
+	                    $("#statisticsResultContainer, #filtersAndViews").hide();
+	                    $('#noResultsContainer').show();
+	                    
+	                    showFiltersNoResults(formData);
+	                    
+	                    $('#noResultsContainer').removeClass('d-none').addClass('d-block');
+	                    
+		                closeModal('statisticsFilterModal');
+	                    return;
+	                  }
+	                  
+		            statisticsResponse = response;
+
+	                // Hay datos: ocultar mensaje y continuar
+	                $('#noResultsContainer').hide();
+                    $('#noResultsContainer').removeClass('d-block').addClass('d-none');
+		            
+	                closeModal('statisticsFilterModal');
+	                
+	                $("#tableContainer").empty();
+	        	    
+	        	    var $newTable = $("<table>", {
+	        	        id: "queryStatisticsTable",
+	        	        class: "display"
+	        	    });
+	        	    
+	        	    // Especificamos atributos que antes estaban en el HTML original
+	        	    $newTable.attr("cellspacing", "0").attr("width", "100%");
+	        	    
+	        	    // Seleccionar la cabecera adecuada según el flag de statisticsResponse.
+	        	    var headerTemplate = "";
+	        	    if (statisticsResponse.isQueryWithCorrectAndIncorrect) {
+	        	        headerTemplate = $("#header-appOrProvider").html();
+	        	    } else if (statisticsResponse.isQueryBySize) {
+	        	        headerTemplate = $("#header-datesSize").html();
+	        	    } else if (statisticsResponse.isQueryByOperation) {
+	        	        headerTemplate = $("#header-operation").html();
+	        	    } else if (statisticsResponse.isSignatureQuery) {
+	        	        headerTemplate = $("#header-signature").html();
+	        	    } else if (statisticsResponse.isQueryByOrganization) {
+	        	        headerTemplate = $("#header-organization").html();
+	        	    }
+	        	    // Si headerTemplate estuviera vacío, asignamos un fallback para evitar problemas.
+	        	    if (!headerTemplate || headerTemplate.trim() === "") {
+	        	        headerTemplate = "<tr><th>Name</th></tr>";
+	        	    }
+	        	    
+	        	    // Construir la estructura de la tabla: <thead> y <tbody>.
+	        	    $newTable.append("<thead>" + headerTemplate + "</thead>");
+	        	    $newTable.append("<tbody></tbody>");
+	        	    
+	        	    // Insertar la nueva tabla en el contenedor
+	        	    $("#tableContainer").append($newTable);
+	        	    
+	        	    // Inicializar DataTables en la nueva tabla
+	        	    var dt = $newTable.DataTable({
+	        	    	dom: 'Bfrtip',
+	        	        buttons: [
+	        	            {
+	        	                extend: 'excelHtml5',
+	        	                text: 'Exportar a Excel',
+	        	                title: 'Informe Estadisticas',            // Título del archivo .xlsx
+	        	                exportOptions: {
+	        	                    columns: ':visible'
+	        	                }
+	        	            }
+	        	        ],
+	        	        paging: true,
+	        	        searching: true,
+	        	        ordering: true,
+	        	        destroy: true
+	        	    });
+	        	    
+	        	    // Agregar las filas según el tipo de consulta.
+	        	    if (statisticsResponse.isQueryWithCorrectAndIncorrect) {
+	        	        // Se espera: [name, organization, corrects, incorrects, total]
+	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+	        	            var item = statisticsResponse.transactions[i];
+	        	            dt.row.add([ 
+	        	            	item.name,
+	        	                item.organization,
+	        	            	item.corrects, 
+	        	            	item.incorrects, 
+	        	            	item.total 
+        	            	]);
+	        	        }
+	        	    } else if (statisticsResponse.isQueryBySize) {
+	        	        // Se espera: [name, organization, sizeBytes]
+	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+	        	            var item = statisticsResponse.transactions[i];
+	        	            dt.row.add([ 
+	        	            	item.name, 
+	        	                item.organization, 
+	        	                item.sizeBytes 
+        	                ]);
+	        	        }
+	        	    } else if (statisticsResponse.isQueryByOperation) {
+	        	        // Se espera: [name, organization, correctSimpleSignatures, incorrectSimpleSignatures, totalSimple, correctBatchSignatures, incorrectBatchSignatures, totalBatch]
+	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+	        	            var item = statisticsResponse.transactions[i];
+	        	            dt.row.add([
+	        	                item.name,
+	        	                item.organization,
+	        	                item.correctSimpleSignatures,
+	        	                item.incorrectSimpleSignatures,
+	        	                item.totalSimple,
+	        	                item.correctBatchSignatures,
+	        	                item.incorrectBatchSignatures,
+	        	                item.totalBatch
+	        	            ]);
+	        	        }
+	        	    } else if (statisticsResponse.isSignatureQuery) {
+	        	        // Se espera: [name, organization, corrects, incorrects, total]
+	        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
+	        	            var item = statisticsResponse.signatures[i];
+	        	            dt.row.add([ 
+	        	            	item.name,
+	        	                item.organization,
+	        	            	item.corrects, 
+	        	            	item.incorrects, 
+	        	            	item.total 
+        	            	]);
+	        	        }
+	        	    } else if (statisticsResponse.isQueryByOrganization) {
+	        	        // Se espera: [name, corrects, incorrects, total]
+	        	    	var source = (statisticsResponse.signatures && statisticsResponse.signatures.length)
+		        	        ? statisticsResponse.signatures
+		        	        : statisticsResponse.transactions;
+	
+		        	    for (var i = 0; i < source.length; i++) {
+		        	        var item = source[i];
+		        	        dt.row.add([
+		        	            item.name,
+		        	            item.corrects,
+		        	            item.incorrects,
+		        	            item.total
+		        	        ]);
+		        	    }
+	        	    }
+	        	    
+	        	    // Dibujar la tabla actualizada
+	        	    dt.draw();
+	        	    
+	        	    $('#filtersAndViews').show();
+	        	    
+	        	    showActiveFilters(formData);
+	        	    
+	        	    showStatisticsControl(response);
+	        	    
+	        	    $('#statisticsResultContainer').show();
+	            },
+	            error: function(xhr, status, error) {
+	                console.error("Error en la consulta de estadísticas: " + error);
+	                
+	                $("#statisticsResultContainer, #filtersAndViews").hide();
+	                $('#noResultsContainer').show();
+	                
+	                showFiltersNoResults(formData);
+                    $('#noResultsContainer').removeClass('d-none').addClass('d-block');
+	            }
+	        });
+	    }
+	});
+	
+	// Función para alternar la selección en la lista de Organismos (permite seleccionar varias entradas)
+  	function toggleOrganization(element) {
+	  $(element).toggleClass('active');
+	  const $ph = $(element).find('.icon-placeholder');
+	  if ($(element).hasClass('active')) {
+	    $ph.html('<i class="ti-check"></i>');
+	  } else {
+	    $ph.empty();
+	  }
+	  updateSelectedOrganizations();
+	}
+		
+	function toggleApplication(element) {
+	  $(element).toggleClass('active');
+	  const $ph = $(element).find('.icon-placeholder');
+	  if ($(element).hasClass('active')) {
+	    $ph.html('<i class="ti-check"></i>');
+	  } else {
+	    $ph.empty();
+	  }
+	  updateSelectedApplications();
+	}
+	
+	  // Actualiza el campo oculto con los códigos de los organismos seleccionados (separados por comas)
+  	  function updateSelectedOrganizations() {
+	    var selected = [];
+	    $('#organizationList a.active').each(function(){
+	      selected.push($(this).attr('data-dir3code'));
+	    });
+	    $('#selectedOrganization').val(selected.join(','));
+	  }
+	  
+	  // Actualiza el campo oculto con los appId de las aplicaciones seleccionadas (separados por comas)
+	  function updateSelectedApplications() {
+	    var selected = [];
+	    $('#applicationList a.active').each(function(){
+	      selected.push($(this).attr('data-appid'));
+	    });
+	    $('#selectedApplication').val(selected.join(','));
+	  }
+	  
+	  function showStatisticsControl(response) {
+		  // 0. Mostrar botón para mostrar/ocultar filtros
+		  $('#showFilterBtn').show();
+
+		  // 1. Mostrar sección que agrupa filtros y controles de vista
+		  $('#filtersAndViews').show();
+		  $('#activeFiltersSection').show();
+		  $('#statsViewControl').show();
+
+		  // 2. Mostrar solo el contenedor de la tabla al inicio
+		  $('#tableContainer').show();
+		  // Ocultar los contenedores de los gráficos
+		  $('#doughnutChartContainer, #barChartContainer, #barTimeEvolutionChartContainer').hide();
+
+		  // 3. Ajustar visibilidad de botones según los flags
+		  $('#statsViewButtonTable').show();
+
+		  if (response.enableDonutChart) {
+		    $('#statsViewButtonDoughnut').show();
+		  } else {
+		    $('#statsViewButtonDoughnut').hide();
+		  }
+
+		  if (response.enableBarChart) {
+		    $('#statsViewButtonBar').show();
+		  } else {
+		    $('#statsViewButtonBar').hide();
+		  }
+
+		  if (response.enableBarTimeChart) {
+		    $('#statsViewButtonBarTimeEvolution').show();
+		  } else {
+		    $('#statsViewButtonBarTimeEvolution').hide();
+		  }
+		}
+	  
+	  function showActiveFilters(formData) {
+		  const $contenedor = $('#activeFiltersContainer');
+		  $contenedor.empty();
+
+		  // 1. Burbuja de consulta
+		  const $burbujaConsulta = $('<span>', {
+		    class: 'filter-bubble'
+		  }).text(`Consulta: ${formData.query}`);
+
+		  // 2. Burbuja de fechas corregida usando guión unicode U+2013 (en dash)
+		  let textoFechas = formData.monthDate || '';
+		  if (formData.endMonthDate) {
+		    textoFechas += ` \u2013 ${formData.endMonthDate}`;
+		  }
+		  const $burbujaFechas = $('<span>', {
+		    class: 'filter-bubble'
+		  }).text(textoFechas);
+
+		  // 3. Burbuja de filtros con listado en pop-over
+		  let items = [];
+		  if (formData.filterByApplications && formData.applications) {
+		    items = items.concat(formData.applications.split(',').map(s=>s.trim()));
+		  }
+		  if (formData.filterByOrganizations && formData.organizations) {
+		    items = items.concat(formData.organizations.split(',').map(s=>s.trim()));
+		  }
+
+		  let $burbujaFiltros = null;
+		  if (items.length) {
+		    $burbujaFiltros = $('<span>', {
+		      class: 'filter-bubble filter-with-popover',
+		      text: `Filtros (${items.length})`
+		    });
+
+		    // Crear el contenedor del pop-over y ocultarlo
+		    const $popover = $('<div>', { class: 'filter-tooltip' });
+		    let html = '';
+		    if (formData.filterByApplications && formData.applications) {
+		      html += `<strong>Aplicaciones:</strong><br>` +
+		              formData.applications.split(',').map(a=>a.trim()).join('<br>');
+		    }
+		    if (formData.filterByOrganizations && formData.organizations) {
+		      if (html) html += '<hr>';
+		      html += `<strong>Organismos:</strong><br>` +
+		              formData.organizations.split(',').map(o=>o.trim()).join('<br>');
+		    }
+		    $popover.html(html);
+		    $burbujaFiltros.append($popover);
+
+		    // Toggle pop-over al hacer click
+		    $burbujaFiltros.on('click', function(e) {
+		      e.stopPropagation();
+		      $contenedor.find('.filter-tooltip').not($popover).hide();
+		      $popover.toggle();
+		    });
+		  }
+
+		  // Agregar las burbujas y limpiar clicks externos
+		  $contenedor.append($burbujaConsulta, $burbujaFechas);
+		  if ($burbujaFiltros) $contenedor.append($burbujaFiltros);
+
+		  // Al hacer click fuera, ocultar todos los tooltips
+		  $(document).on('click.filterPopover', function() {
+		    $contenedor.find('.filter-tooltip').hide();
+		  });
+		}
+	  
+	  function showFiltersNoResults(formData) {
+		  var $c = $('#noResultsFiltersContainer').empty();
+
+		  // Consulta
+		  $c.append($('<span>', { class: 'filter-bubble' })
+		    .text(`Consulta: ${formData.query}`));
+
+		  // Fechas
+		  let textoFechas = formData.monthDate || '';
+			if (formData.endMonthDate) {
+			  textoFechas += ` \u2013 ${formData.endMonthDate}`;
+			}
+			$c.append(
+			  $('<span>', { class: 'filter-bubble' }).text(textoFechas)
+			);
+
+		  // Apps / Organizaciones
+		  var items = [];
+		  if (formData.filterByApplications && formData.applications) {
+		    items.push(`Apps (${formData.applications.split(',').length})`);
+		  }
+		  if (formData.filterByOrganizations && formData.organizations) {
+		    items.push(`Orgs (${formData.organizations.split(',').length})`);
+		  }
+		  if (items.length) {
+		    $c.append($('<span>', { class: 'filter-bubble' })
+		      .text(items.join(' - ')));
+		  }
+		}
+	  
+	  function showYearRangeWarningIfNeeded() {
+		  const startValue = $('#month-datepicker-statistics').val();
+		  const endValue = $('#endMonth-datepicker-statistics').val();
+
+		  if (!startValue || !endValue) {
+		    $('#year-range-warning').hide();
+		    return;
+		  }
+
+		  const getYearFromDate = (value) => {
+		    const parts = value.split('/');
+		    return parseInt(parts[1], 10);
+		  };
+
+		  const startYear = getYearFromDate(startValue);
+		  const endYear = getYearFromDate(endValue);
+		  const yearDiff = endYear - startYear;
+
+		  if (yearDiff > 2) {
+		    $('#year-range-warning')
+		      .show()
+		      .find('.year-warning-start').text(startYear).end()
+		      .find('.year-warning-end').text(endYear);
+		  } else {
+		    $('#year-range-warning').hide();
+		  }
+		}
+</script>
+<style>
+	.bubble-info {
+	  background-color: #e6f0ff;
+	  border-left: 4px solid #3399ff;
+	  padding: 12px 16px;
+	  border-radius: 6px;
+	  display: flex;
+	  align-items: center;
+	  color: #003366;
+	  font-size: 14px;
+	}
+	
+	.bubble-info .info-icon {
+	  font-size: 18px;
+	  color: #3399ff;
+	  margin-right: 8px;
+	}
+</style>

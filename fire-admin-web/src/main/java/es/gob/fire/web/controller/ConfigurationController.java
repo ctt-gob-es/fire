@@ -209,6 +209,10 @@ public class ConfigurationController {
 			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_AMOUNT_DOCS) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
 				generalConfigForm.setMaxAmountDocs(prop.getNumericValue());
 			}
+			
+			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
+				generalConfigForm.setMaxEntitiesBeforeGrouping(prop.getNumericValue());
+			}
 		}
 		
 		model.addAttribute("generalConfig", generalConfigForm);

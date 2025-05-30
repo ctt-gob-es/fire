@@ -123,6 +123,11 @@ public class ApplicationDTO {
 	 * Attribute that represents the maximum amount of documents for this application.
 	 */
     private Long maxAmountDocs;
+    
+    /**
+	 * Attribute that represents if the organizations with the same DIR3 have to be renamed.
+	 */
+    private Boolean updateOrganization;
 
 	/**
 	 * Gets the value of the attribute {@link #appId}.
@@ -306,5 +311,15 @@ public class ApplicationDTO {
 
 	public void setMaxAmountDocs(Long maxAmountDocs) {
 		this.maxAmountDocs = maxAmountDocs;
+	}
+
+
+	public Boolean getUpdateOrganization() {
+		return updateOrganization;
+	}
+
+
+	public void setUpdateOrganization(Boolean updateOrganization) {
+		this.updateOrganization = updateOrganization;
 	}
 }

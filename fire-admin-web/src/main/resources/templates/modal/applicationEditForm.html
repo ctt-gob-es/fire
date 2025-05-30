@@ -193,7 +193,6 @@ $(document).ready(function() {
 });
 			
 function saveEditApp() {
-	
 	var saveEditApp = /*[[@{/saveapp}]]*/;
 	var formData = new FormData();
 	
@@ -266,8 +265,19 @@ function saveEditApp() {
         }
     }
 
-    // Agregamos la lista de proveedores al objeto `appForm`
     appForm.customProviders = customProvidersData;
+    
+    var updateOrganization = false;
+    var $orgElem = $('#organization');
+    if ($orgElem.length > 0) {
+        if ($orgElem.prop("tagName").toLowerCase() === "select") {
+            updateOrganization = true;
+        } else if ($orgElem.prop("tagName").toLowerCase() === "input" && $orgElem.attr("type") === "text") {
+            updateOrganization = false;
+        }
+    }
+    
+    appForm.updateOrganization = updateOrganization;
 
     // Convertimos `appForm` a un Blob JSON
     var blob = new Blob([JSON.stringify(appForm)], { type: "application/json" });
@@ -289,7 +299,6 @@ function saveEditApp() {
  	  	  });
  		  
  	  } else{
- 		  
  		 $.ajax({
  		 	  url: saveEditApp,
  		 	  type: "POST",
@@ -297,60 +306,75 @@ function saveEditApp() {
 			  processData: false,
 			  contentType: false,
 			  success: function(data){
- 				  
- 				  hide();		 
- 				  
- 				  if (data.error != null){
- 					  var errores = JSON.parse(data.error);
- 					  jQuery.each(errores, function(i, val) {
- 					  	$('#appEditForm *').filter('span').each(function(){
- 							if (i == $(this).attr('id')){
- 								$("#" + i).text(val);
- 							}
- 						});
- 					  });
- 				  }else{
- 					  
- 					 hide();
- 					$('#appTable').DataTable().row.add(data.data[0]).draw(false);
- 				  
- 					 $("#appEditForm")[0].reset();
- 					 $('#appEditForm *').filter('span').each(function(){
- 							$(this).text('');
- 						});
- 					  
- 					  
- 					var messageResponse = /*[[#{message.success.application.edit}]]*/;
- 					
- 								  
- 					//se muestra un mensaje
- 					$('#resultAddApp').html(messageResponse);
- 					$('#resultAddApp').removeClass('alert-danger')	
- 					$('#resultAddApp').addClass('alert alert-success');
- 				 	$("#resultAddApp").fadeTo(2000, 500).slideUp(500, function() {
- 						$("#resultAddApp").slideUp(500);
- 						
- 						//se cierra modal
- 	 					closeModal('appEditModal');
- 				 	});
- 				 	
- 					
- 					 	
- 				 	
- 				  }
- 				  
- 				 $('#appEditForm *').filter(':input').each(function(){
-					  $("#" + $(this).attr('id')).removeClass("has-error");
-				  });
+ 				 hide();
+ 				 
+ 		        var table = $('#appTable').DataTable();
+ 		        
+ 		        var $row = $('#appTable').find('tr[data-id="' + data.id + '"]');
+ 		        if ($row.length > 0) {
+ 		            table.row($row).data(data).draw(false);
+ 		        } else {
+ 		            table.row.add(data).draw(false);
+ 		        }
+
+ 		        // Reinicia el formulario y limpia los mensajes de error.
+ 		        $("#appEditForm")[0].reset();
+ 		        $('#appEditForm span').text('');
+ 		        
+ 		        // Mensaje de éxito
+ 		        var messageResponse = /*[[#{message.success.application.add}]]*/;
+ 		        $('#resultAddApp')
+ 		            .html(messageResponse)
+ 		            .removeClass('alert-danger')
+ 		            .addClass('alert alert-success');
+ 		        
+ 		        // Muestra el mensaje con efecto y cierra el modal
+ 		        $("#resultAddApp").fadeTo(2000, 500).slideUp(500, function() {
+ 		            $("#resultAddApp").slideUp(500);
+ 		            closeModal('appEditModal');
+ 		        });
+ 		        
+ 		        // Limpia las clases de error en los inputs
+ 		        $('#appEditForm :input').removeClass("has-error");
  			  },
- 			  error:function(){
- 				  hide();
- 				  var messageResponse = /*[[#{message.error.application.edit}]]*/;
- 				  $('#resultAddApp').removeClass('alert-success')	
- 				  $('#resultAddApp').addClass('alert alert-danger');
- 				  $("#resultAddApp").html(messageResponse);
- 			  }
- 			});
+ 			 error: function(jqXHR) {
+		        hide();
+		        // Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'
+		        var response = jqXHR.responseJSON;
+		        if (response) {
+		            // Se muestran los mensajes de error asociados a cada campo
+		            if (response.error) {
+		                var errores = JSON.parse(response.error);
+		                $.each(errores, function(i, val) {
+		                    // Se asume que cada <span> de error tiene su id igual a la clave
+		                    $('#appAddForm span#' + i).text(val);
+		                });
+		            }
+		            
+		           if (response.organizations) {
+		        	    var $orgInput = $('#organization');
+		        	    // Crea un nuevo elemento select, copiando (opcionalmente) las clases del input original
+		        	    var $orgSelect = $('<select>', {
+		        	        id: 'organization',
+		        	        name: 'organization',
+		        	        class: $orgInput.attr('class')
+		        	    });
+		        	    // Agrega una opción por cada entrada en organizations
+		        	    $.each(response.organizations, function(index, org) {
+		        	        $orgSelect.append($('<option>', { value: org, text: org }));
+		        	    });
+		        	    
+		        	    $orgInput.replaceWith($orgSelect);
+		        	}
+
+		        }
+		        var messageResponse = /*[[#{message.error.application.add}]]*/;
+		        $('#resultAddApp')
+		            .removeClass('alert-success')
+		            .addClass('alert alert-danger')
+		            .html(messageResponse);
+		    }
+		});
  	  }
  }
  
