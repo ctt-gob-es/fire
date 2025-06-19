@@ -40,6 +40,7 @@ import com.openlandsw.rss.gateway.StartOperationInfo;
 import com.openlandsw.rss.gateway.StartTransactionResult;
 import com.openlandsw.rss.gateway.constants.ConstantsGateWay;
 import com.openlandsw.rss.gateway.constants.ConstantsGateWay.GateWayOperationCtes.StartOpTransactionCtes;
+import com.openlandsw.rss.gateway.exception.GeneralException;
 import com.openlandsw.rss.gateway.exception.SafeCertGateWayException;
 
 import es.gob.afirma.core.misc.Base64;
@@ -490,10 +491,15 @@ public final class ClaveFirmaConnector extends FIReConnector {
 		try {
 			intermediateResult = gatewayApi.startOpTransaction(ownerId, opInfo, paramsList);
 		} catch (final SafeCertGateWayException e) {
-			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode())) {
+			GeneralException cause = null;
+			if (e.getCause() != null && e.getCause() instanceof GeneralException) {
+				cause = (GeneralException) e.getCause();
+			}
+
+			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode()) || cause != null && ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(cause.getCode())) {
 				return true;
 			}
-			if (ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY.equals(e.getCode())) {
+			if (ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY.equals(e.getCode()) || cause != null && ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY.equals(cause.getCode())) {
 				LOGGER.warning("Error de registro debil devuelto por el GCC y no por la pasarela de firma: " + //$NON-NLS-1$
 						ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY);
 				return true;
