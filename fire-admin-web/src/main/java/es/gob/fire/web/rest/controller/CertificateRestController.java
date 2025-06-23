@@ -27,9 +27,12 @@ package es.gob.fire.web.rest.controller;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
+import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
+import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -254,13 +257,22 @@ public class CertificateRestController {
 				msgerror = "Error al instanciar el proveedor X.509";
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
-				X509Certificate cert1;
-				X509Certificate cert2;
+				X509Certificate cert1 = null;
+				X509Certificate cert2 = null;
 
 				if (!certFile1.isEmpty()) {
 	        		try (final InputStream certIs = certFile1.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			
+	        			cert1.checkValidity();
+	        			
 	        			certAddForm.setCertBytes1(cert1.getEncoded());
+	        		} catch (final CertificateExpiredException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " se encuentra caducado.";
+	        			throw e;
+	        		} catch (final CertificateNotYetValidException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			throw e;
 	        		} catch (final CertificateException e) {
 	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
@@ -271,12 +283,28 @@ public class CertificateRestController {
 
 					try (final InputStream certIs = certFile2.getInputStream();) {
 	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			
+	        			cert2.checkValidity();
+	        			
 	        			certAddForm.setCertBytes2(cert2.getEncoded());
+	        		} catch (final CertificateExpiredException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado.";
+	        			throw e;
+	        		} catch (final CertificateNotYetValidException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			throw e;
 	        		} catch (final CertificateException e) {
 	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
 	        		}
 				}
+				
+				if (cert1 != null && cert2 != null && Arrays.equals(cert1.getEncoded(), cert2.getEncoded())) {
+		            msgerror = "Los certificados se encuentran duplicados";
+		            json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+		            dtOutput.setError(json.toString());
+		            return dtOutput;
+		        }
 
 				certAddForm.setCertFile1(certFile1);
 				certAddForm.setCertFile2(certFile2);
@@ -355,8 +383,8 @@ public class CertificateRestController {
 				msgerror = "Error al instanciar el proveedor X.509";
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
-				X509Certificate cert1;
-				X509Certificate cert2;
+				X509Certificate cert1 = null;
+				X509Certificate cert2 = null;
 
 				// Si no se actualiza el certificado 1, dejamos el que estaba
 				if (certFile1.isEmpty() && certEditForm.getCertPrincipalB64() != null) {
@@ -367,6 +395,9 @@ public class CertificateRestController {
 
 					try (final InputStream certIs = certFile1.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			
+	        			cert1.checkValidity();
+	        			
 	        			certEditForm.setCertBytes1(cert1.getEncoded());
 	        		} catch (final CertificateException e) {
 	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
@@ -380,15 +411,30 @@ public class CertificateRestController {
 					certEditForm.setCertBytes2(Base64.decode(certEditForm.getCertBackupB64()));
 				// Si se actualiza el certificado 2, tenemos que comprobar que el archivo representa un certificado valido
 				} else if (!certFile2.isEmpty()) {
-
 					try (final InputStream certIs = certFile2.getInputStream();) {
 	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
+	        			
+	        			cert2.checkValidity();
+	        			
 	        			certEditForm.setCertBytes2(cert2.getEncoded());
+	        		} catch (final CertificateExpiredException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado.";
+	        			throw e;
+	        		} catch (final CertificateNotYetValidException e) {
+	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			throw e;
 	        		} catch (final CertificateException e) {
 	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
 	        			throw e;
 	        		}
 				}
+				
+				if (cert1 != null && cert2 != null && Arrays.equals(cert1.getEncoded(), cert2.getEncoded())) {
+		            msgerror = "Los certificados se encuentran duplicados";
+		            json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+		            dtOutput.setError(json.toString());
+		            return dtOutput;
+		        }
 
 				final Certificate certificate = this.certificateService.saveCertificate(certEditForm);
 
