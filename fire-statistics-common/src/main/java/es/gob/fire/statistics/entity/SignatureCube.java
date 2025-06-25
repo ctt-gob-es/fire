@@ -356,68 +356,30 @@ public class SignatureCube {
 	 */
 	@Override
 	public boolean equals(final Object obj) {
-
-		if (obj == null) {
-			return false;
-		}
-
-		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara
-		// es de tipo SignatureCube
-		if (!(obj instanceof SignatureCube)) {
-			return super.equals(obj);
-		}
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		final SignatureCube signature = (SignatureCube) obj;
-
-		// Aplicacion
-		if (!(getApplication() == null && signature.getApplication() == null ||
-				getApplication() != null && getApplication().equals(signature.getApplication()))) {
-			return false;
-		}
-
-		// Algoritmo
-		if (!(getAlgorithm() == null && signature.getAlgorithm() == null ||
-				getAlgorithm() != null && getAlgorithm().equals(signature.getAlgorithm()))) {
-			return false;
-		}
-
-		// Formato
-		if (!(getFormat() == null && signature.getFormat() == null ||
-				getFormat() != null && getFormat().equals(signature.getFormat()))) {
-			return false;
-		}
-
-		// Formato longevo
-		if (!(getImprovedFormat() == null && signature.getImprovedFormat() == null ||
-				getImprovedFormat() != null && getImprovedFormat().equals(signature.getImprovedFormat()))) {
-			return false;
-		}
-
-		// Proveedor
-		if (!(getProvider() == null && signature.getProvider() == null ||
-				getProvider() != null && getProvider().equals(signature.getProvider()))) {
-			return false;
-		}
-
-		// Navegador
-		if (!(getBrowser() == null && signature.getBrowser() == null ||
-				getBrowser() != null && getBrowser().equals(signature.getBrowser()))) {
-			return false;
-		}
-
-		// Resultado
-		if (isResultSign() != signature.isResultSign()) {
-			return  false;
-		}
-
-		return true;
+	    if (this == obj) return true;
+	    if (!(obj instanceof SignatureCube)) return false;
+	    SignatureCube other = (SignatureCube) obj;
+	    return Objects.equals(application,    other.application)
+	        && Objects.equals(format,         other.format)
+	        && Objects.equals(improvedFormat, other.improvedFormat)
+	        && Objects.equals(algorithm,      other.algorithm)
+	        && Objects.equals(provider,       other.provider)
+	        && Objects.equals(browser,        other.browser)
+	        && resultSign == other.resultSign
+	        && Objects.equals(idTransaction,  other.idTransaction);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.application, this.algorithm, this.format, this.improvedFormat,
-				this.provider, this.browser, new Boolean(this.resultSign));
+	    return Objects.hash(
+	        application,
+	        format,
+	        improvedFormat,
+	        algorithm,
+	        provider,
+	        browser,
+	        resultSign,
+	        idTransaction
+	    );
 	}
 }

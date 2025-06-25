@@ -193,7 +193,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal .modal-body .alert').remove();
 			                    $('#altEditor-modal').modal('hide');
 			                },
-			                error:function(){}
+			                error: function(xhr){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
+			                }
 			            });
 		        	}else{
 						// Se oculta la capa 'cargando...'
@@ -264,9 +270,16 @@ $(document).ready(function() {
 				  }
 				  
 			  },
-			  error:function(){
-				  hide();
-				  $('#mailForm').append('<div id="errorModalMail" class="alert alert-danger" role="alert"><strong>' + [[#{mail.admin.error.sameName}]] + '</strong></div>');
+			  error: function(xhr){
+				  	hide();
+				  
+				  	if (xhr.status === 401 || xhr.status === 403) {
+  						window.location.reload();
+	  				} else {
+	  					console.error("Error al realizar la peticion: " + error);
+	  				}
+				  
+				  	$('#mailForm').append('<div id="errorModalMail" class="alert alert-danger" role="alert"><strong>' + [[#{mail.admin.error.sameName}]] + '</strong></div>');
 			  },
 			  dataType: "json",
 			  contentType : "application/json"
@@ -324,8 +337,15 @@ $( "#saveBtn" ).click(function( event ) {
 				  }
 				  
 			  },
-			  error:function(){
+			  error: function(xhr){
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+  					window.location.reload();
+  				} else {
+  					console.error("Error al realizar la peticion: " + error);
+  				}
+				  
 				  if ($('#errorModalConfMail').length > 0){
 						 $('#errorModalConfMail').remove();
 					  }

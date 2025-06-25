@@ -53,8 +53,15 @@ function deleteApplication(){
 			closeModalButton('modalDeleteApp', 'idApplicationForm');
 			
 		},
-		error:function(){
+		error:function(xhr){
 			hide();
+			
+			if (xhr.status === 401 || xhr.status === 403) {
+				window.location.reload();
+			} else {
+				console.error("Error al realizar la peticion: " + error);
+			}
+			
 	  		$('#errordeleteApplication').html(msgErrorDelete);
 			$('#errordeleteApplication').addClass('alert alert-danger');
 		}

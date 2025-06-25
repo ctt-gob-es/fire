@@ -58,7 +58,13 @@ $(document).ready(function() {
 	 							$('#modal').html(data);
 	 							$('#modalUserAdd').modal('show');																
 	 						},
-	 						error : function() {}
+	 						error : function(xhr) {
+	 							if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
+	 						}
 	 					});
 				  } // fin action
 	    
@@ -85,7 +91,13 @@ $(document).ready(function() {
 		 							$('#modal').html(data);
 		 							$('#modalUserEdit').modal('show');																
 		 						},
-		 						error : function() {}
+		 						error : function(xhr) {
+		 							if (xhr.status === 401 || xhr.status === 403) {
+				    					window.location.reload();
+				    				} else {
+				    					console.error("Error al realizar la peticion: " + error);
+				    				}
+		 						}
 		 					});
 					  } // fin action
 				  }, // fin edit
@@ -136,7 +148,13 @@ $(document).ready(function() {
    						                	}
    						                	*/
    						                },
-   						                error:function(){}
+   						                error:function(xhr){
+   						                	if (xhr.status === 401 || xhr.status === 403) {
+						    					window.location.reload();
+						    				} else {
+						    					console.error("Error al realizar la peticion: " + error);
+						    				}
+   						                }
       					});
       		 	 	}
                 	},
@@ -215,7 +233,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal').modal('hide');
 		                	}
 		                },
-		                error:function(){}
+		                error:function(xhr){
+		                	if (xhr.status === 401 || xhr.status === 403) {
+		    					window.location.reload();
+		    				} else {
+		    					console.error("Error al realizar la peticion: " + error);
+		    				}
+		                }
 		            });
 		            break;
 		        default:
@@ -265,8 +289,15 @@ $(document).ready(function() {
 				}
 			}
 		  },
-		  error:function(){
+		  error:function(xhr){
 			  hide();
+			  
+			  if (xhr.status === 401 || xhr.status === 403) {
+					window.location.reload();
+				} else {
+					console.error("Error al realizar la peticion: " + error);
+				}
+			  
 			  $('#errorModalUser').remove();
 			  $('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>' + [[#{message.error}]] + '</strong></div>');
 		  },
