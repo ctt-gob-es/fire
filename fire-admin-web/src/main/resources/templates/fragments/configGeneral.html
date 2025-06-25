@@ -219,7 +219,11 @@ $(document).ready(function() {
 			 	});
             },
             error: function(xhr, status, error) {
-                console.error("Error al guardar:", error);
+            	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
                 $('#messageGeneralConfig').html(messageError);
 				$('#messageGeneralConfig').removeClass('alert alert-success')	
 				$('#messageGeneralConfig').addClass('alert alert-danger');

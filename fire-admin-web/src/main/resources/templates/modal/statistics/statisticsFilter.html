@@ -411,7 +411,7 @@
 	        	            {
 	        	                extend: 'excelHtml5',
 	        	                text: 'Exportar a Excel',
-	        	                title: 'Informe Estadisticas',            // Título del archivo .xlsx
+	        	                title: 'Estadisticas',            // Título del archivo .xlsx
 	        	                exportOptions: {
 	        	                    columns: ':visible'
 	        	                }
@@ -503,6 +503,12 @@
 	            },
 	            error: function(xhr, status, error) {
 	                console.error("Error en la consulta de estadísticas: " + error);
+	                
+	                if (xhr.status === 401 || xhr.status === 403) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error al realizar la peticion: " + error);
+                    }
 	                
 	                $("#statisticsResultContainer, #filtersAndViews").hide();
 	                $('#noResultsContainer').show();

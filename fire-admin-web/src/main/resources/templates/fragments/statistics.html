@@ -238,7 +238,13 @@
 				$('#modal').html(data);
 				$('#statisticsFilterModal').modal('show');														
 			},
-			error : function() {}
+			error : function(xhr) {
+				if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
+			}
 		});
 	});
     

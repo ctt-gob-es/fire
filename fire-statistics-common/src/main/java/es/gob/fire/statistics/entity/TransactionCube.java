@@ -229,63 +229,26 @@ public class TransactionCube {
 
 	@Override
 	public boolean equals(final Object obj) {
-
-		if (obj == null) {
-			return false;
-		}
-
-		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara
-		// es de tipo TransactionCube
-		if (!(obj instanceof TransactionCube)) {
-			return super.equals(obj);
-		}
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		final TransactionCube transaction = (TransactionCube) obj;
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		// Aplicacion
-		if (!(getApplication() == null && transaction.getApplication() == null ||
-				getApplication() != null && getApplication().equals(transaction.getApplication()))) {
-			return false;
-		}
-		
-		// Codigo DIR3
-		if (!(getDir3Code() == null && transaction.getDir3Code() == null ||
-				getDir3Code() != null && getDir3Code().equals(transaction.getDir3Code()))) {
-			return false;
-		}
-
-		// Operacion
-		if (!(getOperation() == null && transaction.getOperation() == null ||
-				getOperation() != null && getOperation().equals(transaction.getOperation()))) {
-			return false;
-		}
-
-		// Proveedor
-		if (!(getProvider() == null && transaction.getProvider() == null ||
-				getProvider() != null && getProvider().equals(transaction.getProvider()))) {
-			return false;
-		}
-
-		// Proveedor forzado
-		if (isMandatoryProvider() != transaction.isMandatoryProvider()) {
-			return  false;
-		}
-
-		// Resultado
-		if (isResultTransaction() != transaction.isResultTransaction()) {
-			return  false;
-		}
-
-		return true;
+	  if (this == obj) return true;
+	  if (!(obj instanceof TransactionCube)) return false;
+	  TransactionCube other = (TransactionCube) obj;
+	  return Objects.equals(application, other.application)
+	      && Objects.equals(operation, other.operation)
+	      && Objects.equals(provider, other.provider)
+	      && mandatoryProvider == other.mandatoryProvider
+	      && resultTransaction == other.resultTransaction
+	      && Objects.equals(idTransaction, other.idTransaction);
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.application, this.operation, this.provider,
-				new Boolean(this.mandatoryProvider), new Boolean(this.resultTransaction));
+        return Objects.hash(
+                application,
+                operation,
+                provider,
+                mandatoryProvider,
+                resultTransaction,
+                idTransaction
+            );
 	}
 }

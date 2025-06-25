@@ -236,8 +236,15 @@
 				        }
 					}
 	 			},
-	 			error:function() {
+	 			error:function(xhr, error) {
 					hide();
+					
+					if (xhr.status === 401 || xhr.status === 403) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error al realizar la peticion: " + error);
+                    }
+					
 	 				var messageResponse = /*[[#{ws.afirma.message.error}]]*/;
 	 				$('#messageWsAfirmaFormId').removeClass('alert-success')	
 	 				$('#messageWsAfirmaFormId').addClass('alert alert-danger');

@@ -206,7 +206,13 @@
 					}
 					
 				 },
-				 error: function(data){
+				 error: function(data, xhr, error){
+					 if (xhr.status === 401 || xhr.status === 403) {
+                         window.location.reload();
+                     } else {
+                         console.error("Error al realizar la peticion: " + error);
+                     }
+					 
 					 if(data.errorEdit != "" && data.errorEdit != null){
 						$('#messageUpdateTaskId').html(data.errorEdit);
 						$('#messageUpdateTaskId').addClass('alert alert-danger');

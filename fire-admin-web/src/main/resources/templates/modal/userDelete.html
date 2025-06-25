@@ -105,7 +105,13 @@ function deleteUser(){
     			closeModalButton('modalDeleteUser', 'idApplicationForm');
            	}
            },
-           error:function(){
+           error:function(xhr, error){
+        	   if (xhr.status === 401 || xhr.status === 403) {
+                   window.location.reload();
+               } else {
+                   console.error("Error al realizar la peticion: " + error);
+               }
+        	   
 		  		$('#errorDeleteUser').html(msgErrorDelete);
 				$('#errorDeleteUser').addClass('alert alert-danger');
            }

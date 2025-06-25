@@ -337,8 +337,15 @@ function saveEditApp() {
  		        // Limpia las clases de error en los inputs
  		        $('#appEditForm :input').removeClass("has-error");
  			  },
- 			 error: function(jqXHR) {
+ 			 error: function(xhr, error, jqXHR) {
 		        hide();
+		        
+		        if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
+		        
 		        // Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'
 		        var response = jqXHR.responseJSON;
 		        if (response) {
