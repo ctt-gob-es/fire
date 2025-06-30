@@ -172,8 +172,14 @@ $('#certViewModal').on('shown.bs.modal', function (e) {
 				hide();
 				$("#" + idResult).html(responseText);
 			},
-			error : function(e) {
+			error : function(e, xhr) {
 				alert("Error al cargar el certificado");
+				
+				if (xhr.status === 401 || xhr.status === 403) {
+					window.location.reload();
+				} else {
+					console.error("Error al realizar la peticion: " + error);
+				}
 			}
 		});
 

@@ -59,7 +59,13 @@ $(document).ready(function() {
 		 							$('#modal').html(data);
 		 							$('#modalLogForm').modal('show');																
 		 						},
-		 						error : function() {}
+		 						error : function(xhr) {
+		 							if (xhr.status === 401 || xhr.status === 403) {
+				    					window.location.reload();
+				    				} else {
+				    					console.error("Error al realizar la peticion: " + error);
+				    				}
+		 						}
 		 					});
 					  } // fin action
 			}, // fin add
@@ -85,7 +91,13 @@ $(document).ready(function() {
 		 							$('#modal').html(data);
 		 							$('#modalLogForm').modal('show');																
 		 						},
-		 						error : function() {}
+		 						error : function(xhr) {
+		 							if (xhr.status === 401 || xhr.status === 403) {
+				    					window.location.reload();
+				    				} else {
+				    					console.error("Error al realizar la peticion: " + error);
+				    				}
+		 						}
 		 					});
 					  } // fin action
 			}, // fin edit
@@ -190,8 +202,15 @@ $(document).ready(function() {
 								}
 			                    
 			                },
-			                error:function(data){
+			                error:function(data, xhr){
 			                	hide();
+			                	
+			                	if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
+			                	
 			                	$('#logServerForm').append('<div id="errorModalLogServer" class="alert alert-danger" role="alert"><strong>' + [[#{log.server.admin.error.sameValues}]] + '</strong></div>');
 			                }
 			            });
@@ -237,8 +256,15 @@ $(document).ready(function() {
 									$('#errorModalLogServer').remove();
 								}
 			                },
-			                error:function(data){
+			                error:function(data, xhr){
 			                	hide();
+			                	
+			                	if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
+			                	
 			                	$('#logServerForm').append('<div id="errorModalLogServer" class="alert alert-danger" role="alert"><strong>' + [[#{log.server.admin.error.sameValues}]] + '</strong></div>');
 			                }
 			            });
@@ -264,7 +290,13 @@ $(document).ready(function() {
 		                    $('#altEditor-modal .modal-body .alert').remove();
 		                    $('#altEditor-modal').modal('hide');
 		                },
-		                error:function(){}
+		                error:function(xhr){
+		                	if (xhr.status === 401 || xhr.status === 403) {
+		    					window.location.reload();
+		    				} else {
+		    					console.error("Error al realizar la peticion: " + error);
+		    				}
+		                }
 		            });
 		            break;
 		        default:
@@ -299,9 +331,15 @@ function connectToLogServer( e, dt, node, config ) {
         	// del elemento principal
 			$("#tableLogServer").parent().html(data);
         },
-        error : function(){
+        error : function(xhr){
         	// Se oculta la capa 'cargando...'
         	hide();
+        	
+        	if (xhr.status === 401 || xhr.status === 403) {
+				window.location.reload();
+			} else {
+				console.error("Error al realizar la peticion: " + error);
+			}
       	
         	if ($('#errorLogServer').length == 0) {
 				$('#logServer-panel').before('<div id="errorLogServer" class="alert alert-danger" role="alert"><strong>' + [[#{log.server.admin.error.connecting}]] + '</strong></div>');

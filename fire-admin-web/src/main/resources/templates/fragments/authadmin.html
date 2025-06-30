@@ -185,6 +185,13 @@ $(document).ready(function() {
 												},
 												error:function(xhr,status,error) {
 								                	hide();
+								                	
+								                	if (xhr.status === 401 || xhr.status === 403) {
+								    					window.location.reload();
+								    				} else {
+								    					console.error("Error al realizar la peticion: " + error);
+								    				}
+								                	
 								                	var responseText = jQuery.parseJSON(xhr.responseText);
 								                	var messageException = responseText.message;
 								                	var messageError = "";
@@ -208,7 +215,12 @@ $(document).ready(function() {
 								}
 			                    		                    
 			                },
-			                error:function(data){
+			                error:function(data, xhr){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
 			                	
 			                	// Se oculta la capa 'cargando...'
 			                	hide();
@@ -218,7 +230,6 @@ $(document).ready(function() {
 			                	// y se modifican los estilos/anaden mensajes
 			                	var validation = $(data)["0"].responseJSON;
 			                	drawValidationResult(validation.fieldErrors);
-			              
 			                }
 			            });
 		            	
@@ -264,7 +275,12 @@ $(document).ready(function() {
 			                    $('#altEditor-modal').modal('hide');
 			                    		                    
 			                },
-			                error:function(data){
+			                error:function(data, xhr){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+			    					window.location.reload();
+			    				} else {
+			    					console.error("Error al realizar la peticion: " + error);
+			    				}
 			                	
 			                	// Se oculta la capa 'cargando...'
 			                	hide();
@@ -293,7 +309,13 @@ $(document).ready(function() {
 		                    $('#altEditor-modal .modal-body .alert').remove();
 		                    $('#altEditor-modal').modal('hide');
 		                },
-		                error:function(data){
+		                error:function(data, xhr){
+		                	if (xhr.status === 401 || xhr.status === 403) {
+		    					window.location.reload();
+		    				} else {
+		    					console.error("Error al realizar la peticion: " + error);
+		    				}
+		                	
 		                	// Se oculta la capa 'cargando...'
 		                	hide();
 		                	$('#altEditor-modal .modal-body .alert').remove();

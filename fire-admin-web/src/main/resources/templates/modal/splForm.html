@@ -103,8 +103,15 @@ $(document).ready(function () {
 		        	$("#connection-result").html("<strong>No se ha podido conectar con el servidor</strong>");	
 				}
 	        },
-	        error: function(err) {
+	        error: function(err, xhr) {
 	        	console.log("Conexion fallida");
+	        	
+	        	if (xhr.status === 401 || xhr.status === 403) {
+					window.location.reload();
+				} else {
+					console.error("Error al realizar la peticion: " + error);
+				}
+	        	
 	        	$("#connection-result").removeClass("alert-success alert-danger");
 	        	$("#connection-result").addClass("alert-danger");
 	        	$("#connection-result").html("<strong>No se ha podido comprobar la conexi&oacute;n con el servidor</strong>");

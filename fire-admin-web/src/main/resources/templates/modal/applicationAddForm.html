@@ -135,8 +135,14 @@ $(document)
 	      			$("#cert-resp").html(certificados[1]);
 	      		}
 			},
-			error : function(e) {
+			error : function(e, xhr) {
 				//alert("Error al cargar el certificado");
+				
+				if (xhr.status === 401 || xhr.status === 403) {
+   					window.location.reload();
+   				} else {
+   					console.error("Error al realizar la peticion: " + error);
+   				}
 			}
 		});
   			
@@ -229,8 +235,15 @@ function saveNewApp() {
 					  $("#" + $(this).attr('id')).removeClass("has-error");
 				  });
  			  },
- 			  error:function(){
+ 			  error:function(xhr){
  				  hide();
+ 				  
+ 				 if (xhr.status === 401 || xhr.status === 403) {
+ 					window.location.reload();
+ 				} else {
+ 					console.error("Error al realizar la peticion: " + error);
+ 				}
+ 				 
  				  var messageResponse = /*[[#{message.error.application.add}]]*/;
  				  $('#resultAddApp').removeClass('alert-success')	
  				  $('#resultAddApp').addClass('alert alert-danger');

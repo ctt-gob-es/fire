@@ -180,6 +180,12 @@ function loadIntoAjax(formTarget, url, idTarget, type, funcion, doLoad) {
 				/* se oculta la capa "cargando" */
 				hide();
 			}
+			
+			if (xhr.status === 401 || xhr.status === 403) {
+				window.location.reload();
+			} else {
+				alert("Error en la petición: " + xhr.status);
+			}
 			//showGlobalError("Error en la petici\u00f3n de " + url + "\nidPanel=" + idTarget + "TE: " + thrownError);
 		}
 
