@@ -42,7 +42,7 @@ public final class SignProcessConstants {
         SHA512("SHA512"), //$NON-NLS-1$
 
         /** SHA384. */
-        SHA384("SHA284"), //$NON-NLS-1$
+        SHA384("SHA384"), //$NON-NLS-1$
 
         /** SHA256. */
         SHA256("SHA256"); //$NON-NLS-1$
