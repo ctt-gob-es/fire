@@ -34,6 +34,8 @@ public class AuditSignatureRecorder {
 
 	private boolean enableDB;
 
+	private String string;
+
 	private static AuditSignatureRecorder instance;
 
 	/**
@@ -76,7 +78,7 @@ public class AuditSignatureRecorder {
 			this.enable = false;
 		}
 
-		LOGGER.fine("Se registraran los datos de auditor&iacute;a de peticion"); //$NON-NLS-1$
+		LOGGER.info("Se registraran los datos de auditor&iacute;a de peticion"); //$NON-NLS-1$
 
 		// Comprobamos que el directorio exista y se pueda escribir en el
 		final File logsDir = new File(logsPath);
@@ -147,6 +149,9 @@ public class AuditSignatureRecorder {
 			return;
 		}
 
+		//XXX: Borrar cuando no sea necesaria o usar el LoggerFormatter
+		LOGGER.info("Registramos en la auditoria el resultado de la firma " + fireSession.getTransactionId()); //$NON-NLS-1$
+
 		// Inicializamos el cubo de datos si no lo estaba
 		final AuditSignatureCube signatureCube = new AuditSignatureCube();
 
@@ -214,8 +219,10 @@ public class AuditSignatureRecorder {
 			signatureCube.setErrorDetail(null);
 		}
 
+		// Registro en fichero
 		this.dataLogger.finest(signatureCube.toString());
 
+		// Registro en base de datos
 		if (this.enableDB) {
 			AuditSignaturesDAO.insertAuditSignature(signatureCube);
 		}

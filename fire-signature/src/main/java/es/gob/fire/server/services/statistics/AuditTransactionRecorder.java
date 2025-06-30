@@ -84,7 +84,7 @@ public class AuditTransactionRecorder {
 			return;
 		}
 
-		LOGGER.fine("Se registraran los datos de las auditoria de transaccion"); //$NON-NLS-1$
+		LOGGER.info("Se registraran los datos de las auditoria de transaccion"); //$NON-NLS-1$
 
 		// Creamos el logger con el que imprimiremos los resultados a disco
 		final Logger fileLogger = Logger.getLogger(LOGGER_NAME);
@@ -146,6 +146,9 @@ public class AuditTransactionRecorder {
 		if (!this.enable) {
 			return;
 		}
+
+		//XXX: Borrar cuando no sea necesaria o usar el LoggerFormatter
+		LOGGER.info("Registramos en la auditoria el resultado de la transaccion " + fireSession.getTransactionId()); //$NON-NLS-1$
 
 		// Inicializamos el cubo de datos si no lo estaba
 		final AuditTransactionCube auditTransactionCube = new AuditTransactionCube();
