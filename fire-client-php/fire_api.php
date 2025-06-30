@@ -990,6 +990,7 @@
 		var $ok = false;
 		var $dt;
 		var $gracePeriod;
+		var $errorMessage;
 		
 		function __construct ($response) {
 			if (isset($response->id)) {
@@ -1006,6 +1007,10 @@
 
 			if (isset($response->grace)) {
 				$this->gracePeriod = new GracePeriod($response->grace->id, "@".($response->grace->date/1000));
+			}
+
+			if (isset($response->errorm)) {
+				$this->errorMessage = $response->errorm;
 			}
 
 			if (empty($this->id)) {
@@ -1065,7 +1070,6 @@
 		// solicitado una firma LTA-Level y recibirse una T-Level.
 		const STATE_PARTIAL = 2;
 
-		var $resultType;
 		var $state;
 		var $providerName;
 		var $signingCert;

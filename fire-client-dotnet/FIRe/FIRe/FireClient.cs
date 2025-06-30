@@ -1016,10 +1016,7 @@ namespace FIRe
                     }
                     catch (Exception e2)
                     {
-
-                        throw new HttpOperationException("Error. ContenType: " + r.ContentType + ". Encoding: " + r.ContentEncoding + ". Length: " + r.ContentLength + ". Excepcion: " + e2.ToString(), e2);
-
-                        //throw new HttpOperationException("No se pudo decodificar la respuesta de error del servicio: " + e2.ToString(), e2);
+                        throw new HttpOperationException("No se pudo decodificar la respuesta de error del servicio: " + e2.ToString(), e2);
                     }
 
                     int code = errorResult.c;
@@ -1073,11 +1070,15 @@ namespace FIRe
 
                 if (r.StatusCode == HttpStatusCode.Forbidden)
                 {
-                    throw new HttpForbiddenException("Error HTTP " + r.StatusCode, e);
+                    throw new HttpForbiddenException("La aplicacion no tiene permiso para conectar con el servicio. Error HTTP " + r.StatusCode, e);
                 }
                 else if (r.StatusCode == HttpStatusCode.RequestTimeout)
                 {
-                    throw new HttpNetworkException("Error HTTP " + r.StatusCode, e);
+                    throw new HttpNetworkException("Ha pasado el tiempo maximo de espera sin haber recibido respuesta del servidor. Error HTTP " + r.StatusCode, e);
+                }
+                else if (r.StatusCode == HttpStatusCode.NotFound)
+                {
+                    throw new HttpNetworkException("No se ha encontrado el servicio de FIRe. Error HTTP " + r.StatusCode, e);
                 }
                 throw new HttpOperationException("Error desconocido en la llamada a FIRe: Error HTTP " + r.StatusCode, e);
 

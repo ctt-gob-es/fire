@@ -13,6 +13,7 @@
     
         <br /><b>Fichero <asp:Label runat="server" id="FileId1"></asp:Label> incluido en batch.</b>
         <br /><b>Fichero <asp:Label runat="server" id="FileId2"></asp:Label> incluido en batch.</b>
+        <br /><b>Fichero <asp:Label runat="server" id="FileId3"></asp:Label> incluido en batch.</b>
 
     </div>
     </form>

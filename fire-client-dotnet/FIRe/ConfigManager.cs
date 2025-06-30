@@ -9,6 +9,7 @@
  */
 
 using Microsoft.Win32;
+using System.Windows.Forms;
 
 namespace FIRe
 {

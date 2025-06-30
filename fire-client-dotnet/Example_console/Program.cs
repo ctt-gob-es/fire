@@ -35,7 +35,7 @@ namespace Example_Console
                         "sign",         // Operacion criptografica (sign, cosign o countersign)
                         "XAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
                         "SHA1withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-                        extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
+                        extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams de Autofirma
                         dataB64,        // Datos a firmar
                         confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
                     );

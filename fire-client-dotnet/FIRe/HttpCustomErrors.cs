@@ -13,6 +13,8 @@ namespace FIRe
     /// <summary>Clase con los tipos de error HTTP propios de la aplicación.</summary>
    public static class HttpCustomErrors
     {
+        /// La peticion es demasiado grande.
+        public const string TOO_LARGE_REQUEST = "413";
         /// Identifica los casos en los que un usuario no tiene certificados del tipo indicado.
         public const string NO_CERTS = "522";
         /// El usuario no esta dado de alta en el sistema.

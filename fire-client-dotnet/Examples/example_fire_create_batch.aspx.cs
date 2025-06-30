@@ -33,7 +33,7 @@ public partial class example_fire_create_batch : System.Web.UI.Page
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
                 "SHA256withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams del MiniApplet de @firma
+                extraParamsB64, // Configuracion del formato de firma en base 64 (propiedades). El equivalente al extraParams de Autofirma
                 upgradeFormat,  // Actualizacion
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
             );

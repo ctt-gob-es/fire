@@ -202,6 +202,10 @@ namespace FIRe
                 {
                     throw new HttpNoUserException("El usuario no esta dado de alta en el sistema", e);
                 }
+                else if (r != null && r.StatusCode.ToString() == HttpCustomErrors.TOO_LARGE_REQUEST)
+                {
+                    throw new HttpOperationException("La peticion es demasiado grande y el servidor la rechazo", e);
+                }
                 throw new HttpNetworkException("Error al realizar la conexion: " + e.Message, e);
             }
             catch (ProtocolViolationException e)

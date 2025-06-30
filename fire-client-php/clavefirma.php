@@ -491,6 +491,9 @@
 		else if ($http_code == 404 || $http_code == 408) {
 			throw new HttpNetworkException("No se pudo conectar con el servidor de destino");
 		}
+		else if ($http_code == 413) {
+			throw new HttpOperationException("La peticion es demasiado grande y el servidor la rechazo");
+		}
 		else if ($http_code == 522) {
 			// El usuario no tiene certificados. No hacemos nada.
 			return;

@@ -53,6 +53,7 @@ namespace FIRe
                 singleSignature.id = singleBatch.id;
                 singleSignature.ok = singleBatch.ok;
                 singleSignature.dt = singleBatch.dt;
+                singleSignature.errorMessage = singleBatch.errorm;
                 if (singleBatch.grace != null)
                 {
                     // Transformamos los milisegundos Java a una fecha .Net
@@ -80,6 +81,10 @@ namespace FIRe
         /// Resultado de la firma.
         /// </summary>
         public string dt { get; set; }
+        /// <summary>
+        /// Mensaje descriptivo del error si fallase la operación.
+        /// </summary>
+        public string errorMessage { get; set; }
 
         /// <summary>
         /// Periodo de gracia que es necesario conceder a la firma antes de recuperarla.

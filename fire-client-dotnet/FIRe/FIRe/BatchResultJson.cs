@@ -48,6 +48,10 @@ namespace FIRe
         /// Resultado de la firma.
         /// </summary>
         public string dt { get; set; }
+        /// <summary>
+        /// Mensaje descriptivo del error.
+        /// </summary>
+        public string errorm { get; set; }
 
         /// <summary>
         /// Periodo de gracia que es necesario conceder a la firma antes de recuperarla.

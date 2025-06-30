@@ -9,11 +9,12 @@ public partial class example_fire_sign : System.Web.UI.Page
 
         string appId = "196647C3A40B";
 
-        //Dictionary<String, String> serviceConfig = new Dictionary<string, string>();
-        //serviceConfig.Add("fire_service", "https://servidorcentral:8443/fire-signature/fireService");
-        //serviceConfig.Add("admit_all_certs", "true");
-        //serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new.p12");
-        //serviceConfig.Add("ssl_client_pass", "12341234");
+        Dictionary<String, String> serviceConfig = new Dictionary<string, string>();
+        serviceConfig.Add("fire_service", "https://servidorcentral:8443/fire-signature/fireService");
+        serviceConfig.Add("admit_all_certs", "true");
+        serviceConfig.Add("ssl_client_pkcs12", "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/app_test_fire_age.p12");
+        serviceConfig.Add("ssl_client_pass", "m1Contrase_a");
+        serviceConfig.Add("ssl_client_alias", "clave_fire");
 
         string extraParams = "mode=implicit\nfilters=keyusage.nonrepudiation:true;nonexpired:";
         string extraParamsB64 = Base64Encode(extraParams);
@@ -36,7 +37,7 @@ public partial class example_fire_sign : System.Web.UI.Page
                 "sign",         // Operacion criptografica (sign, cosign o countersign)
                 "CAdES",        // Formato de firma (CAdES, XAdES, PAdES...)
                 "SHA512withRSA",  // Algoritmo de firma (Actualmente solo se permite SHA1withRSA)
-                extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams del MiniApplet de @firma
+                extraParamsB64, // Configuracion del formato de firma en base 64. El equivalente al extraParams de Autofirma
                 dataB64,        // Datos a firmar
                 confB64         // Configuracion del servicio en base 64 (se incluyen las URL a las que redirigir en caso de exito y error)
             );

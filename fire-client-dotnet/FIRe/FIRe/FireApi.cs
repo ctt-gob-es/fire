@@ -804,7 +804,6 @@ namespace FIRe
         /// </summary>
         /// <param name="url">URL a la que realizar la petición.</param>
         /// <param name="urlParameters">Parámetros que se envían en la petición.</param>
-        /// <param name="config">Configuración para la conexión de red.</param>
         /// <returns>Respuesta de la llamada a la URL indicada.</returns>
         /// <exception cref="ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
         /// <exception cref="HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>

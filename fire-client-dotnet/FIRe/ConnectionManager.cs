@@ -45,7 +45,7 @@ namespace FIRe
         /// <returns>Respuesta de la llamada.</returns>
         public static HttpWebResponse connectByGet(string url, string urlParameters, Dictionary<String, String> config)
         {
-            init(config);
+            Init(config);
 
             HttpWebRequest request;
             if (string.IsNullOrEmpty(url))
@@ -74,7 +74,7 @@ namespace FIRe
         /// <returns>Respuesta de la llamada.</returns>
         public static HttpWebResponse ConnectByPost(string url, string urlParameters, Dictionary<String, String> config)
         {
-            init(config);
+            Init(config);
 
             HttpWebRequest request = (HttpWebRequest)WebRequest.Create(url);
             request.Method = "POST";
@@ -94,7 +94,7 @@ namespace FIRe
             return (HttpWebResponse)request.GetResponse();
         }
 
-        private static void init(Dictionary<String, String> config)
+        private static void Init(Dictionary<String, String> config)
         {
             bool admitAllCert = wantAdmitAllCert(config);
             if (admitAllCert == currentAdmitAllCert)
@@ -104,6 +104,7 @@ namespace FIRe
 
             if (admitAllCert)
             {
+                ServicePointManager.SecurityProtocol = SecurityProtocolType.Tls12;
                 ServicePointManager.ServerCertificateValidationCallback =
                     delegate (object s, X509Certificate certificate, X509Chain chain, SslPolicyErrors sslPolicyErrors)
                     { return true; };

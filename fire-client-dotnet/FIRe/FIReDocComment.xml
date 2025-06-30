@@ -105,6 +105,11 @@
             Resultado de la firma.
             </summary>
         </member>
+        <member name="P:FIRe.BatchSingleResultJson.errorm">
+            <summary>
+            Mensaje descriptivo del error.
+            </summary>
+        </member>
         <member name="P:FIRe.BatchSingleResultJson.grace">
             <summary>
             Periodo de gracia que es necesario conceder a la firma antes de recuperarla.
@@ -828,6 +833,9 @@
         <member name="T:FIRe.HttpCustomErrors">
             <summary>Clase con los tipos de error HTTP propios de la aplicación.</summary>
         </member>
+        <member name="F:FIRe.HttpCustomErrors.TOO_LARGE_REQUEST">
+            La peticion es demasiado grande.
+        </member>
         <member name="F:FIRe.HttpCustomErrors.NO_CERTS">
             Identifica los casos en los que un usuario no tiene certificados del tipo indicado.
         </member>
@@ -1181,6 +1189,11 @@
         <member name="P:FIRe.FireSingleResult.dt">
             <summary>
             Resultado de la firma.
+            </summary>
+        </member>
+        <member name="P:FIRe.FireSingleResult.errorMessage">
+            <summary>
+            Mensaje descriptivo del error si fallase la operación.
             </summary>
         </member>
         <member name="P:FIRe.FireSingleResult.gracePeriod">
@@ -1784,7 +1797,6 @@
             </summary>
             <param name="url">URL a la que realizar la petición.</param>
             <param name="urlParameters">Parámetros que se envían en la petición.</param>
-            <param name="config">Configuración para la conexión de red.</param>
             <returns>Respuesta de la llamada a la URL indicada.</returns>
             <exception cref="T:System.ArgumentException">Cuando se proporciona un parámetro no válido.</exception>
             <exception cref="T:FIRe.HttpForbiddenException">Cuando falla la autenticación con el componente central.</exception>
