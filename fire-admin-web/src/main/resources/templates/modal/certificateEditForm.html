@@ -125,78 +125,91 @@ $(document)
 		});
 	
 	var previewCertUrl = /*[[@{/previewCert}]]*/;
+	
 	function previewCert(event) {
-		
-		hide();
-		var formData = new FormData();
-	 	var file1 =  $('#certFile1').prop('files')[0];
-	 	
-	 	if (file1 == undefined) {
-	 		file1 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-	 	}
-	 	
-	 	var file2 =  $('#certFile2').prop('files')[0];
-	 	
-	 	if (file2 == undefined) {
-			file2 = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
-		}
-	 	
-	 	var id = event.target.id;
-	 	
-	 	formData.append("certFile1", file1);
-	 	formData.append("certFile2", file2);
-	 	formData.append("idField",id)
-	 	
-		//var data = new FormData($("#certEditForm")[0]);
-		var idResult;
-		if (id == "certFile1") {
-			idResult = "cert-prin";
-			
-		} else if (id == "certFile2") {
-			idResult = "cert-resp";
-			
-		}
-		$.ajax(previewCertUrl,{
-			type : "POST",
-			data : formData,
-			processData : false,
-			contentType : false,
-			success : function(responseText) {
-				//document.getElementById(idResult).innerHTML = responseText;
-				hide();
-				$("#" + idResult).html(responseText);
-			},
-			error : function(e, xhr) {
-				alert("Error al cargar el certificado");
-				
-				if (xhr.status === 401 || xhr.status === 403) {
-					window.location.reload();
-				} else {
-					console.error("Error al realizar la peticion: " + error);
-				}
-			}
-		});
+	    hide();
+	    var formData = new FormData();
 
+	    var file1 = $('#certFile1').prop('files')[0];
+	    var file2 = $('#certFile2').prop('files')[0];
+	    
+	    var id = event.target.id;
+	    var idResult = (id === "certFile1") ? "cert-prin" : "cert-resp";
+
+	    if (file1) {
+	        formData.append("certFile1", file1);
+	    }
+	    if (file2) {
+	        formData.append("certFile2", file2);
+	    }
+	    formData.append("idField", id);
+	    
+	    if (id === "certFile1") {
+	        formData.append("certBackupB64", $("#certBackupB64").val());
+	    }
+	    if (id === "certFile2") {
+	        formData.append("certPrincipalB64", $("#certPrincipalB64").val());
+	    }
+
+	    $.ajax(previewCertUrl, {
+	        type: "POST",
+	        data: formData,
+	        processData: false,
+	        contentType: false,
+	        success: function (responseText) {
+	            hide();
+	            $("#" + idResult).html(responseText);
+	        },
+	        error: function (xhr) {
+	            hide();
+
+	            let errorMsg = "Error al cargar el certificado";
+
+	            try {
+	                const json = JSON.parse(xhr.responseText);
+	                if (json.message) errorMsg = json.message;
+	            } catch (e) {
+	                if (xhr.responseText) errorMsg = xhr.responseText;
+	            }
+	            
+	            $("#" + idResult).html(
+	                '<div class="alert alert-danger">' + errorMsg + '</div>'
+	            );
+
+	            // Si el error es por duplicación, limpia el campo afectado
+	            if (errorMsg.includes("mismo certificado")) {
+	                $("#" + id).val(null);
+	            }
+	            
+	         	// Limpia el campo si el error indica duplicado
+	            if (errorMsg.includes("ya existe")) {
+	                $("#" + id).val(null);
+	            }
+
+	            if (xhr.status === 401 || xhr.status === 403) {
+	                window.location.reload();
+	            } else {
+	                console.error("Error al realizar la petición: " + errorMsg);
+	            }
+	        }
+	    });
 	}
 	
-	$("input:file").change(function(event) {
-		
-		previewCert(event);
+	$("input:file").change(function (event) {
+	    previewCert(event);
 	});
 
-		$("input[type=file]").change(
-				function() {
-					var fieldVal = $(this).val();
+	$("input[type=file]").change(function() {
+		var fieldVal = $(this).val();
 
-					// Change the node's value by removing the fake path (Chrome)
-					fieldVal = fieldVal.replace("C:\\fakepath\\", "");
+		// Change the node's value by removing the fake path (Chrome)
+		fieldVal = fieldVal.replace("C:\\fakepath\\", "");
 
-					if (fieldVal != undefined || fieldVal != "") {
-						$(this).next(".custom-file-label").attr('data-content',	fieldVal);
-						$(this).next(".custom-file-label").text(fieldVal);
-					}
-
-				});
+		if (fieldVal != undefined || fieldVal != "") {
+			$(this).next(".custom-file-label").attr('data-content',	fieldVal);
+			$(this).next(".custom-file-label").text(fieldVal);
+		}
+	});
 		
 
 		

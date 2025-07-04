@@ -219,8 +219,7 @@ public class TransactionCube {
 	        && Objects.equals(operation, other.operation)
 	        && Objects.equals(provider, other.provider)
 	        && mandatoryProvider == other.mandatoryProvider
-	        && resultTransaction == other.resultTransaction
-	        && Objects.equals(idTransaction, other.idTransaction);
+	        && resultTransaction == other.resultTransaction;
 	}
 
 	@Override
@@ -230,8 +229,7 @@ public class TransactionCube {
 	        operation,
 	        provider,
 	        mandatoryProvider,
-	        resultTransaction,
-	        idTransaction
+	        resultTransaction
 	    );
 	}
 }

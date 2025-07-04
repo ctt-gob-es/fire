@@ -365,8 +365,7 @@ public class SignatureCube {
 	        && Objects.equals(algorithm,      other.algorithm)
 	        && Objects.equals(provider,       other.provider)
 	        && Objects.equals(browser,        other.browser)
-	        && resultSign == other.resultSign
-	        && Objects.equals(idTransaction,  other.idTransaction);
+	        && resultSign == other.resultSign;
 	}
 
 	@Override
@@ -378,8 +377,7 @@ public class SignatureCube {
 	        algorithm,
 	        provider,
 	        browser,
-	        resultSign,
-	        idTransaction
+	        resultSign
 	    );
 	}
 }

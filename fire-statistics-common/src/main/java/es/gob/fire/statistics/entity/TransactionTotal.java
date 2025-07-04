@@ -3,7 +3,6 @@ package es.gob.fire.statistics.entity;
 public class TransactionTotal {
 
 	private long dataSize;
-
 	private long total;
 
 	public TransactionTotal(final long dataSize, final long total) {
@@ -25,5 +24,10 @@ public class TransactionTotal {
 
 	public void setTotal(final long total) {
 		this.total = total;
+	}
+
+	public void add(final TransactionCube cube) {
+		this.total++;
+		this.dataSize += cube.getDataSize();
 	}
 }
