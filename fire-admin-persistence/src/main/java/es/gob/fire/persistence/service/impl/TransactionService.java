@@ -103,8 +103,8 @@ public class TransactionService implements ITransactionService {
 		List<TransactionDTO> transactions = null;
 		final Query nativeQuery = this.entityManager.createNativeQuery(
 				"SELECT  t.aplicacion, "
-						+ " SUM(t.correcta) AS corrects, "
-						+ " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects "
+						+ " SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects, "
+						+ " SUM(CASE WHEN t.correcta = 0 THEN t.total ELSE 0 END) AS incorrects "
 						+ " FROM tb_transacciones t"
 						+ " WHERE EXTRACT(MONTH FROM t.fecha) = ? AND EXTRACT(YEAR FROM t.fecha) = ? "
 						+ " GROUP BY t.aplicacion ");
@@ -134,8 +134,8 @@ public class TransactionService implements ITransactionService {
 		List<TransactionDTO> transactions = null;
 		final Query nativeQuery = this.entityManager.createNativeQuery(
 				"SELECT  t.proveedor, "
-						+ " SUM(t.correcta) AS corrects, "
-						+ " SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects "
+						+ " SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects, "
+						+ " SUM(CASE WHEN t.correcta = 0 THEN t.total ELSE 0 END) AS incorrects "
 						+ " FROM tb_transacciones t"
 						+ " WHERE EXTRACT(MONTH FROM t.fecha) = ? AND EXTRACT(YEAR FROM t.fecha) = ? "
 						+ " GROUP BY t.proveedor ");
