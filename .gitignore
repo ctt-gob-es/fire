@@ -1,8 +1,8 @@
 .project
 .settings
-target
 .classpath
 .properties
 dependency-reduced-pom.xml
-
 *.class
+target/
+bin/

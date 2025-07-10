@@ -96,46 +96,46 @@ public class CertificateRestController {
 	/**
 	 * Constant that represents the key Json 'errorSaveCertificate'.
 	 */
-	private static final String KEY_JS_ERROR_SAVE_CERT = "errorSaveCertificate";
+	private static final String KEY_JS_ERROR_SAVE_CERT = "errorSaveCertificate"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the parameter 'idSystemCertificate'.
 	 */
-	private static final String FIELD_ID_CERTIFICATE = "idCertificate";
+	private static final String FIELD_ID_CERTIFICATE = "idCertificate"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the field 'alias'.
 	 */
-	private static final String FIELD_ALIAS = "alias";
+	private static final String FIELD_ALIAS = "alias"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the field 'certFile1'.
 	 */
-	private static final String FIELD_FILE_CERTIFICATE1 = "certFile1";
+	private static final String FIELD_FILE_CERTIFICATE1 = "certFile1"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the field 'certFile2'.
 	 */
-	private static final String FIELD_FILE_CERTIFICATE2 = "certFile2";
+	private static final String FIELD_FILE_CERTIFICATE2 = "certFile2"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the parameter 'certificateFile'.
 	 */
-	private static final String FIELD_ROW_INDEX_CERTIFICATE = "rowIndexCert";
+	private static final String FIELD_ROW_INDEX_CERTIFICATE = "rowIndexCert"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the span text.
 	 */
-	private static final String SPAN = "_span";
+	private static final String SPAN = "_span"; //$NON-NLS-1$
 
 	/**
 	 * Constant that represents the parameter 'certFile1'.
 	 */
-	private static final String PARAM_CER_PRINCIPAL = "certFile1";
+	private static final String PARAM_CER_PRINCIPAL = "certFile1"; //$NON-NLS-1$
 	/**
 	 * Constant that represents the parameter 'certFile2'.
 	 */
-	private static final String PARAM_CER_BKUP = "certFile2";
+	private static final String PARAM_CER_BKUP = "certFile2"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the object that manages the log of the class.
@@ -164,23 +164,23 @@ public class CertificateRestController {
 	    final List<Certificate> listCertificates = new ArrayList<>(certificates.getData());
 
 	    if (!input.getOrder().isEmpty()) {
-	        // Buscar índice de la columna 'certificateName'
+	        // Buscar indice de la columna 'certificateName'
 	        for (int i = 0; i < input.getColumns().size(); i++) {
-	            if ("certificateName".equals(input.getColumns().get(i).getData())) {
-	                final int columnIndex = i; // ← esta variable ahora es final
+	            if ("certificateName".equals(input.getColumns().get(i).getData())) { //$NON-NLS-1$
+	                final int columnIndex = i; // esta variable ahora es final
 
 	                input.getOrder().stream()
 	                    .filter(order -> order.getColumn() == columnIndex)
 	                    .findFirst()
 	                    .ifPresent(order -> {
-	                        boolean ascending = "asc".equalsIgnoreCase(order.getDir());
+	                        final boolean ascending = "asc".equalsIgnoreCase(order.getDir()); //$NON-NLS-1$
 
 	                        listCertificates.sort((c1, c2) -> {
-	                            String a = c1.getCertificateName() != null ? c1.getCertificateName().toLowerCase().trim() : "";
-	                            String b = c2.getCertificateName() != null ? c2.getCertificateName().toLowerCase().trim() : "";
+	                            final String a = c1.getCertificateName() != null ? c1.getCertificateName().toLowerCase().trim() : ""; //$NON-NLS-1$
+	                            final String b = c2.getCertificateName() != null ? c2.getCertificateName().toLowerCase().trim() : ""; //$NON-NLS-1$
 
-	                            int pa = getPriority(a);
-	                            int pb = getPriority(b);
+	                            final int pa = getPriority(a);
+	                            final int pb = getPriority(b);
 
 	                            if (pa != pb) {
 	                                return ascending ? Integer.compare(pa, pb) : Integer.compare(pb, pa);
@@ -199,12 +199,12 @@ public class CertificateRestController {
 
 	    return certificates;
 	}
-	
-	private int getPriority(String val) {
-	    if (val.matches("^\\d.*")) {
+
+	private static int getPriority(final String val) {
+	    if (val.matches("^\\d.*")) { //$NON-NLS-1$
 	        return 0;
 	    }
-	    if (val.matches(".*\\d.*")) {
+	    if (val.matches(".*\\d.*")) { //$NON-NLS-1$
 	        return 1;
 	    }
 	    return 2;
@@ -229,13 +229,13 @@ public class CertificateRestController {
 		final List<Application> aplicacionesCert = this.appService.getByIdCertificado(idCertificate);
 
 		if (aplicacionesCert != null && aplicacionesCert.size() > 0) {
-			result = "error.No se ha podido borrar el certificado, tiene aplicaciones asociadas.";
+			result = "error.No se ha podido borrar el certificado, tiene aplicaciones asociadas."; //$NON-NLS-1$
 		} else {
 
 			try {
 				this.certificateService.deleteCertificate(idCertificate);
 			} catch (final Exception e) {
-				result = "-1";
+				result = "-1"; //$NON-NLS-1$
 			}
 		}
 		return result;
@@ -293,7 +293,7 @@ public class CertificateRestController {
 			String msgerror = null;
 			try {
 
-				msgerror = "Error al instanciar el proveedor X.509";
+				msgerror = "Error al instanciar el proveedor X.509"; //$NON-NLS-1$
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 				X509Certificate cert1 = null;
@@ -302,18 +302,18 @@ public class CertificateRestController {
 				if (!certFile1.isEmpty()) {
 	        		try (final InputStream certIs = certFile1.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			
+
 	        			cert1.checkValidity();
-	        			
+
 	        			certAddForm.setCertBytes1(cert1.getEncoded());
 	        		} catch (final CertificateExpiredException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " se encuentra caducado.";
+	        			msgerror = certFile1.getOriginalFilename() + " se encuentra caducado."; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateNotYetValidException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			msgerror = certFile1.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual"; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"; //$NON-NLS-1$
 	        			throw e;
 	        		}
 				}
@@ -322,24 +322,24 @@ public class CertificateRestController {
 
 					try (final InputStream certIs = certFile2.getInputStream();) {
 	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			
+
 	        			cert2.checkValidity();
-	        			
+
 	        			certAddForm.setCertBytes2(cert2.getEncoded());
 	        		} catch (final CertificateExpiredException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado.";
+	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado."; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateNotYetValidException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual"; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"; //$NON-NLS-1$
 	        			throw e;
 	        		}
 				}
-				
+
 				if (cert1 != null && cert2 != null && Arrays.equals(cert1.getEncoded(), cert2.getEncoded())) {
-		            msgerror = "Los certificados se encuentran duplicados";
+		            msgerror = "Los certificados se encuentran duplicados"; //$NON-NLS-1$
 		            json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 		            dtOutput.setError(json.toString());
 		            return dtOutput;
@@ -409,7 +409,7 @@ public class CertificateRestController {
 		} else {
 			String msgerror = null;
 			try {
-				msgerror = "Error al instanciar el proveedor X.509";
+				msgerror = "Error al instanciar el proveedor X.509"; //$NON-NLS-1$
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
 				X509Certificate cert1 = null;
@@ -422,12 +422,18 @@ public class CertificateRestController {
 				} else if (!certFile1.isEmpty()) {
 					try (final InputStream certIs = certFile1.getInputStream();) {
 	        			cert1 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			
+
 	        			cert1.checkValidity();
-	        			
+
 	        			certEditForm.setCertBytes1(cert1.getEncoded());
+	        		} catch (final CertificateExpiredException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " se encuentra caducado."; //$NON-NLS-1$
+	        			throw e;
+	        		} catch (final CertificateNotYetValidException e) {
+	        			msgerror = certFile1.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual"; //$NON-NLS-1$
+	        			throw e;
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"; //$NON-NLS-1$
 	        			throw e;
 	        		}
 				}
@@ -439,51 +445,51 @@ public class CertificateRestController {
 				} else if (!certFile2.isEmpty()) {
 					try (final InputStream certIs = certFile2.getInputStream();) {
 	        			cert2 = (X509Certificate) certFactory.generateCertificate(certIs);
-	        			
+
 	        			cert2.checkValidity();
-	        			
+
 	        			certEditForm.setCertBytes2(cert2.getEncoded());
 	        		} catch (final CertificateExpiredException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado.";
+	        			msgerror = certFile2.getOriginalFilename() + " se encuentra caducado."; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateNotYetValidException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual";
+	        			msgerror = certFile2.getOriginalFilename() + " no es v\u00E1lido a\u00FAn en la fecha actual"; //$NON-NLS-1$
 	        			throw e;
 	        		} catch (final CertificateException e) {
-	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido";
+	        			msgerror = certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"; //$NON-NLS-1$
 	        			throw e;
 	        		}
 				}
-				
+
 				if (cert1 != null && cert2 != null && Arrays.equals(cert1.getEncoded(), cert2.getEncoded())) {
-		            msgerror = "Los certificados se encuentran duplicados";
+		            msgerror = "Los certificados se encuentran duplicados"; //$NON-NLS-1$
 		            json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 		            dtOutput.setError(json.toString());
 		            return dtOutput;
 		        }
-				
-				if (certFile2 != null && !certFile2.isEmpty()
+
+				if (!certFile2.isEmpty()
 		            && certEditForm.getCertPrincipalB64() != null && !certEditForm.getCertPrincipalB64().trim().isEmpty()) {
 
-		            byte[] loaded = certFile2.getBytes();
-		            byte[] saved = Base64.decode(certEditForm.getCertPrincipalB64());
+		            final byte[] loaded = certFile2.getBytes();
+		            final byte[] saved = Base64.decode(certEditForm.getCertPrincipalB64());
 
 		            if (Arrays.equals(loaded, saved)) {
 		                throw new ResponseStatusException(
 		                        HttpStatus.BAD_REQUEST,
-		                        "El certificado cargado ya existe como certificado principal.");
+		                        "El certificado cargado ya existe como certificado principal."); //$NON-NLS-1$
 		            }
 		        }
-				
-				if (certFile1 != null && !certFile1.isEmpty()
+
+				if (!certFile1.isEmpty()
 		            && certEditForm.getCertBackupB64() != null && !certEditForm.getCertBackupB64().trim().isEmpty()) {
-		            byte[] loaded = certFile1.getBytes();
-		            byte[] saved = Base64.decode(certEditForm.getCertBackupB64());
+		            final byte[] loaded = certFile1.getBytes();
+		            final byte[] saved = Base64.decode(certEditForm.getCertBackupB64());
 
 		            if (Arrays.equals(loaded, saved)) {
 		                throw new ResponseStatusException(
 		                        HttpStatus.BAD_REQUEST,
-		                        "El certificado cargado ya existe como certificado de respaldo.");
+		                        "El certificado cargado ya existe como certificado de respaldo."); //$NON-NLS-1$
 		            }
 		        }
 
@@ -551,16 +557,11 @@ public class CertificateRestController {
 	 * @param alias String that represents the value of the field 'Name' to check.
 	 * @return true if the length of the value of the field 'Name' is not valid.
 	 */
-	private boolean isAliasSizeNotValid(final String alias) {
-
+	private static boolean isAliasSizeNotValid(final String alias) {
 		boolean result = false;
-
 		if (alias != null && !alias.isEmpty()) {
-
 			result = alias.length() < NumberConstants.NUM1 || alias.length() > NumberConstants.NUM45;
-
 		}
-
 		return result;
 	}
 
@@ -573,25 +574,25 @@ public class CertificateRestController {
 	 */
 	@RequestMapping(value = "/previewCert", method = RequestMethod.POST, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
 	public String previewCert(
-			@RequestPart(value = "certFile1", required = false) MultipartFile certFile1,
-			@RequestPart(value = "certFile2", required = false) MultipartFile certFile2,
+			@RequestPart(value = "certFile1", required = false) final MultipartFile certFile1,
+			@RequestPart(value = "certFile2", required = false) final MultipartFile certFile2,
 			@RequestPart("idField") final String idField,
 			@RequestPart(value = "certPrincipalB64", required = false) final String certPrincipalB64,
 	        @RequestPart(value = "certBackupB64", required = false) final String certBackupB64) {
 
-		//Comprobación de que ambos certificados no estén duplicados en el formulario
+		//Comprobacion de que ambos certificados no estan duplicados en el formulario
 		try {
 	        // Caso 1: se cargan los dos archivos en inputs
 	        if (certFile1 != null && !certFile1.isEmpty()
 	            && certFile2 != null && !certFile2.isEmpty()) {
 
-	            byte[] bytes1 = certFile1.getBytes();
-	            byte[] bytes2 = certFile2.getBytes();
+	            final byte[] bytes1 = certFile1.getBytes();
+	            final byte[] bytes2 = certFile2.getBytes();
 
 	            if (Arrays.equals(bytes1, bytes2)) {
 	                throw new ResponseStatusException(
 	                        HttpStatus.BAD_REQUEST,
-	                        "No se puede cargar el mismo certificado dos veces en el formulario.");
+	                        "No se puede cargar el mismo certificado dos veces en el formulario."); //$NON-NLS-1$
 	            }
 	        }
 
@@ -600,13 +601,13 @@ public class CertificateRestController {
 	            && certFile2 != null && !certFile2.isEmpty()
 	            && certPrincipalB64 != null && !certPrincipalB64.trim().isEmpty()) {
 
-	            byte[] loaded = certFile2.getBytes();
-	            byte[] saved = Base64.decode(certPrincipalB64);
+	            final byte[] loaded = certFile2.getBytes();
+	            final byte[] saved = Base64.decode(certPrincipalB64);
 
 	            if (Arrays.equals(loaded, saved)) {
 	                throw new ResponseStatusException(
 	                        HttpStatus.BAD_REQUEST,
-	                        "El certificado cargado ya existe como certificado principal.");
+	                        "El certificado cargado ya existe como certificado principal."); //$NON-NLS-1$
 	            }
 	        }
 
@@ -615,21 +616,21 @@ public class CertificateRestController {
 	            && certFile1 != null && !certFile1.isEmpty()
 	            && certBackupB64 != null && !certBackupB64.trim().isEmpty()) {
 
-	            byte[] loaded = certFile1.getBytes();
-	            byte[] saved = Base64.decode(certBackupB64);
+	            final byte[] loaded = certFile1.getBytes();
+	            final byte[] saved = Base64.decode(certBackupB64);
 
 	            if (Arrays.equals(loaded, saved)) {
 	                throw new ResponseStatusException(
 	                        HttpStatus.BAD_REQUEST,
-	                        "El certificado cargado ya existe como certificado de respaldo.");
+	                        "El certificado cargado ya existe como certificado de respaldo."); //$NON-NLS-1$
 	            }
 	        }
 
-	    } catch (IOException e) {
-	        LOGGER.error("Error comparando certificados", e);
+	    } catch (final IOException e) {
+	        LOGGER.error("Error comparando certificados", e); //$NON-NLS-1$
 	    }
-		
-		String certData = "";
+
+		String certData = ""; //$NON-NLS-1$
 
 		if (certFile1 != null && !certFile1.isEmpty() && PARAM_CER_PRINCIPAL.equals(idField)) {
 			try (final InputStream certIs = certFile1.getInputStream();) {
@@ -637,7 +638,7 @@ public class CertificateRestController {
 			} catch (final IOException e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
 			} catch (final CertificateException e) {
-				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile1.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e); //$NON-NLS-1$
 			}
 		} else if (certFile2 != null && !certFile2.isEmpty() && PARAM_CER_BKUP.equals(idField)) {
 			try (final InputStream certIs = certFile2.getInputStream();) {
@@ -645,7 +646,7 @@ public class CertificateRestController {
 			} catch (final IOException e) {
 				LOGGER.error(Language.getResWebFire(IWebLogMessages.ERRORWEB030), e);
 			} catch (final CertificateException e) {
-				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e);
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{certFile2.getOriginalFilename() + " no representa un certificado v\u00E1lido"}), e); //$NON-NLS-1$
 			}
 		}
 
