@@ -31,11 +31,11 @@ package es.gob.fire.commons.utils;
  */
 public enum QueryEnum {
 
-	TRANSACTIONS_ENDED_BY_APP (1L, "Transacciones finalizadas por cada aplicacion"),
-	TRANSACTIONS_ENDED_BY_PROVIDER (2L, "Transacciones finalizadas  por cada origen de certificados/proveedor"),
-	TRANSACTIONS_BY_DATES_SIZE_APP(3L, "Transacciones segun el tama\u00F1o de los datos de cada aplicacion"),
-	TRANSACTIONS_BY_TYPE_TRANSACTION(4L, "Transacciones realizadas segun el tipo de transaccion (simple o lote)"),
-	DOCUMENTS_SIGNED_BY_APP(5L, "Documentos firmados por cada aplicacion"),
+	TRANSACTIONS_ENDED_BY_APP(1L, "Transacciones finalizadas por cada aplicaci\u00F3n"),
+	TRANSACTIONS_ENDED_BY_PROVIDER(2L, "Transacciones finalizadas por cada origen de certificados/proveedor"),
+	TRANSACTIONS_BY_DATES_SIZE_APP(3L, "Transacciones seg\u00FAn el tama\u00F1o de los datos de cada aplicaci\u00F3n"),
+	TRANSACTIONS_BY_TYPE_TRANSACTION(4L, "Transacciones realizadas seg\u00FAn el tipo de transacci\u00F3n (simple o lote)"),
+	DOCUMENTS_SIGNED_BY_APP(5L, "Documentos firmados por cada aplicaci\u00F3n"),
 	DOCUMENTS_SIGNED_BY_PROVIDER(6L, "Documentos firmados por cada origen de certificados/proveedor"),
 	DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT(7L, "Documentos firmados en cada formato de firma"),
 	DOCUMENTS_USED_IN_SIGNATURE_FORMAT(8L, "Documentos firmados que utilizan cada formato de firma longevo");

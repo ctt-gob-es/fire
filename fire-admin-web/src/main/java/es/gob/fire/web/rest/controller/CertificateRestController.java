@@ -468,7 +468,7 @@ public class CertificateRestController {
 		            return dtOutput;
 		        }
 
-				if (!certFile2.isEmpty()
+				if (certFile2 != null && !certFile2.isEmpty()
 		            && certEditForm.getCertPrincipalB64() != null && !certEditForm.getCertPrincipalB64().trim().isEmpty()) {
 
 		            final byte[] loaded = certFile2.getBytes();
@@ -481,7 +481,7 @@ public class CertificateRestController {
 		            }
 		        }
 
-				if (!certFile1.isEmpty()
+				if (certFile1 != null && !certFile1.isEmpty()
 		            && certEditForm.getCertBackupB64() != null && !certEditForm.getCertBackupB64().trim().isEmpty()) {
 		            final byte[] loaded = certFile1.getBytes();
 		            final byte[] saved = Base64.decode(certEditForm.getCertBackupB64());

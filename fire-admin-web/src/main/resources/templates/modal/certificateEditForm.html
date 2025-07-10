@@ -159,6 +159,12 @@ $(document)
 	        success: function (responseText) {
 	            hide();
 	            $("#" + idResult).html(responseText);
+	            
+	            var inputField = $("#" + id);
+	            var fileName = inputField.val().replace("C:\\fakepath\\", "");
+	            inputField.next(".custom-file-label")
+	                .attr("data-content", fileName)
+	                .text(fileName);
 	        },
 	        error: function (xhr) {
 	            hide();
@@ -197,18 +203,6 @@ $(document)
 	
 	$("input:file").change(function (event) {
 	    previewCert(event);
-	});
-
-	$("input[type=file]").change(function() {
-		var fieldVal = $(this).val();
-
-		// Change the node's value by removing the fake path (Chrome)
-		fieldVal = fieldVal.replace("C:\\fakepath\\", "");
-
-		if (fieldVal != undefined || fieldVal != "") {
-			$(this).next(".custom-file-label").attr('data-content',	fieldVal);
-			$(this).next(".custom-file-label").text(fieldVal);
-		}
 	});
 		
 
