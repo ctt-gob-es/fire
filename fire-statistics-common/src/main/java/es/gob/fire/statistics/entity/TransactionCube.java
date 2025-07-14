@@ -258,6 +258,8 @@ public class TransactionCube {
 			return false;
 		TransactionCube other = (TransactionCube) obj;
 		return Objects.equals(application, other.application)
+				&& Objects.equals(dir3Code, other.dir3Code)
+				&& Objects.equals(organization, other.organization)
 				&& Objects.equals(operation, other.operation)
 				&& Objects.equals(provider, other.provider)
 				&& mandatoryProvider == other.mandatoryProvider
@@ -268,10 +270,11 @@ public class TransactionCube {
 	public int hashCode() {
 		return Objects.hash(
 				application,
+				organization, 
+				dir3Code,
 				operation,
 				provider,
 				mandatoryProvider,
-				resultTransaction,
-				idTransaction);
+				resultTransaction);
 	}
 }

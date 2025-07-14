@@ -470,6 +470,8 @@ public class SignatureCube {
 			return false;
 		SignatureCube other = (SignatureCube) obj;
 		return Objects.equals(application, other.application)
+				&& Objects.equals(dir3Code, other.dir3Code)
+				&& Objects.equals(organization, other.organization)
 				&& Objects.equals(format, other.format)
 				&& Objects.equals(improvedFormat, other.improvedFormat)
 				&& Objects.equals(algorithm, other.algorithm)
@@ -482,6 +484,8 @@ public class SignatureCube {
 	public int hashCode() {
 		return Objects.hash(
 				application,
+				organization, 
+				dir3Code,
 				format,
 				improvedFormat,
 				algorithm,
