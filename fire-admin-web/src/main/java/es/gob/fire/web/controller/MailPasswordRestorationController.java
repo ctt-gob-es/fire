@@ -124,10 +124,10 @@ public class MailPasswordRestorationController {
 		try {
 			final List<User> listUsers = this.userService.getAllUserByUserNameOrEmail(userNameOrEmail, userNameOrEmail);
 
-			// Comprobamos que existan usuarios, que cada unotenga un correo y que tenga asignada una contrasena
+			// Comprobamos que existan usuarios, que cada uno tenga un correo y que tenga asignada una contrasena
 			// que debamos restablecer (propio de los usuarios con acceso a la herramienta). Si no cumple este
 			if (listUsers != null && !listUsers.isEmpty()) {
-				for (User user : listUsers) {
+				for (final User user : listUsers) {
 					if (user != null && user.getEmail() != null && PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
 						// Generamos el codigo de restauracion
 						final String id = new String();
@@ -139,7 +139,7 @@ public class MailPasswordRestorationController {
 
 						// Construimos la URL para restaurar la contrasena
 						// Para evitar errores recuperando el parametro code,
-						// parseamos los simbolos mas antes de enviar la URL al usuario
+						// parseamos los simbolos antes de enviar la URL al usuario
 						final String renovationCodeURL = URLEncoder.encode(renovationCode, StandardCharsets.UTF_8.toString());
 
 						final String restorationUrl = getRestorationPageUrl(request, renovationCodeURL);
@@ -148,6 +148,7 @@ public class MailPasswordRestorationController {
 		                this.mailSenderService.sendEmail(user, restorationUrl);
 		                model.addAttribute("mailsuccess", Boolean.TRUE);
 		                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+		                LOGGER.info("Se ha enviado el correo de restauracion de contrasena para el usuario: " + user.getUserName());
 
 
 					}
@@ -162,6 +163,7 @@ public class MailPasswordRestorationController {
 		                this.mailSenderService.checkSendEmail();
 		                model.addAttribute("mailsuccess", Boolean.TRUE);
 		                model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+		                LOGGER.info("Se envia corrreo de comprobacion porque el usuario indicado no puede acceder o no tiene correo: " + (user != null ? user.getUserName() : null)); //$NON-NLS-1$
 					}
 				}
 			} else {
@@ -175,8 +177,9 @@ public class MailPasswordRestorationController {
                 this.mailSenderService.checkSendEmail();
                 model.addAttribute("mailsuccess", Boolean.TRUE);
                 model.addAttribute("mailSuccessMessage", "El correo se ha enviado correctamente");
+                LOGGER.info("Se envia corrreo de comprobacion porque el usuario no existe"); //$NON-NLS-1$
 			}
-			
+
 		} catch (IOException | MessagingException e) {
 			LOGGER.error("No ha sido posible enviar el correo", e);
 			model.addAttribute("mailErrorMessage", "No ha sido posible enviar el correo");
