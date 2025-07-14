@@ -164,8 +164,12 @@ $(document).ready(function() {
 
     									}
     								},
-    								error : function() {
-    									
+    								error : function(xhr) {
+    									if (xhr.status === 401 || xhr.status === 403) {
+    			                            window.location.reload();
+    			                        } else {
+    			                            console.error("Error al realizar la peticion: " + error);
+    			                        }
     								}
     							});
     						}
@@ -200,7 +204,13 @@ $(document).ready(function() {
                  				            $('#modal').html(data);
                  				            $('#auditTransactionViewModal').modal('show');                                                                
                  				        },
-                 				        error : function() {}
+                 				        error : function(xhr) {
+                 				        	if (xhr.status === 401 || xhr.status === 403) {
+                 	                            window.location.reload();
+                 	                        } else {
+                 	                            console.error("Error al realizar la peticion: " + error);
+                 	                        }
+                 				        }
                  				    });
                 			}
                 		}
@@ -224,7 +234,13 @@ $(document).ready(function() {
 	            $('#modal').html(data);
 	            $('#auditTransactionViewModal').modal('show');                                                                
 	        },
-	        error : function() {}
+	        error : function(xhr) {
+	        	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
+	        }
 	    });
     });
     
@@ -359,8 +375,12 @@ $(document).ready(function() {
 
           									}
           								},
-          								error : function() {
-          									
+          								error : function(xhr) {
+          									if (xhr.status === 401 || xhr.status === 403) {
+          			                            window.location.reload();
+          			                        } else {
+          			                            console.error("Error al realizar la peticion: " + error);
+          			                        }
           								}
           							});
           						}
@@ -395,7 +415,13 @@ $(document).ready(function() {
 	                   				            $('#modal').html(data);
 	                   				            $('#auditTransactionViewModal').modal('show');                                                                
 	                   				        },
-	                   				        error : function() {}
+	                   				        error : function(xhr) {
+	                   				        	if (xhr.status === 401 || xhr.status === 403) {
+	                   	                            window.location.reload();
+	                   	                        } else {
+	                   	                            console.error("Error al realizar la peticion: " + error);
+	                   	                        }
+	                   				        }
 	                   				    });
                     			}
                     		}
@@ -425,7 +451,13 @@ function viewAuditTransaction(idAuditTransaction){
             $('#modal').html(data);
             $('#auditTransactionViewModal').modal('show');                                                                
         },
-        error : function() {}
+        error : function(xhr) {
+        	if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion: " + error);
+            }
+        }
     });
 }
 
@@ -444,7 +476,11 @@ function obtainAuditFilterDate(isFirstLoad) {
 	        	$("#filterDate").text(data);
 	        },
 	        error: function (xhr, status, error) {
-	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                	console.error("Error al obtener la fecha de filtrado: " + error);
+                }
 	        }
 	    });
 	} else {
@@ -462,7 +498,11 @@ function obtainAuditFilterDate(isFirstLoad) {
 	        	$("#filterDate").text(data);
 	        },
 	        error: function (xhr, status, error) {
-	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                	console.error("Error al obtener la fecha de filtrado: " + error);
+                }
 	        }
 	    });
 	}
@@ -489,7 +529,11 @@ function setAuditDateFilterFirstLoad(isFirstLoad) {
 	        	fromDateInput.value = fromDate;
 	        },
 	        error: function (xhr, status, error) {
-	            console.error("Error al obtener la fecha de filtrado: " + error);
+	        	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                	console.error("Error al obtener la fecha de filtrado: " + error);
+                }
 	        }
 	    });
 		
@@ -504,7 +548,11 @@ function setAuditDateFilterFirstLoad(isFirstLoad) {
 	        	toDateInput.value = toDate;
 	        },
 	        error: function (xhr, status, error) {
-	            console.error("Error al obtener la fecha de filtrado: " + error);
+	            if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                	console.error("Error al obtener la fecha de filtrado: " + error);
+                }
 	        }
 	    });
 		

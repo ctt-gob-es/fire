@@ -917,22 +917,24 @@ namespace FIRe
                     }
                     else
                     {
+                        // El codigo de error no revela lo ocurrido, pero quizas se pueda determinar por otras vias
+                        if (r.StatusCode == HttpStatusCode.RequestEntityTooLarge)
+                        {
+                            throw new HttpTooLargeContentException(FIReErrors.TOO_LARGE_CONTENT);
+                        }
                         throw new HttpOperationException(code, message);
                     }
                 }
 
                 if (r.StatusCode == HttpStatusCode.Forbidden)
                 {
-                    throw new HttpForbiddenException("Error durante la autenticacion de la aplicacion", e);
+                    throw new HttpForbiddenException("Error HTTP " + r.StatusCode, e);
                 }
-                if (r.StatusCode == HttpStatusCode.InternalServerError)
+                else if (r.StatusCode == HttpStatusCode.RequestTimeout)
                 {
-                    throw new HttpForbiddenException("Error interno del servicio", e);
+                    throw new HttpNetworkException("Error HTTP " + r.StatusCode, e);
                 }
-                else
-                {
-                    throw new HttpOperationException("Error desconocido durante la operacion", e);
-                }
+                throw new HttpOperationException("Error desconocido en la llamada a FIRe: Error HTTP " + r.StatusCode, e);
             }
             catch (ProtocolViolationException e)
             {

@@ -5,25 +5,33 @@ package es.gob.fire.alarms;
  */
 public enum Alarm {
 	/** No se ha encontrado o no se ha podido cargar un fichero de configuraci&oacute;n. */
-	RESOURCE_NOT_FOUND("000", AlarmLevel.CRITICAL, "No se encuentra un fichero de configuracion: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	RESOURCE_NOT_FOUND("000", AlarmLevel.CRITICAL, AlarmInternalMessages.getString("Alarm.1")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** Se ha detectado un error en uno de los ficheros de configuraci&oacute;n. */
-	RESOURCE_CONFIG("001", AlarmLevel.ERROR, "Valor nulo o no valido en propiedad/es de un fichero de configuracion: %1s (%2s)"), //$NON-NLS-1$ //$NON-NLS-2$
+	RESOURCE_CONFIG("001", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.2")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido cargar o se ha encontrado un defecto de implementaci&oacute;n en una biblioteca externa
 	 * agregada al componente central: conector para el acceso a un proveedor de firma en la nube, gestor de documentos,
 	 * gestor de compartici&oacute;n de sesiones, conector con una plataforma de validaci&oacute;n de firmas... */
-	LIBRARY_NOT_FOUND("002", AlarmLevel.CRITICAL, "Biblioteca o dependencia no encontrada: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	LIBRARY_NOT_FOUND("002", AlarmLevel.CRITICAL, AlarmInternalMessages.getString("Alarm.3")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con la base de datos. */
-	CONNECTION_DB("003", AlarmLevel.CRITICAL, "No se puede conectar con la base de datos"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DB("003", AlarmLevel.CRITICAL, AlarmInternalMessages.getString("Alarm.4")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con la plataforma de validacion de firmas. */
-	CONNECTION_VALIDATION_PLATFORM("004", AlarmLevel.ERROR, "No se puede conectar con la plataforma de validacion de firmas"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_VALIDATION_PLATFORM("004", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.5")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con un proveedor de firma en la nube. */
-	CONNECTION_SIGNATURE_PROVIDER("005", AlarmLevel.ERROR, "No se puede conectar con un proveedor de firma en la nube: %1s"), //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_SIGNATURE_PROVIDER("005", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.6")), //$NON-NLS-1$ //$NON-NLS-2$
 	/** No se ha podido conectar con el gestor de documentos. */
-	CONNECTION_DOCUMENT_MANAGER("006", AlarmLevel.ERROR, "No se puede conectar con un gestor de documentos: %1s"); //$NON-NLS-1$ //$NON-NLS-2$
+	CONNECTION_DOCUMENT_MANAGER("006", AlarmLevel.ERROR, AlarmInternalMessages.getString("Alarm.7")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Operacion cancelada. */
+	CANCELLED_OPERATION("007", AlarmLevel.INFO, AlarmInternalMessages.getString("Alarm.9")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Error en la firma. */
+	SIGN_ERROR("008", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.10")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Acceso no autorizado. */
+	ACCESS_ERROR("009", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.11")), //$NON-NLS-1$ //$NON-NLS-2$
+	/** Error en envio a plataforma externa. */
+	EXTERNAL_PLATFORM_ERROR("010", AlarmLevel.WARNING, AlarmInternalMessages.getString("Alarm.12")); //$NON-NLS-1$ //$NON-NLS-2$
 
-	private String eventCode;
-	private AlarmLevel defaultLevel;
-	private String description;
+	private final String eventCode;
+	private final AlarmLevel defaultLevel;
+	private final String description;
 
 	private Alarm(final String eventCode, final AlarmLevel defaultLevel, final String description) {
 		this.eventCode = eventCode;

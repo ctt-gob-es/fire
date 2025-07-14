@@ -9,7 +9,7 @@ import org.springframework.stereotype.Repository;
 import es.gob.fire.persistence.entity.Provider;
 
 @Repository
-public interface ProviderRepository extends JpaRepository<Provider, Long> {
+public interface ProviderRepository extends JpaRepository<Provider, String> {
 	List<Provider> findAllByOrderByOrderIndexAsc();
 
 	Optional<Provider> findByOrderIndex(int orderIndex);

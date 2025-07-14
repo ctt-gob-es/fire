@@ -193,8 +193,7 @@ public class AddDocumentBatchManager {
         }
 
         // Almacenamos el documento en disco, registramos su ID
-        //final int docNumber = ((Integer) configOperation.getOrDefault(ServiceParams.SESSION_PARAM_BATCH_NUM_DOCS, Integer.valueOf(0))).intValue() + 1;
-        final int maxDocuments = ConfigManager.getBatchMaxDocuments();
+        final int maxDocuments = ApplicationsDAOFactory.getApplicationsDAO().getOperationConfig(appId, logF).getBatchMaxDocuments();
         if (maxDocuments != ConfigManager.UNLIMITED_NUM_DOCUMENTS && batchResult.documentsCount() >= maxDocuments) {
         	LOGGER.warning(logF.f("Se ha excedido el numero maximo de documentos permitido en el lote")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.BATCH_NUM_DOCUMENTS_EXCEEDED);

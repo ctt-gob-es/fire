@@ -112,19 +112,30 @@ public class ProviderManager {
 	}
 
 	/**
-	 * Obtiene el listado de proveedores configurados.
-	 * @return Listado con los proveedores.
+	 * Obtiene el listado de proveedores configurados para una aplicaci&oacute;n o,
+	 * si no tiene una configuraci&oacute;n concreta, todos los proveedores habilitados.
+	 * @param appId Aplicaci&oacute;n para la que deseamos obtener los proveedores.
+	 * @param logF Formateador de trazas de log.
+	 * @return Listado con los proveedores de los que puede hacer uso la aplicaci&oacute;n.
+	 * @throws IOException Cuando no se ha podido obtener el listado de proveedores habilitado.
 	 */
-	public static ProviderElement[] getProviders() {
-		return ConfigManager.getProviders();
+	public static ProviderElement[] getProviders(final String appId, final LogTransactionFormatter logF) throws IOException {
+
+		final ApplicationsDAO dao = ApplicationsDAOFactory.getApplicationsDAO();
+		final ApplicationOperationConfig config = dao.getOperationConfig(appId, logF);
+
+		return config.getProviders();
 	}
 
 	/**
 	 * Obtiene el listado con el nombre de los proveedores configurados.
+	 * @param appId Aplicaci&oacute;n para la que deseamos obtener los proveedores.
+	 * @param logF Formateador de trazas de log.
 	 * @return Listado con los nombres de los proveedores.
+	 * @throws IOException Cuando no se ha podido obtener el listado de proveedores habilitado.
 	 */
-	public static String[] getProviderNames() {
-		final ProviderElement[] provs = ConfigManager.getProviders();
+	public static String[] getProviderNames(final String appId, final LogTransactionFormatter logF) throws IOException {
+		final ProviderElement[] provs = getProviders(appId, logF);
 		final String[] provNames = new String[provs.length];
 		for (int i = 0; i < provs.length; i++) {
 			provNames[i] = provs[i].getName();
@@ -137,12 +148,19 @@ public class ProviderManager {
 	 * mostrar a un usuario y que as&iacute; identifique su uso.
 	 * @param providerName Nombre del proveedor.
      * @param logF Formateador de trazas de log.
+     * @param language Idioma configurado.
 	 * @return Informaci&oacute;n del proveedor.
+	 * @throws IOException Cuando no se puede cargar la informaci&oacute;n del proveedor.
 	 */
-	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF) {
+	public static ProviderInfo getProviderInfo(final String providerName, final LogTransactionFormatter logF, final String language) throws IOException {
 
 		if (providersInfo.containsKey(providerName)) {
-			return providersInfo.get(providerName);
+			final ProviderInfo prov = providersInfo.get(providerName);
+			/* Si el idioma configurado es el mismo al almacenado en la variable, se devuelve.
+			* En caso contrario, se sigue el proceso y se sustituye con el nuevo idioma. */
+			if (language != null && language.equals(prov.getLanguage())) {
+				return providersInfo.get(providerName);
+			}
 		}
 
 		Properties infoProperties;
@@ -150,26 +168,31 @@ public class ProviderManager {
 			infoProperties = loadLocalProviderInfoProperties(logF);
 		}
 		else {
-			final String classname = ConfigManager.getProviderClass(providerName);
-			final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
+			try {
+				final String classname = ConfigManager.getProviderClass(providerName);
+				final String infoFilename = ConfigManager.getProviderInfoFile(providerName);
 
-			infoProperties = loadProviderInfoProperties(classname, null, logF);
+				infoProperties = loadProviderInfoProperties(classname, null, logF);
 
-			// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
-			// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
-			// 'provider info' interno.
+				// Si se detecta un fichero 'provider info' externo, miramos primero si el conector permite usarlo mediante la
+				// propiedad 'allowexternalproviderinfo', en caso de que no se permita se cargaran las propiedades del fichero
+				// 'provider info' interno.
 
-			final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
+				final boolean allowExternalProviderInfo = ProviderInfo.isAllowExternalProviderInfo(infoProperties);
 
-			if (infoFilename != null && allowExternalProviderInfo) {
-				infoProperties = loadProviderInfoProperties(classname, infoFilename, logF);
+				if (infoFilename != null && allowExternalProviderInfo) {
+					infoProperties = loadProviderInfoProperties(classname, infoFilename, logF);
+				}
 			}
-
+			catch (final Exception e) {
+				LOGGER.log(Level.SEVERE, logF.f("No se ha podido cargar el proveedor '%s'", LogUtils.cleanText(providerName), e)); //$NON-NLS-1$
+				throw new IOException("No se ha podido cargar el proveedor " + LogUtils.cleanText(providerName), e); //$NON-NLS-1$
+			}
 		}
 
 		// Contruimos la informacion del proveedor y la almacenamos en la coleccion
 		// para evitar su recarga
-		final ProviderInfo providerInfo = new ProviderInfo(providerName, infoProperties);
+		final ProviderInfo providerInfo = new ProviderInfo(providerName, infoProperties, language);
 		providersInfo.put(providerName, providerInfo);
 
 		return providerInfo;
@@ -328,13 +351,16 @@ public class ProviderManager {
 	 * por la aplicaci&oacute;n y aquellos configurados como imprescindibles. Los
 	 * proveedores indicados por la aplicaci&oacute;n y no configurados en el componente
 	 * central se ignoran.
+	 * @param appId Identificador de aplicaci&oacute;n.
 	 * @param requestedProviders Proveedores solicitados.
+	 * @param logF Formateador de trazas de log.
 	 * @return Listado de proveedores ya filtrados.
+	 * @throws IOException Cuando no se puede obtener el listado de proveedores habilitado.
 	 */
-	public static String[] getFilteredProviders(final String[] requestedProviders) {
+	public static String[] getFilteredProviders(final String appId, final String[] requestedProviders, final LogTransactionFormatter logF) throws IOException {
 
 		final List<String> filteredProviders = new ArrayList<>();
-		final ProviderElement[] allProviders = getProviders();
+		final ProviderElement[] allProviders = getProviders(appId, logF);
 
 		// Agregamos al listado final los proveedores solicitados en el orden
 		// en el que se indican

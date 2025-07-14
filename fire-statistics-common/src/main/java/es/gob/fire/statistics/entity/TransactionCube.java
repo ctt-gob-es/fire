@@ -10,16 +10,19 @@ import java.util.Objects;
 public class TransactionCube {
 
 	private String application;
+	private String dir3Code;
+	private String organization;
 	private String operation;
-	private String  provider;
-	private  boolean mandatoryProvider = false;
-	private  boolean resultTransaction = false;
+	private String provider;
+	private boolean mandatoryProvider = false;
+	private boolean resultTransaction = false;
 
 	// Propiedades para obtener el tamano de los datos de las operaciones de firma
 	private String idTransaction;
 	private long dataSize = 0;
 
-	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el momento
+	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el
+	// momento
 	private long total = 1;
 
 	/**
@@ -30,12 +33,14 @@ public class TransactionCube {
 	}
 
 	/**
-	 * Construye un objeto cargando sus propiedades de una cadena de texto con el formato
+	 * Construye un objeto cargando sus propiedades de una cadena de texto con el
+	 * formato
 	 * "Aplicacion;Operacion;Proveedor;ProveedorForzado;ResultadoOperacion;IdTransaccion".<br>
 	 * <ul>
 	 * <li>ProveedorForzado: 0 si es {@code false}, 1 si es {@code true}.</li>
 	 * <li>resultSign: 0 si es {@code false}, 1 si es {@code true}.</li>
 	 * </ul>
+	 * 
 	 * @param registry Cadena de texto con las propiedades de la transacci&oacute;n.
 	 * @return Informaci&oacute;n de la transacci&oacute;n.
 	 * @throws ParseException Cuando se encuentra una fecha mal formada.
@@ -46,45 +51,51 @@ public class TransactionCube {
 			throw new IllegalArgumentException("Se ha proporcionado una cadena vacia"); //$NON-NLS-1$
 		}
 
-		final String [] cube = registry.split(";"); //$NON-NLS-1$
+		final String[] cube = registry.split(";"); //$NON-NLS-1$
 		if (!checkRegistryData(cube)) {
 			throw new IllegalArgumentException("Se ha encontrado un registro con formato no valido: " + registry); //$NON-NLS-1$
 		}
 
-		final TransactionCube trans =  new TransactionCube();
+		final TransactionCube trans = new TransactionCube();
 
 		// Aplicacion
 		trans.setApplication(cube[0]);
 
+		// Codigo DIR3
+		trans.setDir3Code(cube[1]);
+
+		// Organizacion
+		trans.setOrganization(cube[2]);
+
 		// Operacion
-		trans.setOperation(cube[1]);
+		trans.setOperation(cube[3]);
 
 		// Proveedor
-		trans.setProvider(cube[2]);
+		trans.setProvider(cube[4]);
 
 		// Proveedor forzado
-		trans.setMandatoryProvider("1".equals(cube[3])); //$NON-NLS-1$
+		trans.setMandatoryProvider("1".equals(cube[5])); //$NON-NLS-1$
 
 		// Resultado de la transaccion
-		trans.setResultTransaction("1".equals(cube[4])); //$NON-NLS-1$
+		trans.setResultTransaction("1".equals(cube[6])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
-		trans.setIdTransaction(cube[5]);
+		trans.setIdTransaction(cube[7]);
 
 		return trans;
 	}
 
-
 	/**
 	 * Comprueba que un registro de datos contenga el numero de campos adecuado y
 	 * que estos contengan un valor.
+	 * 
 	 * @param registryDatas Listado de campos del registro.
 	 * @return {@code true} si el registro contiene los campos requeridos,
-	 * {@code false} en caso contrario.
+	 *         {@code false} en caso contrario.
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		if (registryDatas == null || registryDatas.length != 6) {
+		if (registryDatas == null || registryDatas.length != 8) {
 			return false;
 		}
 
@@ -96,7 +107,7 @@ public class TransactionCube {
 		return true;
 	}
 
-	/* Propiedades  Getter & Setter*/
+	/* Propiedades Getter & Setter */
 
 	public final String getApplication() {
 		return this.application;
@@ -104,6 +115,22 @@ public class TransactionCube {
 
 	public final void setApplication(final String application) {
 		this.application = application;
+	}
+
+	public final String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	public final void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
+	}
+
+	public final String getOrganization() {
+		return this.organization;
+	}
+
+	public final void setOrganization(final String organization) {
+		this.organization = organization;
 	}
 
 	public final String getOperation() {
@@ -164,7 +191,8 @@ public class TransactionCube {
 
 	/**
 	 * Devuelve una cadena con las propiedades del objeto
-	 * con el formato "Aplicacion;Operacion;Proveedor;ProveedorForzado;ResultadoOperacion;IdTransaccion".<br>
+	 * con el formato
+	 * "Aplicacion;Operacion;Proveedor;ProveedorForzado;ResultadoOperacion;IdTransaccion".<br>
 	 * <ul>
 	 * <li>ProveedorForzado: 0 si es {@code false}, 1 si es {@code true}.</li>
 	 * <li>resultSign: 0 si es {@code false}, 1 si es {@code true}.</li>
@@ -175,94 +203,78 @@ public class TransactionCube {
 
 		final StringBuilder result = new StringBuilder();
 
-		if (this.getApplication() != null) {
-			result.append(clean(this.getApplication(), 45));
+		if (getApplication() != null) {
+			result.append(clean(getApplication(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getOperation() != null) {
-			result.append(clean(this.getOperation(), 10));
+		if (getDir3Code() != null) {
+			result.append(clean(getDir3Code(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
-		if (this.getProvider() != null  && !this.getProvider().isEmpty()) {
-			result.append(clean(this.getProvider(), 45));
+		if (getOrganization() != null) {
+			result.append(clean(getOrganization(), 255));
+		}
+		result.append(";");//$NON-NLS-1$
+
+		if (getOperation() != null) {
+			result.append(clean(getOperation(), 10));
+		}
+		result.append(";");//$NON-NLS-1$
+
+		if (getProvider() != null && !getProvider().isEmpty()) {
+			result.append(clean(getProvider(), 45));
 		}
 		result.append(";") //$NON-NLS-1$
-			.append(this.isMandatoryProvider() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.isResultTransaction() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.getIdTransaction() != null ? this.getIdTransaction() : "0"); //$NON-NLS-1$
+				.append(isMandatoryProvider() ? "1" : "0").append(";") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				.append(isResultTransaction() ? "1" : "0").append(";") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				.append(getIdTransaction() != null ? getIdTransaction() : "0"); //$NON-NLS-1$
 
 		return result.toString();
 	}
 
 	/**
-	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
-	 * @param text Texto que hay que limpiar.
+	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un
+	 * tama&ntilde;o m&aacute;ximo.
+	 * 
+	 * @param text      Texto que hay que limpiar.
 	 * @param maxLength Longitud m&aacute;xima del texto.
 	 * @return Cadena de texto limpia.
 	 */
 	private static String clean(final String text, final int maxLength) {
 		String cleanedText = text.replace(';', ' ').replace('\n', ' ');
 		if (maxLength > 0 && cleanedText.length() > maxLength) {
-			cleanedText = cleanedText.substring(0,  maxLength);
+			cleanedText = cleanedText.substring(0, maxLength);
 		}
 		return cleanedText.trim();
 	}
 
 	@Override
 	public boolean equals(final Object obj) {
-
-		if (obj == null) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof TransactionCube))
 			return false;
-		}
-
-		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara
-		// es de tipo TransactionCube
-		if (!(obj instanceof TransactionCube)) {
-			return super.equals(obj);
-		}
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		final TransactionCube transaction = (TransactionCube) obj;
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		// Aplicacion
-		if (!(getApplication() == null && transaction.getApplication() == null ||
-				getApplication() != null && getApplication().equals(transaction.getApplication()))) {
-			return false;
-		}
-
-		// Operacion
-		if (!(getOperation() == null && transaction.getOperation() == null ||
-				getOperation() != null && getOperation().equals(transaction.getOperation()))) {
-			return false;
-		}
-
-		// Proveedor
-		if (!(getProvider() == null && transaction.getProvider() == null ||
-				getProvider() != null && getProvider().equals(transaction.getProvider()))) {
-			return false;
-		}
-
-		// Proveedor forzado
-		if (isMandatoryProvider() != transaction.isMandatoryProvider()) {
-			return  false;
-		}
-
-		// Resultado
-		if (isResultTransaction() != transaction.isResultTransaction()) {
-			return  false;
-		}
-
-		return true;
+		TransactionCube other = (TransactionCube) obj;
+		return Objects.equals(application, other.application)
+				&& Objects.equals(dir3Code, other.dir3Code)
+				&& Objects.equals(organization, other.organization)
+				&& Objects.equals(operation, other.operation)
+				&& Objects.equals(provider, other.provider)
+				&& mandatoryProvider == other.mandatoryProvider
+				&& resultTransaction == other.resultTransaction;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.application, this.operation, this.provider,
-				new Boolean(this.mandatoryProvider), new Boolean(this.resultTransaction));
+		return Objects.hash(
+				application,
+				organization, 
+				dir3Code,
+				operation,
+				provider,
+				mandatoryProvider,
+				resultTransaction);
 	}
 }

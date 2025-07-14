@@ -20,7 +20,7 @@
   * <b>Project:</b><p>Application for monitoring the services of @firma suite systems</p>
  * <b>Date:</b><p>08/10/2018.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 12/02/2025.
+ * @version 1.4, 06/03/2025.
  */
 package es.gob.fire.i18n;
 
@@ -28,7 +28,7 @@ package es.gob.fire.i18n;
 /**
  * <p>Interface that contains the keys to the log messages for the web module.</p>
  * <b>Project:</b><p>Application for monitoring services of @firma suite systems.</p>
- * @version 1.3, 12/02/2025.
+ * @version 1.4, 06/03/2025.
  */
 public interface IWebLogMessages {
 
@@ -323,4 +323,34 @@ public interface IWebLogMessages {
 	 * Constant attribute that represents the name of the property <code>CTV021</code> belonging to the file fire_xx_YY.properties.
 	 */
 	String LOG_CTV021 = "CTV021";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV022</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV022 = "CTV022";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV023</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV023 = "CTV023";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV024</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV024 = "CTV024";
+	
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV025</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV025 = "CTV025";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV026</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV026 = "CTV026";
+
+	/**
+	 * Constant attribute that represents the name of the property <code>CTV027</code> belonging to the file fire_xx_YY.properties.
+	 */
+	String LOG_CTV027 = "CTV027";
 }

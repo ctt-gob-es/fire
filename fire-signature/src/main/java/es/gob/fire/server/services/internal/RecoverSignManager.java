@@ -26,6 +26,7 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
@@ -247,6 +248,7 @@ public class RecoverSignManager {
     		}
     		catch(final FIReConnectorUnknownUserException e) {
     			LOGGER.log(Level.WARNING, logF.f("El usuario no esta dado de alta en el sistema"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.ACCESS_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "El usuario no esta dado de alta en el sistema"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     			sendError(response, session, FIReError.UNKNOWN_USER, trAux);
     			return;
     		}
@@ -258,11 +260,13 @@ public class RecoverSignManager {
     		}
     		catch(final FIReSignatureException e) {
     			LOGGER.log(Level.WARNING, logF.f("En la operacion de firma"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + e.getMessage());  //$NON-NLS-1$ //$NON-NLS-2$
     			sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
     			return;
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error interno durante la firma"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + e.getMessage());  //$NON-NLS-1$ //$NON-NLS-2$
     			sendError(response, session, FIReError.PROVIDER_ERROR, trAux);
     			return;
 			}
@@ -275,6 +279,7 @@ public class RecoverSignManager {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error durante la postfirma"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + "Error durante la postfirma"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     			sendError(response, session, FIReError.SIGNING, trAux);
     			return;
     		}
@@ -306,6 +311,7 @@ public class RecoverSignManager {
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error al validar o actualizar la firma"), e); //$NON-NLS-1$
+    			AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + "Error al validar o actualizar la firma");  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
     			sendError(response, session, FIReError.UPGRADING_SIGNATURE, trAux);
     			return;
     		}

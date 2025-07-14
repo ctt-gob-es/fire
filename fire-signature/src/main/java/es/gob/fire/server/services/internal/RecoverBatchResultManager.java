@@ -31,6 +31,7 @@ import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
@@ -119,6 +120,7 @@ public class RecoverBatchResultManager {
         	TRANSLOGGER.register(session, false);
         	AUDITTRANSLOGGER.register(session, false, errMessage);
         	SessionCollector.removeSession(session, trAux);
+        	AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + errMessage);  //$NON-NLS-1$//$NON-NLS-2$
         	Responser.sendError(response, FIReError.BATCH_SIGNING, errMessage);
         	return;
         }
@@ -232,6 +234,7 @@ public class RecoverBatchResultManager {
         	if (batchResult.hasErrors() == BatchResult.ALL_FAILED) {
         		LOGGER.info(logF.f("Fallaron todas las firmas, asi que devolvemos el resultado sin procesarlo")); //$NON-NLS-1$
         		prepareResult(batchResult, session, trAux);
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Fallaron todas las firmas");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendResult(response, batchResult);
         		return;
         	}
@@ -243,6 +246,7 @@ public class RecoverBatchResultManager {
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "El certificado firmante es obligatorio para componer la firma con proveedores en la nube y no se devolvio");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendError(response, FIReError.PROVIDER_ERROR);
     			return;
     		}
@@ -259,6 +263,8 @@ public class RecoverBatchResultManager {
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+        				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error de codificacion en los datos de firma trifasica proporcionados");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendError(response, FIReError.PROVIDER_ERROR);
         		return;
         	}
@@ -326,6 +332,8 @@ public class RecoverBatchResultManager {
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+        				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Ocurrio un error durante la operacion de firma de lote en la nube");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendError(response, FIReError.PROVIDER_ERROR);
         		return;
         	}
@@ -343,6 +351,8 @@ public class RecoverBatchResultManager {
             		TRANSLOGGER.register(session, false);
             		AUDITTRANSLOGGER.register(session, false, errorMessage);
             		SessionCollector.removeSession(session, trAux);
+            		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+            				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error de integridad. Uno de los PKCS#1 recibido no se genero con el certificado indicado");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
             		Responser.sendError(response, FIReError.PROVIDER_ERROR);
             		return;
     			}
@@ -416,7 +426,7 @@ public class RecoverBatchResultManager {
         	// interrumpimos todos si detectamos que alguno de
         	// ellos fue interrumpido y no se admiten errores parciales
         	TasksPoolManager.waitTasks(results, stopOnError,
-        			session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+        			session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS, trAux);
 
         	// Liberamos el pool de hilos
         	shutdownExecutorService(executorService);
@@ -581,7 +591,7 @@ public class RecoverBatchResultManager {
         // interrumpimos todos si detectamos que alguno de
         // ellos fue interrumpido y no se admiten errores parciales
         TasksPoolManager.waitTasks(results, stopOnError,
-        		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS);
+        		session, ServiceParams.SESSION_PARAM_BATCH_PENDING_SIGNS, trAux);
 
     	// Liberamos el pool de hilos
         shutdownExecutorService(executorService);

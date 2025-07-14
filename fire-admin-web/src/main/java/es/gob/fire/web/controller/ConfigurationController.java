@@ -20,40 +20,46 @@
  * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
  * <b>Date:</b><p>07/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.1, 12/02/2025.
+ * @version 1.2, 04/03/2025.
  */
 package es.gob.fire.web.controller;
 
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.List;
 
+import org.apache.log4j.spi.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestMethod;
 
 import SchedulerEditDTO.SchedulerVerifyCertExpiredDTO;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsDate;
-import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.CAuthenticationTypeDTO;
 import es.gob.fire.persistence.dto.ConstantsDTO;
 import es.gob.fire.persistence.dto.GeneralConfigDTO;
 import es.gob.fire.persistence.dto.Property;
 import es.gob.fire.persistence.dto.SchedulerEditDTO;
-import es.gob.fire.persistence.entity.CPlannerType;
+import es.gob.fire.persistence.dto.ServerAfirmaDTO;
 import es.gob.fire.persistence.entity.Planner;
 import es.gob.fire.persistence.entity.Scheduler;
 import es.gob.fire.persistence.service.IPropertyService;
 import es.gob.fire.persistence.service.impl.PropertyService;
-import es.gob.fire.service.ICPlannerTypeService;
+import es.gob.fire.service.ICAuthenticationTypeService;
+import es.gob.fire.service.IPlannerService;
 import es.gob.fire.service.ISchedulerService;
+import es.gob.fire.service.IServerAfirmaService;
+import es.gob.fire.web.rest.controller.ApplicationRestController;
 
 /** 
  * <p>Class that manages the requests related to the configuration interface.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe system.</p>
- * @version 1.1, 12/02/2025.
+ * @version 1.2, 04/03/2025.
  */
 @Controller
 public class ConfigurationController {
@@ -83,13 +89,25 @@ public class ConfigurationController {
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
-	private ICPlannerTypeService iCPlannerTypeService;
+	private IPropertyService propertyService;
 	
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
-	private IPropertyService propertyService;
+	private IPlannerService iPlannerService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private IServerAfirmaService iServerAfirmaService;
+	
+	/**
+	 * Attribute that represents the service object for accessing the repository.
+	 */
+	@Autowired
+	private ICAuthenticationTypeService iCAuthenticationTypeService;
 	
 	/**
 	 * Configures the task validation settings and prepares the model attributes for rendering the task validation page.
@@ -101,7 +119,7 @@ public class ConfigurationController {
 	 * @param model The {@link Model} object used to pass attributes to the view.
 	 * @return The name of the HTML template to be rendered ("fragments/configtaskvaladmin.html").
 	 */
-	@RequestMapping(value = "configTaskValidation")
+	@RequestMapping(value = "/configTaskValidation", method = RequestMethod.GET)
 	public String configTaskValidation(final Model model) {
 		
 		SchedulerEditDTO schedulerForm = new SchedulerVerifyCertExpiredDTO();
@@ -118,7 +136,7 @@ public class ConfigurationController {
 		schedulerForm.setImplementationClassEdit(schedulerSelected.getClassName());
 		
 		// se cargan los tipos de planificadores
-		List<ConstantsDTO> typePlanners = loadTypePlanner();
+		List<ConstantsDTO> typePlanners = iPlannerService.loadTypePlanner();
 		schedulerForm.setListPlannerTypeEdit(typePlanners);
 		
 		// se obtiene el planificador asociado a la tarea.
@@ -134,7 +152,7 @@ public class ConfigurationController {
 		}
 				
 		// se indica si la tarea esta habilitada o no.
-		schedulerForm.setIsEnabledEdit(schedulerSelected.getIsActive());
+		schedulerForm.setIsEnabledEdit(schedulerSelected.isActive());
 
 		// se obtiene la hora, minutos, segundos asociados al planificador
 		schedulerForm.setHourPeriodEdit(planner.getHourPeriod());
@@ -163,31 +181,16 @@ public class ConfigurationController {
 	}
 	
 	/**
-	 * Method that loads types planners.
-	 * @return List of constants that represents the different types of planners.
-	 */
-	private List<ConstantsDTO> loadTypePlanner() {
-		List<ConstantsDTO> listPlannerType = new ArrayList<ConstantsDTO>();
-		// obtenemos los tipos de planificadores.
-		List<CPlannerType> listCPlannerType = iCPlannerTypeService.getAllPlannerType();
-		for (CPlannerType typePlanner: listCPlannerType) {
-			ConstantsDTO item = new ConstantsDTO(typePlanner.getIdPlannerType(), getConstantsValue(typePlanner.getTokenName()));
-			listPlannerType.add(item);
-		}
-
-		return listPlannerType;
-	}
-	
-	/**
-	 * Method that gets string constant from multilanguage file.
+	 * Handles GET requests for the general configuration page.
 	 *
-	 * @param key Key for getting constant string from multilanguage file.
-	 * @return Constants string.
+	 * <p>This method retrieves all application properties from the {@link PropertyService},
+	 * processes them to extract specific configuration values, and populates a {@link GeneralConfigDTO}
+	 * object with the corresponding numeric values. The processed configuration is then added to the model
+	 * to be displayed on the general configuration page.
+	 *
+	 * @param model the {@link Model} object used to pass attributes to the view.
+	 * @return the path to the "configGeneral" fragment view.
 	 */
-	private String getConstantsValue(String key) {
-		return Language.getResPersistenceConstants(key);
-	}
-	
 	@GetMapping(value = "configGeneral")
 	public String configGeneral(final Model model) {
 		GeneralConfigDTO generalConfigForm = new GeneralConfigDTO();
@@ -206,10 +209,34 @@ public class ConfigurationController {
 			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_AMOUNT_DOCS) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
 				generalConfigForm.setMaxAmountDocs(prop.getNumericValue());
 			}
+			
+			if (prop.getKey().equalsIgnoreCase(PropertyService.PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING) && prop.getType().equalsIgnoreCase(PropertyService.PROPERTY_DATA_TYPE_NUMERIC)) {
+				generalConfigForm.setMaxEntitiesBeforeGrouping(prop.getNumericValue());
+			}
 		}
 		
 		model.addAttribute("generalConfig", generalConfigForm);
 		
 		return "fragments/configGeneral.html";
+	}
+
+	private Logger LOGGER = LogManager.getLogger(ConfigurationController.class);
+	
+	/**
+	 * Handles GET requests for the WS Afirma configuration page.
+	 *
+	 * <p>This method retrieves the WS Afirma server configuration and authentication types,
+	 * then adds them to the model for display in the configuration view.
+	 *
+	 * @param model the {@link Model} object used to pass attributes to the view.
+	 * @return the path to the "configwsafirma" fragment view.
+	 */
+	@RequestMapping(value = "/configWsAfirma", method = RequestMethod.GET)
+	public String configWsAfirma(final Model model) {
+		ServerAfirmaDTO serverAfirmaDTO = iServerAfirmaService.obtainServerAfirmaServiceDTO(NumberConstants.NUM_1_LONG);
+		List<CAuthenticationTypeDTO> listCAuthenticationTypeDTO = iCAuthenticationTypeService.obtainAllCAuthenticationTypeDTO();
+		model.addAttribute("serverAfirmaDTO", serverAfirmaDTO);
+		model.addAttribute("listCAuthenticationTypeDTO", listCAuthenticationTypeDTO);
+		return "fragments/configwsafirma.html";
 	}
 }

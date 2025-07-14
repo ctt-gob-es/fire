@@ -42,7 +42,7 @@ public class Responser {
 	 */
 	public static void sendResult(final HttpServletResponse response, final int status, final byte[] content) {
 
-		LOGGER.info(" ==== Enviamos respuesta con status: " + status); //$NON-NLS-1$
+		LOGGER.fine("Respuesta con status: " + status); //$NON-NLS-1$
 
 		response.setStatus(status);
 		try (OutputStream os = response.getOutputStream()) {

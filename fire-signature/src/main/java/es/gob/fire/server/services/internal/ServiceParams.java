@@ -69,9 +69,18 @@ public class ServiceParams {
     public static final String HTTP_PARAM_PAGE = "page"; //$NON-NLS-1$
     /** Par&aacute;metro para indicar en las peticiones HTTP si es necesaria la autenticaci&oacute;n del usuario. */
     public static final String HTTP_PARAM_NEED_AUTH_USER = "auth"; //$NON-NLS-1$
+    /** Atributo usado en el env&iacute;o de datos HTTP con el idioma a usar. */
+    public static final String HTTP_PARAM_LANGUAGE = "language"; //$NON-NLS-1$
+
+    /** Antiguo par&aacute;metro para indicar el ID de aplicaci&oacute;n. */
+    public static final String OLD_HTTP_PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
+    /** Antiguo par&aacute;metro para indicar el ID de usuario. */
+    public static final String OLD_HTTP_PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
 
     /** Atributo usado en el env&iacute;o de datos HTTP con el certificado de firma. */
     public static final String HTTP_ATTR_CERT = "cert"; //$NON-NLS-1$
+    /** Atributo usado en el env&iacute;o de datos HTTP con la URL a la que redirigir en caso de error. */
+    public static final String HTTP_ATTR_ERROR_URL = "errorurl"; //$NON-NLS-1$
 
     /** Par&aacute;metro para guardar en sesi&oacute;n el ID de aplicaci&oacute;n. */
     public static final String SESSION_PARAM_APPLICATION_ID = "appid"; //$NON-NLS-1$
@@ -153,6 +162,12 @@ public class ServiceParams {
 	public static final String SESSION_PARAM_DOCSIZE = "docsize"; //$NON-NLS-1$
 	/** Par&aacute;metro para guardar en sesi&oacute;n el tama&ntilde;o de los datos de la transacci&oacute;n en sesi&oacute;n */
 	public static final String SESSION_PARAM_TRANSACTION_SIZE = "transactionsize"; //$NON-NLS-1$
+	/** Par&aacute;metro para guardar en sesi&oacute;n el idioma a usar. */
+    public static final String SESSION_PARAM_LANGUAGE = "language"; //$NON-NLS-1$
+    /** Par&aacute;metro con el c&oacute;digo DIR 3. */
+    public static final String SESSION_PARAM_DIR3_CODE = "dir3Code"; //$NON-NLS-1$
+    /** Par&aacute;metro con el nombre de la organizai&oacute;n. */
+    public static final String SESSION_PARAM_APPLICATION_ORGANIZATION = "appOrganization"; //$NON-NLS-1$
 
     /** Valor del parametro de actualizacion que determina que la firma debe validarse. */
     public static final String UPGRADE_VERIFY = "verify"; //$NON-NLS-1$

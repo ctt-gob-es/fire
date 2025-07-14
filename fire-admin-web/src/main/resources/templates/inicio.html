@@ -59,6 +59,9 @@
             <div id="modal"></div>
           </div>
         </main>
+        
+        <!-- ### $Footer ### -->
+		<div th:replace="fragments/footer"></div>
       </div>
     </div>
     <script th:inline="javascript">
@@ -74,7 +77,14 @@
 	        		$('#modal').html(data);
 	    			$('#modalUserLastAccess').modal('show');
 	    		},
-	            error:function(data){
+	            error:function(data, xhr, error){
+	            	
+	            	if (xhr.status === 401 || xhr.status === 403) {
+                        window.location.reload();
+                    } else {
+                        console.error("Error al realizar la peticion: " + error);
+                    }
+	            	
 	            	$('#messageErrorUserLastAccess').html(data.error);
 	    			$('#messageErrorUserLastAccess').addClass('alert alert-danger');
 	            	hide();       

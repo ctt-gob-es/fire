@@ -53,18 +53,18 @@ var AutoScript = ( function ( window, undefined ) {
 				checktime_server_time: "Hora del servidor",
 				close: "Cerrar",
 				contact_admin: "Por favor, informe del error si el problema persiste: ",
-				error_connecting_autofirma: "No es posible conectar con AutoFirma debido a un problema de comunicaci&oacute;n o de instalaci&oacute;n del cliente. En caso de no tenerlo instalado, puede descargarse desde el siguiente enlace:",
+				error_connecting_autofirma: "No es posible conectar con Autofirma debido a un problema de comunicaci&oacute;n o de instalaci&oacute;n del cliente. En caso de no tenerlo instalado, puede descargarse desde el siguiente enlace:",
 				error_connecting_client: "No es posible conectar con el cliente de firma debido a un problema de comunicaci&oacute;n o de instalaci&oacute;n del cliente. En caso de no tenerlo instalado, puede descargarse desde el siguiente enlace:",
 				error_connecting_service: "No se ha podido conectar con el servicio de la aplicaci&oacute;n de firma. Es probable que no pueda completar firmas electr&oacute;nicas desde esta p&aacute;gina.",
 				error_connecting_server_recovering: "No se pudo conectar con el servicio de la aplicaci&oacute;n para recuperar el resultado de la operaci&oacute;n.",
-				firefox_reinstall_message: "Instalar o restaurar AutoFirma requerir&aacute; cerrar el navegador y reiniciar el tr&aacute;mite.",
+				firefox_reinstall_message: "Instalar o restaurar Autofirma requerir&aacute; cerrar el navegador y reiniciar el tr&aacute;mite.",
 				install_client: "<br>Si lo tiene instalado o lo acaba de instalar, pulse el bot&oacute;n para reintentar la operaci&oacute;n.",
 				ios_download_url: "<a href='https://apps.apple.com/us/app/cliente-firma-movil/id627410001?itsct=apps_box_badge&amp;itscg=30200' style='display: inline-block; overflow: hidden; border-radius: 13px; width: 140px; height: 40px;'><img src='https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/es-es?size=250x83&amp;releaseDate=1381536000' alt='Descarga en la App Store' style='border-radius: 13px; width: 140px; height: 40px;'></a>",
 				loading: "Cargando",
 				no_compatible_procedure: "Esta aplicaci&oacute;n no permite firmar desde el navegador en dispositivos m&oacute;viles. ",
 				pc_download_url: "<a target='_blank' href='https://firmaelectronica.gob.es/Home/Descargas.html'>Portal de Firma Electr&oacute;nica</a>",
 				procedure_from_url: "Puede realizar el tr&aacute;mite desde la siguiente aplicaci&oacute;n:",
-				restore_installation: "Si lo tiene instalado, puede restaurar la instalaci&oacute;n desde AutoFirma en Herramientas -> Restaurar instalaci&oacute;n",
+				restore_installation: "Si lo tiene instalado, puede restaurar la instalaci&oacute;n desde Autofirma en Herramientas -> Restaurar instalaci&oacute;n",
 				retry_operation: "Reintentar operaci\u00F3n",
 				timeout_receiving_sign: "No se ha podido conectar con el cliente de firma. Si no lo tiene instalado, puede descargarlo desde:",
 				warning: "Advertencia:"
@@ -78,18 +78,18 @@ var AutoScript = ( function ( window, undefined ) {
 				checktime_server_time: "Hora do servidor",
 				close: "Pechar",
 				contact_admin: "Por favor, informe do erro se o problema persiste: ",
-				error_connecting_autofirma: "Non se puido conectar con AutoFirma debido a un problema de comunicaci&oacute;n ou de instalaci&oacute;n do cliente. Se non o tes instalado, p&oacute;dese descargar dende a seguinte ligaz&oacute;n:",
+				error_connecting_autofirma: "Non se puido conectar con Autofirma debido a un problema de comunicaci&oacute;n ou de instalaci&oacute;n do cliente. Se non o tes instalado, p&oacute;dese descargar dende a seguinte ligaz&oacute;n:",
 				error_connecting_client: "Non se puido conectar ao cliente da sinatura debido a un problema de comunicaci&oacute;n ou de instalaci&oacute;n do cliente. Se non o tes instalado, p&oacute;dese descargar dende a seguinte ligaz&oacute;n:",
 				error_connecting_service: "Non se puido conectar ao servizo da aplicaci&oacute;n de sinatura. &Eacute; posible que non poida completar sinaturas electr&oacute;nicas desde esta p&aacute;xina.",
 				error_connecting_server_recovering: "Non se puido conectar ao servizo de aplicaci&oacute;n para recuperar o resultado da operaci&oacute;n",
-				firefox_reinstall_message: "Ser&aacute; necesario instalar ou restaurar AutoFirma pecha o navegador e reinicia o proceso.",
+				firefox_reinstall_message: "Ser&aacute; necesario instalar ou restaurar Autofirma pecha o navegador e reinicia o proceso.",
 				install_client: "Se o tes instalado ou o acabas de instalar, preme o bot&oacute;n para tentar de novo a operaci&oacute;n.",
 				ios_download_url: "<a href='https://apps.apple.com/us/app/cliente-firma-movil/id627410001?itsct=apps_box_badge&amp;itscg=30200' style='display: inline-block; overflow: hidden; border-radius: 13px; width: 140px; height: 40px;'><img src='https://tools.applemediaservices.com/api/badges/download-on-the-app-store/black/es-es?size=250x83&amp;releaseDate=1381536000' alt='Descarga na App Store' style='border-radius: 13px; width: 140px; height: 40px;'></a>",
 				loading: "Cargando",
 				no_compatible_procedure: "Esta aplicaci&oacute;n non permite asinar desde o navegador en dispositivos m&oacute;biles.",
 				pc_download_url: "<a target='_blank' href='https://firmaelectronica.gob.es/Home/Descargas.html'>Portal de Sinatura Electr&oacute;nica</a>",
 				procedure_from_url: "Podes realizar o tr&aacute;mite dende a seguinte aplicaci&oacute;n:",
-				restore_installation: "Se o tes instalado, podes restaurar a instalaci&oacute;n desde AutoFirma en Ferramentas -> Restaurar instalaci&oacute;n.",
+				restore_installation: "Se o tes instalado, podes restaurar a instalaci&oacute;n desde Autofirma en Ferramentas -> Restaurar instalaci&oacute;n.",
 				retry_operation: "Reintento a operaci\u00F3n",
 				timeout_receiving_sign: "Non se puido conectar co cliente que asina. Se non o tes instalado, podes descargalo desde:",
 				warning: "Aviso:"
@@ -138,11 +138,11 @@ var AutoScript = ( function ( window, undefined ) {
 		// Tiempo de espera entre los intentos de conexion con autofirma por WebSocket
 		var AUTOFIRMA_LAUNCHING_TIME = 2000;
 
-		// Reintentos de conexion totales para detectar que esta instalado AutoFirma por WebSocket
+		// Reintentos de conexion totales para detectar que esta instalado Autofirma por WebSocket
 		var AUTOFIRMA_CONNECTION_RETRIES = 15;
 
 		// Variable que se puede configurar para forzar el uso del modo de comunicacion por servidor intermedio
-		// entre la pagina web y AutoFirma
+		// entre la pagina web y Autofirma
 		var forceWSMode = false;
 		
 		// Puerto menor del rango de puertos seleccionable
@@ -314,14 +314,14 @@ var AutoScript = ( function ( window, undefined ) {
             return xmlHttp;
 		}
 
-		/** Permite establecer que la comunicacion con AutoFirma sea a traves
+		/** Permite establecer que la comunicacion con Autofirma sea a traves
 		 * del servidor intermedio. */
 		var setForceWSMode = function (force) {
 			forceWSMode = force;
 		}
 		
 		/**
-		 * Establece la version minima del Cliente @firma que se debe ejecutar.
+		 * Establece la version minima de Autofirma que se debe ejecutar.
 		 */
 		var setMinimumClientVersion = function (version) {
 			minimumClientVersion = version;
@@ -338,8 +338,8 @@ var AutoScript = ( function ( window, undefined ) {
 
         /**
          * DEPRECADO - Siempre devuelve false.
-         * Determinaba si se realizaba un despliegue JNLP de AutoFirma WebStart.
-         * Ahora nunca se usa AutoFirma WebStart.
+         * Determinaba si se realizaba un despliegue JNLP de Autofirma WebStart.
+         * Ahora nunca se usa Autofirma WebStart.
          */
         function isJNLP() {
         	return false;
@@ -348,16 +348,12 @@ var AutoScript = ( function ( window, undefined ) {
 		/** DEPRECADO - No tiene efecto.<br>
 		 * Permitia forzar el uso de la aplicacion nativa de firma en lugar del MiniApplet.
 		 * Ahora nunca se usa el MiniApplet. */
-		var setForceAFirma = function (force) {
-			
-		}
+		var setForceAFirma = function () { }
 
 		/** DEPRECADO - No tiene efecto.<br>
 		 * Establece la direccion servicio para la generacion del JNLP de
-		 * carga de AutoFirma. Ahora nunca se usa AutoFirma WebStart. */
-		var setJnlpService = function (jnlp) {
-
-		}
+		 * carga de Autofirma. Ahora nunca se usa Autofirma WebStart. */
+		var setJnlpService = function () { }
 		
 		/** Permite habilitar la comprobacion de la hora local contra la hora del servidor y
 		 * establecer un tiempo maximo permitido y el comportamiento si se supera.
@@ -444,6 +440,13 @@ var AutoScript = ( function ( window, undefined ) {
 			// Al haber cambiado el almacen, el certificado dejara de estar fijado
 			resetStickySignatory = true;
 			
+		}
+		
+		/** Establece el nombre de aplicacion o dominio desde el que se realiza la llamada. */
+		var setAppName = function (appName) {
+			if (!!clienteFirma.setAppName) {
+			    clienteFirma.setAppName(appName);
+			}
 		}
 		
 		var selectCertificate = function (params, successCallback, errorCallback) {
@@ -565,7 +568,10 @@ var AutoScript = ( function ( window, undefined ) {
 		}
 		
 		var getCurrentLog = function (successCallback, errorCallback) {
-			clienteFirma.getCurrentLog(successCallback, errorCallback)
+			if (!!errorCallback) {
+				errorCallback("java.lang.NoSuchMethodException", "El metodo getCurrentLog no se encuentra operativo");
+				return;
+			}
 		}
 
 		var echo = function () {
@@ -621,8 +627,7 @@ var AutoScript = ( function ( window, undefined ) {
 		
 		/**
 		 * Comprueba que tanto el servicio de almacenamiento como el de recuperaci&oacute;n
-		 * funcionen correctamente. Devolver&aacute; true en caso de que se conecten correctamente
-		 * y false en caso contrario. Si es un dispositivo m&oacute;vil, se indicar&aacute; que es
+		 * funcionen correctamente. Si es un dispositivo m&oacute;vil, se indicar&aacute; que es
 		 * un tr&aacute;mite incompatible.
 		 */
 		var checkComunicationServices = function (storageAddress, retrieverAddress, isCheckingCompatibleProcedure) {
@@ -866,9 +871,8 @@ var AutoScript = ( function ( window, undefined ) {
 		 *  - No se fuerce el uso del servidor intermedio.
 		 * En caso contrario, la comunicacion se realizara mediante un servidor intermedio (salvo
 		 * con internet Explorer 10 y anteriores que trataran la comunicacion por sockets).
-		 * El parametro "avoidJnlpLoad" se mantiene por retrocompatibilidad, pero no se usa nunca.
 		 */
-		function cargarAppAfirma(clientAddress, keystore, avoidJnlpLoad) {
+		function cargarAppAfirma(clientAddress, keystore) {
 			
 			if (!!Dialog.isEnabled()) {
 				loadSupportDialogStyles();
@@ -1006,7 +1010,7 @@ var AutoScript = ( function ( window, undefined ) {
 				  "text-decoration: underline;" +
 				"}" +
 				".afirmaDefaultLogoClass {" +
-					"background-image: url(data:image/png;base64,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);"+
+					"background-image: url(data:image/png;base64,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);"+
 					"background-repeat: no-repeat;" +
 					"background-position: left;" +
 					"display: block;" +
@@ -1728,7 +1732,7 @@ var AutoScript = ( function ( window, undefined ) {
 		})(window, undefined);
 
 		/**
-		 * Cliente para la conexi&oacute;n con el Cliente @firma a traves de Secure WebSockets.
+		 * Cliente para la conexi&oacute;n con Autofirma a traves de Secure WebSockets.
 		 */
 		var AppAfirmaWebSocketClient = ( function (window, undefined) {
 			
@@ -1738,8 +1742,6 @@ var AutoScript = ( function ( window, undefined ) {
 
 			var URL_REQUEST_PREFIX = "wss://" + SERVER_HOST + ":";
 
-			var DEFAULT_PORT = 63117;
-			
 			var OPERATION_LOAD = "load";
 			
 			var OPERATION_MULTI_LOAD = "multiload";
@@ -1908,18 +1910,7 @@ var AutoScript = ( function ( window, undefined ) {
 				var requestData = createLoadDataRequest("load", title, extensions, description, filePath, true);
 				execAppIntent(buildUrl(requestData), successCallbackFunction, errorCallbackFunction);
 			}
-			
-			/**
-			 * Inicia el proceso de obtencion del log actual de la aplicacion.
-			 * @param successCallbackFunction Funcion de callback tras exito
-			 * @param errorCallbackFunction Funcion de callback tras error
-			 */
-			var getCurrentLog = function (successCallbackFunction, errorCallbackFunction) {
-				currentOperation = OPERATION_LOG;
-				var requestData = createLoadDataRequest("getLog");
-				execAppIntent(buildUrl(requestData), successCallbackFunction, errorCallbackFunction);
-			}
-			
+
 			/**
 			 * Inicia el proceso de guardado de datos en disco.
 			 */
@@ -2218,7 +2209,7 @@ var AutoScript = ( function ( window, undefined ) {
 						connected = false;
 						ws = null;
 						console.log("Se cierra el socket. Codigo WebSocket de cierre: " + (e ? e.code : null));
-						processErrorResponse("java.lang.InterruptedException", "AutoFirma se ha cerrado o ha cerrado el websocket de comunicacion");
+						processErrorResponse("java.lang.InterruptedException", "Autofirma se ha cerrado o ha cerrado el websocket de comunicacion");
 					}
 				};
 
@@ -2632,13 +2623,12 @@ var AutoScript = ( function ( window, undefined ) {
 				setStickySignatory : setStickySignatory,
 				setLocale : setLocale,
 				getErrorMessage : getErrorMessage,
-				getErrorType : getErrorType,
-				getCurrentLog : getCurrentLog				
+				getErrorType : getErrorType				
 			}
 		});
 
 		/**
-		 * Cliente para la conexi&oacute;n con el Cliente @firma a traves de una conexion directa
+		 * Cliente para la conexi&oacute;n con Autofirma a traves de una conexion directa
 		 * por un socket seguro.
 		 */
 		var AppAfirmaJSSocket = ( function (clientAddress, window, undefined) {
@@ -2688,9 +2678,6 @@ var AutoScript = ( function ( window, undefined ) {
 			/* Indica si se ha establecido la conexion o no */
 			var connection = false;
 		
-			/* Dominio desde el que se realiza la llamada al servicio */
-			var baseUri = clientAddress;
-
 			/* Almacen de claves cargado por defecto */
 			var defaultKeyStore = null;
 
@@ -2895,7 +2882,7 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 
 			/**
-			 * Construye una URL para la invocaci&oacute;n del Cliente @firma nativo.
+			 * Construye una URL para la invocaci&oacute;n de Autofirma nativo.
 			 * paramsObject: Par\u00E1metros para la configuraci\u00F3n de la operaci\u00F3n.
 			 */
 			function buildUrl (paramsObject) {
@@ -3462,23 +3449,7 @@ var AutoScript = ( function ( window, undefined ) {
 					}
 					return;
 				}
-				
-				// Vengo de getCurrentLog
-				if (data.length > 150 && data.substr(0, 150).indexOf("<log>") != -1) {
-					var log = " === JAVASCRIPT INFORMATION === " +
-					"\nnavigator.appCodeName: " + navigator.appCodeName +
-					"\nnavigator.appName: " +  navigator.appName +
-					"\nnavigator.appVersion: " + navigator.appVersion +
-					"\nnavigator.platform: " + navigator.platform +
-					"\nnavigator.userAgent: " + navigator.userAgent+
-					"\nnavigator.javaEnabled(): " + navigator.javaEnabled() +
-					"\nscreen.width: " + (window.screen ? screen.width : 0) +
-					"\nscreen.height: " + (window.screen ? screen.height : 0) +
-					"\n\n   === CLIENTE LOG === \n" + data;
-					successCallback(log);
-					return;
-				}
-				
+
 				// Compruebo si se trata de una operacion de carga/multicarga (load).
 				// El separador "|"  distingue los pares "filename-1:dataBase64-1|filename-2:dataBase64-2...", uno por cada archivo cargado.
 				// Devolveremos un array en el que cada posicion sera uno de estos pares: "filename-n:dataBase64-n".
@@ -3640,18 +3611,17 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 			
 			/**
-			 * Convierte texto plano en texto base 64.
-			 * El parameto charset no se utiliza. Se usa el de la web.
+			 * Convierte texto plano en texto base 64. El juego de caracteres sera el de la web.
 			 */
-			function getBase64FromText (plainText, charset) {
+			function getBase64FromText (plainText) {
 				return plainText != null ? Base64.encode(plainText) : null;
 			}
 
 			/**
-			 * Convierte texto base 64 en texto plano.
-			 * El parameto charset no se utiliza. Sera el usado al generar el base 64.
+			 * Convierte texto base 64 en texto plano. El juego de caracteres de la cadena resultante
+			 * sera la usada al codificar la cadena.
 			 */
-			function getTextFromBase64 (base64Text, charset) {
+			function getTextFromBase64 (base64Text) {
 				return base64Text != null ? Base64.decode(base64Text) : null;
 			}
 
@@ -3687,19 +3657,7 @@ var AutoScript = ( function ( window, undefined ) {
 				errorCallback = errorCallbackFunction;
 				getLoadContentBase64ByService("load", title, extensions, description, filePath, true);
 			}
-			
-			/**
-			 * Inicia el proceso de obtencion del log actual de la aplicacion.
-			 * Implementada tambien en el applet Java de firma
-			 * @param successCallbackFunction Funcion de callback tras exito
-			 * @param errorCallbackFunction Funcion de callback tras error
-			 */
-			function getCurrentLog (successCallbackFunction, errorCallbackFunction) {
-				successCallback = successCallbackFunction;
-				errorCallback = errorCallbackFunction;
-				getCurrentLogByService("getLog");
-			}
-			
+
 			/**
 			 * Realiza una operacion de carga de fichero comunicandose con la
 			 * aplicacion nativa por socket.
@@ -3717,16 +3675,6 @@ var AutoScript = ( function ( window, undefined ) {
 				
 				execAppIntent(buildUrl(data));
 			}
-			
-			/**
-			 * Realiza una operacion de obtencion de log actual de la aplicacion
-			 */
-			function getCurrentLogByService() {
-				
-				var data = generateDataToLoad("getLog");
-				
-				execAppIntent(buildUrl(data));
-			} 
 
 			/** 
 			 * Funcion para la comprobacion de existencia del objeto. No hace nada.
@@ -3773,14 +3721,13 @@ var AutoScript = ( function ( window, undefined ) {
 				setStickySignatory : setStickySignatory,
 				setLocale : setLocale,
 				getErrorMessage : getErrorMessage,
-				getErrorType : getErrorType,
-				getCurrentLog : getCurrentLog				
+				getErrorType : getErrorType			
 			}
 		});
 
 
 		/**
-		 * Cliente para la conexi&oacute;n con el Cliente @firma a trav&eacute;s de un servidor intermedio.
+		 * Cliente para la conexi&oacute;n con Autofirma a trav&eacute;s de un servidor intermedio.
 		 */
 		var AppAfirmaJSWebService = ( function (clientAddress, window, undefined) {
 
@@ -3817,6 +3764,7 @@ var AutoScript = ( function ( window, undefined ) {
 			var defaultKeyStore = null;
 			var retrieverServletAddress = null;
 			var storageServletAddress = null;
+			var appName = null;
 
 			if (clientAddress != undefined && clientAddress != null) {
 				if (clientAddress.indexOf("://") != -1 && clientAddress.indexOf("/", clientAddress.indexOf("://") + 3) != -1) {
@@ -3830,6 +3778,13 @@ var AutoScript = ( function ( window, undefined ) {
 			} else {
 				retrieverServletAddress = window.location.origin + "/afirma-signature-retriever/RetrieveService";
 				storageServletAddress = window.location.origin + "/afirma-signature-storage/StorageService";
+			}
+			
+			/**
+			 * Establece el nombre de la aplicacion o dominio desde el que se realiza la llamada.
+			 */
+			function setAppName (appNameParam) {
+				appName = appNameParam;
 			}
 
 			/**
@@ -3938,7 +3893,7 @@ var AutoScript = ( function ( window, undefined ) {
 
 				if (dataB64 != null && !isValidUrl(dataB64)) {
 					dataB64 = dataB64.replace(/\+/g, "-").replace(/\//g, "_");
-					dataB64 = dataB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en AutoFirma
+					dataB64 = dataB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en Autofirma
 				}
 
 				// Si hay un certificado prefijado, lo agregamos a los parametros extra
@@ -3949,6 +3904,11 @@ var AutoScript = ( function ( window, undefined ) {
 				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 
+				if (appName == null && storageServletAddress != null && storageServletAddress != undefined) {
+					var url = new URL(storageServletAddress);
+					appName = url.hostname;
+				}
+				
 				var i = 0;
 				var params = new Array();
 				params[i++] = {key:"ver", value:PROTOCOL_VERSION};
@@ -3964,6 +3924,7 @@ var AutoScript = ( function ( window, undefined ) {
 				if (algorithm != null && algorithm != undefined) {		params[i++] = {key:"algorithm", value:algorithm}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:"true"}; } // Espera activa
+				if (appName != null && appName != undefined) {			params[i++] = {key:"appname", value:appName}; }
 				if (dataB64 != null) {									params[i++] = {key:"dat", value:dataB64}; }
 			
 				var url = buildUrl(signId, params);
@@ -4004,7 +3965,7 @@ var AutoScript = ( function ( window, undefined ) {
 
 				if (dataB64 != null && !isValidUrl(dataB64)) {
 					dataB64 = dataB64.replace(/\+/g, "-").replace(/\//g, "_");
-					dataB64 = dataB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en AutoFirma
+					dataB64 = dataB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en Autofirma
 				}
 
 				// Si hay un certificado prefijado, lo agregamos a los parametros extra
@@ -4014,6 +3975,11 @@ var AutoScript = ( function ( window, undefined ) {
 				
 				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
+
+				if (appName == null && storageServletAddress != null && storageServletAddress != undefined) {
+					var url = new URL(storageServletAddress);
+					appName = url.hostname;
+				}
 
 				var i = 0;
 				var opId = "signandsave";
@@ -4035,6 +4001,7 @@ var AutoScript = ( function ( window, undefined ) {
 				if (outputFileName != null &&
 						outputFileName != undefined) {					params[i++] = {key:"filename", value:outputFileName}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:"true"}; } // Espera activa
+				if (appName != null && appName != undefined) {			params[i++] = {key:"appname", value:appName}; }
 				if (dataB64 != null) {									params[i++] = {key:"dat", value:dataB64}; }
 			
 				var url = buildUrl(opId, params);
@@ -4067,7 +4034,7 @@ var AutoScript = ( function ( window, undefined ) {
 
 				if (batchB64 != null && !isValidUrl(batchB64)) {
 					batchB64 = batchB64.replace(/\+/g, "-").replace(/\//g, "_");
-					batchB64 = batchB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en AutoFirma
+					batchB64 = batchB64.replace(/\n/g, "").replace(/\r/g, ""); //eliminamos saltos de carro para que no generen espacios 0x20 al parsear los atributos del XML enviado/recibido (storageServletAddress y retrieverServletAddress) que impiden la firma en Autofirma
 				}
 
 				// Si hay un certificado prefijado, lo agregamos a los parametros extra
@@ -4077,6 +4044,11 @@ var AutoScript = ( function ( window, undefined ) {
 				
 				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
+				
+				if (appName == null && storageServletAddress != null && storageServletAddress != undefined) {
+					var url = new URL(storageServletAddress);
+					appName = url.hostname;
+				}
 				
 				var opId = "batch";
 				
@@ -4097,6 +4069,7 @@ var AutoScript = ( function ( window, undefined ) {
 						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
 				if (extraParams != null && extraParams != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(extraParams)}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:"true"}; } // Espera activa
+				if (appName != null && appName != undefined) {			params[i++] = {key:"appname", value:appName}; }
 				params[i++] = {key:"needcert", value:"true"}; 
 				if (batchB64 != null) {									params[i++] = {key:"dat", value:batchB64}; }
 
@@ -4132,6 +4105,11 @@ var AutoScript = ( function ( window, undefined ) {
 				var idSession = AfirmaUtils.generateNewIdSession();
 				var cipherKey = generateCipherKey();
 				
+				if (appName == null && storageServletAddress != null && storageServletAddress != undefined) {
+					var url = new URL(storageServletAddress);
+					appName = url.hostname;
+				}
+				
 				var opId = "batch";
 				
 				var i = 0;
@@ -4151,6 +4129,7 @@ var AutoScript = ( function ( window, undefined ) {
 						batchPostSignerUrl != undefined) {				params[i++] = {key:"batchpostsignerurl", value:batchPostSignerUrl}; }
 				if (certFilters != null && certFilters != undefined) { 	params[i++] = {key:"properties", value:Base64.encode(certFilters)}; }
 				if (!Platform.isAndroid() && !Platform.isIOS()) {		params[i++] = {key:"aw", value:true}; } // Espera activa
+				if (appName != null && appName != undefined) {			params[i++] = {key:"appname", value:appName}; }
 				if (localBatchProcess) {								params[i++] = {key:"localBatchProcess", value:true}; }
 				
 				params[i++] = {key:"needcert", value:true};
@@ -4267,20 +4246,6 @@ var AutoScript = ( function ( window, undefined ) {
 			 */
 			function getErrorType () {
 				return errorType;
-			}
-
-			/**
-			 * Recupera la cadena "Applet no cargado".
-			 */
-			function getCurrentLog (successCallbackFunction, errorCallbackFunction) {
-				var errorType = "java.lang.UnsupportedOperationException";
-				var errorMessage = "La operacion de obtencion del log no esta disponible por servidor intermedio";
-				if (!errorCallbackFunction) {
-					throwException(errorType, errorMessage);
-				}
-				else {
-					errorCallbackFunction(errorType, errorMessage);
-				}
 			}
 
 			/**
@@ -4445,8 +4410,8 @@ var AutoScript = ( function ( window, undefined ) {
 			}
 
 			/**
-			 * Construye una URL para la invocacion del Cliente @firma nativo.
-			 * @param op Funcion a invocar en el cliente nativo.
+			 * Construye una URL para la invocacion de Autofirma nativo.
+			 * @param op Funcion a invocar en el Autofirma nativo.
 			 * @param params Parametros para la configuracion de la operacion.
 			 */
 			function buildUrl (op, params) {
@@ -4940,6 +4905,7 @@ var AutoScript = ( function ( window, undefined ) {
 			return {
 				echo : echo,
 				setKeyStore : setKeyStore,
+				setAppName : setAppName,
 				sign : sign,
 				coSign : coSign,
 				counterSign : counterSign,
@@ -4954,8 +4920,7 @@ var AutoScript = ( function ( window, undefined ) {
 				setStickySignatory : setStickySignatory,
 				setLocale : setLocale,
 				getErrorMessage : getErrorMessage,
-				getErrorType : getErrorType,
-				getCurrentLog : getCurrentLog
+				getErrorType : getErrorType
 			}
 		});
 		
@@ -5024,6 +4989,7 @@ var AutoScript = ( function ( window, undefined ) {
 			setStickySignatory : setStickySignatory,
 			setLocale : setLocale,
 			setMinimumClientVersion : setMinimumClientVersion,
+			setAppName : setAppName,
 
 			/* Gestion de errores */
 			getErrorMessage : getErrorMessage,

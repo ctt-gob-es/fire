@@ -9,18 +9,18 @@
  */
 package es.gob.fire.server.services.internal;
 
-import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 
 /**
@@ -35,44 +35,60 @@ public class CancelOperationService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(CancelOperationService.class.getName());
 
 	@Override
-	protected void doPost(final HttpServletRequest req, final HttpServletResponse resp) throws ServletException, IOException {
-		doGet(req, resp);
-	}
-
-	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String trId = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String userRef = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
+		// Recuperamos el identificador de transaccion
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
+		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
+
+		try {
+			params.checkParameters(logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+
 		// Comprobamos que se hayan prorcionado los parametros indispensables
-        if (trId == null || userRef == null || redirectErrorUrl == null) {
+        if (userRef == null || redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
         	LOGGER.warning(logF.f("No se han proporcionado todos los parametros necesarios")); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
+        	Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
-		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
-		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
-			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
-			return;
-		}
-		try {
+        try {
         	redirectErrorUrl = URLDecoder.decode(redirectErrorUrl, StandardCharsets.UTF_8.name());
         }
         catch (final Exception e) {
         	LOGGER.warning(logF.f("No se pudo deshacer el URL Encoding de la URL de redireccion: ") + e); //$NON-NLS-1$
 		}
-
-		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de cancelacion")); //$NON-NLS-1$
 
 		final FireSession session = SessionCollector.getFireSessionOfuscated(trId, userRef, request.getSession(false), false, true, trAux);
     	if (session == null) {
@@ -91,6 +107,8 @@ public class CancelOperationService extends HttpServlet {
 			Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
 			return;
 		}
+
+		AlarmsManager.notify(Alarm.CANCELLED_OPERATION);
 
 		ErrorManager.setErrorToSession(session, FIReError.OPERATION_CANCELED, trAux);
 

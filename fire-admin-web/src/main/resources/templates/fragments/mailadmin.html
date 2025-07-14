@@ -193,7 +193,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal .modal-body .alert').remove();
 			                    $('#altEditor-modal').modal('hide');
 			                },
-			                error:function(){}
+			                error:function(xhr, error){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+		                            window.location.reload();
+		                        } else {
+		                            console.error("Error al realizar la peticion: " + error);
+		                        }
+			                }
 			            });
 		        	}else{
 						// Se oculta la capa 'cargando...'
@@ -264,8 +270,15 @@ $(document).ready(function() {
 				  }
 				  
 			  },
-			  error:function(){
+			  error:function(xhr, error){
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+                      window.location.reload();
+                  } else {
+                      console.error("Error al realizar la peticion: " + error);
+                  }
+				  
 				  $('#mailForm').append('<div id="errorModalMail" class="alert alert-danger" role="alert"><strong>' + [[#{mail.admin.error.sameName}]] + '</strong></div>');
 			  },
 			  dataType: "json",
@@ -324,8 +337,15 @@ $( "#saveBtn" ).click(function( event ) {
 				  }
 				  
 			  },
-			  error:function(){
+			  error:function(xhr, error){
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+                      window.location.reload();
+                  } else {
+                      console.error("Error al realizar la peticion: " + error);
+                  }
+				  
 				  if ($('#errorModalConfMail').length > 0){
 						 $('#errorModalConfMail').remove();
 					  }

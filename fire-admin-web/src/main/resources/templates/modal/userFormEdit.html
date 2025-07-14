@@ -178,8 +178,15 @@
 	 			});
 							
 			  },
-			  error:function(){
+			  error:function(xhr, error){
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+                      window.location.reload();
+                  } else {
+                      console.error("Error al realizar la peticion: " + error);
+                  }
+				  
  				  var messageResponse = /*[[#{message.error.user.edit}]]*/;
  				  $('#resultEditUser').removeClass('alert-success')	
  				  $('#resultEditUser').addClass('alert alert-danger');

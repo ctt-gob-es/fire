@@ -29,6 +29,7 @@ import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
 
@@ -45,39 +46,59 @@ public final class RequestNewCertificateService extends HttpServlet {
 	 * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response)
 	 */
 	@Override
-	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		final String appId  = request.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-		final String trId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String subjectRef  = request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final boolean originForced = Boolean.parseBoolean(request.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
-		final String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(appId, LogUtils.limitText(trId));
+		// Recuperamos el identificador de aplicacion y el de transaccion
+		final String appId  = params.getAppId();
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
-		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
+		try {
+			params.checkParameters(appId, logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
-		// Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el identificador de transaccion")); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
+		final String subjectRef  = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		final boolean originForced = Boolean.parseBoolean(params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED));
+		final String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+
+		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de solicitud de certificado")); //$NON-NLS-1$
 
 		// Comprobamos del usuario
     	if (subjectRef == null || subjectRef.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia de usuario")); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
+        	Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 

@@ -3,10 +3,19 @@
     <div class="row gap-20 masonry pos-r">
         <div class="masonry-item col-md-10">
             <div class="bgc-white pL-40 pR-40 pT-20 pB-20 bd">
-                <h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+                <h4 class="c-grey-900 mT-10 mB-30" th:text="#{config.general.title}"></h4>
                 <div class="mT-30">
                     <form name="altEditor-form" role="form" id="generalConfig" th:object="${generalConfig}" method="post" action="">
                         <div id="messageGeneralConfig" role="alert"></div>
+                        
+                        <!-- ConfiguraciÛn de gr·ficos -->
+						<h5 class="c-grey-900 mB-10" th:text="#{config.general.section.grouping}"></h5>
+						<div class="form-group row">
+						    <div class="col-md-4">
+						        <label for="maxEntitiesBeforeGrouping" class="col-form-label" th:text="#{config.general.field.maxEntitiesBeforeGrouping}"></label>
+						        <input type="text" id="maxEntitiesBeforeGrouping" th:field="*{maxEntitiesBeforeGrouping}" class="form-control" />
+						    </div>
+						</div>
                         
                         <!-- Secci√≥n Configuraci√≥n General -->
                         <h5 class="c-grey-900 mB-10" th:text="#{config.general.section.size}"></h5>
@@ -157,11 +166,12 @@ $(document).ready(function() {
         
         // Capturar datos del formulario
         let formData = {
-            maxSizeDoc: $('#maxSizeDoc').val(),
-            maxSizePetition: $('#maxSizePetition').val(),
-            maxAmountDocs: $('#maxAmountDocs').val(),
-            providers: []
-        };
+		    maxSizeDoc: $('#maxSizeDoc').val(),
+		    maxSizePetition: $('#maxSizePetition').val(),
+		    maxAmountDocs: $('#maxAmountDocs').val(),
+		    maxEntitiesBeforeGrouping: $('#maxEntitiesBeforeGrouping').val(),
+		    providers: []
+		};
 
         let hasEnabledProvider = false; // Bandera para validar que al menos un proveedor est√© habilitado
         
@@ -209,7 +219,11 @@ $(document).ready(function() {
 			 	});
             },
             error: function(xhr, status, error) {
-                console.error("Error al guardar:", error);
+            	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
                 $('#messageGeneralConfig').html(messageError);
 				$('#messageGeneralConfig').removeClass('alert alert-success')	
 				$('#messageGeneralConfig').addClass('alert alert-danger');

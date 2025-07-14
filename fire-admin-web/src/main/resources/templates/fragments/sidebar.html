@@ -181,15 +181,27 @@
 						</li>
                			<li class="nav-item">
 							<a id="aConfigTaskValidationAdmin" class='sidebar-link' href="#">
-			                <span class="icon-holder">
-			                  <i class="c-cyan-500 ti-calendar"></i>
-			                </span>
-			                <span class="title" th:text="#{menu.admin.config.task.validation}"></span>
-			                <script th:inline="javascript">
-			                	var actionConfigTaskValidation = /*[[@{/configTaskValidation}]]*/;
-			                	$('#aConfigTaskValidationAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionConfigTaskValidation, 'optionReplacement', 'GET', null, true); return false;});
-			                </script>
-			              </a>
+				                <span class="icon-holder">
+				                  <i class="c-cyan-500 ti-calendar"></i>
+				                </span>
+				                <span class="title" th:text="#{menu.admin.config.task.validation}"></span>
+				                <script th:inline="javascript">
+				                	var actionConfigTaskValidation = /*[[@{/configTaskValidation}]]*/;
+				                	$('#aConfigTaskValidationAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionConfigTaskValidation, 'optionReplacement', 'GET', null, true); return false;});
+				                </script>
+			              	</a>
+						</li>
+						<li class="nav-item">
+							<a id="aConfigWsAfirmaAdmin" class='sidebar-link' href="#">
+								<span class="icon-holder">
+				                  <i class="c-green-500 ti-server"></i>
+				                </span>
+				                <span class="title" th:text="#{menu.admin.config.ws}"></span>
+				                <script th:inline="javascript">
+				                	var actionConfigWsAfirma = /*[[@{/configWsAfirma}]]*/;
+				                	$('#aConfigWsAfirmaAdmin').click(function(e){e.preventDefault(); loadIntoAjax('formMenu', actionConfigWsAfirma, 'optionReplacement', 'GET', null, true); return false;});
+				                </script>
+			                </a>
 						</li>
                		</ul>
                </li>

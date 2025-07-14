@@ -22,6 +22,8 @@ public class PropertyService implements IPropertyService {
 	
 	public static final String PROPERTY_NAME_MAX_AMOUNT_DOCS = "CANTIDAD_MAXIMA_DOCUMENTOS";
 	
+	public static final String PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING = "CANTIDAD_MAXIMA_ENTIDADES";
+	
 	public static final String PROPERTY_DATA_TYPE_NUMERIC = "NUMBER";
 	
 	public static final String PROPERTY_DATA_TYPE_DATE = "DATE";
@@ -76,6 +78,14 @@ public class PropertyService implements IPropertyService {
 		maxAmountDocs.setType(PROPERTY_DATA_TYPE_NUMERIC);
 		
 		repository.save(maxAmountDocs);
+		
+		//Creamos la primera propiedad MAX_ENTITIES_BEFORE_GROUPING
+		Property maxEntitiesBeforeGrouping = new Property();
+		maxEntitiesBeforeGrouping.setKey(PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING);
+		maxEntitiesBeforeGrouping.setNumericValue(request.getMaxEntitiesBeforeGrouping());
+		maxEntitiesBeforeGrouping.setType(PROPERTY_DATA_TYPE_NUMERIC);
+		
+		repository.save(maxEntitiesBeforeGrouping);
 	}
 	
 	@Override
@@ -83,7 +93,8 @@ public class PropertyService implements IPropertyService {
 	    List<String> propertyKeys = Arrays.asList(
 	        PROPERTY_NAME_MAX_SIZE_DOC,
 	        PROPERTY_NAME_MAX_SIZE_PETITION,
-	        PROPERTY_NAME_MAX_AMOUNT_DOCS
+	        PROPERTY_NAME_MAX_AMOUNT_DOCS,
+	        PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING
 	    );
 
 	    List<Property> response = new ArrayList<>();

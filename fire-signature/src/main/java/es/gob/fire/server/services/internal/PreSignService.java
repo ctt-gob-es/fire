@@ -38,6 +38,7 @@ import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
@@ -76,51 +77,70 @@ public final class PreSignService extends HttpServlet {
     /** Carga los datos para su posterior firma en servidor.
      * @see HttpServlet#service(HttpServletRequest request, HttpServletResponse response) */
     @Override
-    protected void service(final HttpServletRequest request,
+	protected void doPost(final HttpServletRequest request,
     		               final HttpServletResponse response) {
-
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-    	final String trId  = request.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-    	final String userRef  		= request.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-    	String certB64        		= request.getParameter(ServiceParams.HTTP_PARAM_CERT);
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
-    	// Con la seleccion automatica de certificado, se recibe el certificado en un
-    	// atributo en lugar de por parametro
+		// Recuperamos el identificador de transaccion
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		try {
+			params.checkParameters(logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+    	final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+    	String certB64 = params.getParameter(ServiceParams.HTTP_PARAM_CERT);
+		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
+
+    	// Con la seleccion automatica de certificado, se recibe el certificado y la URL
+		// de error en un atributo en lugar de por parametro
     	if (certB64 == null || certB64.isEmpty()) {
     		certB64 = (String) request.getAttribute(ServiceParams.HTTP_ATTR_CERT);
+        	redirectErrorUrl = (String) request.getAttribute(ServiceParams.HTTP_ATTR_ERROR_URL);
     	}
-
-    	final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-    	final LogTransactionFormatter logF = trAux.getLogFormatter();
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
 
-        // Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
-
         if (userRef == null || userRef.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
         if (certB64 == null || certB64.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
         	return;
         }
 
-		// Comprobamos que se haya indicado la URL a la que redirigir en caso de error
-		String redirectErrorUrl = request.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 		try {
@@ -342,7 +362,7 @@ public final class PreSignService extends HttpServlet {
         		}
         	}
 
-            // En caso de haber detectado algún error y que no se permitan errores, se aborta la operacion
+            // En caso de haber detectado algun error y que no se permitan errores, se aborta la operacion
             if (failed && stopOnError) {
             	final String errorMessage = "Se encontraron errores en las prefirmas del lote y se aborta la operacion"; //$NON-NLS-1$
                 LOGGER.log(Level.SEVERE, logF.f(errorMessage));

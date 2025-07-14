@@ -21,21 +21,23 @@
  * certificates and electronic signature.</p>
  * <b>Date:</b><p>15/05/2020.</p>
  * @author Gobierno de España.
- * @version 1.2, 13/06/2023.
+ * @version 1.3, 04/03/2025.
  */
 package es.gob.fire.service;
 
 import java.util.Date;
+import java.util.List;
 
 import javax.servlet.http.HttpServletRequest;
 
+import es.gob.fire.persistence.dto.ConstantsDTO;
 import es.gob.fire.persistence.entity.Planner;
 
 /**
  * <p>Interface that provides communication with the operations of the persistence layer related to Planner.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI
  * certificates and electronic signature.</p>
- * @version 1.2, 13/06/2023.
+ * @version 1.3, 04/03/2025.
  */
 public interface IPlannerService {
 
@@ -72,5 +74,10 @@ public interface IPlannerService {
 	 */
 	Planner savePlanner(Planner planner, HttpServletRequest httpServletRequest, String auditTransNumber, Date auditDate, String operation, String subOperation, String module);
 
+	/**
+	 * Method that loads types planners.
+	 * @return List of constants that represents the different types of planners.
+	 */
+	List<ConstantsDTO> loadTypePlanner();
 }
 

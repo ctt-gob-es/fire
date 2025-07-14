@@ -97,8 +97,14 @@ $(document)
 						hide();
 						$("#" + idResult).html(responseText);
 					},
-					error : function(e) {
+					error : function(e, xhr) {
 						alert("Error al cargar el certificado");
+						
+						if (xhr.status === 401 || xhr.status === 403) {
+                            window.location.reload();
+                        } else {
+                            console.error("Error al realizar la peticion: " + error);
+                        }
 					}
 				});
 
@@ -215,8 +221,14 @@ function addNewCert() {
  				  });
  				  		  
  			  },
- 			  error:function(){
+ 			  error:function(xhr, error){
  				  hide();
+ 				  
+ 				 if (xhr.status === 401 || xhr.status === 403) {
+                     window.location.reload();
+                 } else {
+                     console.error("Error al realizar la peticion: " + error);
+                 }
  				  
  				 var messageResponse = /*[[#{message.error.cert.add}]]*/;
 				  $('#resultEditCert').removeClass('alert-success')	

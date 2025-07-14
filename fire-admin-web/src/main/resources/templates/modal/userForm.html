@@ -156,8 +156,15 @@ $( "#addBtnModal" ).click(function( event ) {
 			});
 						
 		  },
-		  error:function(){
+		  error:function(xhr, error){
 			  hide();
+			  
+			  if (xhr.status === 401 || xhr.status === 403) {
+                  window.location.reload();
+              } else {
+                  console.error("Error al realizar la peticion: " + error);
+              }
+			  
 			  var messageResponse = /*[[#{message.error.user.edit}]]*/;
 			  $('#resultAddUser').removeClass('alert-success')	
 			  $('#resultAddUser').addClass('alert alert-danger');

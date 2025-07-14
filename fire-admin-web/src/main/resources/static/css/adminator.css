@@ -6877,7 +6877,8 @@ hr {
       transform: scale(1, 1); }
     .header .header-container .nav-left {
       float: left;
-      margin-left: 15px; }
+      margin-left: 15px; 
+      height: 100%; }
     .header .header-container .nav-right {
       float: right; }
       .header .header-container .nav-right .dropdown-menu {
@@ -50348,3 +50349,111 @@ footer {
 /*@import 'vendor/index';*/
 
 /*# sourceMappingURL=stylesheet.css.map */
+
+.footer {
+	height: 61px;
+	text-align: left;
+	padding-left: 2rem;
+}
+
+.footer-container {
+  display: flex;
+  align-items: center;   /* Alineación vertical */
+  justify-content: center; /* Alineación horizontal */
+  padding: 0 15px;
+  min-height: 60px;      /* Puedes ajustar la altura mínima según tus necesidades */
+}
+
+.footer-text {
+  font-size: 14px;
+  margin: 0;
+  line-height: 1.5;
+}
+
+.statsViewControl {
+	padding: 1rem;
+}
+
+.statsViewControlButton {
+	padding: 0.3rem 1rem;
+	border-radius: 0.3rem;
+	border: 1px solid #aaa;
+	color: white;
+	background-color: #6c757d;
+}
+
+.stats-datepicker {
+	flex: none !important;
+	max-width: none !important;
+	margin-left: 1rem !important;
+}
+
+.input-group-text.bg-dark {
+  background-color: #343a40 !important;
+  border-right: 0;
+}
+.input-group .form-control {
+  border-left: 0;
+}
+
+.list-group-item {
+  display: flex;
+  align-items: center;
+}
+
+.icon-placeholder {
+  display: inline-block;
+  width: 1.25rem;
+  text-align: center;
+  margin-right: 0.5rem;
+}
+
+.icon-placeholder i {
+  font-size: 1rem;
+}
+
+/* Contenedor general del mensaje */
+#noResultsContainer {
+  width: 100%;
+}
+
+/* Tarjeta interior */
+.no-results-card {
+  max-width: 700px;
+  margin: 2rem auto;
+  padding: 1.5rem;
+  background-color: #f8f9fa;
+  border: 1px solid #bee5eb;
+  border-radius: 8px;
+  box-shadow: 0 4px 8px rgba(0,0,0,0.05);
+  text-align: center;
+}
+
+/* Icono grande */
+.icon-container {
+  margin-bottom: 1rem;
+}
+.big-icon {
+  font-size: 3rem;
+  color: #17a2b8;
+}
+
+/* Título y mensaje */
+.no-results-title {
+  margin: 0;
+  font-size: 1.25rem;
+  color: #0c5460;
+}
+.no-results-message {
+  margin: 0.5rem 0 1rem;
+  font-size: 1rem;
+  color: #0c5460;
+}
+
+/* Contenedor de burbujas de filtro */
+#noResultsFiltersContainer {
+  display: flex;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  justify-content: center;
+}
