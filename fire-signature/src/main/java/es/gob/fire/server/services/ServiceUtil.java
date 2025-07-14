@@ -190,7 +190,9 @@ public final class ServiceUtil {
 				throw new IOException("No se pudo obtener la informacion del sistema para la validacion de la peticion", e); //$NON-NLS-1$
 			}
 
-			appInfo = new ApplicationInfo(appId, registeredAppInfo != null ? registeredAppInfo.getName() : appId, registeredAppInfo != null ? registeredAppInfo.getDir3Code() : null);
+			appInfo = new ApplicationInfo(appId, registeredAppInfo != null ? registeredAppInfo.getName() : appId,
+											registeredAppInfo != null ? registeredAppInfo.getDir3Code() : null,
+											registeredAppInfo != null ? registeredAppInfo.getOrganization() : null);
 
     		// Comprobamos que la aplicacion este registrada en el sistema y habilitada
     		if (ConfigManager.isCheckApplicationNeeded()) {
@@ -235,9 +237,9 @@ public final class ServiceUtil {
 
     	if (appInfo == null) {
     		if (appId != null) {
-        		appInfo = new ApplicationInfo(appId, appId, null);
+        		appInfo = new ApplicationInfo(appId, appId, null, null);
         	} else {
-        		appInfo = new ApplicationInfo(UNIDENTIFIED, UNIDENTIFIED, UNIDENTIFIED);
+        		appInfo = new ApplicationInfo(UNIDENTIFIED, UNIDENTIFIED, UNIDENTIFIED, UNIDENTIFIED);
         	}
     	}
 

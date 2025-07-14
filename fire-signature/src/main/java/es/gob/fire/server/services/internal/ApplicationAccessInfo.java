@@ -10,6 +10,7 @@ public class ApplicationAccessInfo {
 	private final boolean enabled;
 	private final DigestInfo[] certDigests;
 	private final String dir3Code;
+	private final String organization;
 
 	/**
 	 * Identifica el estado de una aplicaci&oacute;n.
@@ -18,13 +19,15 @@ public class ApplicationAccessInfo {
 	 * @param enabled Indica si est&aacute; habilitada ({@code true}) o no ({@code false}).
 	 * @param certDigests Listado de huellas de certificado permitidas para el certificado.
 	 * @param dir3Code C&oacute;digo DIR 3.
+	 * @param organization Organizaci&oacute;n.
 	 */
-	public ApplicationAccessInfo(final String id, final String name, final boolean enabled, final DigestInfo[] certDigests, final String dir3Code) {
+	public ApplicationAccessInfo(final String id, final String name, final boolean enabled, final DigestInfo[] certDigests, final String dir3Code, final String organization) {
 		this.id = id;
 		this.name = name;
 		this.enabled = enabled;
 		this.certDigests = certDigests;
 		this.dir3Code = dir3Code;
+		this.organization = organization;
 	}
 
 	/**
@@ -66,5 +69,13 @@ public class ApplicationAccessInfo {
 	 */
 	public String getDir3Code() {
 		return this.dir3Code;
+	}
+	
+	/**
+	 * Organizaci&oacute;n.
+	 * @return Nombre de Organizaci&oacute;n.
+	 */
+	public String getOrganization() {
+		return this.organization;
 	}
 }

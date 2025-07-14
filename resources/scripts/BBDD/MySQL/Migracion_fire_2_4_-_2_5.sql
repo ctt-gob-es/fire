@@ -157,9 +157,11 @@ CREATE TABLE `TB_SERVIDOR_AFIRMA` (
 
 -- TABLA TB_FIRMAS
 ALTER TABLE `tb_firmas` ADD `dir3_code` VARCHAR(50) NULL;
+ALTER TABLE `tb_firmas` ADD `organization` VARCHAR(255) NULL;
 
 -- TABLA TB_TRANSACCIONES
 ALTER TABLE `tb_transacciones` ADD `dir3_code` VARCHAR(50) NULL;
+ALTER TABLE `tb_transacciones` ADD `organization` VARCHAR(255) NULL;
 
 -- Proveedores por defecto --
 INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
