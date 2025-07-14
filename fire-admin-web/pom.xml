@@ -20,6 +20,22 @@
 			<artifactId>fire-admin-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-admin-i18n</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-upgrade</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-upgrade-afirma</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-admin-i18n</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
