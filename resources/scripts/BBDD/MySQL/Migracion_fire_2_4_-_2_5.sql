@@ -12,7 +12,8 @@ SET `dni` = 'X0000000T';
 
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `nombre_usuario`;
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `clave`;
-
+ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `dni_UNIQUE` (`dni`),
+ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`)
 
 -- TABLA DE CERTIFICADOS
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);

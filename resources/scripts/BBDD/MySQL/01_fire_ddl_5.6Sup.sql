@@ -48,7 +48,7 @@ CREATE TABLE `tb_usuarios` (
   `dni` varchar(9) NULL,
   `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP,
   PRIMARY KEY (`id_usuario`),
-  UNIQUE KEY `nombre_usuario_UNIQUE` (`nombre_usuario`),
+  UNIQUE KEY `dni_UNIQUE` (`dni`),
   UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`)
 ) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
 
