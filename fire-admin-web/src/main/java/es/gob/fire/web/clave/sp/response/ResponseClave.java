@@ -95,7 +95,7 @@ public class ResponseClave {
 	           	.filter(p -> p.getDni().equals(dniRef.get()))
 	           	.findFirst()
 	           	.orElseThrow(() -> new BadCredentialsException(
-	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
+	           			Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG006)
 	        ));
 	    	
 	        // Autenticamos el token utilizando el usuario consultado previamente
