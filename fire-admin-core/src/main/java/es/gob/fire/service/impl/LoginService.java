@@ -348,9 +348,9 @@ public class LoginService implements ILoginService {
     	final Authentication authentication = new DniAuthenticationToken(user.getDni(), grantedAuths);
 
     	if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-    		LOGGER.error("El usuario con DNI "+ user.getDni() +" no tiene permisos de acceso "); //$NON-NLS-1$ //$NON-NLS-2$
-			throw new InsufficientAuthenticationException("El usuario con DNI " + user.getDni() + " no tiene permisos de acceso"); //$NON-NLS-1$ //$NON-NLS-2$
-		}
+    	    LOGGER.error("El usuario no tiene permisos de acceso."); //$NON-NLS-1$
+    	    throw new InsufficientAuthenticationException("Acceso denegado: permisos insuficientes."); //$NON-NLS-1$
+    	}
 
     	// Asignamos al bean de spring del usuario para usarlo en la app
 		this.userLoggedDTO.setDni(user.getDni());
