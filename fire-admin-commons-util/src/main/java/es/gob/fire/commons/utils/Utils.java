@@ -36,7 +36,7 @@ public class Utils {
     /**
      * Simple regular expression for email validation.
      */
-    private static final String EMAIL_REGEX_PATTERN = "^(.+)@(.+)$"; 
+    private static final String EMAIL_REGEX_PATTERN = "^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$";
 
 	/** Lee un flujo de datos de entrada y los recupera en forma de array de
      * bytes. Este m&eacute;todo consume pero no cierra el flujo de datos de

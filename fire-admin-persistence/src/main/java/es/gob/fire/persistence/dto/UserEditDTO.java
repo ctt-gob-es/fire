@@ -73,7 +73,7 @@ public class UserEditDTO {
 	 * form.
 	 */
 	@NotNull(groups = CheckItFirst.class, message = "{form.valid.user.email.notempty}")
-	@Size(min=NumberConstants.NUM3, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
+	@Size(min=NumberConstants.NUM3, max=NumberConstants.NUM60, groups=ThenCheckIt.class)
 	private String emailEdit = UtilsStringChar.EMPTY_STRING;
 
 	/**

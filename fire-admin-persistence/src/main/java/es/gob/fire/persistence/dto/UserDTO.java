@@ -84,7 +84,7 @@ public class UserDTO {
 	 * Attribute that represents the value of the input email of the user in the form.
 	 */
 	@NotNull(groups=CheckItFirst.class, message="{form.valid.user.email.notempty}")
-    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM45, groups=ThenCheckIt.class)
+    @Size(min=NumberConstants.NUM3, max=NumberConstants.NUM60, groups=ThenCheckIt.class)
     private String emailAdd = UtilsStringChar.EMPTY_STRING;
 
 	/**

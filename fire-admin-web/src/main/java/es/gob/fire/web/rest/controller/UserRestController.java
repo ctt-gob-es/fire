@@ -28,6 +28,7 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Locale;
+import java.util.Objects;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -476,10 +477,11 @@ public class UserRestController {
 			json.put("emailEdit" + SPAN, "El campo email no es v\u00E1lido.");
 		}
 
-		if (!userBeforeUpdate.getEmail().equals(userForm.getEmailEdit())
-				&& (this.userService.getAllUserByEmail(userForm.getEmailEdit())!=null && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty())) {
-			error = true;
-			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
+		if (!Objects.equals(userBeforeUpdate.getEmail(), userForm.getEmailEdit())
+		        && this.userService.getAllUserByEmail(userForm.getEmailEdit()) != null
+		        && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty()) {
+		    error = true;
+		    json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
 
 		if (!error) {

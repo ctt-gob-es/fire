@@ -172,7 +172,7 @@ public class User implements Serializable {
 	 * Gets the value of the attribute {@link #email}.
 	 * @return the value of the attribute {@link #email}.
 	 */
-	@Column(name = "CORREO_ELEC", nullable = true, length = NumberConstants.NUM45)
+	@Column(name = "CORREO_ELEC", nullable = true, length = NumberConstants.NUM60)
 	@JsonView(DataTablesOutput.View.class)
 	public String getEmail() {
 		return this.email;
