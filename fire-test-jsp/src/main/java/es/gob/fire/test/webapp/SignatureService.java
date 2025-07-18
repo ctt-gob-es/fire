@@ -76,6 +76,7 @@ public class SignatureService extends HttpServlet {
 		final String algorithm = config.getAlgorithm();
 		final String extraparams = config.getExtraParamsB64();
 		final String upgrade = config.getUpgrade();
+		final String language = config.getLanguage();
 		final byte[] data = config.getData();
 
 		if (op == null || op.isEmpty() || format == null || format.isEmpty() ||
@@ -143,6 +144,7 @@ public class SignatureService extends HttpServlet {
 		try {
 			signResult = configManager.getFireClient(appId).sign(
 					userId,
+					language,
 					op,
 					format,
 					algorithm,
@@ -194,6 +196,8 @@ public class SignatureService extends HttpServlet {
 	        		config.setExtraParamsB64(item.getString());
 	        	} else if (item.isFormField() && "upgrade".equals(item.getFieldName())) { //$NON-NLS-1$
 	        		config.setUpgrade(item.getString());
+	        	} else if (item.isFormField() && "language".equals(item.getFieldName())) { //$NON-NLS-1$
+	        		config.setLanguage(item.getString());
 	        	} else if (!item.isFormField() && "sign-file".equals(item.getFieldName())) { //$NON-NLS-1$
 	        		try (final InputStream fileContent = item.getInputStream()) {
 	        			config.setData(Utils.getDataFromInputStream(fileContent));
@@ -216,6 +220,7 @@ public class SignatureService extends HttpServlet {
 		private String format;
 		private String extraParamsB64;
 		private String upgrade;
+		private String language;
 
 		OperationConfig() {
 			this.data = null;
@@ -267,6 +272,14 @@ public class SignatureService extends HttpServlet {
 
 		public void setUpgrade(final String upgrade) {
 			this.upgrade = upgrade;
+		}
+		
+		public String getLanguage() {
+			return this.language;
+		}
+
+		public void setLanguage(final String language) {
+			this.language = language;
 		}
 	}
 }

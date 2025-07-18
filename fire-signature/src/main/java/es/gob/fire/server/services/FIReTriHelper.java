@@ -615,7 +615,7 @@ public final class FIReTriHelper {
 		final es.gob.fire.server.connector.TriphaseData target = new es.gob.fire.server.connector.TriphaseData();
 		target.setFormat(source.getFormat());
 		for (final TriSign triSign : source.getTriSigns()) {
-			target.addSignOperation(new es.gob.fire.server.connector.TriphaseData.TriSign(triSign.getDict(), triSign.getId()));
+			target.addSignOperation(new es.gob.fire.server.connector.TriphaseData.TriSign(triSign.getDict(), triSign.getId(), triSign.getSignatureId()));
 		}
 		return target;
 	}

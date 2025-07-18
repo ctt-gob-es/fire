@@ -95,7 +95,8 @@ public class DBSessionsDAO implements SessionsDAO, Serializable {
 				}
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.WARNING, "Error al crear la sesion con ID: " + sessionId, e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Error al crear la sesion: " + sessionId //$NON-NLS-1$
+						+ ". No se pueda establecer la conexion con la base de datos", e); //$NON-NLS-1$
 			}
 		}
 		else {

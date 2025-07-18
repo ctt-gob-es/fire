@@ -1,5 +1,6 @@
 package es.gob.fire.web.clave.sp.response;
 
+import java.text.SimpleDateFormat;
 import java.util.Iterator;
 import java.util.Properties;
 import java.util.concurrent.atomic.AtomicReference;
@@ -22,17 +23,23 @@ import org.springframework.web.bind.annotation.RequestMethod;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
+import com.ibm.icu.util.Calendar;
 
+import es.gob.fire.commons.utils.UtilsDate;
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
+import es.gob.fire.service.impl.LoginService;
 import es.gob.fire.web.clave.sp.SpProtocolEngineFactory;
 import es.gob.fire.web.clave.sp.exception.ClaveException;
 import es.gob.fire.web.clave.sp.utils.Constants;
 import es.gob.fire.web.clave.sp.utils.SPConfig;
 import es.gob.fire.web.clave.sp.utils.SessionHolder;
+import es.gob.fire.web.config.VersionProperties;
 import es.gob.fire.web.config.WebSecurityConfig;
 import eu.eidas.auth.commons.EidasStringUtil;
 import eu.eidas.auth.commons.attribute.AttributeDefinition;
@@ -53,6 +60,12 @@ public class ResponseClave {
 	
 	@Autowired
 	private ILoginService iLoginService;
+	
+	@Autowired
+	private ThreadInfoDataSecureDTO threadInfoDataSecure;
+	
+	@Autowired
+    private VersionProperties versionProperties;
 	
 	@RequestMapping(value = "/ResponseClave", method = RequestMethod.POST)
     public String responseClave(HttpServletRequest request, HttpServletResponse response, final Model model) {
@@ -82,13 +95,13 @@ public class ResponseClave {
 	           	.filter(p -> p.getDni().equals(dniRef.get()))
 	           	.findFirst()
 	           	.orElseThrow(() -> new BadCredentialsException(
-	           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
+	           			Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG006)
 	        ));
 	    	
 	        // Autenticamos el token utilizando el usuario consultado previamente
 	        Authentication authentication = iLoginService.obtainAuthAndUpdateLastAccess(user);
 	            
-	        // Si la autenticación es exitosa, guardamos el resultado en el contexto de seguridad
+	        // Si la autenticacion es exitosa, guardamos el resultado en el contexto de seguridad
 	        SecurityContextHolder.getContext().setAuthentication(authentication);
 	        
 	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
@@ -97,11 +110,18 @@ public class ResponseClave {
 	    	cookie.setSecure(true);
 	    	response.addCookie(cookie);
 	    	
+	    	model.addAttribute("appVersion", versionProperties.getProjectVersion());
+	        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
+	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
-	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
+	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG015)}));
 	        return "inicio.html";
 		
 		}catch (ClaveException e) {
+			String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+			threadInfoDataSecure.setRandomStringLogin(randomStringLogin);
+			threadInfoDataSecure.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
 			model.addAttribute("errorMessage", e.getMessage());
 			model.addAttribute("accessByCertificate", true);
 			return "login.html";

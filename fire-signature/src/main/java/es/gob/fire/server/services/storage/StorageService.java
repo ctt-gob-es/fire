@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.io.PrintWriter;
 import java.io.UnsupportedEncodingException;
 import java.net.URLDecoder;
-import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -21,8 +20,10 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
+import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
 
@@ -69,20 +70,30 @@ public final class StorageService extends HttpServlet {
 
 		LOGGER.fine(" == INICIO GUARDADO == "); //$NON-NLS-1$
 
-		// Leemos la entrada
-		RequestParameters params;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
-			sendError(response, ErrorManager.ERROR_EXTRACTING_PARAMETERS);
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
-		final String operation = params.get(PARAMETER_NAME_OPERATION);
-		final String syntaxVersion = params.get(PARAMETER_NAME_SYNTAX_VERSION);
-		final String id = params.get(PARAMETER_NAME_ID);
+		// Leemos la entrada
+		try {
+			params.checkParameters();
+		}
+		catch (final Exception e) {
+			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
+			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
+			return;
+		}
+
+		final String operation = params.getParameter(PARAMETER_NAME_OPERATION);
+		final String syntaxVersion = params.getParameter(PARAMETER_NAME_SYNTAX_VERSION);
+		final String id = params.getParameter(PARAMETER_NAME_ID);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 		response.setContentType("text/plain"); //$NON-NLS-1$
@@ -144,16 +155,16 @@ public final class StorageService extends HttpServlet {
 	 * @param operation Operacion solicitada. Debe ser #StorageService.OPERATION_STORE.
 	 * @param params Par&aacute;metros de la petici&oacute;n.
 	 * @throws IOException Cuando ocurre un error al general la respuesta. */
-	private static void storeSign(final HttpServletResponse response, final String id, final String operation, final Map<String, String> params) {
+	private static void storeSign(final HttpServletResponse response, final String id, final String operation, final RequestParameters params) {
 
 		LOGGER.info("Se solicita guardar un documento con el identificador: " + LogUtils.cleanText(id)); //$NON-NLS-1$
 
 		// Si no se indican los datos, se transmite el error en texto plano a traves del fichero generado
 		String dataText;
 		try {
-			dataText = URLDecoder.decode(params.get(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
+			dataText = URLDecoder.decode(params.getParameter(PARAMETER_NAME_DATA), DEFAULT_ENCODING);
 		} catch (final UnsupportedEncodingException e1) {
-			dataText = params.get(PARAMETER_NAME_DATA);
+			dataText = params.getParameter(PARAMETER_NAME_DATA);
 		}
 		if (dataText == null) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_MISSING_DATA));

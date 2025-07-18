@@ -738,6 +738,9 @@
         <member name="F:FIRe.FIReErrors.CERTIFICATE_WEAK_REGISTRY">
             El usuario no puede poseer certificados de firma por haber realizado un registro no fehaciente.
         </member>
+        <member name="F:FIRe.FIReErrors.UNDEFINED_ERROR">
+            Error desconocido durante la operacion.
+        </member>
         <member name="F:FIRe.FIReErrors.SIGNING">
             Error durante la firma.
         </member>
@@ -792,6 +795,9 @@
         <member name="F:FIRe.FIReErrors.BATCH_RESULT_RECOVERED">
             El resultado del lote se recuperó anteriormente.
         </member>
+        <member name="F:FIRe.FIReErrors.TOO_LARGE_CONTENT">
+            El contenido de la peticion era demasiado grande.
+        </member>
         <member name="F:FIRe.FIReErrors.INTERNAL_ERROR">
             Error interno del servidor.
         </member>
@@ -799,7 +805,7 @@
             Petición rechazada.
         </member>
         <member name="F:FIRe.FIReErrors.UNAUTHORIZED">
-            No se proporcionaron los parámetros de autenticación.
+            No se proporcionaron los parámetros de autenticación o no son correctos.
         </member>
         <member name="F:FIRe.FIReErrors.INVALID_TRANSACTION">
             La transacción no se ha inicializado o ha caducado.
@@ -1055,6 +1061,34 @@
             </summary>
         </member>
         <member name="M:FIRe.HttpCertificateAvailableException.#ctor(System.String,System.Exception)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="msg">Descripcion del error.</param>
+            <param name="e">Causa del error</param>
+        </member>
+        <member name="T:FIRe.HttpTooLargeContentException">
+            <summary>El tamaño de la petición excedía el máximo permitido.</summary>
+        </member>
+        <member name="M:FIRe.HttpTooLargeContentException.#ctor">
+            <summary>
+            Se crea la excepción.
+            </summary>
+        </member>
+        <member name="M:FIRe.HttpTooLargeContentException.#ctor(System.Int32)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+        </member>
+        <member name="M:FIRe.HttpTooLargeContentException.#ctor(System.Int32,System.String)">
+            <summary>
+            Se crea la excepción.
+            </summary>
+            <param name="code">Código del error.</param>
+            <param name="msg">Descripcion del error.</param>
+        </member>
+        <member name="M:FIRe.HttpTooLargeContentException.#ctor(System.String,System.Exception)">
             <summary>
             Se crea la excepción.
             </summary>

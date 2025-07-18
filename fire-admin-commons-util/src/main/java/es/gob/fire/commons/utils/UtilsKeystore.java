@@ -15,10 +15,11 @@
  * <b>Project:</b><p></p>
  * <b>Date:</b><p> 01/10/2020.</p>
  * @author Gobierno de España.
- * @version 1.3, 20/02/2025.
+ * @version 1.4, 04/03/2025.
  */
 package es.gob.fire.commons.utils;
 
+import java.io.ByteArrayInputStream;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.IOException;
@@ -31,12 +32,14 @@ import java.security.SignatureException;
 import java.security.cert.Certificate;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.util.ArrayList;
 import java.util.Enumeration;
+import java.util.List;
 
 /** 
  * <p>Class that manages operations related with the management of keystores.</p>
  * <b>Project:</b><p></p>
- * @version 1.3, 20/02/2025.
+ * @version 1.4, 04/03/2025.
  */
 public final class UtilsKeystore {
 
@@ -144,5 +147,62 @@ public final class UtilsKeystore {
 	 */
 	public static void verify(X509Certificate certificate, X509Certificate issuerCert) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
 		certificate.verify(issuerCert.getPublicKey());
+	}
+	
+	public static KeyStore loadKsPKCS12(byte[] certificate, String password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		KeyStore keyStore = KeyStore.getInstance(PKCS12);
+        try (ByteArrayInputStream bais = new ByteArrayInputStream(certificate)) {
+            keyStore.load(bais, password.toCharArray());
+        }
+		return keyStore;
+	}
+	
+	/**
+	 * Retrieves a list of all subject names from the certificates stored in the given KeyStore.
+	 *
+	 * <p>This method iterates through all the aliases in the provided {@link KeyStore},
+	 * extracts the associated {@link X509Certificate}, and retrieves its subject distinguished name
+	 * in X.500 format.
+	 *
+	 * @param keyStore the {@link KeyStore} instance from which to extract certificate subjects.
+	 * @return a list of subject distinguished names (DNs) of all certificates in the KeyStore.
+	 * @throws KeyStoreException if an error occurs while accessing the KeyStore.
+	 */
+	public static List<String> listAllSubjects(KeyStore keyStore) throws KeyStoreException {
+		List<String> listAllSubjects = new ArrayList<String>();
+		Enumeration<String> aliases = keyStore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+
+            X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+            if (cert != null) {
+            	listAllSubjects.add(cert.getSubjectX500Principal().getName());
+            }
+        }
+		return listAllSubjects;
+	}
+	
+	/**
+	 * Retrieves a list of all {@link X509Certificate} instances from the given {@link KeyStore}.
+	 *
+	 * <p>This method iterates through all the aliases in the provided {@link KeyStore},
+	 * extracts the associated {@link X509Certificate}, and adds it to a list.
+	 *
+	 * @param keyStore the {@link KeyStore} instance from which to extract certificates.
+	 * @return a list of all {@link X509Certificate} instances found in the KeyStore.
+	 * @throws KeyStoreException if an error occurs while accessing the KeyStore.
+	 */
+	public static List<X509Certificate> listAllX509Certificate(KeyStore keyStore) throws KeyStoreException {
+		List<X509Certificate> listAllX509Certificate = new ArrayList<X509Certificate>();
+		Enumeration<String> aliases = keyStore.aliases();
+        while (aliases.hasMoreElements()) {
+            String alias = aliases.nextElement();
+
+            X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+            if (cert != null) {
+            	listAllX509Certificate.add(cert);
+            }
+        }
+		return listAllX509Certificate;
 	}
 }

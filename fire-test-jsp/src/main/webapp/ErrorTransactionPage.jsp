@@ -1,6 +1,8 @@
 <!DOCTYPE html>
+<%@page import="org.slf4j.LoggerFactory"%>
+<%@page import="org.slf4j.Logger"%>
+<%@page import="es.gob.fire.client.HttpOperationException"%>
 <%@page import="java.util.Enumeration"%>
-<%@page import="java.util.logging.Logger"%>
 <%@page import="java.util.Collection"%>
 <%@page import="es.gob.fire.test.webapp.ErrorHelper"%>
 <%@page import="es.gob.fire.client.TransactionResult"%>
@@ -13,11 +15,18 @@
  </head>
  <body>
   <%
+  	Logger LOGGER = LoggerFactory.getLogger("es.gob.fire.test.webapp.errortransaction"); //$NON-NLS-1$
+  
 	TransactionResult error;
 	try {
 		error = ErrorHelper.recoverErrorResult(request);
 	}
+	catch (HttpOperationException e) {
+		LOGGER.warn("Error: " + e.toString()); //$NON-NLS-1$
+		error = new TransactionResult(TransactionResult.RESULT_TYPE_ERROR, e.getCode(), e.getMessage());
+	}
 	catch (Exception e) {
+		LOGGER.warn("Error desconocido: " + e.toString(), e); //$NON-NLS-1$
 		error = new TransactionResult(0, 0, "No se pudo obtener el error de la operaci\u00F3n"); //$NON-NLS-1$
 	}
   %>

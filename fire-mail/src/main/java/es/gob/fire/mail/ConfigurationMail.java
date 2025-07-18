@@ -6,17 +6,18 @@ import javax.mail.Authenticator;
 import javax.mail.PasswordAuthentication;
 import javax.mail.Session;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.utils.ConstantsMail;
 import es.gob.fire.utils.ConstantsMailProperties;
 
 @Component
 public class ConfigurationMail {
 
-	private static final Logger LOGGER = Logger.getLogger(ConfigurationMail.class);
+	private static final Logger LOGGER = LogManager.getLogger(ConfigurationMail.class);
 	
 	/**
 	 * Attribute that represents the default expired time.
@@ -110,46 +111,46 @@ public class ConfigurationMail {
      */
     public void init() {
     	try {
-    		properties.put(ConstantsMail.MAIL_SMTP_HOST, mailSmtpHost);
-            properties.put(ConstantsMail.MAIL_SMTP_PORT, mailSmtpPort);
-            properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, mailSmtpMailSender);
-            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, mailSmtpStarttlsEnable);
+    		properties.put(ConstantsMail.MAIL_SMTP_HOST, this.mailSmtpHost);
+            properties.put(ConstantsMail.MAIL_SMTP_PORT, this.mailSmtpPort);
+            properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, this.mailSmtpMailSender);
+            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, this.mailSmtpStarttlsEnable);
 
-            String starttlsRequired = mailSmtpStarttlsRequired;
+            final String starttlsRequired = this.mailSmtpStarttlsRequired;
             if (!starttlsRequired.isEmpty()) {
                 properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
             }
 
-            String sslProtocols = mailSmtpSslProtocols;
+            final String sslProtocols = this.mailSmtpSslProtocols;
             if (!sslProtocols.isEmpty()) {
                 properties.put(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
             }
 
-            String socketFactoryPort = mailSmtpSocketFactoryPort;
+            final String socketFactoryPort = this.mailSmtpSocketFactoryPort;
             if (!socketFactoryPort.isEmpty()) {
                 properties.put(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
             }
 
-            properties.put(ConstantsMail.MAIL_PROTOCOL, mailProtocol);
+            properties.put(ConstantsMail.MAIL_PROTOCOL, this.mailProtocol);
 
             // Comprobamos si es necesaria autenticación
-            String mailSmtpAuth = this.mailSmtpAuth;
+            final String mailSmtpAuth = this.mailSmtpAuth;
             if ("true".equalsIgnoreCase(mailSmtpAuth)) {
                 properties.put(ConstantsMail.MAIL_SMTP_AUTH, mailSmtpAuth);
-                properties.put(ConstantsMail.MAIL_SMTP_USER, mailSmtpUser);
-                properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, mailSmtpPassword);
+                properties.put(ConstantsMail.MAIL_SMTP_USER, this.mailSmtpUser);
+                properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, this.mailSmtpPassword);
 
                 // Obtenemos la sesión con seguridad
                 final Authenticator smtpAuthenticator = new SmtpAuthenticator(
-                	mailSmtpUser,
-                	mailSmtpPassword
+                	this.mailSmtpUser,
+                	this.mailSmtpPassword
                 );
                 sessionMail = Session.getInstance(properties, smtpAuthenticator);
             } else {
                 // Obtenemos la sesión sin seguridad
                 sessionMail = Session.getDefaultInstance(properties);
             }
-    	} catch (Exception e) {
+    	} catch (final Exception e) {
 			LOGGER.error("Se ha producido un fallo al cargar alguna propiedad procedente del properties externo", e);
 		}
         
@@ -163,51 +164,51 @@ public class ConfigurationMail {
      * </p>
      * If an error occurs during the setup, it is logged appropriately.
      *
-     * @param properties A {@link Properties} object containing email configuration values.
+     * @param props A {@link Properties} object containing email configuration values.
      */
-	public void init(Properties properties) {
+	public void init(final Properties props) {
 		try {
-			properties.put(ConstantsMail.MAIL_SMTP_HOST, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_HOST));
-	        properties.put(ConstantsMail.MAIL_SMTP_PORT, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PORT));
-	        this.mailSmtpMailSender = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER);
-	        properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER));
-	        properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_ENABLE));
+			properties.put(ConstantsMail.MAIL_SMTP_HOST, props.getProperty(ConstantsMailProperties.MAIL_SMTP_HOST));
+	        properties.put(ConstantsMail.MAIL_SMTP_PORT, props.getProperty(ConstantsMailProperties.MAIL_SMTP_PORT));
+	        this.mailSmtpMailSender = props.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER);
+	        properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, props.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER));
+	        properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, props.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_ENABLE));
 
-	        String starttlsRequired = properties.getProperty(properties.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_REQUIRED), "");
+	        final String starttlsRequired = props.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_REQUIRED, "");
 	        if (!starttlsRequired.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
 	        }
 
-	        String sslProtocols = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_SSL_PROTOCOLS, "");
+	        final String sslProtocols = props.getProperty(ConstantsMailProperties.MAIL_SMTP_SSL_PROTOCOLS, "");
 	        if (!sslProtocols.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
 	        }
 
-	        String socketFactoryPort = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_SOCKETFACTORY_PORT, "");
+	        final String socketFactoryPort = props.getProperty(ConstantsMailProperties.MAIL_SMTP_SOCKETFACTORY_PORT, "");
 	        if (!socketFactoryPort.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
 	        }
 
-	        properties.put(ConstantsMail.MAIL_PROTOCOL, properties.getProperty(ConstantsMailProperties.MAIL_PROTOCOL));
+	        properties.put(ConstantsMail.MAIL_PROTOCOL, props.getProperty(ConstantsMailProperties.MAIL_PROTOCOL));
 
 	        // Comprobamos si es necesaria autenticación
-	        String mailSmtpAuth = properties.getProperty(ConstantsMailProperties.MAIL_SMTP_AUTH);
+	        final String mailSmtpAuth = props.getProperty(ConstantsMailProperties.MAIL_SMTP_AUTH);
 	        if ("true".equalsIgnoreCase(mailSmtpAuth)) {
 	            properties.put(ConstantsMail.MAIL_SMTP_AUTH, mailSmtpAuth);
-	            properties.put(ConstantsMail.MAIL_SMTP_USER, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_USER));
-	            properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD));
+	            properties.put(ConstantsMail.MAIL_SMTP_USER, props.getProperty(ConstantsMailProperties.MAIL_SMTP_USER));
+	            properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, props.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD));
 
 	            // Obtenemos la sesión con seguridad
 	            final Authenticator smtpAuthenticator = new SmtpAuthenticator(
-	            	properties.getProperty(ConstantsMailProperties.MAIL_SMTP_USER),
-	            	properties.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD)
+	            	props.getProperty(ConstantsMailProperties.MAIL_SMTP_USER),
+	            	props.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD)
 	            );
 	            sessionMail = Session.getInstance(properties, smtpAuthenticator);
 	        } else {
 	            // Obtenemos la sesión sin seguridad
 	            sessionMail = Session.getDefaultInstance(properties);
 	        }
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Se ha producido un fallo al cargar alguna propiedad procedente del properties", e);
 		}
 		

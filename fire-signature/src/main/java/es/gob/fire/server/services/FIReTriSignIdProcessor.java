@@ -34,7 +34,7 @@ public class FIReTriSignIdProcessor {
 		int n = 0;
 		for (final TriSign sign : triData.getTriSigns()) {
 			if (sign.getId() != null) {
-				data.addSignOperation(new TriSign(sign.getDict(), sign.getId() + SEP + n));
+				data.addSignOperation(new TriSign(sign.getDict(), sign.getId() + SEP + n, sign.getSignatureId()));
 			}
 			else {
 				data.addSignOperation(new TriSign(sign));
@@ -56,7 +56,7 @@ public class FIReTriSignIdProcessor {
 
 		for (final TriSign sign : triData.getTriSigns()) {
 			if (sign.getId() != null && sign.getId().lastIndexOf(SEP) != -1) {
-				data.addSignOperation(new TriSign(sign.getDict(), sign.getId().substring(0, sign.getId().lastIndexOf(SEP))));
+				data.addSignOperation(new TriSign(sign.getDict(), sign.getId().substring(0, sign.getId().lastIndexOf(SEP)), sign.getSignatureId()));
 			}
 			else {
 				data.addSignOperation(new TriSign(sign));

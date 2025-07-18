@@ -8,16 +8,19 @@
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
-<%@page import="java.net.URLEncoder"%>
-<%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@page import="java.util.Map"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
-<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="es.gob.fire.signature.i18n.Language"%>
+<%@page import="es.gob.fire.signature.i18n.IWebViewMessages"%>
+<%@page import="java.net.URLEncoder"%>
 <%@page import="java.security.cert.X509Certificate"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Locale"%>
+<%@page import="java.util.Map"%>
+<%@page import="java.util.Properties"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%
@@ -42,6 +45,12 @@
 		Responser.sendError(response, FIReError.FORBIDDEN);
 		return;
 	}
+	
+	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
+	if (language == null || language.isEmpty()) {
+		language = "es";
+	}
+	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 		
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	if (appId != null) {
@@ -64,9 +73,8 @@
 	boolean originForced = Boolean
 			.parseBoolean(fireSession.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
 		
-	// Extraemos de la sesion los certificados y los eliminamos de la misma
+	// Extraemos de la sesion los certificados
 	final X509Certificate[] certificates = (X509Certificate[]) fireSession.getObject(trId + "-certs"); //$NON-NLS-1$
-	fireSession.removeAttribute(trId + "-certs"); //$NON-NLS-1$
 
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -89,7 +97,7 @@
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title>Selección de certificado de firma</title>
+	<title><%= Language.getResFireSignature(IWebViewMessages.CERT_SELECTION) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -110,11 +118,21 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec">Firma solicitada por <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
 			<div class="clr"></div>
+			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+				<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
+				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
+				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
+				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
+				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				</select>
+			</div>
 		</div>
 	</header>
 
@@ -125,7 +143,7 @@
 		<section class="contenido">
 				<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold">Seleccione el certificado de firma</span></h1>
+						<h1 class="title"><span class="bold"><%= Language.getResFireSignature(IWebViewMessages.SELECT_CERT) %></span></h1>
 					</div>
 					
 				</div>
@@ -151,8 +169,8 @@
 						</div>
 						<div class="cert-box-center">
 							<h2 class="title-cert-box"><%= subject %></h2>
-							<p class="text-cert-box">Emitido por <%= issuer %></p>
-							<p class="text-cert-box">Fecha de caducidad: <%= date %></p>
+							<p class="text-cert-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_ISSUED_BY) %> <%= issuer %></p>
+							<p class="text-cert-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_EXPIRATION_DATE) %>: <%= date %></p>
 						</div>
 						<div class="cert-box-right">
 							<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_PRESIGN %>" id="certForm<%= i %>">
@@ -161,7 +179,7 @@
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 							<input  type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="<%= cert %>">
 							<a class="button" title="Firmar con el certificado de <%= subject %>" onclick="document.getElementById('certForm<%= i %>').submit()" href="javascript:{}">
-								<span >seleccionar</span>
+								<span ><%= Language.getResFireSignature(IWebViewMessages.SELECT_BTN) %></span>
 								<span class="arrow-right"></span>
 							</a>
 							
@@ -184,10 +202,10 @@
 					</form>
 				
 					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-						<span >Cancelar</span>
+						<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 					</a>
 				<% } else { %>
-					<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
+					<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
 						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
 						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
 						<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
@@ -196,10 +214,18 @@
 				
 					<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 						<span class="arrow-left-white"></span>
-						<span >Volver</span>
+						<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 					</a>
 				<% } %>
-			</div>		
+			</div>	
+			
+			<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_CHANGE %>" id="changeLangForm">
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>" />
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" name="<%= ServiceParams.HTTP_PARAM_TRANSACTION_ID %>" value="<%= trId %>" />
+				<input type="hidden" id="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
+				<input type="hidden" id="languageConf" name="<%= ServiceParams.HTTP_PARAM_LANGUAGE %>" value="<%= language %>" />
+				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_PAGE %>" value="<%= FirePages.PG_CHOOSE_CERTIFICATE %>" />
+			</form>	
 		</section>
 	</main>
 	
@@ -217,5 +243,14 @@
 			</div>
 		</div>
 	</footer>
+	<script type="text/javascript">
+	
+	function changeLanguage() {
+		var languageSelected = document.getElementById('languageSelect').value;	
+		document.getElementById('languageConf').value = languageSelected;
+	    document.getElementById('changeLangForm').submit();
+	}
+	
+	</script>
 </body>
 </html>

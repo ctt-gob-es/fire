@@ -45,7 +45,7 @@ public class UtilsDate {
 	 * Constant attribute that represents the date format <code>yyyy-MM-dd EEE HH:mm:ss ZZZZ</code>.
 	 */
 	public static final String FORMAT_FULL = "yyyy-MM-dd EEE HH:mm:ss ZZZZ";
-
+	
 	/**
 	 * Constant attribute that represents the date format <code>yyyy-MM-dd</code>.
 	 */

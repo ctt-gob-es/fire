@@ -102,8 +102,15 @@
 				}
 			}
 		  },
-		  error:function(){
+		  error:function(xhr, error){
 			  hide();
+			  
+			  if (xhr.status === 401 || xhr.status === 403) {
+                  window.location.reload();
+              } else {
+                  console.error("Error al realizar la peticion: " + error);
+              }
+			  
 			  $('#errorModalUser').remove();
 			  $('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>Error inesperado, int\u00E9ntelo mas tarde</strong></div>');
 		  },

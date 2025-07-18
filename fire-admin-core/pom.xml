@@ -78,13 +78,6 @@
 		</dependency>
 
 		<dependency>
-			<groupId>jfree</groupId>
-			<artifactId>jfreechart</artifactId>
-			<version>1.0.13</version>
-			<scope>compile</scope>
-		</dependency>
-
-		<dependency>
 			<groupId>es.gob.afirma.lib</groupId>
 			<artifactId>afirma-lib-itext</artifactId>
 			<version>1.6</version>

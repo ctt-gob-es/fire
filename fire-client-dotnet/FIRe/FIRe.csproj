@@ -70,6 +70,7 @@
     <Compile Include="GenerateCert\GenerateCertificateResult.cs" />
     <Compile Include="GenerateCert\HttpGenerateCertificate.cs" />
     <Compile Include="GenerateCert\HttpCertificateAvailableException.cs" />
+    <Compile Include="HttpTooLargeContentException.cs" />
     <Compile Include="HttpWeakRegistryException.cs" />
     <Compile Include="HttpNoUserException.cs" />
     <Compile Include="FIRe\FireBatchResult.cs" />

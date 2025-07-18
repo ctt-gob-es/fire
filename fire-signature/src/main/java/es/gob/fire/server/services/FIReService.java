@@ -19,6 +19,7 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.services.internal.AddDocumentBatchManager;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.ApplicationInfo;
@@ -56,7 +57,7 @@ public class FIReService extends HttpServlet {
     	super.init();
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
 
     	// Comprobamos la configuracion
     	try {
@@ -113,11 +114,12 @@ public class FIReService extends HttpServlet {
     	LOGGER.info("Componente central de FIRe cargado correctamente"); //$NON-NLS-1$
     }
 
-	@Override
+    @Override
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine("Nueva peticion entrante"); //$NON-NLS-1$
 
+		// Comprobamos que la configuracion este inicializada
 		if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -136,9 +138,10 @@ public class FIReService extends HttpServlet {
 	    	}
 		}
 
-		RequestParameters params;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
@@ -146,22 +149,23 @@ public class FIReService extends HttpServlet {
 			return;
 		}
 
-    	final String appId     = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
-        final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
-        final String trId      = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-
-        final TransactionAuxParams trAux = new TransactionAuxParams(appId, LogUtils.limitText(trId));
-		final LogTransactionFormatter logF = trAux.getLogFormatter();
+		// Cargamos los datos esenciales para la autenticacion
+		final String appId = params.getAppId();
+        final String trId  = params.getTransactionId();
 
 		// El identificador de aplicacion es obligatorio, incluso si no es necesario
 		// validarlo posteriormente
     	if (appId == null || appId.isEmpty()) {
-    		LOGGER.warning(logF.f("No se ha proporcionado el identificador de la aplicacion en una peticion entrante")); //$NON-NLS-1$
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
             Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
             return;
         }
 
-    	// Comprobamos que la peticion este autorizada
+        // Construimos el formateado de logs
+		final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		// Comprobamos que la peticion este autorizada
     	ApplicationInfo appInfo;
     	try {
     		appInfo = ServiceUtil.checkAccess(appId, request, trAux);
@@ -173,21 +177,36 @@ public class FIReService extends HttpServlet {
 		}
     	catch (final CertificateValidationException e) {
     		LOGGER.log(Level.WARNING, logF.f("Error al validar el certificado cliente"), e); //$NON-NLS-1$
-            Responser.sendError(response, e.getError());
+    		AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error al validar el certificado cliente");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+    		Responser.sendError(response, e.getError());
             return;
 		}
     	catch (final UnauthorizedApplicacionException e) {
     		LOGGER.log(Level.WARNING, logF.f("Acceso denegado"), e); //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.ACCESS_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Acceso denegado");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
             Responser.sendError(response, FIReError.UNAUTHORIZED);
             return;
 		}
     	catch (final Exception e) {
     		LOGGER.log(Level.SEVERE, logF.f("Error desconocido al validar la peticion"), e); //$NON-NLS-1$
-            Responser.sendError(response, FIReError.INTERNAL_ERROR);
+    		AlarmsManager.notify(Alarm.SIGN_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error desconocido al validar la peticion");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
+    		Responser.sendError(response, FIReError.INTERNAL_ERROR);
             return;
 		}
 
     	LOGGER.fine(logF.f("Peticion autorizada")); //$NON-NLS-1$
+
+    	// Comprobamos los parametros de la peticion
+		try {
+			params.checkParameters(appId, logF);
+		}
+		catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
+        final String operation = params.getParameter(ServiceParams.HTTP_PARAM_OPERATION);
 
         if (operation == null || operation.isEmpty()) {
             LOGGER.warning(logF.f("No se ha indicado la operacion a realizar en servidor")); //$NON-NLS-1$
@@ -210,7 +229,7 @@ public class FIReService extends HttpServlet {
     	try {
     		switch (op) {
     		case SIGN:
-    			SignOperationManager.sign(request, appInfo.getName(), params, trAux, response);
+    			SignOperationManager.sign(request, appInfo, params, trAux, response);
     			break;
     		case RECOVER_SIGN:
     			RecoverSignManager.recoverSignature(params, trAux, response);
@@ -219,7 +238,7 @@ public class FIReService extends HttpServlet {
     			RecoverSignResultManager.recoverSignature(params, trAux, response);
     			break;
     		case CREATE_BATCH:
-    			CreateBatchManager.createBatch(request, appInfo.getName(), params, trAux, response);
+    			CreateBatchManager.createBatch(request, appInfo, params, trAux, response);
     			break;
     		case ADD_DOCUMENT_TO_BATCH:
     			AddDocumentBatchManager.addDocument(params, trAux, response);

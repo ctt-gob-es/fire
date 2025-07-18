@@ -69,6 +69,8 @@ CREATE TABLE `tb_firmas` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fecha` TIMESTAMP DEFAULT NULL COMMENT 'Fecha de la operacion',
   `aplicacion` varchar(45) DEFAULT NULL COMMENT 'Aplicacion que solicito la operacion',
+  `dir3_code` varchar(50) DEFAULT NULL COMMENT 'Codigo DIR3',
+  `organization` varchar(255) DEFAULT NULL COMMENT 'Nombre de organizacion',
   `formato` varchar(20) DEFAULT NULL COMMENT 'Formato de firma',
   `formato_mejorado` varchar(20) DEFAULT NULL COMMENT 'Formato longevo al que actualizar',
   `algoritmo` varchar(20) DEFAULT NULL COMMENT 'Algoritmo de firma',
@@ -84,6 +86,8 @@ CREATE TABLE `tb_transacciones` (
   `id` int(11) NOT NULL AUTO_INCREMENT,
   `fecha` TIMESTAMP NOT NULL COMMENT 'Fecha de la operacion',
   `aplicacion` varchar(45) NOT NULL COMMENT 'Aplicacion que solicito la operacion',
+  `dir3_code` varchar(50) DEFAULT NULL COMMENT 'Codigo DIR3',
+  `organization` varchar(255) DEFAULT NULL COMMENT 'Nombre de organizacion',
   `operacion` varchar(10) NOT NULL COMMENT 'Tipo de operacion',
   `proveedor` varchar(45) NOT NULL COMMENT 'Nombre del proveedor de firma',
   `proveedor_forzado` tinyint(1) DEFAULT '0' COMMENT 'Si solo habia un proveedor o si la aplicacion forzo que se usase ese',
@@ -181,7 +185,7 @@ CREATE TABLE TB_PROGRAMADOR (
   ID_PROGRAMADOR BIGINT NOT NULL AUTO_INCREMENT,
   NOMBRE_TOKEN VARCHAR(30) NOT NULL,
   NOMBRE_CLASE VARCHAR(255) NOT NULL,
-  ESTA_ACTIVO CHAR(1) NOT NULL,
+  ESTA_ACTIVO tinyint(1) NOT NULL,
   NUM_HILOS BIGINT,
   NUM_PROCESOS BIGINT,
   PERIODO_EXPIRADO BIGINT,
@@ -207,10 +211,10 @@ CREATE TABLE TB_CONTROL_ACCESO (
 
 -- Tabla TB_PROVEEDORES
 CREATE TABLE `tb_proveedores` (
-  `id_proveedor` bigint NOT NULL,
+  `id_proveedor` varchar(20) NOT NULL,
   `nombre` varchar(50) NOT NULL,
-  `obligatorio` char(1) NOT NULL,
-  `habilitado` char(1) NOT NULL,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_proveedor`)
@@ -218,10 +222,10 @@ CREATE TABLE `tb_proveedores` (
 
 -- Tabla TB_PROVEEDORES_APLICACION
 CREATE TABLE `tb_proveedores_aplicacion` (
-  `id_proveedor` bigint NOT NULL,
+  `id_proveedor` varchar(20) NOT NULL,
   `id_aplicacion` varchar(48) NOT NULL,
-  `obligatorio` char(1) NOT NULL,
-  `habilitado` char(1) NOT NULL,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_aplicacion`, `id_proveedor`),
@@ -239,3 +243,28 @@ CREATE TABLE `tb_propiedades` (
   
   PRIMARY KEY (`clave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
+
+-- Tabla CATALOGO TIPO AUTENTICACION
+CREATE TABLE `TB_C_TIPO_AUTENTICACION` (
+    `ID_TIPO_AUTENTICACION`   BIGINT NOT NULL,
+    `NOMBRE_TOKEN`            VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`ID_TIPO_AUTENTICACION`)
+);
+
+-- Tabla SERVIDOR_AFIRMA
+CREATE TABLE `TB_SERVIDOR_AFIRMA` (
+    `ID_SERVIDOR_AFIRMA`      BIGINT NOT NULL,
+    `URL_SERVIDOR`            VARCHAR(255) NOT NULL,
+    `FIN_CONEXION`            INT NOT NULL,
+    `NOMBRE_APLICACION`       VARCHAR(45) NOT NULL,
+    `ID_TIPO_AUTENTICACION`   TINYINT NOT NULL,
+    `USUARIO`                 VARCHAR(45) NULL,
+    `PASSWORD`                TEXT NULL,
+    `ALMACEN`                 TEXT NULL,
+    `PASSWORD_ALMACEN`        TEXT NULL,
+    `FECHA_ULTIMA_COMUNICACION` datetime NULL,
+    PRIMARY KEY (`ID_SERVIDOR_AFIRMA`),
+    CONSTRAINT `FK_ID_TIPO_AUTENTICACION`
+        FOREIGN KEY (`ID_TIPO_AUTENTICACION`)
+        REFERENCES `TB_C_TIPO_AUTENTICACION`(`ID_TIPO_AUTENTICACION`)
+);

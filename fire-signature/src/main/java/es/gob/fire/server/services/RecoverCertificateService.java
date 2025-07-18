@@ -41,14 +41,6 @@ public final class RecoverCertificateService extends HttpServlet {
 
 	private static final Logger LOGGER = Logger.getLogger(RecoverCertificateService.class.getName());
 
-    // Parametros que necesitamos de la URL. Se mantiene por compatibilidad ya que en las nuevas
-	// versiones se utiliza "appid"
-    private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_APPLICATION_ID = "appId"; //$NON-NLS-1$
-
-    private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_TRANSACTION_ID = "transactionId"; //$NON-NLS-1$
-
     @Override
     public void init() throws ServletException {
     	super.init();
@@ -70,15 +62,13 @@ public final class RecoverCertificateService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
     /** Recepci&oacute;n de la petici&oacute;n GET y realizaci&oacute;n de la
      * firma. */
-    @Override
-    protected void service(final HttpServletRequest request,
-    					   final HttpServletResponse response) {
-
+	@Override
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
         if (!ConfigManager.isInitialized()) {
 			try {
 				ConfigManager.checkConfiguration();
@@ -97,21 +87,36 @@ public final class RecoverCertificateService extends HttpServlet {
 	    	}
 		}
 
-    	RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
+        // Verificar si los servicios antiguos estan habilitados
+	    if (!ConfigManager.isLegacyServicesEnabled()) {
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
+	        return;
+	    }
+
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-			Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST, "Error en la lectura de los parametros de entrada"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		updateLegacyKeys(params);
 
-    	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String trId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
+    	final String appId = params.getAppId();
+    	final String trId = params.getTransactionId();
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(LogUtils.limitText(appId), LogUtils.limitText(trId));
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
+
+    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
     	final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de recuperacion del certificado generado")); //$NON-NLS-1$
@@ -141,13 +146,22 @@ public final class RecoverCertificateService extends HttpServlet {
             return;
 		}
 
+    	try {
+    		params.checkParameters(appId, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
     	// Comprobamos si se indica un proveedor y, si no, se utiliza el
     	// por defecto de Clave Firma
     	String certOrigin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
     	if (certOrigin == null) {
     		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
     	}
-    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
+    	params.putParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
@@ -155,17 +169,6 @@ public final class RecoverCertificateService extends HttpServlet {
 
         LOGGER.fine(logF.f("Fin de la llamada al servicio publico de recuperacion del certificado generado")); //$NON-NLS-1$
     }
-
-    /**
-     * Sustituye los nombres de par&aacute;metro utilizados por versiones anteriores,
-     * por el nombre actual.
-     * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
-     */
-    private static void updateLegacyKeys(final RequestParameters params) {
-    	params.replaceParamKey(OLD_PARAMETER_NAME_APPLICATION_ID, PARAMETER_NAME_APPLICATION_ID);
-    	params.replaceParamKey(OLD_PARAMETER_NAME_TRANSACTION_ID, PARAMETER_NAME_TRANSACTION_ID);
-    }
-
 
 	/**
 	 * Ejecuta una operaci&oacute;n de recuperaci&oacute;n del certificado generado

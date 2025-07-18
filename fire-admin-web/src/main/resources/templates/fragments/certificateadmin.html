@@ -66,7 +66,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
             { data: 'status', "orderable": true },
             { data: 'fechaAlta', "orderable": true }
         ],
-    "order" : [ 1, 'desc' ],
+    "order" : [ 1, 'asc' ],
     responsive :  true,
     dom: 'Bfrtip',
     select: 'single',
@@ -83,7 +83,13 @@ var tableCertFire = $('#certServiceTable').DataTable({
 						$('#modal').html(data);
 						$('#certAddModal').modal('show');																
 					},
-					error : function() {}
+					error : function(xhr) {
+                        if (xhr.status === 401 || xhr.status === 403) {
+                            window.location.reload();
+                        } else {
+                            console.error("Error al realizar la peticion: " + error);
+                        }
+					}
 				});
 		}},
     	{extend: 'selected',text: 'Editar',name: 'editt',
@@ -110,7 +116,13 @@ var tableCertFire = $('#certServiceTable').DataTable({
  							$('#modal').html(data);
  							$('#certEditModal').modal('show');																
  						},
- 						error : function() {}
+ 						error : function(xhr) {
+ 							if (xhr.status === 401 || xhr.status === 403) {
+ 	                            window.location.reload();
+ 	                        } else {
+ 	                            console.error("Error al realizar la peticion: " + error);
+ 	                        }
+ 						}
  					});
    			}
     	},
@@ -143,10 +155,15 @@ var tableCertFire = $('#certServiceTable').DataTable({
 							    		$('#modal').html(data);
 										$('#modalDeleteCert').modal('show');
 							        },
-							        error:function(data){
+							        error:function(data, xhr, error){
 							        	// Se oculta la capa 'cargando...'
 							        	hide();
 							        
+							        	if (xhr.status === 401 || xhr.status === 403) {
+				                            window.location.reload();
+				                        } else {
+				                            console.error("Error al realizar la peticion: " + error);
+				                        }
 									}
 					});
 		 	 	}
@@ -182,7 +199,13 @@ var tableCertFire = $('#certServiceTable').DataTable({
 							$('#modal').html(data);
 							$('#certViewModal').modal('show');																
 						},
-						error : function() {}
+						error : function(xhr) {
+							if (xhr.status === 401 || xhr.status === 403) {
+	                            window.location.reload();
+	                        } else {
+	                            console.error("Error al realizar la peticion: " + error);
+	                        }
+						}
 					});
 			}
 		}
@@ -204,10 +227,16 @@ function editCertificate(idCertificate) {
 			$('#modalEditCertificate').modal('show');
     		
         },
-        error:function(data){
+        error:function(data, xhr, error){
         	// Se oculta la capa 'cargando...'
         	hide();       
-}
+			
+        	if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion: " + error);
+            }
+        }
 	});
 }
 
@@ -235,11 +264,16 @@ function deleteConfirmCertificate(idCertificate,  element) {
 	    		$('#modal').html(data);
 				$('#modalDeleteCertificate').modal('show');
 	        },
-	        error:function(data){
+	        error:function(data, xhr, error){
 	        	// Se oculta la capa 'cargando...'
 	        	hide();
 	        
-	}
+	        	if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion: " + error);
+                }
+			}
 		});
 }
 

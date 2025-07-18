@@ -85,6 +85,16 @@ public class TransactionDTO {
 	 * Attribute that represents the value of the total batch signatures transactions.
 	 */
 	private Integer totalBatch;
+	
+	/**
+	 * Attribute that represents the value of the associated application.
+	 */
+	private String application;
+	
+	/**
+	 * Attribute that represents the value of the associated application.
+	 */
+	private String organization;
 
 	public TransactionDTO(final String name, final double sizeBytes) {
 		this.name = name;
@@ -107,6 +117,35 @@ public class TransactionDTO {
 		this.correctBatchSignatures = correctBatchSignatures;
 		this.incorrectBatchSignatures = incorrectBatchSignatures;
 		this.totalBatch = totalBatch;
+	}
+	
+	public TransactionDTO(final String name, final double sizeBytes, final String application, final String organization) {
+		this.name = name;
+		this.sizeBytes = sizeBytes;
+		this.application = application;
+		this.organization = organization;
+	}
+	
+	public TransactionDTO(final String name, final Integer corrects, final Integer incorrects, final Integer total, final String application, final String organization) {
+		this.name = name;
+		this.corrects = corrects;
+		this.incorrects = incorrects;
+		this.total = total;
+		this.application = application;
+		this.organization = organization;
+	}
+
+	public TransactionDTO(final String name, final Integer correctSimpleSignatures, final Integer incorrectSimpleSignatures, final Integer totalSimple,
+			final Integer correctBatchSignatures, final Integer incorrectBatchSignatures, final Integer totalBatch, final String application, final String organization) {
+		this.name = name;
+		this.correctSimpleSignatures = correctSimpleSignatures;
+		this.incorrectSimpleSignatures = incorrectSimpleSignatures;
+		this.totalSimple = totalSimple;
+		this.correctBatchSignatures = correctBatchSignatures;
+		this.incorrectBatchSignatures = incorrectBatchSignatures;
+		this.totalBatch = totalBatch;
+		this.application = application;
+		this.organization = organization;
 	}
 
 	public String getName() {
@@ -197,5 +236,19 @@ public class TransactionDTO {
 		this.totalBatch = totalBatchP;
 	}
 
+	public String getApplication() {
+		return application;
+	}
 
+	public void setApplication(String application) {
+		this.application = application;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
 }

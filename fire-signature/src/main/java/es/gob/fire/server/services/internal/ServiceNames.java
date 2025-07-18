@@ -47,6 +47,9 @@ public class ServiceNames {
 
 	/** Servicio para regresar a una p&aacute;gina. */
 	public static final String PUBLIC_SERVICE_BACK = "backService"; //$NON-NLS-1$
+	
+	/** Servicio para actualizar cambios en una p&aacute;gina. */
+	public static final String PUBLIC_SERVICE_CHANGE = "changeService"; //$NON-NLS-1$
 
 	/** Servicio para el guardado de datos temporales del Cliente @firma. */
 	public static final String PUBLIC_SERVICE_AFIRMA_STORAGE = "storage"; //$NON-NLS-1$

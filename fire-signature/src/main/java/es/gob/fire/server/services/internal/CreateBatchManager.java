@@ -36,13 +36,13 @@ public class CreateBatchManager {
 	/**
 	 * Create un lote de firma.
 	 * @param request Petici&oacute;n para la creaci&oacute;n del lote.
-	 * @param appName Nombre de la aplicaci&oacute;n.
+	 * @param appInfo Informaci&oacute;n de la aplicaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta de la creaci&oacute;n del lote.
 	 * @throws IOException Cuando se produce un error de lectura o env&iacute;o de datos.
 	 */
-	public static void createBatch(final HttpServletRequest request, final String appName,
+	public static void createBatch(final HttpServletRequest request, final ApplicationInfo appInfo,
 			final RequestParameters params, final TransactionAuxParams trAux, final HttpServletResponse response)
 		throws IOException {
 
@@ -127,7 +127,14 @@ public class CreateBatchManager {
 		String[] provs;
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
-			provs = ProviderManager.getFilteredProviders(requestedProvs);
+			try {
+				provs = ProviderManager.getFilteredProviders(appId, requestedProvs, logF);
+			}
+			catch (final Exception e) {
+				LOGGER.warning(logF.f("No se ha podido cargar el listado de proveedores configurados en el sistema")); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.INTERNAL_ERROR);
+				return;
+			}
 			if (provs.length == 0) {
 				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);
@@ -135,7 +142,7 @@ public class CreateBatchManager {
 			}
 		}
         else {
-        	provs = ProviderManager.getProviderNames();
+        	provs = ProviderManager.getProviderNames(appId, logF);
         }
 
 		final String appTitle = connConfig.getAppTitle();
@@ -153,7 +160,7 @@ public class CreateBatchManager {
 
         // Guardamos los datos recibidos en la sesion
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
-        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
+        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appInfo.getName());
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
@@ -166,7 +173,14 @@ public class CreateBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_ID, transactionId);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
         session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.BATCH);
-
+        
+        if (appInfo.getDir3Code() != null && !appInfo.getDir3Code().isEmpty()) {
+    		session.setAttribute(ServiceParams.SESSION_PARAM_DIR3_CODE, appInfo.getDir3Code());
+    	}
+        
+        if (appInfo.getOrganization() != null && !appInfo.getOrganization().isEmpty()) {
+    		session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION, appInfo.getOrganization());
+    	}
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto

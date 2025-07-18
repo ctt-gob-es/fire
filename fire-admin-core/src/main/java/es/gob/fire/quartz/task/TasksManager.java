@@ -20,18 +20,19 @@
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * <b>Date:</b><p>20/10/2021.</p>
  * @author Gobierno de España.
- * @version 1.6, 12/02/2025.
+ * @version 1.7, 04/03/2025.
  */
 package es.gob.fire.quartz.task;
 
 import javax.annotation.PostConstruct;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.BeansException;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
 
-import es.gob.fire.commons.log.Logger;
-import es.gob.fire.i18n.ICoreGeneralMessages;
+import es.gob.fire.i18n.ICoreMessages;
 import es.gob.fire.i18n.ISchedulerIdConstants;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.entity.Planner;
@@ -49,7 +50,7 @@ import es.gob.fire.spring.config.ApplicationContextProvider;
  * <p>Class that manages the named 'Tasks'. This tasks are only managed
  * by administrators of the platform.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
- * @version 1.6, 12/02/2025.
+ * @version 1.7, 04/03/2025.
  */
 @Component
 public class TasksManager {
@@ -57,7 +58,7 @@ public class TasksManager {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(TasksManager.class);
+	private static final Logger LOGGER = LogManager.getLogger(TasksManager.class);
 
 	/**
 	 * The {@link ApplicationContextProvider} instance used to access the Spring application context.
@@ -95,7 +96,7 @@ public class TasksManager {
 	
 		// Obtenemos el nombre de la tarea.
 		String taskName = scheduler.getSchedulerName();
-		// Obtenemos su implementación.
+		// Obtenemos su implementacion.
 		String implementationClassName = scheduler.getClassName();
 		
 		try {
@@ -107,16 +108,15 @@ public class TasksManager {
 				tasksScheduler.stopTask(taskName);
 			}
 
-			// Si la tarea está habilitada, la generamos de nuevo.
-			if (scheduler.getIsActive()) {
-				// Llamamos al método auxiliar (para reducir complejidad
-				// ciclomática).
+			// Si la tarea esta habilitada, la generamos de nuevo.
+			if (scheduler.isActive()) {
+				// Llamamos al metodo auxiliar (para reducir complejidad
+				// ciclomatica).
 				loadSchedulersAux(scheduler, taskName, implementationClassName);
 			}
 						
-		}catch (Exception e) {
-			
-			
+		} catch (Exception e) {
+			LOGGER.error("Ocurrio un error al programar la tarea", e);			
 		}
 	}
 	
@@ -137,7 +137,7 @@ public class TasksManager {
 		// Si al menos hay un planificador...
 		if (planner != null) {
 
-			LOGGER.debug(Language.getFormatResCoreTasks(ICoreGeneralMessages.TASK_MNG_002, new Object[ ] { schedulerName, implementationClassName }));
+			LOGGER.debug(Language.getFormatResCoreTasks(ICoreMessages.TASK_MNG_002, new Object[ ] { schedulerName, implementationClassName }));
 
 			TasksScheduler tasksScheduler = TasksScheduler.getInstance();
 	
@@ -146,7 +146,7 @@ public class TasksManager {
 			try {
 				tasksScheduler.addOrReplacePlannerInTask(schedulerName, calculatedPlanner, (Class<es.gob.fire.quartz.task.FireTask>) Class.forName(implementationClassName), null);
 			} catch (FireSchedulerException e) {
-				LOGGER.error(Language.getFormatResCoreTasks(ICoreGeneralMessages.TASK_MNG_003, new Object[ ] { schedulerName }), e);
+				LOGGER.error(Language.getFormatResCoreTasks(ICoreMessages.TASK_MNG_003, new Object[ ] { schedulerName }), e);
 			}
 			
 

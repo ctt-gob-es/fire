@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/02/2025.
  */
 package es.gob.fire.commons.utils;
 
@@ -34,14 +34,21 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 
+import javax.security.auth.x500.X500Principal;
+
 import org.bouncycastle.asn1.ASN1InputStream;
+import org.bouncycastle.asn1.ASN1ObjectIdentifier;
 import org.bouncycastle.asn1.ASN1OctetString;
 import org.bouncycastle.asn1.ASN1Primitive;
+import org.bouncycastle.asn1.x500.AttributeTypeAndValue;
+import org.bouncycastle.asn1.x500.RDN;
+import org.bouncycastle.asn1.x500.X500Name;
+import org.bouncycastle.asn1.x500.style.BCStyle;
 
 /** 
  * <p>Class that manages operations related with the management of certificates.</p>
  * <b>Project:</b><p></p>
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/02/2025.
  */
 public class UtilsCertificate {
 
@@ -289,5 +296,53 @@ public class UtilsCertificate {
             }
         }
         return dnMap;
+    }
+	
+	/**
+     * Converts an X500Principal (from subject or issuer) into a human-readable string.
+     *
+     * @param principal The X500Principal to decode.
+     * @return A readable string representation of the principal.
+     */
+    public static String getReadableX500Principal(X500Principal principal) {
+        X500Name x500Name = X500Name.getInstance(principal.getEncoded());
+        StringBuilder readableName = new StringBuilder();
+
+        for (RDN rdn : x500Name.getRDNs()) {
+            AttributeTypeAndValue[] attributes = rdn.getTypesAndValues();
+            for (AttributeTypeAndValue attribute : attributes) {
+                ASN1ObjectIdentifier oid = attribute.getType();
+                String oidName = BCStyle.INSTANCE.oidToDisplayName(oid); // Convert OID to readable name
+                String value = attribute.getValue().toString(); // Get the actual value
+                readableName.append(oidName).append("=").append(value).append(", ");
+            }
+        }
+
+        // Remove the trailing comma and space
+        if (readableName.length() > 2) {
+            readableName.setLength(readableName.length() - 2);
+        }
+
+        return readableName.toString();
+    }
+
+    /**
+     * Extracts and prints a readable Subject from an X509Certificate.
+     *
+     * @param cert The X509Certificate.
+     * @return A human-readable subject string.
+     */
+    public static String getReadableSubject(X509Certificate cert) {
+        return getReadableX500Principal(cert.getSubjectX500Principal());
+    }
+
+    /**
+     * Extracts and prints a readable Issuer from an X509Certificate.
+     *
+     * @param cert The X509Certificate.
+     * @return A human-readable issuer string.
+     */
+    public static String getReadableIssuer(X509Certificate cert) {
+        return getReadableX500Principal(cert.getIssuerX500Principal());
     }
 }

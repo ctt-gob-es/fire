@@ -178,7 +178,7 @@ public class Application implements Serializable{
 	 * Gets the value of the attribute {@link #habilitado}.
 	 * @return the value of the attribute {@link #habilitado}.
 	 */
-	@JoinColumn(name = "HABILITADO", nullable = false)
+	@Column(name = "HABILITADO", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public boolean isHabilitado() {
 		return this.habilitado;
@@ -281,17 +281,16 @@ public class Application implements Serializable{
      * Gets the value of the attribute {@link #customProvider}.
      * @return the value of the attribute {@link #customProvider}.
      */
-    @Column(name = "PROVEEDOR_PERSONALIZADO", nullable = false, precision = 1)
-    @Type(type = "yes_no")
-    public Boolean getCustomProvider() {
+	@Column(name = "PROVEEDOR_PERSONALIZADO")
+	 public boolean isCustomProvider() {
         return customProvider;
     }
-    
+
     /**
 	 * Sets the value of the attribute {@link #customProvider}.
 	 * @param userNameP The value for the attribute {@link #customProvider}.
 	 */
-	public void setCustomProvider(final Boolean customProvider) {
+	public void setCustomProvider(final boolean customProvider) {
 		this.customProvider = customProvider;
 	}
 	
@@ -299,9 +298,8 @@ public class Application implements Serializable{
      * Gets the value of the attribute {@link #customSize}.
      * @return the value of the attribute {@link #customSize}.
      */
-    @Column(name = "TAMANO_PERSONALIZADO", nullable = false, precision = 1)
-    @Type(type = "yes_no")
-    public Boolean getCustomSize() {
+	@Column(name = "TAMANO_PERSONALIZADO")
+    public boolean isCustomSize() {
         return customSize;
     }
     
@@ -309,7 +307,7 @@ public class Application implements Serializable{
 	 * Sets the value of the attribute {@link #customSize}.
 	 * @param userNameP The value for the attribute {@link #customSize}.
 	 */
-	public void setCustomSize(final Boolean customSize) {
+	public void setCustomSize(final boolean customSize) {
 		this.customSize = customSize;
 	}
 

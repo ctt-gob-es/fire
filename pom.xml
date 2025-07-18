@@ -89,6 +89,7 @@
 				<module>fire-admin-persistence</module>
 				<module>fire-alarms</module>
 				<module>fire-alarms-graylog</module>
+				<module>fire-alarms-mail</module>
 				<module>fire-client-java</module>
 				<module>fire-log-handlers</module>
 				<module>fire-signature-common-libraries</module>
@@ -96,6 +97,7 @@
 				<module>fire-signature-connector-clavefirma-test</module>
 				<module>fire-signature-decipher</module>
 				<module>fire-signature-document</module>
+				<module>fire-signature-i18n</module>
 				<module>fire-statistics-cmd</module>
 				<module>fire-statistics-common</module>
 				<module>fire-upgrade</module>
@@ -112,7 +114,7 @@
 			<modules>
 				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
-				<module>fire-signature</module>
+				<module>fire-signature</module>	
 				<module>fire-test-jsp</module>
 				<module>log-consumer-service</module>
 			</modules>
@@ -133,6 +135,7 @@
 				<module>fire-alarms-eventmanager</module>
 			</modules>
 		</profile>
+
 	</profiles>
 
 	<dependencyManagement>
@@ -215,6 +218,12 @@
 				<artifactId>fire-signature-decipher</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
+			
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-signature-i18n</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
 
 			<dependency>
 				<groupId>es.gob.fire</groupId>
@@ -242,6 +251,11 @@
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms-eventmanager</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms-mail</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
 			<dependency>
@@ -525,7 +539,4 @@
 		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
 		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
 		</pluginRepository> </pluginRepositories> -->
-	<modules>
-		<module>fire-mail</module>
-	</modules>
 </project>

@@ -100,6 +100,7 @@ public class CreateBatchService extends HttpServlet {
 		final String algorithm = request.getParameter("algorithm"); //$NON-NLS-1$
 		final String extraparams = request.getParameter("extraParams"); //$NON-NLS-1$
 		final String upgrade = request.getParameter("upgrade"); //$NON-NLS-1$
+		final String language = request.getParameter("language"); //$NON-NLS-1$
 
 		CreateBatchResult createBatchResult;
 		try {
@@ -124,6 +125,11 @@ public class CreateBatchService extends HttpServlet {
 
 		// Guardamos el formato de firma por defecto para poder identificar luego la extension de los ficheros de firma
 		session.setAttribute("format", format); //$NON-NLS-1$
+		
+		if (language != null && !language.isEmpty()) {
+			// Guardamos el idioma en la sesion en caso de que se haya indicado
+			session.setAttribute("language", language); //$NON-NLS-1$
+		}
 
 		// Redirigimos al usuario a la pagina para agregar ficheros al lote
 		response.sendRedirect("AddDocumentToBatch.jsp"); //$NON-NLS-1$

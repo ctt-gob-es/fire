@@ -29,6 +29,9 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.commons.utils.QueryEnum;
+import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.entity.Signature;
 
@@ -40,67 +43,251 @@ import es.gob.fire.persistence.entity.Signature;
 public interface ISignatureService {
 
 	/**
-	 * Method that obtains the information for a signature by its identifier.
-	 * @param signatureId The signature identifier.
-	 * @return {@link Signature}
-	 */
-	Signature getSignatureBySignatureId(Long signatureId);
-	
-	/**
-     * Method that obtains from the persistence a signatures list grouped by application and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the signatures from the persistence
+     * Method that obtains the information for a signature by its identifier.
+     * 
+     * @param signatureId The signature identifier.
+     * @return {@link Signature}
      */
-	List<SignatureDTO> getSignaturesByApplication(Integer month, Integer year);
-	
-	/**
-     * Method that obtains from the persistence a signatures list grouped by provider and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the signatures from the persistence
-     */
-	List<SignatureDTO> getSignaturesByProvider(Integer month, Integer year);
-	
-	/**
-     * Method that obtains from the persistence a signatures list grouped by format and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the signatures from the persistence
-     */
-	List<SignatureDTO> getSignaturesByFormat(final Integer month, final Integer year);
-	
-	/**
-     * Method that obtains from the persistence a signatures list grouped by application and filtered by its long live format, year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the signatures from the persistence
-     */
-	List<SignatureDTO> getSignaturesByImprovedFormat(final Integer month, final Integer year);
-	
-	/**
-	 * Method that stores a signature object.
-	 * @param signature signature object
-	 * @return {@link Signature}
-	 */
-	Signature saveSignature(Signature signature);
+    Signature getSignatureBySignatureId(Long signatureId);
 
-	/**
-	 * Method that deletes a signature in the persistence.
-	 * @param signatureId {@link Long} that represents the signature to delete.
-	 */
-	void deleteSignatureById(Long signatureId);
+    /**
+     * Method that obtains from the persistence a signatures list grouped by application 
+     * and filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByApplication(Integer month, Integer year);
 
-	/**
-	 * Method that gets all the signatures from the persistence.
-	 * @return a {@link Iterable<Signature>} with all signatures.
-	 */
-	Iterable<Signature> getAllSignature();
+    /**
+     * Method that obtains from the persistence a signatures list grouped by application 
+     * and filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByApplication(Integer month, Integer year, List<String> applications, List<String> organizations);
 
-	/**
-	 * Method that returns a list of signatures to be showed in DataTable.
-	 * @param input DataTableInput with filtering, paging and sorting configuration.
-	 * @return A set of DataTable rows that matches the query.
-	 */
-	DataTablesOutput<Signature> getAllSignature(DataTablesInput input);
+    /**
+     * Method that obtains from the persistence a signatures list grouped by provider 
+     * and filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByProvider(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by provider 
+     * and filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByProvider(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by format 
+     * and filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByFormat(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by format 
+     * and filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByFormat(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by improved format 
+     * (long live format) and filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByImprovedFormat(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by improved format 
+     * (long live format) and filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByImprovedFormat(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by organism 
+     * and filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByOrganism(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a signatures list grouped by organism 
+     * and filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the signatures from the persistence.
+     */
+    List<SignatureDTO> getSignaturesByOrganism(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    // METHODS WITH INTERVAL (startMonth/startYear - endMonth/endYear)
+
+    /**
+     * Retrieves a list of signatures grouped by application, filtered by a date range defined by the provided start and end month/year.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByApplication(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of signatures grouped by application, filtered by a date range defined by the provided start and end month/year,
+     * and applying optional filters on applications and organizations.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByApplication(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of signatures grouped by provider, filtered by a date range defined by the provided start and end month/year.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByProvider(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of signatures grouped by provider, filtered by a date range defined by the provided start and end month/year,
+     * and applying optional filters on applications and organizations.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByProvider(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of signatures grouped by format, filtered by a date range defined by the provided start and end month/year.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByFormat(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of signatures grouped by format, filtered by a date range defined by the provided start and end month/year,
+     * and applying optional filters on applications and organizations.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByFormat(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of signatures grouped by improved format, filtered by a date range defined by the provided start and end month/year.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByImprovedFormat(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of signatures grouped by improved format, filtered by a date range defined by the provided start and end month/year,
+     * and applying optional filters on applications and organizations.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByImprovedFormat(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of signatures grouped by organism, filtered by a date range defined by the provided start and end month/year.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByOrganism(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of signatures grouped by organism, filtered by a date range defined by the provided start and end month/year,
+     * and applying optional filters on applications and organizations.
+     * 
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear the starting year of the date range.
+     * @param endMonth the ending month (1–12) of the date range.
+     * @param endYear the ending year of the date range.
+     * @param applications List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link SignatureDTO} objects matching the specified date range.
+     */
+    List<SignatureDTO> getSignaturesByOrganism(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    List<String> getDifferentApplications();
+    
+    List<OrganizationDTO> getDifferentOrganizations();
 }
