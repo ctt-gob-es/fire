@@ -37,7 +37,7 @@ CREATE TABLE `tb_usuarios` (
   `id_usuario` int(11) NOT NULL AUTO_INCREMENT COMMENT 'auto-numérico identificativo único',
   `nombre` varchar(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` varchar(120) NOT NULL COMMENT 'Apellidos del usuario',
-  `correo_elec` varchar(45) DEFAULT NULL COMMENT 'Correo electrónico',
+  `correo_elec` varchar(60) DEFAULT NULL COMMENT 'Correo electrónico',
   `telf_contacto` varchar(45) DEFAULT NULL COMMENT 'Teléfono de contacto',
   `fk_rol` int(11) NOT NULL,
   `fec_alta` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP COMMENT 'Fecha de alta del usuario.',

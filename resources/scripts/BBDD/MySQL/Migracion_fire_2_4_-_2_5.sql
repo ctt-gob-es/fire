@@ -8,8 +8,11 @@ ADD `dni` VARCHAR(9) NULL,
 ADD `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 UPDATE `tb_usuarios`
-SET `dni` = 'X0000000T';
+SET `dni` = 'X0000000T'
+WHERE id_usuario = 1;
 
+-- TABLA USUARIOS
+ALTER TABLE `tb_usuarios` CHANGE COLUMN `correo_elec` `huella` varchar(45);
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `nombre_usuario`;
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `clave`;
 ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `dni_UNIQUE` (`dni`),
@@ -17,7 +20,7 @@ ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `codigo_renovacion_UNIQUE` (
 
 -- TABLA DE CERTIFICADOS
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);
-ALTER TABLE `tb_certificados` CHANGE COLUMN `huella_principal` `huella` varchar(45);
+ALTER TABLE `tb_certificados` CHANGE COLUMN `correo_elec` varchar(60);
 ALTER TABLE `tb_certificados` DROP COLUMN `cert_backup`;
 ALTER TABLE `tb_certificados` DROP COLUMN `huella_backup`;
 ALTER TABLE `tb_certificados` ADD `fec_caducidad` datetime NULL;
