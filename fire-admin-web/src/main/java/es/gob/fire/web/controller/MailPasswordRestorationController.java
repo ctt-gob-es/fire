@@ -294,9 +294,12 @@ public class MailPasswordRestorationController {
 	 * @throws Exception exception
 	 */
 	@RequestMapping(value = "restorepassword", method = RequestMethod.POST)
-	public String restorePassword(@RequestParam("restoreUserId") final Long restoreUserId, @RequestParam("restoreUserCode") final String restoreUserCode,
-			@RequestParam("username") final String username, @RequestParam("newPassword") final String newPassword,
-			@RequestParam("repeatNewPassword") final String repeatNewPassword, final HttpServletRequest request,
+	public String restorePassword(@RequestParam("restoreUserId") final Long restoreUserId, 
+			@RequestParam("restoreUserCode") final String restoreUserCode,
+			@RequestParam("username") final String username, 
+			@RequestParam("newPassword") final String newPassword,
+			@RequestParam("repeatNewPassword") final String repeatNewPassword, 
+			final HttpServletRequest request,
 			final Model model) throws Exception {
 		String result = "login.html";
 		try {
