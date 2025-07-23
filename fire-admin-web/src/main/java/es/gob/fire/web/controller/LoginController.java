@@ -33,6 +33,7 @@ import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
@@ -127,7 +128,7 @@ public class LoginController {
 	 */
 	@Autowired
 	private ThreadInfoDataSecureDTO threadInfoDataSecureDTO;
-	
+
 	@Autowired
     private VersionProperties versionProperties;
 
@@ -326,9 +327,9 @@ public class LoginController {
 
 	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
 	        this.threadInfoDataSecureDTO.clear();
-	        
-	        model.addAttribute("appVersion", versionProperties.getProjectVersion());
-	        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
+
+	        model.addAttribute("appVersion", this.versionProperties.getProjectVersion());
+	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear());
 
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
 	        return "inicio.html";
@@ -340,6 +341,8 @@ public class LoginController {
 	        	msgerror = e.getMessage();
 	        } else if (e instanceof KeyStoreException) {
 	        	msgerror = e.getMessage();
+	        } else if (e instanceof TimeoutException) {
+	        	msgerror = e.getMessage();
 	        } else if (e instanceof BadCredentialsException) {
 	        	LOGGER.error(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
@@ -348,6 +351,10 @@ public class LoginController {
 	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016);
 	        }
 
+    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
+    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
 	        model.addAttribute("errorMessage", msgerror);
 	        model.addAttribute("accessByCertificate", true);
 	        return "login.html";

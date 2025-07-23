@@ -31,6 +31,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.ParseException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.springframework.security.core.Authentication;
 
@@ -64,7 +65,7 @@ public interface ILoginService {
 
 	/**
     * Checks if the Pasarela service is available by sending a GET request to its URL.
-    * <p>This method attempts to establish a connection to the Pasarela service and checks if the response code is 200 (OK). 
+    * <p>This method attempts to establish a connection to the Pasarela service and checks if the response code is 200 (OK).
     * If successful, it returns {@code true}, otherwise, it returns {@code false}.</p>
     *
     * @return {@code true} if the Pasarela service responds with a status code of 200, otherwise {@code false}.
@@ -110,7 +111,7 @@ public interface ILoginService {
 	 * @return the X.509 certificate of the issuer if found, or {@code null} if not
 	 * @throws KeyStoreException if there is an error accessing the TrustStore
 	 * @throws CertificateException if the issuer certificate is null
-	 */ 
+	 */
 	X509Certificate validateIssuerWithTrustStoreUsers(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException, CertificateException;
 
 	/**
@@ -135,13 +136,13 @@ public interface ILoginService {
 	 *
 	 * @param certificate the X.509 certificate from which to extract the DNI
 	 * @return the extracted DNI as a string
-	 * @throws CertificateException if the certificate is invalid, does not contain a valid DNI, 
+	 * @throws CertificateException if the certificate is invalid, does not contain a valid DNI,
 	 *                              or is issued by an unrecognized authority
 	 */
 	String obtainDNIfromCertUser(X509Certificate certificate) throws CertificateException;
 
 	/**
-	 * Obtains an authentication token for the given user, updates their last access time, 
+	 * Obtains an authentication token for the given user, updates their last access time,
 	 * and populates the user session data.
 	 *
 	 * @param user the user to authenticate and update
@@ -151,15 +152,16 @@ public interface ILoginService {
 
 	/**
 	 * Validates the signature security by comparing the signature and the time limits.
-	 * 
+	 *
 	 * This method checks if the signature provided in the {@link CAdESAnalizer} matches the stored
 	 * random string login and verifies if the limit sign generation time has passed.
 	 * It throws a {@link CertificateException} if the validation fails, such as if the signature
 	 * doesn't match or if the time difference exceeds the allowed limit.
-	 * 
+	 *
 	 * @param analizer the {@link CAdESAnalizer} containing the content to be validated
 	 * @throws CertificateException if the signature is invalid or the time limit has expired
 	 * @throws ParseException if the time format cannot be parsed correctly
+	 * @throws TimeoutException if the token to init session has expired
 	 */
-	void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException;
+	void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException;
 }

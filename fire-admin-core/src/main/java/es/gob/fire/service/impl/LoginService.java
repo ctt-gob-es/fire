@@ -47,6 +47,7 @@ import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -110,7 +111,7 @@ public class LoginService implements ILoginService {
 
 	@Autowired
 	private ThreadInfoDataSecureDTO threadInfoDataSecure;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository of control access.
 	 */
@@ -373,24 +374,30 @@ public class LoginService implements ILoginService {
 
 		return authentication;
 	}
-	
+
 	/**
    	 * {@inheritDoc}
+	 * @throws TimeoutException
    	 * @see es.gob.fire.persistence.service#validateIfSignSecure(es.gob.fire.crypto.cades.verifier.CAdESAnalizer)
    	 */
-	public void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException {
-		String strSigned = new String(analizer.getContent());
-		String token = threadInfoDataSecure.getRandomStringLogin();
+	@Override
+	public void validateIfSignSecure(final CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException {
+		final String strSigned = new String(analizer.getContent());
+		final String token = this.threadInfoDataSecure.getRandomStringLogin();
+		if (token == null) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML019));
+			throw new TimeoutException (Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		}
 		if (!strSigned.equalsIgnoreCase(token)) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
 		}
 
-		SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
+		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
 
-		Date pastDate = simpleDateFormat.parse(threadInfoDataSecure.getLimitSignGen());
+		final Date pastDate = simpleDateFormat.parse(this.threadInfoDataSecure.getLimitSignGen());
 
-		Date currentDate = new Date();
+		final Date currentDate = new Date();
 
 		long differenceInMillis = currentDate.getTime() - pastDate.getTime();
 
@@ -399,7 +406,7 @@ public class LoginService implements ILoginService {
 
 		if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML017));
-			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+			throw new TimeoutException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
 		}
 
 		differenceInMillis = currentDate.getTime() - analizer.getSigningTime().getTime();
