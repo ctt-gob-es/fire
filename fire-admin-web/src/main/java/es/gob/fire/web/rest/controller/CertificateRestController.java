@@ -25,15 +25,21 @@
 package es.gob.fire.web.rest.controller;
 
 import java.io.IOException;
+import java.io.ByteArrayInputStream;
 import java.io.InputStream;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.DateFormat;
+import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Comparator;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -45,6 +51,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
+import org.springframework.data.jpa.datatables.mapping.Order;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -158,56 +165,126 @@ public class CertificateRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/certificatedatatable", method = RequestMethod.GET)
-	public DataTablesOutput<Certificate> certificates(@NotEmpty final DataTablesInput input) {
-	    final DataTablesOutput<Certificate> certificates = this.certificateService.certificatesDataTable(input);
+	public DataTablesOutput<Certificate> certificates(@NotEmpty DataTablesInput input) {
+	    // 1. Recuperar todos sin paginar
+	    List<Certificate> allCertificates = certificateService.getAllCertificate();
+	    int recordsTotal = allCertificates.size();
 
-	    final List<Certificate> listCertificates = new ArrayList<>(certificates.getData());
+	    // 2. Búsqueda global en todos los campos
+	    String searchValue = Optional.ofNullable(input.getSearch())
+	        .map(s -> s.getValue().trim().toLowerCase())
+	        .orElse("");
+	    DateFormat df = new SimpleDateFormat("dd/MM/yyyy");
+	    List<Certificate> filtered = allCertificates;
+	    if (!searchValue.isEmpty()) {
+	        filtered = allCertificates.stream()
+	            .filter(c -> {
+	                // 2.1 certificateName
+	                boolean matchName = c.getCertificateName() != null &&
+	                    c.getCertificateName().toLowerCase().contains(searchValue);
 
+	                // 2.2 certPrincipal → texto formateado
+	                String principalText = "";
+	                if (c.getCertPrincipal() != null && !c.getCertPrincipal().isEmpty()) {
+	                    try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(c.getCertPrincipal()));) {
+	                        principalText = certificateService
+	                            .getFormatCertText(certIs)
+	                            .toLowerCase();
+	                    } catch (Exception e) {
+	                        // log si lo necesitas
+	                    }
+	                }
+	                boolean matchPrincipal = principalText.contains(searchValue);
+
+	                // 2.3 certBackup → texto formateado
+	                String backupText = "";
+	                if (c.getCertBackup() != null && !c.getCertBackup().isEmpty()) {
+	                    try (final InputStream certIs = new ByteArrayInputStream(Base64.decode(c.getCertBackup()));) {
+	                        backupText = certificateService
+	                            .getFormatCertText(certIs)
+	                            .toLowerCase();
+	                    } catch (Exception e) {
+	                        // log si lo necesitas
+	                    }
+	                }
+	                boolean matchBackup = backupText.contains(searchValue);
+
+	                // 2.4 fechaAlta formateada
+	                boolean matchDate = c.getfechaAlta() != null &&
+		                    c.getfechaAlta().toString().toLowerCase().contains(searchValue);
+
+	                return matchName || matchPrincipal || matchBackup || matchDate;
+	            })
+	            .collect(Collectors.toList());
+	    }
+	    int recordsFiltered = filtered.size();
+
+	    // 3. Ordenación (solo el primer criterio)
 	    if (!input.getOrder().isEmpty()) {
-	        // Buscar indice de la columna 'certificateName'
-	        for (int i = 0; i < input.getColumns().size(); i++) {
-	            if ("certificateName".equals(input.getColumns().get(i).getData())) { //$NON-NLS-1$
-	                final int columnIndex = i; // esta variable ahora es final
+	        Order order = input.getOrder().get(0);
+	        String dir   = order.getDir();
+	        String field = input.getColumns().get(order.getColumn()).getData();
 
-	                input.getOrder().stream()
-	                    .filter(order -> order.getColumn() == columnIndex)
-	                    .findFirst()
-	                    .ifPresent(order -> {
-	                        final boolean ascending = "asc".equalsIgnoreCase(order.getDir()); //$NON-NLS-1$
+	        Comparator<Certificate> cmp = null;
+	        if ("certificateName".equals(field)) {
+	            cmp = Comparator.comparing(
+	                c -> Optional.ofNullable(c.getCertificateName()).orElse(""),
+	                this::compareWithDigitIgnoreCase
+	            );
+	        }
+	        else if ("fechaAlta".equals(field)) {
+	            cmp = (c1, c2) -> {
+	                Date d1 = c1.getfechaAlta(), d2 = c2.getfechaAlta();
+	                if (d1 == null && d2 == null) return 0;
+	                if (d1 == null) return -1;
+	                if (d2 == null) return 1;
+	                return d1.compareTo(d2);
+	            };
+	        }
+	        // si quieres ordenar certPrincipal o certBackup, añade aquí
 
-	                        listCertificates.sort((c1, c2) -> {
-	                            final String a = c1.getCertificateName() != null ? c1.getCertificateName().toLowerCase().trim() : ""; //$NON-NLS-1$
-	                            final String b = c2.getCertificateName() != null ? c2.getCertificateName().toLowerCase().trim() : ""; //$NON-NLS-1$
-
-	                            final int pa = getPriority(a);
-	                            final int pb = getPriority(b);
-
-	                            if (pa != pb) {
-	                                return ascending ? Integer.compare(pa, pb) : Integer.compare(pb, pa);
-	                            }
-	                            return ascending ? a.compareTo(b) : b.compareTo(a);
-	                        });
-	                    });
-
-	                break;
+	        if (cmp != null) {
+	            if ("desc".equalsIgnoreCase(dir)) {
+	                cmp = cmp.reversed();
 	            }
+	            filtered.sort(cmp);
 	        }
 	    }
 
-	    this.certificateService.getSubjectValuesForView(listCertificates);
-	    certificates.setData(listCertificates);
+	    // 4. Paginación manual
+	    int start  = input.getStart();
+	    int length = input.getLength();
+	    int end    = Math.min(start + length, filtered.size());
+	    List<Certificate> page = filtered.subList(start, end);
 
-	    return certificates;
+	    // 5. Construir el output
+	    DataTablesOutput<Certificate> output = new DataTablesOutput<>();
+	    output.setDraw(input.getDraw());
+	    output.setRecordsTotal(recordsTotal);
+	    output.setRecordsFiltered(recordsFiltered);
+	    output.setData(page);
+	    certificateService.getSubjectValuesForView(page);
+
+	    return output;
 	}
 
-	private static int getPriority(final String val) {
-	    if (val.matches("^\\d.*")) { //$NON-NLS-1$
-	        return 0;
+	/**
+	 * Compara dos cadenas:
+	 * 1) dígitos antes que no-dígitos en misma posición
+	 * 2) comparación case-insensitive (sin prioridad a case)
+	 * 3) si idénticas hasta el largo mínimo, gana la más corta
+	 */
+	private int compareWithDigitIgnoreCase(String a, String b) {
+	    int len = Math.min(a.length(), b.length());
+	    for (int i = 0; i < len; i++) {
+	        char ca = a.charAt(i), cb = b.charAt(i);
+	        boolean da = Character.isDigit(ca), db = Character.isDigit(cb);
+	        if (da && !db) return -1;
+	        if (!da && db) return 1;
+	        char la = Character.toLowerCase(ca), lb = Character.toLowerCase(cb);
+	        if (la != lb) return Character.compare(la, lb);
 	    }
-	    if (val.matches(".*\\d.*")) { //$NON-NLS-1$
-	        return 1;
-	    }
-	    return 2;
+	    return Integer.compare(a.length(), b.length());
 	}
 
 	/**
