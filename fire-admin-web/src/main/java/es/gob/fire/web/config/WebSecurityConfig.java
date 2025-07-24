@@ -53,35 +53,40 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 	 */
 	@Override
     protected void configure(HttpSecurity http) throws Exception {  
-      http.authorizeRequests()
-	    .antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", // Enable css, images and js when logged out 
-	    		"/loginClave", "/ResponseClave", "/loginWithCertificate") // Rutas publicas
-	    .permitAll()
+      http
+      	.authorizeRequests()
+      		// Recursos estáticos y rutas de login público
+      		.antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", "/loginClave", "/ResponseClave", "/loginWithCertificate")
+      		.permitAll()
 		.and()
-		.authorizeRequests()
-		.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
-		.access("hasRole(" + Constants.ROLE_ADMIN + ")")
-		.anyRequest()
-		.authenticated()
+			.authorizeRequests()
+				.antMatchers("/", "add", "delete/{id}", "edit/{id}", "save", "users")
+					.access("hasRole(" + Constants.ROLE_ADMIN + ")")
+				.anyRequest()
+					.authenticated()
 		.and()
-		.formLogin()
-        .loginPage("/")
-        .defaultSuccessUrl("/inicio")
-        .permitAll()
-        .failureUrl("/login-error")
+			.formLogin()
+				.loginPage("/")
+		        // Siempre redirige a /inicio (añadir alwaysUse = true)
+		        .defaultSuccessUrl("/inicio", true)
+		        .failureUrl("/login-error")
+		        .permitAll()
         .and()
-		.logout().invalidateHttpSession(true).deleteCookies(SESSION_TRACKING_COOKIE_NAME).clearAuthentication(true).logoutSuccessUrl("/?logout")
-		.permitAll()
+			.logout()
+				.invalidateHttpSession(true)
+				.deleteCookies(SESSION_TRACKING_COOKIE_NAME)
+				.clearAuthentication(true)
+				.logoutSuccessUrl("/?logout")
+				.permitAll()
 		.and()
-		.httpBasic()
+			.httpBasic()
 		.and()
-		.csrf()
-		.disable() // Disable CSRF
-		.sessionManagement()
-        .sessionFixation().migrateSession()
-    	.maximumSessions(1)
-    	.maxSessionsPreventsLogin(false)
-    	.expiredUrl("/login.html");
+			.csrf().disable() // Disable CSRF
+			.sessionManagement()
+		        .sessionFixation().migrateSession()
+		    	.maximumSessions(1)
+		    	.maxSessionsPreventsLogin(false)
+		    	.expiredUrl("/login.html");
     }
 	
 	/**

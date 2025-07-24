@@ -281,8 +281,8 @@ function saveNewApp() {
  			  success: function(data){
  				 hide();
  				 
- 		        // Se añade la nueva aplicación a la tabla.
- 		        $('#appTable').DataTable().row.add(data).draw(false);
+ 				// Recarga la tabla de aplicaciones en lugar de añadir la fila manualmente
+ 			    $('#appTable').DataTable().ajax.reload(null, false);
 
  		        // Reinicia el formulario y limpia los mensajes de error.
  		        $("#appAddForm")[0].reset();
@@ -304,25 +304,42 @@ function saveNewApp() {
  		        // Limpia las clases de error en los inputs
  		        $('#appAddForm :input').removeClass("has-error");
  			  },
- 			  error: function(xhr, error, jqXHR) {
+ 			  error: function(data, xhr, error, jqXHR) {
  			        hide();
  			        
  			       if (xhr.status === 401 || xhr.status === 403) {
                        window.location.reload();
                    } else {
-                       console.error("Error al realizar la peticion: " + error);
+                	   if (error) {
+                           console.error("Error al realizar la peticion: " + error);
+                	   } else {
+                		   console.error("Error al realizar la peticion");
+                	   }
                    }
- 			        
+ 			       
  			        // Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'
- 			        var response = jqXHR.responseJSON;
+ 			        var response = data.responseJSON;
+ 			        
+ 			        var generalErrorShown = false;
+ 			        
  			        if (response) {
  			            // Se muestran los mensajes de error asociados a cada campo
  			            if (response.error) {
  			                var errores = JSON.parse(response.error);
- 			                $.each(errores, function(i, val) {
- 			                    // Se asume que cada <span> de error tiene su id igual a la clave
- 			                    $('#appAddForm span#' + i).text(val);
- 			                });
+			                $.each(errores, function(key, msg) {
+			                  if (key === 'generalError') {
+			                      // Mostrar el error general
+			                      $('#resultAddApp')
+			                          .removeClass('alert-success')
+			                          .addClass('alert alert-danger')
+			                          .html(msg);
+			                      
+			                      generalErrorShown = true;
+			                  } else {
+			                      // Mostrar los errores especificos en <span>
+			                      $('#appAddForm span#' + key).text(msg);
+			                  }
+			               });
  			            }
  			            
  			           if (response.organizations) {
@@ -342,11 +359,14 @@ function saveNewApp() {
  			        	}
 
  			        }
- 			        var messageResponse = /*[[#{message.error.application.add}]]*/;
- 			        $('#resultAddApp')
- 			            .removeClass('alert-success')
- 			            .addClass('alert alert-danger')
- 			            .html(messageResponse);
+ 			        
+ 			        if (!generalErrorShown) {
+ 			        	var messageResponse = /*[[#{message.error.application.add}]]*/;
+ 	 			        $('#resultAddApp')
+ 	 			            .removeClass('alert-success')
+ 	 			            .addClass('alert alert-danger')
+ 	 			            .html(messageResponse);
+ 			        }
  			    }
  			});
  	  }

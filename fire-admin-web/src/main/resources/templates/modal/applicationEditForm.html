@@ -346,16 +346,29 @@ function saveEditApp() {
                     console.error("Error al realizar la peticion: " + error);
                 }
 		        
-		        // Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'
-		        var response = jqXHR.responseJSON;
+		     	// Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'
+		        var response = data.responseJSON;
+		        
+		        var generalErrorShown = false;
+		        
 		        if (response) {
 		            // Se muestran los mensajes de error asociados a cada campo
 		            if (response.error) {
 		                var errores = JSON.parse(response.error);
-		                $.each(errores, function(i, val) {
-		                    // Se asume que cada <span> de error tiene su id igual a la clave
-		                    $('#appAddForm span#' + i).text(val);
-		                });
+	                $.each(errores, function(key, msg) {
+	                  if (key === 'generalError') {
+	                      // Mostrar el error general
+	                      $('#resultAddApp')
+	                          .removeClass('alert-success')
+	                          .addClass('alert alert-danger')
+	                          .html(msg);
+	                      
+	                      generalErrorShown = true;
+	                  } else {
+	                      // Mostrar los errores especificos en <span>
+	                      $('#appAddForm span#' + key).text(msg);
+	                  }
+	               });
 		            }
 		            
 		           if (response.organizations) {
@@ -375,11 +388,14 @@ function saveEditApp() {
 		        	}
 
 		        }
-		        var messageResponse = /*[[#{message.error.application.add}]]*/;
-		        $('#resultAddApp')
-		            .removeClass('alert-success')
-		            .addClass('alert alert-danger')
-		            .html(messageResponse);
+		        
+		        if (!generalErrorShown) {
+		        	var messageResponse = /*[[#{message.error.application.add}]]*/;
+ 			        $('#resultAddApp')
+ 			            .removeClass('alert-success')
+ 			            .addClass('alert alert-danger')
+ 			            .html(messageResponse);
+		        }
 		    }
 		});
  	  }

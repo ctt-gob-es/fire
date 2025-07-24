@@ -190,6 +190,12 @@ public interface IWebViewMessages {
 	 * Constant attribute that represents the name of the property <code>message.validation.app.cert.selected</code> belonging to the file messages_xx_YY.properties.
 	 */
 	String ERROR_VAL_APP_CERT_SELECTED = "message.validation.app.cert.selected";
+	
+	/**
+	 * Constant attribute that represents the name of the property 
+	 * <code>message.validation.app.cert.none</code> belonging to the file messages_xx_YY.properties.
+	 */
+	String ERROR_VAL_NO_CERTS_IN_DB = "message.validation.app.cert.none";
 
 
 }

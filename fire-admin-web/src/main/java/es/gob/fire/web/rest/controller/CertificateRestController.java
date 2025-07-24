@@ -336,10 +336,16 @@ public class CertificateRestController {
 				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
-				} catch (PlatformWsException | WSServiceInvokerException e) {
+				} catch (PlatformWsException e) {
 					// Se ha producido un fallo en la peticion o respuesta del SOAP
 					LOGGER.error(e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (WSServiceInvokerException e) {
+					// Se ha producido un fallo en la peticion o respuesta del SOAP
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC016);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				}
@@ -511,10 +517,16 @@ public class CertificateRestController {
 				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
-				} catch (PlatformWsException | WSServiceInvokerException e) {
+				} catch (PlatformWsException e) {
 					// Se ha producido un fallo en la peticion o respuesta del SOAP
 					LOGGER.error(e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (WSServiceInvokerException e) {
+					// Se ha producido un fallo en la peticion o respuesta del SOAP
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC016);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				}

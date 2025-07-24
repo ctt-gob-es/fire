@@ -105,17 +105,17 @@ public class ResponseClave {
 	        SecurityContextHolder.getContext().setAuthentication(authentication);
 	        
 	        // Generaremos una nueva cookie por cada inicio de sesion exitoso
-	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());
-	    	cookie.setPath("/");
-	    	cookie.setSecure(true);
-	    	response.addCookie(cookie);
+//	        Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, iLoginService.generateCookieValue());
+//	    	cookie.setPath("/");
+//	    	cookie.setSecure(true);
+//	    	response.addCookie(cookie);
 	    	
 	    	model.addAttribute("appVersion", versionProperties.getProjectVersion());
 	        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
 	    	
 	        // Informamos en la traza que el usuario X se ha logueado en la administracion
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG015)}));
-	        return "inicio.html";
+	        return "redirect:/inicio";
 		
 		}catch (ClaveException e) {
 			String randomStringLogin = UtilsStringChar.getRandomStringToLogin();

@@ -319,11 +319,12 @@ public class LoginController {
 	        // Eliminamos intentos fallidos de acceso para todas las ip
 	        this.iLoginService.deleteAllControlAccess();
 
-	        // Generamos una nueva cookie de sesion
-	        final Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, this.iLoginService.generateCookieValue());
-	        cookie.setPath("/");
-	        cookie.setSecure(true);
-	        response.addCookie(cookie);
+//	        // Generamos una nueva cookie de sesion
+//	        final Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, 
+//	        									this.iLoginService.generateCookieValue());
+//	        cookie.setPath("/");
+//	        cookie.setSecure(true);
+//	        response.addCookie(cookie);
 
 	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
 	        this.threadInfoDataSecureDTO.clear();
@@ -332,7 +333,7 @@ public class LoginController {
 	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear());
 
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
-	        return "inicio.html";
+	        return "redirect:/inicio";
 
 	    } catch (final Exception e) {
 	        String msgerror;

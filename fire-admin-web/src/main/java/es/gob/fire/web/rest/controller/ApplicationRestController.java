@@ -134,6 +134,11 @@ public class ApplicationRestController {
 	 * Constant that represents the parameter 'rowIndexApp'.
 	 */
 	private static final String FIELD_ROW_INDEX_APPLICATION = "rowIndexApp";
+	
+	/**
+	 * Constant that represents the field 'user'.
+	 */
+	private static final String GENERAL_ERROR = "generalError";
 
 	/**
 	 * Attribute that represents the service object for accessing the
@@ -244,6 +249,25 @@ public class ApplicationRestController {
 
 	    // Bandera para detectar si existe algún error de validación
 	    boolean hasError = false;
+	    
+	    // Validación de que existan certificados en base de datos
+        if (certificateService.getAllCertificate().size() == 0) {
+            String errorNoCerts = messageSource.getMessage(
+                IWebViewMessages.ERROR_VAL_NO_CERTS_IN_DB, 
+                null, 
+                request.getLocale()
+            );
+            json.put(FIELD_CERTIFICATE + SPAN, errorNoCerts);
+            json.put(GENERAL_ERROR, errorNoCerts);
+            hasError = true;
+        } else {
+        	// Validación de la selección de certificados
+    	    if (!isCertificatesSelected(listCertificates)) {
+    	        final String errorValCertSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_CERT_SELECTED, null, request.getLocale());
+    	        json.put(FIELD_CERTIFICATE + SPAN, errorValCertSelected);
+    	        hasError = true;
+    	    }
+        }
 
 	    // Validación del nombre de la aplicación
 	    if (isAppNameBlank(appForm.getAppName())) {
@@ -262,12 +286,7 @@ public class ApplicationRestController {
 	        json.put(FIELD_RESPONSIBLE + SPAN, errorValRespSelected);
 	        hasError = true;
 	    }
-	    // Validación de la selección de certificados
-	    if (!isCertificatesSelected(listCertificates)) {
-	        final String errorValCertSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_CERT_SELECTED, null, request.getLocale());
-	        json.put(FIELD_CERTIFICATE + SPAN, errorValCertSelected);
-	        hasError = true;
-	    }
+	    
 	    // Validación de organization y dir3Code
 	    if (appForm.getDir3Code() != null && !appForm.getDir3Code().isEmpty() && !appForm.getUpdateOrganization()) {
 	        availableOrganizations = this.appService.findOrganizationByDIR3(appForm.getDir3Code());
