@@ -94,8 +94,11 @@ public class LoginService implements ILoginService {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(LoginService.class);
 
-	@Value("${conf.cert.path.truststore.issuers}")
-	private String confCertPathTruststoreIssuers;
+	@Value("${conf.cert.path.truststore}")
+	private String confCertPathTruststore;
+	
+	@Value("${conf.cert.path.truststore.password}")
+	private String confCertPathTruststorePassword;
 
 	/**
 	 * Attribute that represents the url to service pasarela.
@@ -228,8 +231,7 @@ public class LoginService implements ILoginService {
     	KeyStore trustStoreUsers = null;
     	try {
     		// Cargamos el TrustStore
-			final String passTrustStoreUsers = "changeit"; //$NON-NLS-1$
-			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststoreIssuers, UtilsKeystore.JKS, passTrustStoreUsers);
+			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststore, UtilsKeystore.JKS, this.confCertPathTruststorePassword);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
 		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));

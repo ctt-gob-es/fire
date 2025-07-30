@@ -148,7 +148,45 @@ public class CertificateService implements ICertificateService{
 	 */
 	@Override
 	public List<Certificate> getAllCertificate() {
-		return this.repository.findAll();
+
+		List<Certificate> certificates = this.repository.findAll();
+
+		for (Certificate cert : certificates) {
+			if (cert.getFechaInicio() == null || cert.getFechaCaducidad() == null || cert.getSubject() == null || cert.getSubject().isEmpty()) {
+				try {
+					// Decodificar el certificado desde Base64
+					byte[] certBytes = Base64.decode(cert.getCertificate());
+
+					// Convertir a X509Certificate
+					CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+					ByteArrayInputStream bais = new ByteArrayInputStream(certBytes);
+					X509Certificate x509Certificate = (X509Certificate) certFactory.generateCertificate(bais);
+
+					// Establecer fechas si son nulas
+					if (cert.getFechaInicio() == null) {
+						cert.setFechaInicio(x509Certificate.getNotBefore());
+					}
+					if (cert.getFechaCaducidad() == null) {
+						cert.setFechaCaducidad(x509Certificate.getNotAfter());
+					}
+					// Establecer subject si es nulo o vacío
+					if (cert.getSubject() == null || cert.getSubject().isEmpty()) {
+						String certSubject = x509Certificate.getSubjectX500Principal().getName();
+						String[] subjectParts = certSubject.split(",");
+						cert.setSubject(subjectParts[0]);
+					}
+
+					// Persistir certificado actualizado
+					this.repository.save(cert);
+
+				} catch (CertificateException | IllegalArgumentException | IOException e) {
+					// Loguea el error pero no interrumpe el proceso para otros certificados
+					LOGGER.error("Error al procesar fechas del certificado con ID: " + cert.getIdCertificado(), e);
+				}
+			}
+		}
+
+		return certificates;
 	}
 
 	/**

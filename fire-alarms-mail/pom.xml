@@ -14,10 +14,15 @@
 	</parent>
 
 	<dependencies>
-
+		<!-- FIRe -->
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-alarms</artifactId>
+		</dependency>
+		
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-mail</artifactId>
 		</dependency>
 		
 		<!-- JavaMail -->
@@ -32,10 +37,7 @@
 			<scope>test</scope>
 		</dependency>
 
-		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-mail</artifactId>
-		</dependency>
+		
 	</dependencies>
 	
 	<build>
