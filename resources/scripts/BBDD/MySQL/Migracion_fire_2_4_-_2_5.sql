@@ -15,8 +15,7 @@ WHERE id_usuario = 1;
 ALTER TABLE `tb_usuarios` CHANGE COLUMN `correo_elec` `huella` varchar(45);
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `nombre_usuario`;
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `clave`;
-ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `dni_UNIQUE` (`dni`),
-ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`)
+ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `dni_UNIQUE` (`dni`);
 
 -- TABLA DE CERTIFICADOS
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);
@@ -196,8 +195,7 @@ VALUES (1, 24, 0, 0, STR_TO_DATE('01/01/2012 00:00:00', '%m/%d/%Y %H:%i:%s'), 1)
 
 -- Insertar valores en la tabla PROGRAMADOR
 INSERT INTO TB_PROGRAMADOR (ID_PROGRAMADOR, NOMBRE_TOKEN, NOMBRE_CLASE, ESTA_ACTIVO, NUM_HILOS, NUM_PROCESOS, PERIODO_EXPIRADO, TIEMPO_REASIGNACION, TIEMPO_REACTIVACION, TIEMPO_COMPROBACION, DIAS_PREAVISO, PERIODO_COMUNICACION, ID_PLANIFICADOR, NOMBRE_PROGRAMADOR) 
-VALUES (1, 'PROGRAMADOR01', 'es.gob.fire.control.tasks.TaskVerifyCertExpired', 'N', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'TaskVerifyCertExpired');
-
+VALUES (1, 'PROGRAMADOR01', 'es.gob.fire.control.tasks.TaskVerifyCertExpired', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'TaskVerifyCertExpired');
 
 -- Insertar valores en la tabla TB_C_TIPO_AUTENTICACION
 INSERT INTO TB_C_TIPO_AUTENTICACION (ID_TIPO_AUTENTICACION, NOMBRE_TOKEN)
