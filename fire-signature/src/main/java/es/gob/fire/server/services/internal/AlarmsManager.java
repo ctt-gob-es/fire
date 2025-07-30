@@ -46,7 +46,7 @@ public class AlarmsManager {
 			final String [] notifierNames = notifierName.split(PARAM_ALARM_NOTIFIER_SEPARATOR);
 
 			for (final String notifName : notifierNames) {
-				if (!notifierName.isEmpty()) {
+				if (!notifName.isEmpty()) {
 					initNotifier(moduleName, notifName);
 				}
 			}
