@@ -12,7 +12,7 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 import es.gob.fire.utils.ConstantsMail;
-import es.gob.fire.utils.ConstantsMailProperties;
+import es.gob.fire.utils.ConstantsMail;
 
 @Component
 public class ConfigurationMail {
@@ -168,40 +168,40 @@ public class ConfigurationMail {
      */
 	public void init(final Properties props) {
 		try {
-			properties.put(ConstantsMail.MAIL_SMTP_HOST, props.getProperty(ConstantsMailProperties.MAIL_SMTP_HOST));
-	        properties.put(ConstantsMail.MAIL_SMTP_PORT, props.getProperty(ConstantsMailProperties.MAIL_SMTP_PORT));
-	        this.mailSmtpMailSender = props.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER);
-	        properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, props.getProperty(ConstantsMailProperties.MAIL_SMTP_MAIL_SENDER));
-	        properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, props.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_ENABLE));
+			properties.put(ConstantsMail.MAIL_SMTP_HOST, props.getProperty(ConstantsMail.MAIL_SMTP_HOST));
+	        properties.put(ConstantsMail.MAIL_SMTP_PORT, props.getProperty(ConstantsMail.MAIL_SMTP_PORT));
+	        this.mailSmtpMailSender = props.getProperty(ConstantsMail.MAIL_SMTP_MAIL_SENDER);
+	        properties.put(ConstantsMail.MAIL_SMTP_MAIL_SENDER, props.getProperty(ConstantsMail.MAIL_SMTP_MAIL_SENDER));
+	        properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE, props.getProperty(ConstantsMail.MAIL_SMTP_STARTTLS_ENABLE));
 
-	        final String starttlsRequired = props.getProperty(ConstantsMailProperties.MAIL_SMTP_STARTTLS_REQUIRED, "");
+	        final String starttlsRequired = props.getProperty(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, "");
 	        if (!starttlsRequired.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_STARTTLS_REQUIRED, starttlsRequired);
 	        }
 
-	        final String sslProtocols = props.getProperty(ConstantsMailProperties.MAIL_SMTP_SSL_PROTOCOLS, "");
+	        final String sslProtocols = props.getProperty(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, "");
 	        if (!sslProtocols.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_SSL_PROTOCOLS, sslProtocols);
 	        }
 
-	        final String socketFactoryPort = props.getProperty(ConstantsMailProperties.MAIL_SMTP_SOCKETFACTORY_PORT, "");
+	        final String socketFactoryPort = props.getProperty(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, "");
 	        if (!socketFactoryPort.isEmpty()) {
 	            properties.put(ConstantsMail.MAIL_SMTP_SOCKETFACTORY_PORT, socketFactoryPort);
 	        }
 
-	        properties.put(ConstantsMail.MAIL_PROTOCOL, props.getProperty(ConstantsMailProperties.MAIL_PROTOCOL));
+	        properties.put(ConstantsMail.MAIL_PROTOCOL, props.getProperty(ConstantsMail.MAIL_PROTOCOL));
 
 	        // Comprobamos si es necesaria autenticación
-	        final String mailSmtpAuth = props.getProperty(ConstantsMailProperties.MAIL_SMTP_AUTH);
+	        final String mailSmtpAuth = props.getProperty(ConstantsMail.MAIL_SMTP_AUTH);
 	        if ("true".equalsIgnoreCase(mailSmtpAuth)) {
 	            properties.put(ConstantsMail.MAIL_SMTP_AUTH, mailSmtpAuth);
-	            properties.put(ConstantsMail.MAIL_SMTP_USER, props.getProperty(ConstantsMailProperties.MAIL_SMTP_USER));
-	            properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, props.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD));
+	            properties.put(ConstantsMail.MAIL_SMTP_USER, props.getProperty(ConstantsMail.MAIL_SMTP_USER));
+	            properties.put(ConstantsMail.MAIL_SMTP_PASSWORD, props.getProperty(ConstantsMail.MAIL_SMTP_PASSWORD));
 
 	            // Obtenemos la sesión con seguridad
 	            final Authenticator smtpAuthenticator = new SmtpAuthenticator(
-	            	props.getProperty(ConstantsMailProperties.MAIL_SMTP_USER),
-	            	props.getProperty(ConstantsMailProperties.MAIL_SMTP_PASSWORD)
+	            	props.getProperty(ConstantsMail.MAIL_SMTP_USER),
+	            	props.getProperty(ConstantsMail.MAIL_SMTP_PASSWORD)
 	            );
 	            sessionMail = Session.getInstance(properties, smtpAuthenticator);
 	        } else {

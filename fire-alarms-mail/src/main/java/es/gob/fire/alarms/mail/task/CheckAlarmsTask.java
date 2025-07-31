@@ -12,10 +12,10 @@ public class CheckAlarmsTask implements Runnable {
 	@Override
 	public void run() {
 		if (MailAlarmNotifier.initialized && 
-			(MailAlarmNotifier.criticalNotifyAttemps >= MailAlarmNotifier.criticalNotifyLimits ||
-			MailAlarmNotifier.errorNotifyAttemps >= MailAlarmNotifier.errorNotifyLimits ||
-			MailAlarmNotifier.warningNotifyAttemps >= MailAlarmNotifier.warningNotifyLimits ||
-			MailAlarmNotifier.infoNotifyAttemps >= MailAlarmNotifier.infoNotifyLimits)) {
+			(MailAlarmNotifier.criticalNotifyAttempts >= MailAlarmNotifier.criticalNotifyLimits ||
+			MailAlarmNotifier.errorNotifyAttempts >= MailAlarmNotifier.errorNotifyLimits ||
+			MailAlarmNotifier.warningNotifyAttempts >= MailAlarmNotifier.warningNotifyLimits ||
+			MailAlarmNotifier.infoNotifyAttempts >= MailAlarmNotifier.infoNotifyLimits)) {
 			
 			MailAlarmNotifier.sendSummary();
 		} else {

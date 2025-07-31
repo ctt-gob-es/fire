@@ -25,6 +25,11 @@
 			<artifactId>fire-mail</artifactId>
 		</dependency>
 		
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-signature-common-libraries</artifactId>
+		</dependency>
+		
 		<!-- JavaMail -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>
