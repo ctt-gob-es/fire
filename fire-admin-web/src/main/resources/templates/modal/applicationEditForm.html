@@ -310,12 +310,16 @@ function saveEditApp() {
  				 
  		        var table = $('#appTable').DataTable();
  		        
+ 		       	table.ajax.reload(null, false);
+ 		        
+ 		       	/*
  		        var $row = $('#appTable').find('tr[data-id="' + data.id + '"]');
  		        if ($row.length > 0) {
  		            table.row($row).data(data).draw(false);
  		        } else {
  		            table.row.add(data).draw(false);
  		        }
+ 		        */
 
  		        // Reinicia el formulario y limpia los mensajes de error.
  		        $("#appEditForm")[0].reset();

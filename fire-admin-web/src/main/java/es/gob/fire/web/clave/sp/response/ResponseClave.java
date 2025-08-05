@@ -91,11 +91,21 @@ public class ResponseClave {
 	    	
 	    	dniRef.set(personalInfoBean.getDni());
 	    		
-	    	User user = StreamSupport.stream(iUserService.getAllUser().spliterator(), false)
-	           	.filter(p -> p.getDni().equals(dniRef.get()))
-	           	.findFirst()
-	           	.orElseThrow(() -> new BadCredentialsException(
-	           			Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG006)
+	    	// Buscamos al usuario en la base de datos
+	        final Iterable<User> allUsers = this.iUserService.getAllUser();
+	        final String dni = dniRef.get();
+
+	        if (allUsers == null || dni == null) {
+	            throw new BadCredentialsException(
+	                Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] { dni })
+	            );
+	        }
+
+	        final User user = StreamSupport.stream(allUsers.spliterator(), false)
+	            .filter(p -> dni.equals(p.getDni()))
+	            .findFirst()
+	            .orElseThrow(() -> new BadCredentialsException(
+	                Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] { dni })
 	        ));
 	    	
 	        // Autenticamos el token utilizando el usuario consultado previamente
