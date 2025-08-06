@@ -114,7 +114,7 @@ $(document).ready(function () {
 	        	if (xhr.status === 401 || xhr.status === 403) {
                     window.location.reload();
                 } else {
-                    console.error("Error al realizar la peticion: " + error);
+                    console.error("Error al realizar la peticion");
                 }
 	        	
 	        	$("#connection-result").removeClass("alert-success alert-danger");
@@ -189,7 +189,7 @@ $( "#saveBtnModal" ).click(function( event ) {
 			  if (xhr.status === 401 || xhr.status === 403) {
                   window.location.reload();
               } else {
-                  console.error("Error al realizar la peticion: " + error);
+                  console.error("Error al realizar la peticion");
               }
 			  
 			  var messageResponse = /*[[#{message.error.user.edit}]]*/;

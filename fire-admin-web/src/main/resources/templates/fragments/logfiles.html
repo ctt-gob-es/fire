@@ -159,7 +159,7 @@ function openLogFile ( e, dt, node, config ) {
         	if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion");
             }
 		}
 	});
@@ -188,7 +188,7 @@ function disconnectToSpl ( e, dt, node, config ) {
         	if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion");
             }
 		}
 	});

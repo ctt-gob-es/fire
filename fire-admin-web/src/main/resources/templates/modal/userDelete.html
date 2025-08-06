@@ -109,7 +109,7 @@ function deleteUser(){
         	   if (xhr.status === 401 || xhr.status === 403) {
                    window.location.reload();
                } else {
-                   console.error("Error al realizar la peticion: " + error);
+                   console.error("Error al realizar la peticion");
                }
         	   
 		  		$('#errorDeleteUser').html(msgErrorDelete);

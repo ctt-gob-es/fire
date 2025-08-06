@@ -310,11 +310,7 @@ function saveNewApp() {
  			       if (xhr.status === 401 || xhr.status === 403) {
                        window.location.reload();
                    } else {
-                	   if (error) {
-                           console.error("Error al realizar la peticion: " + error);
-                	   } else {
-                		   console.error("Error al realizar la peticion");
-                	   }
+            		   console.error("Error al realizar la peticion");
                    }
  			       
  			        // Se espera que la respuesta de error sea un objeto JSON con 'error' y 'organizations'

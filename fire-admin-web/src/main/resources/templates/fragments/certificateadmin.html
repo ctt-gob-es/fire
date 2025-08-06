@@ -87,7 +87,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
                         if (xhr.status === 401 || xhr.status === 403) {
                             window.location.reload();
                         } else {
-                            console.error("Error al realizar la peticion: " + error);
+                            console.error("Error al realizar la peticion");
                         }
 					}
 				});
@@ -120,7 +120,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
  							if (xhr.status === 401 || xhr.status === 403) {
  	                            window.location.reload();
  	                        } else {
- 	                            console.error("Error al realizar la peticion: " + error);
+ 	                            console.error("Error al realizar la peticion");
  	                        }
  						}
  					});
@@ -162,7 +162,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
 							        	if (xhr.status === 401 || xhr.status === 403) {
 				                            window.location.reload();
 				                        } else {
-				                            console.error("Error al realizar la peticion: " + error);
+				                            console.error("Error al realizar la peticion");
 				                        }
 									}
 					});
@@ -203,7 +203,7 @@ var tableCertFire = $('#certServiceTable').DataTable({
 							if (xhr.status === 401 || xhr.status === 403) {
 	                            window.location.reload();
 	                        } else {
-	                            console.error("Error al realizar la peticion: " + error);
+	                            console.error("Error al realizar la peticion");
 	                        }
 						}
 					});
@@ -234,7 +234,7 @@ function editCertificate(idCertificate) {
         	if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion");
             }
         }
 	});
@@ -271,7 +271,7 @@ function deleteConfirmCertificate(idCertificate,  element) {
 	        	if (xhr.status === 401 || xhr.status === 403) {
                     window.location.reload();
                 } else {
-                    console.error("Error al realizar la peticion: " + error);
+                    console.error("Error al realizar la peticion");
                 }
 			}
 		});

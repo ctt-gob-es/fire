@@ -63,7 +63,7 @@ $(document).ready(function() {
 		 							if (xhr.status === 401 || xhr.status === 403) {
 		 	                            window.location.reload();
 		 	                        } else {
-		 	                            console.error("Error al realizar la peticion: " + error);
+		 	                            console.error("Error al realizar la peticion");
 		 	                        }
 		 						}
 		 					});
@@ -95,7 +95,7 @@ $(document).ready(function() {
 		 							if (xhr.status === 401 || xhr.status === 403) {
 		 	                            window.location.reload();
 		 	                        } else {
-		 	                            console.error("Error al realizar la peticion: " + error);
+		 	                            console.error("Error al realizar la peticion");
 		 	                        }
 		 						}
 		 					});
@@ -208,7 +208,7 @@ $(document).ready(function() {
 			                	if (xhr.status === 401 || xhr.status === 403) {
 		                            window.location.reload();
 		                        } else {
-		                            console.error("Error al realizar la peticion: " + error);
+		                            console.error("Error al realizar la peticion");
 		                        }
 			                	
 			                	$('#logServerForm').append('<div id="errorModalLogServer" class="alert alert-danger" role="alert"><strong>' + [[#{log.server.admin.error.sameValues}]] + '</strong></div>');
@@ -262,7 +262,7 @@ $(document).ready(function() {
 			                	if (xhr.status === 401 || xhr.status === 403) {
 		                            window.location.reload();
 		                        } else {
-		                            console.error("Error al realizar la peticion: " + error);
+		                            console.error("Error al realizar la peticion");
 		                        }
 			                	
 			                	$('#logServerForm').append('<div id="errorModalLogServer" class="alert alert-danger" role="alert"><strong>' + [[#{log.server.admin.error.sameValues}]] + '</strong></div>');
@@ -294,7 +294,7 @@ $(document).ready(function() {
 		                	if (xhr.status === 401 || xhr.status === 403) {
 	                            window.location.reload();
 	                        } else {
-	                            console.error("Error al realizar la peticion: " + error);
+	                            console.error("Error al realizar la peticion");
 	                        }
 		                }
 		            });
@@ -338,7 +338,7 @@ function connectToLogServer( e, dt, node, config ) {
         	if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion");
             }
       	
         	if ($('#errorLogServer').length == 0) {

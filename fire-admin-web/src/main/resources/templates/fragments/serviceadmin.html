@@ -198,7 +198,7 @@ function typeServiceChange(idPlatform, serviceType){
 			if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion");
             }
 		}
 	});
@@ -401,7 +401,7 @@ $(document).ready(function() {
 			                	if (xhr.status === 401 || xhr.status === 403) {
 		                            window.location.reload();
 		                        } else {
-		                            console.error("Error al realizar la peticion: " + error);
+		                            console.error("Error al realizar la peticion");
 		                        }
 			                }
 			            });
@@ -518,7 +518,7 @@ $(document).ready(function() {
 			                	if (xhr.status === 401 || xhr.status === 403) {
 		                            window.location.reload();
 		                        } else {
-		                            console.error("Error al realizar la peticion: " + error);
+		                            console.error("Error al realizar la peticion");
 		                        }
 			                }
 			            });
@@ -611,7 +611,7 @@ $(document).ready(function() {
 				  if (xhr.status === 401 || xhr.status === 403) {
                       window.location.reload();
                   } else {
-                      console.error("Error al realizar la peticion: " + error);
+                      console.error("Error al realizar la peticion");
                   }
 				  
 				  if (checkTypeTime($('#frequencyTime')) == $('#frequencyTime')[0].value){
@@ -757,7 +757,7 @@ $(document).ready(function() {
 				  if (xhr.status === 401 || xhr.status === 403) {
                       window.location.reload();
                   } else {
-                      console.error("Error al realizar la peticion: " + error);
+                      console.error("Error al realizar la peticion");
                   }
 				  
 				  if (data.error == "-1"){

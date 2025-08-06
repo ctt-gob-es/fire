@@ -197,7 +197,7 @@ $(document).ready(function() {
 			                	if (xhr.status === 401 || xhr.status === 403) {
 		                            window.location.reload();
 		                        } else {
-		                            console.error("Error al realizar la peticion: " + error);
+		                            console.error("Error al realizar la peticion");
 		                        }
 			                }
 			            });
@@ -276,7 +276,7 @@ $(document).ready(function() {
 				  if (xhr.status === 401 || xhr.status === 403) {
                       window.location.reload();
                   } else {
-                      console.error("Error al realizar la peticion: " + error);
+                      console.error("Error al realizar la peticion");
                   }
 				  
 				  $('#mailForm').append('<div id="errorModalMail" class="alert alert-danger" role="alert"><strong>' + [[#{mail.admin.error.sameName}]] + '</strong></div>');
@@ -343,7 +343,7 @@ $( "#saveBtn" ).click(function( event ) {
 				  if (xhr.status === 401 || xhr.status === 403) {
                       window.location.reload();
                   } else {
-                      console.error("Error al realizar la peticion: " + error);
+                      console.error("Error al realizar la peticion");
                   }
 				  
 				  if ($('#errorModalConfMail').length > 0){
