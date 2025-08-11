@@ -498,7 +498,7 @@
             var sortedData = items.sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
             labels = sortedData.map(item => {
-            	if (item.organization == null || item.organization === '') {
+            	if (item.organization == null || item.organization === '' || item.organization === 'Indeterminado') {
             		return item.name;
             	} else {
             		return item.name + ' (' + item.organization + ')';
@@ -870,47 +870,82 @@
 	        batchIncorrect  += item.incorrectBatchSignatures  || 0;
 	    });
 
-	    // ===== 2) First doughnut stays the same =====
+	 // ===== 2) First doughnut stays the same, but legend shows datasets (Simple/Batch) =====
 	    var ctx1 = document.getElementById('doughnutChartCorrectas').getContext('2d');
 	    if (window.doughnutChartCorrect) window.doughnutChartCorrect.destroy();
 
 	    var hueSimple = 207;
 	    var hueBatch  = 174;
-	    window.doughnutChartCorrect = new Chart(ctx1, {
-	        type: 'doughnut',
-	        data: {
-	            labels: ['Correctas', 'Incorrectas'],
-	            datasets: [
-	                {
-	                    label: 'Simple',
-	                    data: [simpleCorrect, simpleIncorrect],
-	                    backgroundColor: [
-	                        '#36A2EB',
-	                        generateIncorrectColor ? generateIncorrectColor(hueSimple) : '#9ec9f3'
-	                    ]
-	                },
-	                {
-	                    label: 'Batch',
-	                    data: [batchCorrect, batchIncorrect],
-	                    backgroundColor: [
-	                        '#4BC0C0',
-	                        generateIncorrectColor ? generateIncorrectColor(hueBatch) : '#9ad9d9'
-	                    ]
-	                }
-	            ]
-	        },
-	        options: {
-	            responsive: true,
-	            title: { display: true, text: 'Firmas Simple vs Batch' },
-	            tooltips: {
-	                callbacks: {
-	                    label: function(t, d) {
-	                        var ds = d.datasets[t.datasetIndex];
-	                        return ds.label + ' - ' + d.labels[t.index] + ': ' + ds.data[t.index];
-	                    }
-	                }
-	            }
+
+	    // shared legend config (works in v3+ under plugins.legend, and as fallback in v2 under options.legend)
+	    var datasetLegendConfig = {
+	      labels: {
+	        generateLabels: function(chart) {
+	          return chart.data.datasets.map(function(ds, i) {
+	            var meta = chart.getDatasetMeta(i);
+	            var color = Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor;
+	            return {
+	              text: ds.label,              // <-- "Simple" / "Batch"
+	              fillStyle: color,            // color swatch = first color of the dataset
+	              hidden: meta.hidden === true,
+	              datasetIndex: i
+	            };
+	          });
 	        }
+	      },
+	      onClick: function(evt, legendItem, legend) {
+	        var chart = legend.chart;
+	        var i = legendItem.datasetIndex;
+	        var meta = chart.getDatasetMeta(i);
+	        meta.hidden = meta.hidden === null ? true : null; // toggle entire ring (dataset)
+	        chart.update();
+	      }
+	    };
+
+	    window.doughnutChartCorrect = new Chart(ctx1, {
+	      type: 'doughnut',
+	      data: {
+	        labels: ['Correctas', 'Incorrectas'],
+	        datasets: [
+	          {
+	            label: 'Simple',
+	            data: [simpleCorrect, simpleIncorrect],
+	            backgroundColor: [
+	              '#36A2EB',
+	              (typeof generateIncorrectColor === 'function') ? generateIncorrectColor(hueSimple) : '#9ec9f3'
+	            ]
+	          },
+	          {
+	            label: 'Batch',
+	            data: [batchCorrect, batchIncorrect],
+	            backgroundColor: [
+	              '#4BC0C0',
+	              (typeof generateIncorrectColor === 'function') ? generateIncorrectColor(hueBatch) : '#9ad9d9'
+	            ]
+	          }
+	        ]
+	      },
+	      options: {
+	        responsive: true,
+	        // v2 title (si usas v3+, puedes moverlo a plugins.title)
+	        title: { display: true, text: 'Firmas Simple vs Batch' },
+
+	        // Legend by datasets (v3/v4)
+	        plugins: { legend: datasetLegendConfig },
+
+	        // Tooltip queda igual (muestra "Simple - Correctas: N", etc.)
+	        tooltips: {
+	          callbacks: {
+	            label: function(t, d) {
+	              var ds = d.datasets[t.datasetIndex];
+	              return ds.label + ' - ' + d.labels[t.index] + ': ' + ds.data[t.index];
+	            }
+	          }
+	        },
+
+	        // v2 fallback (si tu Chart.js es v2)
+	        legend: datasetLegendConfig
+	      }
 	    });
 
 	    // ===== 3) Build single-ring totals per App (group by name; split each into Simple/Batch) =====
@@ -1229,45 +1264,61 @@
     
  	// Bar: Correctas vs Incorrectas
 	function drawBarCorrectVsIncorrect(data) {
-	    // 1) lista única de nombres (eje X)
-	    var nombres = Array.from(new Set(data.map(item => item.name)));
+	    function destroyExistingChartByCanvasId(canvasId) {
+	        var canvas = document.getElementById(canvasId);
+	        if (!canvas) return;
+	        if (typeof Chart.getChart === 'function') {
+	            var inst = Chart.getChart(canvas);
+	            if (inst) inst.destroy();
+	        } else if (Chart.instances) {
+	            Object.keys(Chart.instances).forEach(function(k) {
+	                var ch = Chart.instances[k];
+	                if (ch && ch.chart && ch.chart.canvas && ch.chart.canvas.id === canvasId) {
+	                    try { ch.destroy(); } catch (e) {}
+	                }
+	            });
+	        }
+	    }
 	
-	    // 2) agrupar correctas/incorrectas por name y organización
-	    var estadisticas = {};
-	    nombres.forEach(n => estadisticas[n] = {});
+	    // 1) nombres unicos (x axis)
+	    var names = Array.from(new Set(data.map(item => item.name)));
+	
+	    // 2) agrupar correct/incorrect by name+organization
+	    var stats = {};
+	    names.forEach(n => stats[n] = {});
 	    data.forEach(item => {
-	        var n = item.name, o = item.organization;
-	        if (!estadisticas[n][o]) estadisticas[n][o] = { correctas: 0, incorrectas: 0 };
-	        estadisticas[n][o].correctas   += item.corrects   || 0;
-	        estadisticas[n][o].incorrectas += item.incorrects || 0;
+	        var n = item.name, o = item.organization || '';
+	        if (!stats[n][o]) stats[n][o] = { correct: 0, incorrect: 0 };
+	        stats[n][o].correct   += item.corrects   || 0;
+	        stats[n][o].incorrect += item.incorrects || 0;
 	    });
 	
-	    // 3) crear datasets: para cada nombre, primero todos los segmentos de correctas y luego los de incorrectas
+	    // 3) generar datasets: per name -> org segments (correct first, then incorrect)
 	    var datasets = [], stackId = 'stack';
-	    nombres.forEach((nombre, idx) => {
-	        var orgs       = Object.keys(estadisticas[nombre]);
-	        var hue        = generateBaseHue(idx, nombres.length);
-	        var colorC     = generateCorrectColor(hue);
-	        var colorI     = generateIncorrectColor(hue);
+	    names.forEach((name, idx) => {
+	        var orgs = Object.keys(stats[name]);
+	        var hue  = generateBaseHue ? generateBaseHue(idx, names.length) : Math.round(360 * idx / Math.max(1, names.length));
+	        var colorC = generateCorrectColor ? generateCorrectColor(hue) : '#36A2EB';
+	        var colorI = generateIncorrectColor ? generateIncorrectColor(hue) : '#FF6384';
 	
-	        // segmentos de correctas
+	        // correct segments
 	        orgs.forEach(org => {
-	            var valor = estadisticas[nombre][org].correctas;
-	            var dataC = nombres.map((_, i) => i === idx ? valor : 0);
+	            var value = stats[name][org].correct;
+	            var dataC = names.map((_, i) => i === idx ? value : 0);
 	            datasets.push({
-	                label: nombre + (org == null || org == '') ? ' (' + org + ')' : '' + ' - Correctas',
+	                label: name + ((org == null || org === '') ? '' : ' (' + org + ')') + ' - Correctas',
 	                data: dataC,
 	                backgroundColor: colorC,
 	                stack: stackId
 	            });
 	        });
 	
-	        // segmentos de incorrectas
+	        // incorrect segments
 	        orgs.forEach(org => {
-	            var valor = estadisticas[nombre][org].incorrectas;
-	            var dataI = nombres.map((_, i) => i === idx ? valor : 0);
+	            var value = stats[name][org].incorrect;
+	            var dataI = names.map((_, i) => i === idx ? value : 0);
 	            datasets.push({
-	                label: nombre + (org == null || org == '') ? ' (' + org + ')' : '' + ' - Incorrectas',
+	                label: name + ((org == null || org === '') ? '' : ' (' + org + ')') + ' - Incorrectas',
 	                data: dataI,
 	                backgroundColor: colorI,
 	                stack: stackId
@@ -1275,65 +1326,109 @@
 	        });
 	    });
 	
-	    // 4) dibujar gráfico apilado y ocupar todo el ancho de cada categoría
-	    var ctx = document.getElementById('barChart').getContext('2d');
-	    if (barChart) barChart.destroy();
-	    barChart = new Chart(ctx, {
+	    // 4) dibujar grafico de barras
+	    var canvasId = 'barChart';
+	    var ctx = document.getElementById(canvasId).getContext('2d');
+	
+	    // destruir si hay grafico anterior
+	    destroyExistingChartByCanvasId(canvasId);
+	    if (window.barChart) { try { window.barChart.destroy(); } catch(e) {} }
+	
+	    // leyenda
+	    var legendConfig = {
+	        labels: {
+	            generateLabels: function(chart) {
+	                return chart.data.labels.map(function(name) {
+	                    var dsIdx = chart.data.datasets.findIndex(function(ds) {
+	                        return ds.label.split(' (')[0].split(' - ')[0] === name;
+	                    });
+	                    if (dsIdx < 0) dsIdx = 0;
+	                    return {
+	                        text: name,
+	                        fillStyle: chart.data.datasets[dsIdx].backgroundColor,
+	                        hidden: false,
+	                        datasetIndex: dsIdx
+	                    };
+	                });
+	            }
+	        },
+	        onClick: function(evt, legendItem, legend) {
+	            var chart = legend.chart;
+	            var name = legendItem.text;
+	            chart.data.datasets.forEach(function(ds) {
+	                if (ds.label.split(' (')[0].split(' - ')[0] === name) {
+	                    ds.hidden = !ds.hidden;
+	                }
+	            });
+	            chart.update();
+	        }
+	    };
+		
+	    var scalesOpt = {
+	        x: { stacked: true },
+	        y: { stacked: true, beginAtZero: true }
+	    };
+	
+	    window.barChart = new Chart(ctx, {
 	        type: 'bar',
 	        data: {
-	            labels: nombres,
+	            labels: names,
 	            datasets: datasets
 	        },
 	        options: {
-	            responsive: true,
-	            maintainAspectRatio: false,
-	            scales: {
-	                x: [{ stacked: true }],
-	                y: [{ stacked: true, beginAtZero: true }]
-	            },
-	            plugins: {
-	                legend: {
-	                    labels: {
-	                        // Una sola etiqueta por nombre de aplicación
-	                        generateLabels: function(chart) {
-	                            return chart.data.labels.map(function(nombre) {
-	                                // buscar el primer dataset correspondiente a este nombre
-	                                var dsIdx = chart.data.datasets.findIndex(function(ds) {
-	                                    return ds.label.split(' (')[0] === nombre;
-	                                });
-	                                return {
-	                                    text: nombre,
-	                                    fillStyle: chart.data.datasets[dsIdx].backgroundColor,
-	                                    hidden: false,
-	                                    datasetIndex: dsIdx
-	                                };
-	                            });
-	                        }
-	                    },
-	                    onClick: function(evt, legendItem, legend) {
-	                        var chart = legend.chart;
-	                        var nombre = legendItem.text;
-	                        // alternar visibilidad de todos los datasets de ese nombre
-	                        chart.data.datasets.forEach(function(ds) {
-	                            if (ds.label.split(' (')[0] === nombre) {
-	                                ds.hidden = !ds.hidden;
-	                            }
-	                        });
-	                        chart.update();
-	                    }
-	                },
-	                tooltip: {
-	                    callbacks: {
-	                        label: function(ctx) {
-	                            var ds = ctx.dataset;
-	                            return ds.label + ': ' + ds.data[ctx.dataIndex];
-	                        }
-	                    }
-	                }
-	            }
-	        }
-	    });
+	        	  responsive: true,
+	        	  maintainAspectRatio: false,
+	        	  scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+	        	// --- Chart.js v3/v4 ---
+	        	  plugins: {
+	        	    legend: legendConfig,
+	        	    tooltip: {
+	        	      callbacks: {
+	        	        label: function(ctx) {
+	        	          // build pieces from dataset label
+	        	          var label = ctx.dataset.label || '';                         // "AppX (Org) - Correctas"
+	        	          var value = ctx.dataset.data[ctx.dataIndex];
+	        	          var parts = label.split(' - ');
+	        	          var base  = parts[0];                                        // "AppX (Org)" o "AppX"
+	        	          var type  = parts[1] || '';                                  // "Correctas"/"Incorrectas"
+	        	          var m     = base.match(/^(.+?)(?: \((.+)\))?$/);
+	        	          var app   = m ? m[1] : base;                                 // "AppX"
+	        	          var org   = (m && m[2]) ? m[2] : '';                         // "Org" o ""
 
+	        	          // if org is "Indeterminado" -> drop it, keep app + type + value
+	        	          if (org && org.trim().toLowerCase() === 'indeterminado') {
+	        	            return (type ? (app + ' - ' + type) : app) + ': ' + value;
+	        	          }
+	        	          // default (unchanged)
+	        	          return label + ': ' + value;
+	        	        }
+	        	      }
+	        	    }
+	        	  },
+	        	  // --- fallback Chart.js v2 ---
+	        	  tooltips: {
+	        	    callbacks: {
+	        	      label: function(tooltipItem, data) {
+	        	        var ds    = data.datasets[tooltipItem.datasetIndex];
+	        	        var label = ds.label || '';
+	        	        var value = ds.data[tooltipItem.index];
+	        	        var parts = label.split(' - ');
+	        	        var base  = parts[0];
+	        	        var type  = parts[1] || '';
+	        	        var m     = base.match(/^(.+?)(?: \((.+)\))?$/);
+	        	        var app   = m ? m[1] : base;
+	        	        var org   = (m && m[2]) ? m[2] : '';
+	        	        if (org && org.trim().toLowerCase() === 'indeterminado') {
+	        	          return (type ? (app + ' - ' + type) : app) + ': ' + value;
+	        	        }
+	        	        return label + ': ' + value;
+	        	      }
+	        	    }
+	        	  }
+	        	}
+	    });
+	
+	    // force layout reflow after draw
 	    setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
 	}
 
