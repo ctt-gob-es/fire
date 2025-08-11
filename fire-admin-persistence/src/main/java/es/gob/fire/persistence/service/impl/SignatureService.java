@@ -182,7 +182,7 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             month, year, null, null,
             apps, orgs,
@@ -201,6 +201,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByProvider ---
@@ -221,26 +230,39 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.proveedor", "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             month, year, null, null,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
-                int    corrects     = ((BigDecimal)row[1]).intValue();
-                int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String organization = row[4] != null ? (String)row[4] : "Indeterminado";
-                return new SignatureDTO(
-                    name, 
-                    corrects, 
-                    incorrects,
-                    corrects + incorrects,
-                    application, 
-                    organization
-                );
+            	if (row[0] != null) {
+            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                    int    corrects     = ((BigDecimal)row[1]).intValue();
+                    int    incorrects   = ((BigDecimal)row[2]).intValue();
+                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
+                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    return new SignatureDTO(
+                        name, 
+                        corrects, 
+                        incorrects,
+                        corrects + incorrects,
+                        application, 
+                        organization
+                    );
+            	} else {
+            		return null;
+            	}
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByFormat ---
@@ -261,7 +283,7 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.formato", "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             month, year, null, null,
             apps, orgs,
@@ -281,6 +303,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByImprovedFormat ---
@@ -300,23 +331,36 @@ public class SignatureService implements ISignatureService {
         };
         String[] groupByCols = { "f.formato_mejorado", "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             month, year, null, null,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
-                int    corrects     = ((BigDecimal)row[1]).intValue();
-                int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String organization = row[4] != null ? (String)row[4] : "Indeterminado";
-                return new SignatureDTO(
-                    name, corrects, incorrects,
-                    corrects + incorrects,
-                    application, organization
-                );
+            	if (row[0] != null) {
+            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                    int    corrects     = ((BigDecimal)row[1]).intValue();
+                    int    incorrects   = ((BigDecimal)row[2]).intValue();
+                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
+                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    return new SignatureDTO(
+                        name, corrects, incorrects,
+                        corrects + incorrects,
+                        application, organization
+                    );
+            	} else {
+            		return null;
+            	}
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // =================== MÉTODOS CON RANGO (startMonth/startYear - endMonth/endYear) ===================
@@ -339,7 +383,7 @@ public class SignatureService implements ISignatureService {
         };
         String[] groupByCols = { "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
@@ -356,6 +400,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByProvider (rango) ---
@@ -378,23 +431,36 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.proveedor", "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
     		selectCols, groupByCols,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
-                int    corrects     = ((BigDecimal)row[1]).intValue();
-                int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String organization = row[4] != null ? (String)row[4] : "Indeterminado";
-                return new SignatureDTO(
-                    name, corrects, incorrects,
-                    corrects + incorrects,
-                    application, organization
-                );
+            	if (row[0] != null) {
+            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                    int    corrects     = ((BigDecimal)row[1]).intValue();
+                    int    incorrects   = ((BigDecimal)row[2]).intValue();
+                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
+                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    return new SignatureDTO(
+                        name, corrects, incorrects,
+                        corrects + incorrects,
+                        application, organization
+                    );
+            	} else {
+            		return null;
+            	}
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByFormat (rango) ---
@@ -421,7 +487,7 @@ public class SignatureService implements ISignatureService {
     		"f.dir3_code" 
     		};
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
@@ -441,6 +507,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     // --- getSignaturesByImprovedFormat (rango) ---
@@ -463,26 +538,41 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.formato_mejorado", "f.aplicacion", "f.dir3_code" };
 
-        return executeStatisticsQuery(
-            selectCols, groupByCols,
-            startMonth, startYear, endMonth, endYear,
-            apps, orgs,
-            row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
-                int    corrects     = ((BigDecimal)row[1]).intValue();
-                int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String dir3 = row[4] != null ? (String)row[4] : "Indeterminado";
-                return new SignatureDTO(
-                    name, 
-                    corrects, 
-                    incorrects,
-                    corrects + incorrects,
-                    application, 
-                    dir3
-                );
+        List<SignatureDTO> raw = executeStatisticsQuery(
+                selectCols, groupByCols,
+                startMonth, startYear, endMonth, endYear,
+                apps, orgs,
+                row -> {
+                    String improved = row[0] == null ? null : ((String) row[0]).trim();
+                    if (improved == null || improved.isEmpty()) {
+                        return null; // skip row with no improved format
+                    }
+
+                    int corrects   = row[1] != null ? ((BigDecimal) row[1]).intValue() : 0;
+                    int incorrects = row[2] != null ? ((BigDecimal) row[2]).intValue() : 0;
+                    String application = row[3] != null ? (String) row[3] : "Indeterminado";
+                    String dir3        = row[4] != null ? (String) row[4] : "Indeterminado";
+
+                    return new SignatureDTO(
+                        improved,
+                        corrects,
+                        incorrects,
+                        corrects + incorrects,
+                        application,
+                        dir3
+                    );
+                }
+            );
+
+        // Filter out nulls without method references
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
             }
-        );
+        }
+        return result;
     }
 
     // --- getSignaturesByOrganism (sin rango) ---
@@ -501,7 +591,7 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw = executeStatisticsQuery(
             selectCols, groupByCols,
             month, year, null, null,
             apps, orgs,
@@ -519,6 +609,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
     @Override
@@ -538,7 +637,7 @@ public class SignatureService implements ISignatureService {
     	
         String[] groupByCols = { "f.dir3_code" };
 
-        return executeStatisticsQuery(
+        List<SignatureDTO> raw =  executeStatisticsQuery(
             selectCols, groupByCols,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
@@ -553,6 +652,15 @@ public class SignatureService implements ISignatureService {
                 );
             }
         );
+        
+        List<SignatureDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+            SignatureDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
     }
 
 	@Override

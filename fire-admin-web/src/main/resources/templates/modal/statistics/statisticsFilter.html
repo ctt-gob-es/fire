@@ -381,18 +381,33 @@
 	        	    
 	        	    // Seleccionar la cabecera adecuada según el flag de statisticsResponse.
 	        	    var headerTemplate = "";
-	        	    if (statisticsResponse.isQueryWithCorrectAndIncorrect) {
-	        	        headerTemplate = $("#header-appOrProvider").html();
-	        	    } else if (statisticsResponse.isQueryBySize) {
-	        	        headerTemplate = $("#header-datesSize").html();
-	        	    } else if (statisticsResponse.isQueryByOperation) {
-	        	        headerTemplate = $("#header-operation").html();
-	        	    } else if (statisticsResponse.isSignatureQuery) {
-	        	        headerTemplate = $("#header-signature").html();
-	        	    } else if (statisticsResponse.isQueryByOrganization) {
-	        	        headerTemplate = $("#header-organization").html();
+	        	    if (statisticsResponse.isSignatureQuery) {
+	        	    	if (statisticsResponse.isQueryByApplication) {
+		        	        headerTemplate = $("#header-signature-application").html();
+		        	    } else if (statisticsResponse.isQueryByProvider) {
+		        	    	headerTemplate = $("#header-signature-provider").html();
+		        	    } else if (statisticsResponse.isQueryByFormat) {
+		        	    	headerTemplate = $("#header-signature-format").html();
+		        	    } else if (statisticsResponse.isQueryByImprovedFormat) {
+		        	    	headerTemplate = $("#header-signature-improvedFormat").html();
+		        	    } else if (statisticsResponse.isQueryByOrganization) {
+		        	        headerTemplate = $("#header-signature-organization").html();
+		        	    }
+	        	    } else {
+	        	    	if (statisticsResponse.isQueryBySize) {
+		        	        headerTemplate = $("#header-datesSize").html();
+		        	    } else if (statisticsResponse.isQueryByOperation) {
+		        	        headerTemplate = $("#header-operation").html();
+		        	    } else if (statisticsResponse.isQueryByApplication) {
+		        	        headerTemplate = $("#header-application").html();
+		        	    } else if (statisticsResponse.isQueryByOrganization) {
+		        	        headerTemplate = $("#header-organization").html();
+		        	    } else if (statisticsResponse.isQueryByProvider) {
+		        	    	headerTemplate = $("#header-provider").html();
+		        	    } 
 	        	    }
-	        	    // Si headerTemplate estuviera vacío, asignamos un fallback para evitar problemas.
+	        	    
+	        	    // Si headerTemplate estuviera vacío, asignamos un caso de contingencia para evitar problemas.
 	        	    if (!headerTemplate || headerTemplate.trim() === "") {
 	        	        headerTemplate = "<tr><th>Name</th></tr>";
 	        	    }
@@ -420,73 +435,153 @@
 	        	        paging: true,
 	        	        searching: true,
 	        	        ordering: true,
-	        	        destroy: true
+	        	        destroy: true,
+	        	        language: {
+	        		        url: "js/datatables/i18n/spanish.json",
+	        		        select: {
+		       		            rows: {
+		       		                _: "%d filas seleccionadas",
+		       		                1: "1 fila seleccionada"
+		       		            }
+	       		        	}
+        		        },
 	        	    });
 	        	    
-	        	    // Agregar las filas según el tipo de consulta.
-	        	    if (statisticsResponse.isQueryWithCorrectAndIncorrect) {
-	        	        // Se espera: [name, organization, corrects, incorrects, total]
-	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
-	        	            var item = statisticsResponse.transactions[i];
-	        	            dt.row.add([ 
-	        	            	item.name,
-	        	                item.organization,
-	        	            	item.corrects, 
-	        	            	item.incorrects, 
-	        	            	item.total 
-        	            	]);
-	        	        }
-	        	    } else if (statisticsResponse.isQueryBySize) {
-	        	        // Se espera: [name, organization, sizeBytes]
-	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
-	        	            var item = statisticsResponse.transactions[i];
-	        	            dt.row.add([ 
-	        	            	item.name, 
-	        	                item.organization, 
-	        	                item.sizeBytes 
-        	                ]);
-	        	        }
-	        	    } else if (statisticsResponse.isQueryByOperation) {
-	        	        // Se espera: [name, organization, correctSimpleSignatures, incorrectSimpleSignatures, totalSimple, correctBatchSignatures, incorrectBatchSignatures, totalBatch]
-	        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
-	        	            var item = statisticsResponse.transactions[i];
-	        	            dt.row.add([
-	        	                item.name,
-	        	                item.organization,
-	        	                item.correctSimpleSignatures,
-	        	                item.incorrectSimpleSignatures,
-	        	                item.totalSimple,
-	        	                item.correctBatchSignatures,
-	        	                item.incorrectBatchSignatures,
-	        	                item.totalBatch
-	        	            ]);
-	        	        }
-	        	    } else if (statisticsResponse.isSignatureQuery) {
-	        	        // Se espera: [name, organization, corrects, incorrects, total]
-	        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
-	        	            var item = statisticsResponse.signatures[i];
-	        	            dt.row.add([ 
-	        	            	item.name,
-	        	                item.organization,
-	        	            	item.corrects, 
-	        	            	item.incorrects, 
-	        	            	item.total 
-        	            	]);
-	        	        }
-	        	    } else if (statisticsResponse.isQueryByOrganization) {
-	        	        // Se espera: [name, corrects, incorrects, total]
-	        	    	var source = (statisticsResponse.signatures && statisticsResponse.signatures.length)
-		        	        ? statisticsResponse.signatures
-		        	        : statisticsResponse.transactions;
-	
-		        	    for (var i = 0; i < source.length; i++) {
-		        	        var item = source[i];
-		        	        dt.row.add([
-		        	            item.name,
-		        	            item.corrects,
-		        	            item.incorrects,
-		        	            item.total
-		        	        ]);
+	        	 // Agregar las filas segun el tipo de consulta.
+	        	    if (statisticsResponse.isSignatureQuery) {
+	        	    	if (statisticsResponse.isQueryByApplication) {
+	        	    		// Se espera: [name, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
+		        	            var item = statisticsResponse.signatures[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByProvider) {
+		        	    	// Se espera: [name, application, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
+		        	            var item = statisticsResponse.signatures[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	            	item.application,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByFormat) {
+		        	    	// Se espera: [name, application, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
+		        	            var item = statisticsResponse.signatures[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	            	item.application,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByImprovedFormat) {
+		        	    	// Se espera: [name, application, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.signatures.length; i++) {
+		        	            var item = statisticsResponse.signatures[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	            	item.application,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByOrganization) {
+		        	    	// Se espera: [name, corrects, incorrects, total]
+		        	    	var source = (statisticsResponse.signatures && statisticsResponse.signatures.length)
+			        	        ? statisticsResponse.signatures
+			        	        : statisticsResponse.transactions;
+		
+			        	    for (var i = 0; i < source.length; i++) {
+			        	        var item = source[i];
+			        	        dt.row.add([
+			        	            item.name,
+			        	            item.corrects,
+			        	            item.incorrects,
+			        	            item.total
+			        	        ]);
+			        	    }
+		        	    }
+	        	    } else {
+						if (statisticsResponse.isQueryByApplication) {
+							// Se espera: [name, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+		        	            var item = statisticsResponse.transactions[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByProvider) {
+		        	    	// Se espera: [name, application, organization, corrects, incorrects, total]
+		        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+		        	            var item = statisticsResponse.transactions[i];
+		        	            dt.row.add([ 
+		        	            	item.name,
+		        	            	item.application,
+		        	                item.organization,
+		        	            	item.corrects, 
+		        	            	item.incorrects, 
+		        	            	item.total 
+	        	            	]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryBySize) {
+		        	    	// Se espera: [name, organization, sizeBytes]
+		        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+		        	            var item = statisticsResponse.transactions[i];
+		        	            dt.row.add([ 
+		        	            	item.name, 
+		        	                item.organization, 
+		        	                item.sizeBytes 
+	        	                ]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByOperation) {
+		        	    	// Se espera: [name, organization, correctSimpleSignatures, incorrectSimpleSignatures, totalSimple, correctBatchSignatures, incorrectBatchSignatures, totalBatch]
+		        	        for (var i = 0; i < statisticsResponse.transactions.length; i++) {
+		        	            var item = statisticsResponse.transactions[i];
+		        	            dt.row.add([
+		        	                item.name,
+		        	                item.organization,
+		        	                item.correctSimpleSignatures,
+		        	                item.incorrectSimpleSignatures,
+		        	                item.totalSimple,
+		        	                item.correctBatchSignatures,
+		        	                item.incorrectBatchSignatures,
+		        	                item.totalBatch
+		        	            ]);
+		        	        }
+		        	    } else if (statisticsResponse.isQueryByOrganization) {
+		        	    	// Se espera: [name, corrects, incorrects, total]
+		        	    	var source = (statisticsResponse.signatures && statisticsResponse.signatures.length)
+			        	        ? statisticsResponse.signatures
+			        	        : statisticsResponse.transactions;
+		
+			        	    for (var i = 0; i < source.length; i++) {
+			        	        var item = source[i];
+			        	        dt.row.add([
+			        	            item.name,
+			        	            item.corrects,
+			        	            item.incorrects,
+			        	            item.total
+			        	        ]);
+			        	    }
 		        	    }
 	        	    }
 	        	    
@@ -606,7 +701,7 @@
 		    class: 'filter-bubble'
 		  }).text(`Consulta: ${formData.query}`);
 
-		  // 2. Burbuja de fechas corregida usando guión unicode U+2013 (en dash)
+		  // 2. Burbuja de fechas corregida usando guion unicode U+2013
 		  let textoFechas = formData.monthDate || '';
 		  if (formData.endMonthDate) {
 		    textoFechas += ` \u2013 ${formData.endMonthDate}`;
@@ -615,13 +710,23 @@
 		    class: 'filter-bubble'
 		  }).text(textoFechas);
 
-		  // 3. Burbuja de filtros con listado en pop-over
+		// 3. Burbuja de filtros con listado en pop-over
 		  let items = [];
 		  if (formData.filterByApplications && formData.applications) {
-		    items = items.concat(formData.applications.split(',').map(s=>s.trim()));
+		    items = items.concat(
+		      formData.applications.split(',').map(s => {
+		        s = s.trim();
+		        return s === '__UNDEFINED__' ? 'Indeterminado' : s;
+		      })
+		    );
 		  }
 		  if (formData.filterByOrganizations && formData.organizations) {
-		    items = items.concat(formData.organizations.split(',').map(s=>s.trim()));
+		    items = items.concat(
+		      formData.organizations.split(',').map(s => {
+		        s = s.trim();
+		        return s === '__UNDEFINED__' ? 'Indeterminado' : s;
+		      })
+		    );
 		  }
 
 		  let $burbujaFiltros = null;
@@ -631,17 +736,23 @@
 		      text: `Filtros (${items.length})`
 		    });
 
-		    // Crear el contenedor del pop-over y ocultarlo
+		 	// Crear el contenedor del pop-over y ocultarlo
 		    const $popover = $('<div>', { class: 'filter-tooltip' });
 		    let html = '';
 		    if (formData.filterByApplications && formData.applications) {
-		      html += `<strong>Aplicaciones:</strong><br>` +
-		              formData.applications.split(',').map(a=>a.trim()).join('<br>');
+		      const apps = formData.applications.split(',').map(a => {
+		        a = a.trim();
+		        return a === '__UNDEFINED__' ? 'Indeterminado' : a;
+		      }).join('<br>');
+		      html += `<strong>Aplicaciones:</strong><br>${apps}`;
 		    }
 		    if (formData.filterByOrganizations && formData.organizations) {
 		      if (html) html += '<hr>';
-		      html += `<strong>Organismos:</strong><br>` +
-		              formData.organizations.split(',').map(o=>o.trim()).join('<br>');
+		      const orgs = formData.organizations.split(',').map(o => {
+		        o = o.trim();
+		        return o === '__UNDEFINED__' ? 'Indeterminado' : o;
+		      }).join('<br>');
+		      html += `<strong>Organismos:</strong><br>${orgs}`;
 		    }
 		    $popover.html(html);
 		    $burbujaFiltros.append($popover);

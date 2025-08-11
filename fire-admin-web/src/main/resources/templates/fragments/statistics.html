@@ -86,7 +86,10 @@
               <canvas id="doughnutChartCorrectas"></canvas>
             </div>
             <div style="width:45%; text-align:center">
-              <h3 th:text="#{chart.statistics.totalPorNombre}"></h3>
+              <h3>
+              	<span th:text="#{chart.statistics.totalPorNombre}"></span>
+              	<span id="doughnutNameDiff"></span>
+              </h3>
               <canvas id="doughnutChartTotales"></canvas>
             </div>
           </div>
@@ -119,7 +122,7 @@
 
 <script type="text/template" id="header-datesSize">
   <tr>
-    <th th:text="#{table.statistics.name}">Nombre</th>
+    <th th:text="#{table.statistics.application}">Aplicación</th>
 	<th th:text="#{table.statistics.organization}">Organismo</th>
     <th th:text="#{table.statistics.size}">Megabyte</th>
   </tr>
@@ -133,21 +136,11 @@
     <th colspan="3" th:text="#{table.statistics.operation.lotes}" style="text-align: center;">Oper. Lotes</th>
   </tr>
   <tr>
-    <th th:text="#{table.statistics.name}">Nombre</th>
+    <th th:text="#{table.statistics.application}">Aplicación</th>
 	<th th:text="#{table.statistics.organization}">Organismo</th>
     <th th:text="#{table.statistics.correct}">Correctas</th>
     <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
     <th th:text="#{table.statistics.total}">Total</th>
-    <th th:text="#{table.statistics.correct}">Correctas</th>
-    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
-    <th th:text="#{table.statistics.total}">Total</th>
-  </tr>
-</script>
-
-<script type="text/template" id="header-signature">
-  <tr>
-    <th th:text="#{table.statistics.name}">Nombre</th>
-	<th th:text="#{table.statistics.organization}">Organismo</th>
     <th th:text="#{table.statistics.correct}">Correctas</th>
     <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
     <th th:text="#{table.statistics.total}">Total</th>
@@ -156,9 +149,82 @@
 
 <script type="text/template" id="header-organization">
   <tr>
-    <th th:text="#{table.statistics.name}">Nombre</th>
+    <th th:text="#{table.statistics.organization}">Organismo</th>
     <th th:text="#{table.statistics.correct}">Correctas</th>
     <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-application">
+  <tr>
+    <th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-provider">
+  <tr>
+    <th th:text="#{table.statistics.provider}">Proveedor</th>
+	<th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.correct}">Correctas</th>
+    <th th:text="#{table.statistics.incorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature-format">
+  <tr>
+    <th th:text="#{table.statistics.format}">Formato</th>
+	<th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.signatureCorrect}">Correctas</th>
+    <th th:text="#{table.statistics.signatureIncorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature-improvedFormat">
+  <tr>
+    <th th:text="#{table.statistics.improvedFormat}">Formato longevo</th>
+	<th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.signatureCorrect}">Correctas</th>
+    <th th:text="#{table.statistics.signatureIncorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature-application">
+  <tr>
+    <th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.signatureCorrect}">Correctas</th>
+    <th th:text="#{table.statistics.signatureIncorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature-provider">
+  <tr>
+    <th th:text="#{table.statistics.provider}">Proveedor</th>
+    <th th:text="#{table.statistics.application}">Aplicación</th>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.signatureCorrect}">Correctas</th>
+    <th th:text="#{table.statistics.signatureIncorrect}">Incorrectas</th>
+    <th th:text="#{table.statistics.total}">Total</th>
+  </tr>
+</script>
+
+<script type="text/template" id="header-signature-organization">
+  <tr>
+	<th th:text="#{table.statistics.organization}">Organismo</th>
+    <th th:text="#{table.statistics.signatureCorrect}">Correctas</th>
+    <th th:text="#{table.statistics.signatureIncorrect}">Incorrectas</th>
     <th th:text="#{table.statistics.total}">Total</th>
   </tr>
 </script>
@@ -192,6 +258,22 @@
 	}
 	function generateIncorrectBatchColor(hue) {
 	  return `hsl(${hue}, 80%, 70%)`;
+	}
+	
+	const donutMsgs = {
+	    application:      /*[[#{doughnut.nameDiff.application}]]*/ 'Aplicación',
+	    provider:         /*[[#{doughnut.nameDiff.provider}]]*/ 'Proveedor',
+	    format:           /*[[#{doughnut.nameDiff.format}]]*/ 'Formato',
+	    improvedFormat:   /*[[#{doughnut.nameDiff.improvedFormat}]]*/ 'Formato mejorado',
+	    organization:     /*[[#{doughnut.nameDiff.organization}]]*/ 'Organismo',
+	    size:     		  /*[[#{doughnut.nameDiff.size}]]*/ 'Tamaño',
+	    operation:     	  /*[[#{doughnut.nameDiff.operation}]]*/ 'Operación'
+	};
+
+	function setDoughnutNameDiff(text) {
+	    // Update span content safely
+	    var el = document.getElementById('doughnutNameDiff');
+	    if (el) el.textContent = text;
 	}
 
     // Instancias de Chart.js para poder destruirlas antes de regenerar
@@ -293,43 +375,63 @@
         var datosGenerales = statisticsResponse.isSignatureQuery
             ? statisticsResponse.signatures
             : statisticsResponse.transactions;
-
-        if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
+        
+        if (statisticsResponse.isSignatureQuery) {
         	const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
         	
-        	console.log(groupedFromValues);
-        	
-            drawDoughnutCorrectVsIncorrect(groupedFromValues);
-            drawDoughnutTotalsByAppOrg(groupedFromValues);
-        } else if (statisticsResponse.isQueryByOperation) {
-			const groupedFromValues = groupTopEntitiesFromSignatureSources(datosGenerales, max);
-        	
-        	console.log(groupedFromValues);
-        	
-        	drawDoughnutOperationCharts(groupedFromValues);
-        } else if (statisticsResponse.isQueryBySize) {
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawDoughnutSizeChart(groupedFromValues);
-        } else if (statisticsResponse.isQueryByOrganization) {
-            var datosOrg = (statisticsResponse.signatures && statisticsResponse.signatures.length)
-                ? statisticsResponse.signatures
-                : statisticsResponse.transactions;
-            
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawDoughnutCorrectVsIncorrect(groupedFromValues);
-            drawDoughnutOrganizationChart(groupedFromValues);
+        	if (statisticsResponse.isQueryByApplication) {
+        		// Grafico por Aplicaciones
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, false);
+        		setDoughnutNameDiff(donutMsgs.application);
+        	} else if (statisticsResponse.isQueryByProvider) {
+        		// Grafico por Proveedores
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.provider);
+        	} else if (statisticsResponse.isQueryByFormat) {
+        		// Grafico por Formatos
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.format);
+        	} else if (statisticsResponse.isQueryByImprovedFormat) {
+        		// Grafico por Formatos longevos
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.improvedFormat);
+        	} else if (statisticsResponse.isQueryByOrganization) {
+        		// Grafico por Organismos
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.organization);
+        	}
         } else {
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawDoughnutTotalsByAppOrg(groupedFromValues);
+    		const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+    		
+        	if (statisticsResponse.isQueryByApplication) {
+        		// Grafico por Aplicaciones
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, false);
+        		setDoughnutNameDiff(donutMsgs.application);
+        	} else if (statisticsResponse.isQueryByProvider) {
+        		// Grafico por Proveedores
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.provider);
+        	} else if (statisticsResponse.isQueryBySize) {
+        		// Grafico por Tamaños
+        		drawDoughnutSizeChart(groupedFromValues);
+        		setDoughnutNameDiff(donutMsgs.size);
+        	} else if (statisticsResponse.isQueryByOperation) {
+        		// Grafico por Operaciones
+        		drawDoughnutOperationChartsCorrection(groupedFromValues);
+        		setDoughnutNameDiff(donutMsgs.operation);
+        	} else if (statisticsResponse.isQueryByOrganization) {
+        		// Grafico por Aplicaciones
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
+        		setDoughnutNameDiff(donutMsgs.organization);
+        	}
         }
     }
 
@@ -359,6 +461,120 @@
                             var label = d.labels[t.index];
                             var value = d.datasets[t.datasetIndex].data[t.index];
                             return label + ': ' + value;
+                        }
+                    }
+                }
+            }
+        });
+    }
+    
+    function drawDoughnutTotals(data, title, groupByNameOnly) {
+        var items = Array.isArray(data) ? data.slice() : [];
+        if (!items.length) {
+            if (doughnutChartTotals) { doughnutChartTotals.destroy(); doughnutChartTotals = null; }
+            return;
+        }
+
+        var labels, values, colors;
+
+        if (groupByNameOnly) {
+            var totalsByName = {};
+            items.forEach(function(it) {
+                var name = String(it.name || '');
+                totalsByName[name] = (totalsByName[name] || 0) + Number(it.total || 0);
+            });
+            var names = Object.keys(totalsByName).sort((a, b) => a.localeCompare(b));
+
+            labels = names;
+            values = names.map(n => totalsByName[n]);
+
+            var colorMap = {};
+            names.forEach((name, i) => {
+                colorMap[name] = generateCorrectColor(generateBaseHue(i, names.length));
+            });
+            colors = names.map(n => colorMap[n]);
+
+        } else {
+            var sortedData = items.sort((a, b) => String(a.name).localeCompare(String(b.name)));
+
+            labels = sortedData.map(item => {
+            	if (item.organization == null || item.organization === '') {
+            		return item.name;
+            	} else {
+            		return item.name + ' (' + item.organization + ')';
+            	}
+            });
+            values = sortedData.map(item => item.total || 0);
+
+            var uniqueNames = Array.from(new Set(sortedData.map(item => item.name)));
+            var colorMap = {};
+            uniqueNames.forEach((name, i) => {
+                colorMap[name] = generateCorrectColor(generateBaseHue(i, uniqueNames.length));
+            });
+            colors = sortedData.map(item => colorMap[item.name]);
+        }
+
+        if (doughnutChartTotals) {
+            try { doughnutChartTotals.destroy(); } catch(e) {}
+            doughnutChartTotals = null;
+        }
+
+        // 5) Dibujar el gráfico
+        var ctx = document.getElementById('doughnutChartTotales').getContext('2d');
+        doughnutChartTotals = new Chart(ctx, {
+            type: 'doughnut',
+            data: {
+                labels: labels,
+                datasets: [{ data: values, backgroundColor: colors }]
+            },
+            options: {
+                responsive: true,
+                plugins: {
+                    legend: groupByNameOnly
+                        ? { display: true }
+                        : {
+                            labels: {
+                                generateLabels: function(chart) {
+                                    const bg = chart.data.datasets[0].backgroundColor;
+                                    const nameFirstIndex = {};
+                                    chart.data.labels.forEach((full, i) => {
+                                        const name = full.split(' (')[0];
+                                        if (nameFirstIndex[name] === undefined) nameFirstIndex[name] = i;
+                                    });
+                                    return Object.keys(nameFirstIndex).sort().map(name => {
+                                        const idx = nameFirstIndex[name];
+                                        const hidden = chart.getDataVisibility
+                                            ? !chart.getDataVisibility(idx)
+                                            : (chart.getDatasetMeta(0).data[idx] && chart.getDatasetMeta(0).data[idx].hidden) || false;
+                                        return { text: name, fillStyle: bg[idx], hidden: hidden, index: idx };
+                                    });
+                                }
+                            },
+                            onClick: function(evt, legendItem, legend) {
+                                const chart = legend.chart;
+                                const clickedName = legendItem.text;
+                                chart.data.labels.forEach((full, i) => {
+                                    const name = full.split(' (')[0];
+                                    if (name === clickedName) {
+                                        if (typeof chart.toggleDataVisibility === 'function') {
+                                            const visible = chart.getDataVisibility(i);
+                                            chart.setDataVisibility(i, !visible);
+                                        } else {
+                                            const meta = chart.getDatasetMeta(0);
+                                            if (meta && meta.data[i]) meta.data[i].hidden = !meta.data[i].hidden;
+                                        }
+                                    }
+                                });
+                                chart.update();
+                            }
+                        }
+                },
+                tooltips: {
+                    callbacks: {
+                        label: function(t, data) {
+                            const lbl = data.labels[t.index];
+                            const val = data.datasets[0].data[t.index];
+                            return lbl + ': ' + val;
                         }
                     }
                 }
@@ -540,7 +756,7 @@
 	        }
 	    });
 	
-	 // === Segundo doughnut: Totales Simple/Batch por App (Org) ===
+	 	// === Segundo doughnut: Totales Simple/Batch por App (Org) ===
 	    var ctx2 = document.getElementById('doughnutChartTotales').getContext('2d');
 	    if (doughnutChartTotals) doughnutChartTotals.destroy();
 	    doughnutChartTotals = new Chart(ctx2, {
@@ -608,6 +824,207 @@
 	        }
 	    });
 	}
+    
+	// Simple vs Batch (Correct/Incorrect) + Totals Simple/Batch grouped by App (single ring)
+	function drawDoughnutOperationChartsCorrection(data) {
+	    // ===== Helpers for single-ring split colors (same hue per app) =====
+	    function hslToHex(h, s, l) {
+	        s /= 100; l /= 100;
+	        const c = (1 - Math.abs(2 * l - 1)) * s;
+	        const x = c * (1 - Math.abs((h / 60) % 2 - 1));
+	        const m = l - c / 2;
+	        let r = 0, g = 0, b = 0;
+	        if (0 <= h && h < 60)   { r = c; g = x; b = 0; }
+	        else if (60 <= h && h < 120) { r = x; g = c; b = 0; }
+	        else if (120 <= h && h < 180){ r = 0; g = c; b = x; }
+	        else if (180 <= h && h < 240){ r = 0; g = x; b = c; }
+	        else if (240 <= h && h < 300){ r = x; g = 0; b = c; }
+	        else                         { r = c; g = 0; b = x; }
+	        const toHex = v => {
+	            const hv = Math.round((v + m) * 255).toString(16).padStart(2, '0');
+	            return hv;
+	        };
+	        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
+	    }
+	    // Fallback base hue generator if not provided in your codebase
+	    if (typeof generateBaseHue !== 'function') {
+	        window.generateBaseHue = function(i, total) {
+	            return Math.round((360 * i) / Math.max(total || 1, 1));
+	        };
+	    }
+	    // Two variants per hue to distinguish Simple vs Batch
+	    function colorForType(hue, type) {
+	        // same saturation, different lightness to pair the two slices visually
+	        const s = 70;
+	        const lSimple = 55; // lighter
+	        const lBatch  = 35; // darker
+	        return hslToHex(hue, s, type === 'Simple' ? lSimple : lBatch);
+	    }
+
+	    // ===== 1) Totals for first doughnut (Simple vs Batch - Correct/Incorrect) =====
+	    var simpleCorrect = 0, simpleIncorrect = 0, batchCorrect = 0, batchIncorrect = 0;
+	    data.forEach(function(item) {
+	        simpleCorrect   += item.correctSimpleSignatures   || 0;
+	        simpleIncorrect += item.incorrectSimpleSignatures || 0;
+	        batchCorrect    += item.correctBatchSignatures    || 0;
+	        batchIncorrect  += item.incorrectBatchSignatures  || 0;
+	    });
+
+	    // ===== 2) First doughnut stays the same =====
+	    var ctx1 = document.getElementById('doughnutChartCorrectas').getContext('2d');
+	    if (window.doughnutChartCorrect) window.doughnutChartCorrect.destroy();
+
+	    var hueSimple = 207;
+	    var hueBatch  = 174;
+	    window.doughnutChartCorrect = new Chart(ctx1, {
+	        type: 'doughnut',
+	        data: {
+	            labels: ['Correctas', 'Incorrectas'],
+	            datasets: [
+	                {
+	                    label: 'Simple',
+	                    data: [simpleCorrect, simpleIncorrect],
+	                    backgroundColor: [
+	                        '#36A2EB',
+	                        generateIncorrectColor ? generateIncorrectColor(hueSimple) : '#9ec9f3'
+	                    ]
+	                },
+	                {
+	                    label: 'Batch',
+	                    data: [batchCorrect, batchIncorrect],
+	                    backgroundColor: [
+	                        '#4BC0C0',
+	                        generateIncorrectColor ? generateIncorrectColor(hueBatch) : '#9ad9d9'
+	                    ]
+	                }
+	            ]
+	        },
+	        options: {
+	            responsive: true,
+	            title: { display: true, text: 'Firmas Simple vs Batch' },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(t, d) {
+	                        var ds = d.datasets[t.datasetIndex];
+	                        return ds.label + ' - ' + d.labels[t.index] + ': ' + ds.data[t.index];
+	                    }
+	                }
+	            }
+	        }
+	    });
+
+	    // ===== 3) Build single-ring totals per App (group by name; split each into Simple/Batch) =====
+	    // Aggregate totals across organizations by name
+	    var totalsByName = {};
+	    data.forEach(function(item) {
+	        var name = item.name || 'Desconocido';
+	        if (!totalsByName[name]) totalsByName[name] = { simple: 0, batch: 0 };
+	        totalsByName[name].simple += item.totalSimple || 0;
+	        totalsByName[name].batch  += item.totalBatch  || 0;
+	    });
+
+	    var names = Object.keys(totalsByName).sort(function(a, b) { return a.localeCompare(b); });
+
+	    // Assign a base hue per name, then derive two colors (Simple/Batch)
+	    var nameHueMap = {};
+	    names.forEach(function(name, i) {
+	        nameHueMap[name] = generateBaseHue(i, names.length);
+	    });
+
+	    // Flattened arrays: [App1 — Simple, App1 — Batch, App2 — Simple, App2 — Batch, ...]
+	    var flatLabels = [];
+	    var flatData = [];
+	    var flatColors = [];
+	    names.forEach(function(name) {
+	        var totals = totalsByName[name];
+	        flatLabels.push(name + ' - Simple');
+	        flatData.push(totals.simple);
+	        flatColors.push(colorForType(nameHueMap[name], 'Simple'));
+
+	        flatLabels.push(name + ' - Batch');
+	        flatData.push(totals.batch);
+	        flatColors.push(colorForType(nameHueMap[name], 'Batch'));
+	    });
+
+	    // ===== 4) Second doughnut: single dataset (single ring), adjacent slices per app =====
+	    var ctx2 = document.getElementById('doughnutChartTotales').getContext('2d');
+	    if (window.doughnutChartTotals) window.doughnutChartTotals.destroy();
+
+	    window.doughnutChartTotals = new Chart(ctx2, {
+	        type: 'doughnut',
+	        data: {
+	            labels: flatLabels,
+	            datasets: [
+	                {
+	                    label: 'Total',
+	                    data: flatData,
+	                    backgroundColor: flatColors,
+	                    borderWidth: 1
+	                }
+	            ]
+	        },
+	        options: {
+	            responsive: true,
+	            title: {
+	                display: true,
+	                text: 'Totales Simple vs Batch por Aplicación'
+	            },
+	            // Custom legend: one entry per app (name). Click toggles both slices of that app.
+	            plugins: {
+	                legend: {
+	                    labels: {
+	                        generateLabels: function(chart) {
+	                            // Build first index per name (use the "Simple" slice color as swatch)
+	                            var nameIndexMap = {};
+	                            chart.data.labels.forEach(function(lbl, i) {
+	                                var name = lbl.split(' - ')[0];
+	                                var type = lbl.split(' - ')[1];
+	                                if (type === 'Simple' && nameIndexMap[name] === undefined) {
+	                                    nameIndexMap[name] = i; // index of Simple slice
+	                                }
+	                            });
+	                            return Object.keys(nameIndexMap).map(function(name) {
+	                                var i = nameIndexMap[name];
+	                                var bg = chart.data.datasets[0].backgroundColor[i];
+	                                return {
+	                                    text: name,
+	                                    fillStyle: bg,
+	                                    hidden: false,
+	                                    index: i
+	                                };
+	                            });
+	                        }
+	                    },
+	                    onClick: function(evt, legendItem, legend) {
+	                        var chart = legend.chart;
+	                        var clickedName = legendItem.text;
+	                        var meta = chart.getDatasetMeta(0);
+
+	                        // Toggle visibility for both slices (Simple & Batch) of this name
+	                        chart.data.labels.forEach(function(lbl, i) {
+	                            if (lbl.startsWith(clickedName + ' - ')) {
+	                                // Compatible toggle for doughnut elements
+	                                var el = meta.data[i];
+	                                el.hidden = !el.hidden;
+	                            }
+	                        });
+	                        chart.update();
+	                    }
+	                }
+	            },
+	            tooltips: {
+	                callbacks: {
+	                    label: function(tooltipItem, data) {
+	                        var lbl = data.labels[tooltipItem.index];     // "AppX - Simple/Batch"
+	                        var val = data.datasets[0].data[tooltipItem.index];
+	                        return lbl + ': ' + val;
+	                    }
+	                }
+	            }
+	        }
+	    });
+	}
+
 
     // TamaÃ±o en bytes
 	function drawDoughnutSizeChart(data) {
@@ -838,7 +1255,7 @@
 	            var valor = estadisticas[nombre][org].correctas;
 	            var dataC = nombres.map((_, i) => i === idx ? valor : 0);
 	            datasets.push({
-	                label: nombre + ' (' + org + ') â€“ Correctas',
+	                label: nombre + (org == null || org == '') ? ' (' + org + ')' : '' + ' - Correctas',
 	                data: dataC,
 	                backgroundColor: colorC,
 	                stack: stackId
@@ -850,7 +1267,7 @@
 	            var valor = estadisticas[nombre][org].incorrectas;
 	            var dataI = nombres.map((_, i) => i === idx ? valor : 0);
 	            datasets.push({
-	                label: nombre + ' (' + org + ') â€“ Incorrectas',
+	                label: nombre + (org == null || org == '') ? ' (' + org + ')' : '' + ' - Incorrectas',
 	                data: dataI,
 	                backgroundColor: colorI,
 	                stack: stackId
@@ -1194,7 +1611,7 @@
 	                },
 	                tooltip: {
 	                    callbacks: {
-	                        label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + ' B'
+	                        label: ctx => ctx.dataset.label + ': ' + ctx.parsed.y + ' MB'
 	                    }
 	                }
 	            }
@@ -1683,7 +2100,7 @@
                     tooltip: {
                         callbacks: {
                             label: function(context) {
-                                return context.dataset.label + ': ' + context.parsed.y + ' B';
+                                return context.dataset.label + ': ' + context.parsed.y + ' MB';
                             }
                         }
                     }

@@ -43,6 +43,7 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
 import es.gob.fire.persistence.dto.OrganizationDTO;
+import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 import es.gob.fire.persistence.repository.TransactionRepository;
@@ -158,7 +159,7 @@ public class TransactionService implements ITransactionService {
 		}
 
 		if (apps != null && !apps.isEmpty()) {
-			params.put("aplicaciones", apps);
+			params.put("applications", apps);
 		}
 
 		// Agregar parámetro "organizations" solo si hay valores distintos de "__UNDEFINED__"
@@ -255,17 +256,26 @@ public class TransactionService implements ITransactionService {
 				"t.dir3_code" 
 				};
 		
-		return executeStatisticsQuery(
+		List<TransactionDTO> raw = executeStatisticsQuery(
 				selectColumns, groupByColumns, 
 				month, year, null, null, 
 				apps, orgs,
-				fila -> {
-					String app = fila[0] != null ? (String) fila[0] : "Indeterminado";
-					int corr = ((BigDecimal) fila[1]).intValue();
-					int inc = ((BigDecimal) fila[2]).intValue();
-					String dir3Code = fila[3] != null ? (String) fila[3] : "Indeterminado";
+				row -> {
+					String app = row[0] != null ? (String) row[0] : "Indeterminado";
+					int corr = ((BigDecimal) row[1]).intValue();
+					int inc = ((BigDecimal) row[2]).intValue();
+					String dir3Code = row[3] != null ? (String) row[3] : "Indeterminado";
 			return new TransactionDTO(app, corr, inc, corr + inc, app, dir3Code);
 		});
+		
+		List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -288,25 +298,38 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 		
-		return executeStatisticsQuery(
+		List<TransactionDTO> raw = executeStatisticsQuery(
 			selectColumns, groupByColumns, 
 			month, year, null, null, 
 			apps, orgs,
-			fila -> {
-				String provider   = fila[0] != null ? (String)fila[0] : "Indeterminado";
-	            int corrects      = ((BigDecimal)fila[1]).intValue();
-	            int incorrects    = ((BigDecimal)fila[2]).intValue();
-	            String application= fila[3] != null ? (String)fila[3] : "Indeterminado";
-	            String organization = fila[4] != null ? (String)fila[4] : "Indeterminado";
-	            return new TransactionDTO(
-	                provider,
-	                corrects,
-	                incorrects,
-	                corrects + incorrects,
-	                application,
-	                organization
-	            );
+			row -> {
+				if (row[0] != null) {
+					String provider   = row[0] != null ? (String)row[0] : "Indeterminado";
+		            int corrects      = ((BigDecimal)row[1]).intValue();
+		            int incorrects    = ((BigDecimal)row[2]).intValue();
+		            String application= row[3] != null ? (String)row[3] : "Indeterminado";
+		            String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+		            return new TransactionDTO(
+		                provider,
+		                corrects,
+		                incorrects,
+		                corrects + incorrects,
+		                application,
+		                organization
+		            );
+				} else {
+					return null;
+				}
 		});
+		
+		List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -327,14 +350,14 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             month, year, null, null,
             apps, orgs,
-            fila -> {
-                String application   = fila[0] != null ? (String)fila[0] : "Indeterminado";
-                double sizeMb        = Math.floor(((BigDecimal)fila[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-                String organization  = fila[2] != null ? (String)fila[2] : "Indeterminado";
+            row -> {
+                String application   = row[0] != null ? (String)row[0] : "Indeterminado";
+                double sizeMb        = Math.floor(((BigDecimal)row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
+                String organization  = row[2] != null ? (String)row[2] : "Indeterminado";
                 return new TransactionDTO(
                     application,
                     sizeMb,
@@ -343,6 +366,15 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -368,19 +400,19 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             month, year, null, null,
             apps, orgs,
-            fila -> {
-                String aplicacion               = fila[0] != null ? (String) fila[0] : "Indeterminado";
-                Integer correctSimpleSignatures = ((BigDecimal) fila[1]).intValue();
-                Integer incorrectSimpleSignatures = ((BigDecimal) fila[2]).intValue();
-                Integer totalSimple             = ((BigDecimal) fila[3]).intValue();
-                Integer correctBatchSignatures  = ((BigDecimal) fila[4]).intValue();
-                Integer incorrectBatchSignatures = ((BigDecimal) fila[5]).intValue();
-                Integer totalBatch              = ((BigDecimal) fila[6]).intValue();
-                String organizacion             = fila[7] != null ? (String) fila[7] : "Indeterminado";
+            row -> {
+                String aplicacion               = row[0] != null ? (String) row[0] : "Indeterminado";
+                Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
+                Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
+                Integer totalSimple             = ((BigDecimal) row[3]).intValue();
+                Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
+                Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
+                Integer totalBatch              = ((BigDecimal) row[6]).intValue();
+                String organizacion             = row[7] != null ? (String) row[7] : "Indeterminado";
 
                 return new TransactionDTO(
                     aplicacion,
@@ -395,6 +427,15 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	// ----- Métodos CON rango de fechas (startMonth/startYear - endMonth/endYear) -----
@@ -422,15 +463,15 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
-            fila -> {
-                String application    = fila[0] != null ? (String) fila[0] : "Indeterminado";
-                int corrects          = ((BigDecimal) fila[1]).intValue();
-                int incorrects        = ((BigDecimal) fila[2]).intValue();
-                String organization   = fila[3] != null ? (String) fila[3] : "Indeterminado";
+            row -> {
+                String application    = row[0] != null ? (String) row[0] : "Indeterminado";
+                int corrects          = ((BigDecimal) row[1]).intValue();
+                int incorrects        = ((BigDecimal) row[2]).intValue();
+                String organization   = row[3] != null ? (String) row[3] : "Indeterminado";
                 return new TransactionDTO(
                     application,
                     corrects,
@@ -441,6 +482,15 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -466,26 +516,39 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
-            fila -> {
-                String proveedor    = fila[0] != null ? (String) fila[0] : "Indeterminado";
-                int corrects        = ((BigDecimal) fila[1]).intValue();
-                int incorrects      = ((BigDecimal) fila[2]).intValue();
-                String aplicacion   = fila[3] != null ? (String) fila[3] : "Indeterminado";
-                String dir3 		= fila[4] != null ? (String) fila[4] : "Indeterminado";
-                return new TransactionDTO(
-                    proveedor,
-                    corrects,
-                    incorrects,
-                    corrects + incorrects,
-                    aplicacion,
-                    dir3
-                );
+            row -> {
+            	if (row[0] != null) {
+            		String proveedor    = row[0] != null ? (String) row[0] : "Indeterminado";
+                    int corrects        = ((BigDecimal) row[1]).intValue();
+                    int incorrects      = ((BigDecimal) row[2]).intValue();
+                    String aplicacion   = row[3] != null ? (String) row[3] : "Indeterminado";
+                    String dir3 		= row[4] != null ? (String) row[4] : "Indeterminado";
+                    return new TransactionDTO(
+                        proveedor,
+                        corrects,
+                        incorrects,
+                        corrects + incorrects,
+                        aplicacion,
+                        dir3
+                    );
+            	} else {
+            		return null;
+            	}
             }
         );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -508,14 +571,14 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
-	        fila -> {
-	            String aplicacion   = fila[0] != null ? (String) fila[0] : "Indeterminado";
-	            double sizeMb       = Math.floor(((BigDecimal) fila[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-	            String dir3 		= fila[2] != null ? (String) fila[2] : "Indeterminado";
+	        row -> {
+	            String aplicacion   = row[0] != null ? (String) row[0] : "Indeterminado";
+	            double sizeMb       = Math.floor(((BigDecimal) row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
+	            String dir3 		= row[2] != null ? (String) row[2] : "Indeterminado";
 	            return new TransactionDTO(
 	                aplicacion,
 	                sizeMb,
@@ -524,6 +587,15 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -551,19 +623,19 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
-	        fila -> {
-	            String aplicacion               = fila[0] != null ? (String) fila[0] : "Indeterminado";
-	            Integer correctSimpleSignatures = ((BigDecimal) fila[1]).intValue();
-	            Integer incorrectSimpleSignatures = ((BigDecimal) fila[2]).intValue();
-	            Integer totalSimple             = ((BigDecimal) fila[3]).intValue();
-	            Integer correctBatchSignatures  = ((BigDecimal) fila[4]).intValue();
-	            Integer incorrectBatchSignatures = ((BigDecimal) fila[5]).intValue();
-	            Integer totalBatch              = ((BigDecimal) fila[6]).intValue();
-	            String dir3             		= fila[7] != null ? (String) fila[7] : "Indeterminado";
+	        row -> {
+	            String aplicacion               = row[0] != null ? (String) row[0] : "Indeterminado";
+	            Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
+	            Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
+	            Integer totalSimple             = ((BigDecimal) row[3]).intValue();
+	            Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
+	            Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
+	            Integer totalBatch              = ((BigDecimal) row[6]).intValue();
+	            String dir3             		= row[7] != null ? (String) row[7] : "Indeterminado";
 
 	            return new TransactionDTO(
 	                aplicacion,
@@ -578,6 +650,15 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -597,14 +678,14 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        month, year, null, null,
 	        apps, orgs,
-	        fila -> {
-	            String dir3         = fila[0] != null ? (String) fila[0] : "Indeterminado";
-	            int corrects        = ((BigDecimal) fila[1]).intValue();
-	            int incorrects      = ((BigDecimal) fila[2]).intValue();
+	        row -> {
+	            String dir3         = row[0] != null ? (String) row[0] : "Indeterminado";
+	            int corrects        = ((BigDecimal) row[1]).intValue();
+	            int incorrects      = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(
 	            	dir3,
 	                corrects,
@@ -615,6 +696,15 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override
@@ -635,14 +725,14 @@ public class TransactionService implements ITransactionService {
 	        "t.dir3_code"
 	    };
 
-	    return executeStatisticsQuery(
+	    List<TransactionDTO> raw =executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
-	        fila -> {
-	            String dir3       = fila[0] != null ? (String) fila[0] : "Indeterminado";
-	            int corrects      = ((BigDecimal) fila[1]).intValue();
-	            int incorrects    = ((BigDecimal) fila[2]).intValue();
+	        row -> {
+	            String dir3       = row[0] != null ? (String) row[0] : "Indeterminado";
+	            int corrects      = ((BigDecimal) row[1]).intValue();
+	            int incorrects    = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(
 	                dir3,
 	                corrects,
@@ -653,6 +743,15 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
+	    
+	    List<TransactionDTO> result = new ArrayList<>();
+        for (int i = 0; i < raw.size(); i++) {
+        	TransactionDTO dto = raw.get(i);
+            if (dto != null) {
+                result.add(dto);
+            }
+        }
+        return result;
 	}
 
 	@Override

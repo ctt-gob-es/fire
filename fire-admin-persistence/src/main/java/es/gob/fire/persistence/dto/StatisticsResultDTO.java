@@ -19,6 +19,11 @@ public class StatisticsResultDTO {
 	private Boolean isQueryByOperation;
 	private Boolean isQueryByOrganization;
 	
+	private Boolean isQueryByApplication;
+	private Boolean isQueryByProvider;
+	private Boolean isQueryByFormat;
+	private Boolean isQueryByImprovedFormat;
+	
 	private Boolean enableDonutChart;
 	private Boolean enableBarChart;
 	private Boolean enableBarTimeChart;
@@ -28,7 +33,8 @@ public class StatisticsResultDTO {
 	public StatisticsResultDTO(List<TransactionDTO> transactions, List<SignatureDTO> signatures,
 			Map<String, List<TransactionDTO>> transactionsByMonth, Map<String, List<SignatureDTO>> signaturesByMonth,
 			String queryName, Boolean isSignatureQuery, Boolean isQueryWithCorrectAndIncorrect, Boolean isQueryBySize,
-			Boolean isQueryByOperation, Boolean enableDonutChart, Boolean enableBarChart, Boolean enableBarTimeChart) {
+			Boolean isQueryByOperation, Boolean enableDonutChart, Boolean enableBarChart, Boolean enableBarTimeChart,
+			Boolean isQueryByApplication, Boolean isQueryByProvider, Boolean isQueryByFormat, Boolean isQueryByImprovedFormat) {
 		super();
 		this.transactions = transactions;
 		this.signatures = signatures;
@@ -42,6 +48,10 @@ public class StatisticsResultDTO {
 		this.enableDonutChart = enableDonutChart;
 		this.enableBarChart = enableBarChart;
 		this.enableBarTimeChart = enableBarTimeChart;
+		this.isQueryByApplication = isQueryByApplication;
+		this.isQueryByProvider = isQueryByProvider;
+		this.isQueryByFormat = isQueryByFormat;
+		this.isQueryByImprovedFormat = isQueryByImprovedFormat;
 	}
 
 	public List<TransactionDTO> getTransactions() {
@@ -148,6 +158,38 @@ public class StatisticsResultDTO {
 		this.isQueryByOrganization = isQueryByOrganization;
 	}
 
+	public Boolean getIsQueryByApplication() {
+		return isQueryByApplication;
+	}
+
+	public void setIsQueryByApplication(Boolean isQueryByApplication) {
+		this.isQueryByApplication = isQueryByApplication;
+	}
+
+	public Boolean getIsQueryByProvider() {
+		return isQueryByProvider;
+	}
+
+	public void setIsQueryByProvider(Boolean isQueryByProvider) {
+		this.isQueryByProvider = isQueryByProvider;
+	}
+
+	public Boolean getIsQueryByFormat() {
+		return isQueryByFormat;
+	}
+
+	public void setIsQueryByFormat(Boolean isQueryByFormat) {
+		this.isQueryByFormat = isQueryByFormat;
+	}
+
+	public Boolean getIsQueryByImprovedFormat() {
+		return isQueryByImprovedFormat;
+	}
+
+	public void setIsQueryByImprovedFormat(Boolean isQueryByImprovedFormat) {
+		this.isQueryByImprovedFormat = isQueryByImprovedFormat;
+	}
+
 	public StatisticsResultDTO obtainStatisticsResultByQueryType(List<?> result, String queryName) {
         // Asignamos el query recibido.
         this.setQueryName(queryName);
@@ -160,12 +202,14 @@ public class StatisticsResultDTO {
         
         if(queryName.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_APP.getName())) {
             this.setIsQueryWithCorrectAndIncorrect(Boolean.TRUE);
+            this.setIsQueryByApplication(Boolean.TRUE);
             this.setTransactions((List<TransactionDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
             this.setEnableBarTimeChart(Boolean.FALSE);
         } else if(queryName.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
             this.setIsQueryWithCorrectAndIncorrect(Boolean.TRUE);
+            this.setIsQueryByProvider(Boolean.TRUE);
             this.setTransactions((List<TransactionDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
@@ -192,30 +236,35 @@ public class StatisticsResultDTO {
         // Consultas de firmas
         else if(queryName.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
             this.setIsSignatureQuery(Boolean.TRUE);
+            this.setIsQueryByApplication(Boolean.TRUE);
             this.setSignatures((List<SignatureDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
             this.setEnableBarTimeChart(Boolean.FALSE);
         } else if(queryName.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
             this.setIsSignatureQuery(Boolean.TRUE);
+            this.setIsQueryByProvider(Boolean.TRUE);
             this.setSignatures((List<SignatureDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
             this.setEnableBarTimeChart(Boolean.FALSE);
         } else if(queryName.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
             this.setIsSignatureQuery(Boolean.TRUE);
+            this.setIsQueryByFormat(Boolean.TRUE);
             this.setSignatures((List<SignatureDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
             this.setEnableBarTimeChart(Boolean.FALSE);
         } else if(queryName.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
             this.setIsSignatureQuery(Boolean.TRUE);
+            this.setIsQueryByImprovedFormat(Boolean.TRUE);
             this.setSignatures((List<SignatureDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);
             this.setEnableBarTimeChart(Boolean.FALSE);
         } else if(queryName.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_ORGANISM.getName())) {
-            this.setIsQueryByOrganization(Boolean.TRUE);
+        	this.setIsSignatureQuery(Boolean.TRUE);
+        	this.setIsQueryByOrganization(Boolean.TRUE);
             this.setSignatures((List<SignatureDTO>) result);
             this.setEnableDonutChart(Boolean.TRUE);
             this.setEnableBarChart(Boolean.TRUE);

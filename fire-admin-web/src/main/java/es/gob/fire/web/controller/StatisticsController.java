@@ -181,6 +181,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_APP.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByApplication(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
+				model.addAttribute("isQueryByApp", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
 				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_APP));
@@ -192,6 +193,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
+				model.addAttribute("isQueryByProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("textGood", Constants.TRANS_CORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
 				model.addAttribute("textBad", Constants.TRANS_INCORRECTAS.concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(Constants.QUERYBYTYPE_PROVEEDOR));
@@ -221,6 +223,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_ORGANISM.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOrganism(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
+				model.addAttribute("isQueryByOrganism", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
 				model.addAttribute("queryenum", QueryEnum.TRANSACTIONS_ENDED_BY_ORGANISM.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
@@ -232,6 +235,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("isSignatureQueryByApp", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_APP.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
@@ -241,6 +245,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("isSignatureQueryByProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
@@ -250,6 +255,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("isSignatureQueryByFormat", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
@@ -259,6 +265,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("isSignatureQueryByImprovedFormat", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
@@ -268,6 +275,7 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_ORGANISM.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByOrganism(month, year).spliterator(), false).collect(Collectors.toList());
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
+				model.addAttribute("isSignatureQueryByOrganism", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
 				model.addAttribute("queryenum", QueryEnum.DOCUMENTS_SIGNED_BY_ORGANISM.getId());
 				model.addAttribute("enableDonutChart", Boolean.TRUE);
