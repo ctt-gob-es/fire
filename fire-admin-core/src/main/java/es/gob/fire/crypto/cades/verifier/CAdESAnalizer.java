@@ -52,10 +52,9 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
+import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 
 /**
@@ -235,7 +234,7 @@ public class CAdESAnalizer {
 
 	/**
 	 * Valida que la informaci&oacute;n firmada por un firmante es integra y se
-	 * firm&oacute; con el certificado indicdo.
+	 * firm&oacute; con el certificado indicado.
 	 * @param signer Informaci&oacute;n del firmante.
 	 * @param cert Certificado con el que comprobar la firma.
 	 * @return {@code true} si la informaci&oacute;n del firmante es correcta,
@@ -245,33 +244,20 @@ public class CAdESAnalizer {
 	 */
 	private static boolean verifySigner(final SignerInformation signer, final X509Certificate cert) throws InvalidSignatureException {
 		try {
-
-			// Con la nueva versión de Bouncycastle, la llamada al método verify cambia.
-			// Es necesario instanciar un objeto SignerInformationVerifier.
-			final JcaContentVerifierProviderBuilder jcaContentVerifierProviderBuilder = new JcaContentVerifierProviderBuilder();
-			jcaContentVerifierProviderBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-
-			final ContentVerifierProvider contentVerifierProvider = jcaContentVerifierProviderBuilder.build(cert);
-
-			final JcaDigestCalculatorProviderBuilder digestCalculatorProviderBuilder = new JcaDigestCalculatorProviderBuilder();
-			digestCalculatorProviderBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-			final DigestCalculatorProvider digestCalculatorProvider = digestCalculatorProviderBuilder.build();
+			final ContentVerifierProvider contentVerifierProvider =
+					new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert);
 
 			return signer.verify(
-					// En la nueva versión de Bouncycastle, la signatura del constructor SignerInformationVerifier, es:
-					// public SignerInformationVerifier(CMSSignatureAlgorithmNameGenerator sigNameGenerator, SignatureAlgorithmIdentifierFinder sigAlgorithmFinder, ContentVerifierProvider verifierProvider, DigestCalculatorProvider digestProvider)
-//					new SignerInformationVerifier(
-//							new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert),
-//							new BcDigestCalculatorProvider()));
 					new SignerInformationVerifier(
-			            	new	DefaultCMSSignatureAlgorithmNameGenerator(),
-			            	new DefaultSignatureAlgorithmIdentifierFinder(),
-			            	contentVerifierProvider,
-			            	digestCalculatorProvider));
+							new DefaultCMSSignatureAlgorithmNameGenerator(),
+							new DefaultSignatureAlgorithmIdentifierFinder(),
+							contentVerifierProvider,
+							new BcDigestCalculatorProvider()));
 		} catch (OperatorCreationException | CMSException e) {
 			throw new InvalidSignatureException("Error durante la validacion de un firmante", e); //$NON-NLS-1$
 		}
 	}
+
 
 	/**
 	 * Valida la integridad de la firma y comprueba que todas las firmas que
