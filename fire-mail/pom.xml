@@ -12,23 +12,11 @@
 	</parent>
 	
 	<dependencies>
-		<!-- Spring -->
+		<!-- SLF4J -->
 		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
-			<exclusions>
-		        <exclusion>
-		            <groupId>org.springframework.boot</groupId>
-		            <artifactId>spring-boot-starter-logging</artifactId>
-		        </exclusion>
-		    </exclusions>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
 		</dependency>
-		
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-log4j2</artifactId>
-		</dependency>
-		
 		<!-- JavaMail -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>

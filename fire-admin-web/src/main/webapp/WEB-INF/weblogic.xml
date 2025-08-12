@@ -12,6 +12,7 @@
             <wls:package-name>org.apache.logging.log4j.*</wls:package-name>
             <wls:package-name>org.springframework.*</wls:package-name>
             <wls:package-name>org.hibernate.*</wls:package-name>
+            <wls:package-name>org.bouncycastle.*</wls:package-name>
         </wls:prefer-application-packages>
     </wls:container-descriptor>
 
