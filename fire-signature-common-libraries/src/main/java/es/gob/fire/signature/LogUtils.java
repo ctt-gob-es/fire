@@ -1,4 +1,4 @@
-package es.gob.fire.server.services;
+package es.gob.fire.signature;
 
 /**
  * Clase con m&eacute;todos de utilidad para la impresi&oacute;n de logs.

@@ -118,7 +118,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			params.checkParameters();
 		}
 		catch (final Throwable e) {
-			LOGGER.severe("Error en la comprobacion de los parametros de entrada: " + e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "Error en la comprobacion de los parametros de entrada", e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}

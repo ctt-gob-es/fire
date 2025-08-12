@@ -38,6 +38,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {

@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.internal.sessions.SessionException;
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
@@ -40,6 +39,7 @@ import es.gob.fire.server.services.statistics.StatisticsConfig;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Gestiona las transacciones de firma de la aplicaciones almacenando los datos de cada

@@ -37,13 +37,13 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servicio de carga y prefirma de datos para su posterior firma a trav&eacute;s

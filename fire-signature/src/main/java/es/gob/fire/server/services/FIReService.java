@@ -100,8 +100,7 @@ public class FIReService extends HttpServlet {
     		try {
     			final String statisticsDirPath = ConfigManager.getStatisticsDir();
     			final String datasourceJndiName = ConfigManager.getDatasourceJNDIName();
-    			if (statisticsDirPath != null && !statisticsDirPath.isEmpty() &&
-    					datasourceJndiName != null && !datasourceJndiName.isEmpty()) {
+    			if (statisticsDirPath != null && datasourceJndiName != null) {
     				final String startTime = ConfigManager.getStatisticsDumpTime();
     				FireStatistics.init(statisticsDirPath, startTime, datasourceJndiName, false);
     			}
@@ -278,4 +277,11 @@ public class FIReService extends HttpServlet {
     		return;
     	}
 	}
+
+    @Override
+    public void destroy() {
+    	super.destroy();
+
+    	AlarmsManager.destroy();
+    }
 }

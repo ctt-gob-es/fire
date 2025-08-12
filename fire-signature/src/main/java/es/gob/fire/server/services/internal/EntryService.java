@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.statistics.entity.Browser;
 
 /**

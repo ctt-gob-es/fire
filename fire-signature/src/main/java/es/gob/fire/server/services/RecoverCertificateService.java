@@ -32,6 +32,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servlet que recupera un certificado recien creado. */
 public final class RecoverCertificateService extends HttpServlet {

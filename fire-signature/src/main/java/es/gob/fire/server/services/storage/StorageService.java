@@ -21,11 +21,11 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n

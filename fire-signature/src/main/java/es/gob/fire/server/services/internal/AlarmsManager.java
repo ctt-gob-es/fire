@@ -19,7 +19,7 @@ public class AlarmsManager {
 
 	private static final Logger LOGGER = Logger.getLogger(AlarmsManager.class.getName());
 
-	private static final String CONFIG_FILE = "alarms_config.properties"; //$NON-NLS-1$
+	private static final String OLD_CONFIG_FILE = "alarms_config.properties"; //$NON-NLS-1$
 
 	private static final String PARAM_ALARM_NOTIFIER_SEPARATOR = ","; //$NON-NLS-1$
 
@@ -52,7 +52,8 @@ public class AlarmsManager {
 			}
 
 			// Si no se han conseguido inicializar los notificadores con sus propios archivos de configuracion,
-			// se intentara inicializar el notificador mediante el archivo de configuracion antiguo
+			// se intentara cargar del modo antiguo, en donde el nombre de la configuracion seria en realidad la
+			// clase del notificador y la configuracion se carga de un fichero de configuracion concreto
 			if (notifiersList.isEmpty()) {
 				initOldNotifier(moduleName, notifierName);
 			}
@@ -61,56 +62,59 @@ public class AlarmsManager {
 		initialized = true;
 	}
 
+	/**
+	 * Inicializa un notificador cargando la configuraci&oacute;n de su propio fichero.
+	 * @param moduleName Nombre del m&oacute;dulo (componente central, administracion, etc).
+	 * @param notifierName Nombre del notificador.
+	 */
 	private static void initNotifier(final String moduleName, final String notifierName) {
 
-		try {
-			final String className = ConfigManager.getNotifierClassName(notifierName);
-			final Class<?> notifierClass = Class.forName(className);
-			final AlarmNotifier notifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
-			final Properties config = ConfigFileLoader.loadConfigFile("alarms_" + notifierName + ".properties");  //$NON-NLS-1$//$NON-NLS-2$
-			notifier.init(config);
-			notifier.setModule(moduleName);
-			notifiersList.add(notifier);
+		final String configFilename = "alarms_" + notifierName + ".properties"; //$NON-NLS-1$ //$NON-NLS-2$
+		final String className = ConfigManager.getNotifierClassName(notifierName);
+		if (className == null) {
+			LOGGER.warning("No se ha configurado la clase asociada al gestor de alarmas " + notifierName + ". No se cargara"); //$NON-NLS-1$ //$NON-NLS-2$
+			return;
 		}
-		catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + "alarms_" + notifierName + ".properties" //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-					+ " con la configuracion para la notificacion de alarmas. " //$NON-NLS-1$
-					+ "Debe agregar al directorio de ficheros de configuracion el fichero " //$NON-NLS-1$
-					+ "alarms_" + notifierName + ".properties", e);  //$NON-NLS-1$//$NON-NLS-2$
-		}
-		catch (final InitializationException e) {
-			LOGGER.log(Level.WARNING,
-					"Ocurrio un error durante la inicializacion del notificador de errores" //$NON-NLS-1$
-					+ "alarms_" + notifierName + ".properties", e);  //$NON-NLS-1$//$NON-NLS-2$
-		}
-		catch (final Throwable e) {
-			LOGGER.log(Level.WARNING, "No se ha podido cargar el gestor de alarmas configurado", e); //$NON-NLS-1$
-		}
+		initNotifier(moduleName, className, configFilename);
 	}
 
+	/**
+	 * Inicializa un notificador cargando la configuraci&oacute;n del antiguo fichero general de alarmas.
+	 * @param moduleName Nombre del m&oacute;dulo (componente central, administracion, etc).
+	 * @param notifierClassname Nombre de la clase que implemena el notificador.
+	 */
 	private static void initOldNotifier(final String moduleName, final String notifierClassname) {
+		initNotifier(moduleName, notifierClassname, OLD_CONFIG_FILE);
+	}
+
+	/**
+	 * Inicializa un notificador.
+	 * @param moduleName Nombre del m&oacute;dulo (componente central, administracion, etc).
+	 * @param className Nombre de la clase que implementa el notificador.
+	 * @param configFilename Nombre del fichero con la configuraci&oacute;n del notificador.
+	 */
+	private static void initNotifier(final String moduleName, final String className, final String configFilename) {
 
 		try {
-			final Class<?> notifierClass = Class.forName(notifierClassname);
+			final Class<?> notifierClass = Class.forName(className);
 			final AlarmNotifier notifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
-			final Properties config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
+			final Properties config = ConfigFileLoader.loadConfigFile(configFilename);
 			notifier.init(config);
 			notifier.setModule(moduleName);
 			notifiersList.add(notifier);
 		}
 		catch (final IOException e) {
-			LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + CONFIG_FILE //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + configFilename //$NON-NLS-1$
 					+ " con la configuracion para la notificacion de alarmas. " //$NON-NLS-1$
-					+ "Debe agregar al directorio de ficheros de configuracion el fichero " //$NON-NLS-1$
-					+ CONFIG_FILE, e);
+					+ "Debe agregarlo al directorio de ficheros de configuracion", e);  //$NON-NLS-1$
 		}
 		catch (final InitializationException e) {
 			LOGGER.log(Level.WARNING,
-					"Ocurrio un error durante la inicializacion del notificador de errores" //$NON-NLS-1$
-					+ CONFIG_FILE, e);
+					"Ocurrio un error durante la inicializacion del notificador de errores con el fichero: " //$NON-NLS-1$
+					+ configFilename, e);
 		}
 		catch (final Throwable e) {
-			LOGGER.log(Level.WARNING, "No se ha podido cargar el gestor de alarmas configurado", e); //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, "No se ha podido cargar el gestor de alarmas con la clase configurada: " + className, e); //$NON-NLS-1$
 		}
 	}
 
@@ -133,11 +137,27 @@ public class AlarmsManager {
 		if (notifiersList != null && !notifiersList.isEmpty()) {
 			for (final AlarmNotifier notifier : notifiersList) {
 				try {
+
+					LOGGER.log(Level.INFO, " ====++++==== Enviamos al notificador " + notifier + " la alarma " + alarm); //$NON-NLS-1$
+
 					notifier.notify(alarm.getDefaultLevel(), alarm, resource);
 				} catch (final IOException e) {
 					LOGGER.log(Level.WARNING, "No se ha podido enviar el error al gestor de notificaciones", e); //$NON-NLS-1$
 				}
 			}
 		}
+	}
+
+	public static void destroy() {
+
+		if (!initialized) {
+			return;
+		}
+
+		for (final AlarmNotifier notifier : notifiersList) {
+			notifier.destroy();
+		}
+
+		initialized = false;
 	}
 }

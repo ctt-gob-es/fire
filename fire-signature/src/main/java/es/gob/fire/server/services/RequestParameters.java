@@ -161,7 +161,7 @@ public class RequestParameters {
 	 * @throws IOException Cuando la petici&oacute;n no cumpla con las restricciones establecidas.
 	 */
 	public void checkParameters() throws IOException {
-		checkParameters(null);
+		checkParameters(null, new LogTransactionFormatter());
 	}
 
 	/**
@@ -214,12 +214,6 @@ public class RequestParameters {
 			totalSize += name.length() + value.length();
 		}
 		return new RequestParameters(parameters, totalSize);
-	}
-
-	private static boolean isMultipartRequest(final HttpServletRequest request) {
-		System.out.println("Content-Length: " + request.getContentLengthLong());
-		final String contentType = request.getHeader("Content-Type");
-		return contentType != null && contentType.contains("multipart/form-data");
 	}
 
 	/**

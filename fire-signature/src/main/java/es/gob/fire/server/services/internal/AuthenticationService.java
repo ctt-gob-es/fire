@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servlet que redirige a la autenticacion de usuarios para la obtenci&oacute;n

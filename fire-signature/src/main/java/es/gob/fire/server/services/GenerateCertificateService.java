@@ -36,6 +36,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servicio para la solicitud de un nuevo certificado de firma. */
 public final class GenerateCertificateService extends HttpServlet {

@@ -387,7 +387,7 @@ public class ConfigManager {
 
 	/**
 	 * Recupera el nombre del datasource para el acceso a la base de datos.
-	 * @return nombre del datasource.
+	 * @return nombre del datasource o {@code null} si no est&aacute; definido.
 	 */
 	public static String getDatasourceJNDIName(){
 		final String value = getProperty(PROP_DATASOURCE_JNDI_NAME);
@@ -397,7 +397,7 @@ public class ConfigManager {
 	/**
 	 * Recupera el texto para la composici&oacute;n de la clave HMac para la
 	 * verificaci&oacute;n de del PKCS#1 de la firma.
-	 * @return Cadena a partir de la que componer la clave HMac.
+	 * @return Cadena a partir de la que componer la clave HMac o {@code null} si no est&aacute; definido.
 	 */
 	public static String getHMacKey() {
 		final String value = getProperty(PROP_LOCAL_VERIFICATION_KEY);
@@ -935,7 +935,7 @@ public class ConfigManager {
 			}
 		}
 
-		if (value == null) {
+		if (value == null || value.isEmpty()) {
 			value = defaultValue;
 		}
 		return value;

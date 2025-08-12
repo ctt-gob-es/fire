@@ -28,10 +28,10 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.GenerateCertificateResult;
 import es.gob.fire.server.connector.WeakRegistryException;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servlet para la solicitud de expedici&oacute;n de un nuevo certificado.

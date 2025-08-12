@@ -7,7 +7,7 @@ import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Clase para la composici&oacute;n y recuperaci&oacute;n de la firma iniciada

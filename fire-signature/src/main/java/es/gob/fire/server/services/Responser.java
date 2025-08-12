@@ -13,6 +13,7 @@ import javax.servlet.http.HttpSession;
 import es.gob.fire.server.connector.OperationResult;
 import es.gob.fire.server.services.internal.ErrorResult;
 import es.gob.fire.server.services.internal.TransactionAuxParams;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Construye una respuesta estructurada para una petici&oacute;n del servicio.

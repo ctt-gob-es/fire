@@ -17,9 +17,9 @@ import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactory;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.signature.ConfigFileLoader;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.signature.ProviderElement;
 
 /**
@@ -123,6 +123,16 @@ public class ProviderManager {
 
 		final ApplicationsDAO dao = ApplicationsDAOFactory.getApplicationsDAO();
 		final ApplicationOperationConfig config = dao.getOperationConfig(appId, logF);
+
+
+		//XXX: BORRAR
+		String provs = "";
+		for (final ProviderElement prov : config.getProviders()) {
+			provs += prov.getName() + ", ";
+		}
+		LOGGER.info(logF.f(" =================== Proveedores habilitados para la aplicacion " + appId + ": ") + provs);
+
+
 
 		return config.getProviders();
 	}

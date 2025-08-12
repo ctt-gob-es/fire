@@ -27,10 +27,10 @@ import es.gob.fire.server.connector.FIReCertificateException;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 
 /**

@@ -38,7 +38,6 @@ import es.gob.fire.server.connector.FIReConnectorNetworkException;
 import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.SignOperation;
@@ -48,6 +47,7 @@ import es.gob.fire.server.services.statistics.AuditTransactionRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 
 /**

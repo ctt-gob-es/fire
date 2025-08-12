@@ -43,6 +43,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;

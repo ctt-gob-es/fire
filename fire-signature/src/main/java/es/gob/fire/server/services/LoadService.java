@@ -40,6 +40,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servicio de carga de datos para su posterior firma en servidor.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */

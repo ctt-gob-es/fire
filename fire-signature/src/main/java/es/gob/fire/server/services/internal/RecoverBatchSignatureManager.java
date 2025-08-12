@@ -18,12 +18,12 @@ import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 
 /**

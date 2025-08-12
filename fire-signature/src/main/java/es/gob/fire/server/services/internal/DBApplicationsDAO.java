@@ -16,6 +16,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Base64;
 import java.util.List;
 import java.util.logging.Logger;
@@ -120,6 +121,8 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 	public ApplicationOperationConfig getOperationConfig(final String appId,
 			final LogTransactionFormatter logF) throws IOException {
 
+		LOGGER.warning(logF.f(" ========= Cargamos la configuracion de la aplicacion " + appId));
+
 		ApplicationOperationConfig config = this.operationConfigLoader.getOperationConfig(appId);
 
 		if (config == null) {
@@ -127,6 +130,8 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 					+ "No se estableceran limites para el servicio")); //$NON-NLS-1$
 			config = new ApplicationOperationConfig();
 		}
+
+		LOGGER.warning(logF.f(" ========= Se cargaran los siguientes proveedores para la aplicacion: " + Arrays.toString(config.getProviders())));
 
 		return config;
 	}

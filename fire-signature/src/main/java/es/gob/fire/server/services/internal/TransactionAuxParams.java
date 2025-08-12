@@ -1,6 +1,6 @@
 package es.gob.fire.server.services.internal;
 
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Clase con objetos y m&eacute;todos de ayuda para el tratamiento de una transacci&oacute;n concreta.

@@ -1,26 +1,24 @@
-package es.gob.fire.alarms;
+package es.gob.fire.alarms.mail;
+
+import java.util.Date;
+
+import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmLevel;
 
 /**
- * Clase que relaciona la informaci&oacute;n de una alarma 
+ * Clase que relaciona la informaci&oacute;n de una alarma
  * con las notificaciones realizadas sobre la misma.
  */
 public class AlarmNotification {
 
 	private Alarm alarm;
 	private AlarmLevel level;
-	private int notifications;
+	private final long time;
 
 	public AlarmNotification(final Alarm alarm, final AlarmLevel level) {
 		this.alarm = alarm;
 		this.level = level;
-		this.notifications = 0;
-	}
-	
-	/**
-	 * Agrega una nueva notificaci&oacute;n a la alarma
-	 */
-	public void addNotification() {
-		this.notifications++;
+		this.time = new Date().getTime();
 	}
 
 	/**
@@ -39,12 +37,12 @@ public class AlarmNotification {
 		return this.level;
 	}
 
-	public int getNotifications() {
-		return this.notifications;
-	}
-
-	public void setNotifications(final int notifications) {
-		this.notifications = notifications;
+	/**
+	 * Momento del tiempo en milisegundos en el que se creo la notificaci&oacute;n.
+	 * @return Milisegundos correspondientes al momento en le que se creo la notificaci&oacute;n.
+	 */
+	public long getTime() {
+		return this.time;
 	}
 
 	public void setAlarm(final Alarm alarm) {

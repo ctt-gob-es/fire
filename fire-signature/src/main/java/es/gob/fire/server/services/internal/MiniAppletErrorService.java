@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
