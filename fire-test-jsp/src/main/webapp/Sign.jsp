@@ -96,23 +96,16 @@
 							<label for="upgrade-verify">Validar</label><br>
 			   	</fieldset>
 			   	
-			   	<fieldset  class="fieldset-fire">
-					<legend>Idioma: </legend>
-						<input id="none" type="radio" name="language" value="" checked="checked"/>
-							<label for="none" >Sin definir</label><br>
-						<input id="spanish" type="radio" name="language" value="es"/>
-							<label for="spanish">Espa&ntilde;ol</label><br>
-						<input id="english" type="radio" name="language" value="en"/>
-							<label for="english">Ingl&eacute;s</label><br>
-						<input id="catalan" type="radio" name="language" value="ca"/>
-							<label for="catalan">Catal&aacute;n</label><br>
-						<input id="basque" type="radio" name="language" value="eu"/>
-							<label for="basque">Euskera</label><br>
-						<input id="valencian" type="radio" name="language" value="va"/>
-							<label for="valencian">Valenciano</label><br>
-						<input id="galician" type="radio" name="language" value="gl"/>
-							<label for="galician">Gallego</label><br>
-			   	</fieldset>
+				<label for="idioma">Idioma: </label>
+				<select id="idioma" name="language">
+					<option value="" selected="selected">Sin definir</option>
+					<option value="es">Espa&ntilde;ol</option>
+					<option value="ca">Catal&aacute;n</option>
+					<option value="eu">Euskera</option>
+					<option value="gl">Gallego</option>
+					<option value="va">Valenciano</option>
+					<option value="en">Ingl&eacute;s</option>
+				</select>
 				
 				 <%-- ExtraParams en Base64. En este ejemplo, se establecen los parametros:
 				   - mode=implicit
