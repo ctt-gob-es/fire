@@ -1177,54 +1177,51 @@
 	    });
 	}
     
-    function handleBarView() {
-        if (barChart) barChart.destroy();
+	function handleBarView() {
+		  if (barChart) { try { barChart.destroy(); } catch (e) {} }
 
-        var datosBase = statisticsResponse.isSignatureQuery
-            ? statisticsResponse.signatures
-            : statisticsResponse.transactions;
-        
-     	const el = document.getElementById("maxEntitiesBeforeGrouping");
-        const parsed = parseInt(el?.value ?? "", 10);
-        const max = Math.max(0, Number.isNaN(parsed) ? 8 : parsed);
-        
-        if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosBase, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawBarCorrectVsIncorrect(groupedFromValues);
-        } else if (statisticsResponse.isQueryByOperation) {
-			const groupedFromValues = groupTopEntitiesFromSignatureSources(datosBase, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawBarOperationChart(groupedFromValues);
-        } else if (statisticsResponse.isQueryBySize) {
-        	const topNames = getTopNamesBySizeBytesFlat(datosBase, max);
-			const groupedFromValues = groupByTopNamesSizeBytesFlat(datosBase, topNames);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawBarSizeChart(groupedFromValues);
-        } else if (statisticsResponse.isQueryByOrganization) {
-            var datosOrg = (statisticsResponse.signatures && statisticsResponse.signatures.length)
-                ? statisticsResponse.signatures
-                : statisticsResponse.transactions;
-            
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosOrg, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawBarOrganizationChart(groupedFromValues);
-        } else {
-			const groupedFromValues = groupTopEntitiesByCorrectValues(datosBase, max);
-        	
-        	console.log(groupedFromValues);
-        	
-            drawBarTotalsByAppOrg(groupedFromValues);
-        }
-    }
+		  var datosGenerales = statisticsResponse.isSignatureQuery
+		    ? statisticsResponse.signatures
+		    : statisticsResponse.transactions;
+
+		  const el = document.getElementById("maxEntitiesBeforeGrouping");
+		  const parsed = parseInt(el?.value ?? "", 10);
+		  const max = Math.max(0, Number.isNaN(parsed) ? 8 : parsed);
+
+		  if (statisticsResponse.isSignatureQuery) {
+		    const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+
+		    if (statisticsResponse.isQueryByApplication) {
+		      // App -> sin split por org
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, true);
+		    } else if (statisticsResponse.isQueryByProvider) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  true);
+		    } else if (statisticsResponse.isQueryByFormat) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  true);
+		    } else if (statisticsResponse.isQueryByImprovedFormat) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  true);
+		    } else if (statisticsResponse.isQueryByOrganization) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  true);
+		    }
+
+		  } else {
+		    const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
+
+		    if (statisticsResponse.isQueryByApplication) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, false);
+		    } else if (statisticsResponse.isQueryByProvider) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  false);
+		    } else if (statisticsResponse.isQueryBySize) {
+		      // Vista específica de tamaño
+		      drawBarSizeChart(groupedFromValues);
+		    } else if (statisticsResponse.isQueryByOperation) {
+		      // Vista específica de operación
+		      drawBarOperationChart(groupedFromValues);
+		    } else if (statisticsResponse.isQueryByOrganization) {
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  false);
+		    }
+		  }
+		}
 
     
  	// Bar: Correctas vs Incorrectas
@@ -2577,6 +2574,152 @@
 
    	  return grouped;
    	}
+    
+ 	// Replacement: legend shows distinct "name" values (not Correct/Incorrect)
+    function drawBarCorrectVsIncorrectFlexible(data, splitByOrg, isSignature) {
+      function destroyByCanvasId(id) {
+        const canvas = document.getElementById(id);
+        if (!canvas) return;
+        if (typeof Chart.getChart === 'function') {
+          const inst = Chart.getChart(canvas);
+          if (inst) inst.destroy();
+        } else if (Chart.instances) {
+          Object.keys(Chart.instances).forEach(k => {
+            const ch = Chart.instances[k];
+            if (ch && ch.chart && ch.chart.canvas && ch.chart.canvas.id === id) {
+              try { ch.destroy(); } catch(e) {}
+            }
+          });
+        }
+      }
+
+      const labelCorrect   = isSignature ? signatureCorrectVsIncorrectMsgs.correct   : transactionCorrectVsIncorrectMsgs.correct;
+      const labelIncorrect = isSignature ? signatureCorrectVsIncorrectMsgs.incorrect : transactionCorrectVsIncorrectMsgs.incorrect;
+
+      const canvasId = 'barChart';
+      const ctx = document.getElementById(canvasId).getContext('2d');
+      destroyByCanvasId(canvasId);
+      if (window.barChart) { try { window.barChart.destroy(); } catch(e) {} }
+
+      if (!Array.isArray(data) || data.length === 0) {
+        window.barChart = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+        return;
+      }
+
+      let labelsNames = [];
+      let datasets = [];
+
+      if (splitByOrg) {
+        labelsNames = Array.from(new Set(data.map(it => it.name))).sort((a,b)=>a.localeCompare(b));
+
+        const stats = {};
+        labelsNames.forEach(n => stats[n] = {});
+        data.forEach(item => {
+          const n = item.name;
+          const o = item.organization || '';
+          if (!stats[n][o]) stats[n][o] = { correct: 0, incorrect: 0 };
+          stats[n][o].correct   += item.corrects   || 0;
+          stats[n][o].incorrect += item.incorrects || 0;
+        });
+
+        const stackId = 'stack';
+        labelsNames.forEach((name, idx) => {
+          const orgs = Object.keys(stats[name]);
+          const hue  = generateBaseHue(idx, labelsNames.length);
+          const colorC = generateCorrectColor(hue);
+          const colorI = generateIncorrectColor(hue);
+
+          orgs.forEach(org => {
+            const vC = stats[name][org].correct;
+            const vI = stats[name][org].incorrect;
+
+            const arrC = labelsNames.map((_, i) => i === idx ? vC : 0);
+            const arrI = labelsNames.map((_, i) => i === idx ? vI : 0);
+            const base = (org && org.trim().toLowerCase() !== 'no definido') ? `${name} (${org})` : `${name}`;
+
+            datasets.push({ label: `${base} - ${labelCorrect}`,   data: arrC, backgroundColor: colorC, stack: stackId });
+            datasets.push({ label: `${base} - ${labelIncorrect}`, data: arrI, backgroundColor: colorI, stack: stackId });
+          });
+        });
+
+      } else {
+        labelsNames = Array.from(new Set(data.map(i => i.name))).sort((a,b)=>a.localeCompare(b));
+
+        const correctBy = {}; const incorrectBy = {};
+        labelsNames.forEach(n => { correctBy[n]=0; incorrectBy[n]=0; });
+        data.forEach(item => {
+          correctBy[item.name]   += item.corrects   || 0;
+          incorrectBy[item.name] += item.incorrects || 0;
+        });
+
+        const correctArr   = labelsNames.map(n => correctBy[n]);
+        const incorrectArr = labelsNames.map(n => incorrectBy[n]);
+
+        const colorsCorrect   = labelsNames.map((_, i) => generateCorrectColor(generateBaseHue(i, labelsNames.length)));
+        const colorsIncorrect = labelsNames.map((_, i) => generateIncorrectColor(generateBaseHue(i, labelsNames.length)));
+
+        datasets = [
+          { label: labelCorrect,   data: correctArr,   backgroundColor: colorsCorrect,   stack: 'stack' },
+          { label: labelIncorrect, data: incorrectArr, backgroundColor: colorsIncorrect, stack: 'stack' }
+        ];
+      }
+
+      window.barChart = new Chart(ctx, {
+        type: 'bar',
+        data: { labels: labelsNames, datasets },
+        options: {
+          responsive: true,
+          maintainAspectRatio: false,
+          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+          plugins: {
+            legend: {
+              labels: {
+                generateLabels(chart) {
+                  const names  = chart.data.labels || [];
+                  const ds0    = chart.data.datasets?.[0];
+                  const bgList = Array.isArray(ds0?.backgroundColor) ? ds0.backgroundColor : [];
+                  return names.map((name, i) => ({
+                    text: name,
+                    fillStyle: bgList[i] || generateCorrectColor(generateBaseHue(i, names.length)),
+                    hidden: chart.getDataVisibility ? !chart.getDataVisibility(i) : false,
+                    index: i
+                  }));
+                }
+              },
+              onClick(evt, legendItem, legend) {
+                const chart = legend.chart;
+                const idx = legendItem.index;
+
+                if (typeof chart.toggleDataVisibility === 'function') {
+                  chart.toggleDataVisibility(idx);
+                } else {
+                  chart.data.datasets.forEach(ds => {
+                    if (!ds._origData) ds._origData = ds.data.slice();
+                    ds.data[idx] = (ds.data[idx] === 0 && ds._lastHiddenIndex === idx) ? ds._origData[idx] : 0;
+                    ds._lastHiddenIndex = (ds._lastHiddenIndex === idx) ? null : idx;
+                  });
+                }
+                chart.update();
+              }
+            },
+            tooltip: {
+              callbacks: {
+                label(ctx) {
+                  const name = ctx.chart.data.labels[ctx.dataIndex];
+                  const dsLabel = ctx.dataset.label || '';
+                  const value = ctx.parsed.y;
+                  
+                  if (splitByOrg) return `${dsLabel}: ${value}`;
+                  return `${name} - ${dsLabel}: ${value}`;
+                }
+              }
+            }
+          }
+        }
+      });
+
+      setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+    }
 
 </script>
 
