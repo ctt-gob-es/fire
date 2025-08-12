@@ -733,6 +733,8 @@
 					throw new BatchNoSignedException($errorMessage, $errorCode);
 				}
 				else {
+					// El codigo de error no revela lo ocurrido, pero quizas se pueda determinar por otras vias
+					// La petcion excedio el tamano permitido
 					if ($httpResponse->statusCode == 413) {
 						throw new HttpTooLargeContentException("El contenido de la peticion era demasiado grande", FIReErrors::TOO_LARGE_CONTENT);
 					}

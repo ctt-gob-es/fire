@@ -930,7 +930,7 @@ namespace FIRe
                 {
                     throw new HttpForbiddenException("Error HTTP " + r.StatusCode, e);
                 }
-                else if (r.StatusCode == HttpStatusCode.RequestTimeout)
+                else if (r.StatusCode == HttpStatusCode.NotFound || r.StatusCode == HttpStatusCode.RequestTimeout)
                 {
                     throw new HttpNetworkException("Error HTTP " + r.StatusCode, e);
                 }

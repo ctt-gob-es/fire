@@ -324,7 +324,7 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
+
         String languageUsed = language;
         if (languageUsed == null || languageUsed.isEmpty()) {
         	languageUsed = "es";
@@ -403,7 +403,7 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
+
         String languageUsed = language;
         if (languageUsed == null || languageUsed.isEmpty()) {
         	languageUsed = "es";
@@ -413,7 +413,7 @@ public class FireClient {
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
+        		.replace(TAG_VALUE_LANGUAGE, languageUsed)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
         		URL_PARAMETERS_SIGN
         		.replace(TAG_VALUE_CRYPTO_OPERATION, op)
@@ -972,17 +972,17 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
+
         String languageUsed = language;
         if (languageUsed == null || languageUsed.isEmpty()) {
         	languageUsed = "es";
         }
-        
+
         final String urlParameters =
         		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
+        		.replace(TAG_VALUE_LANGUAGE, languageUsed)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +
         		URL_PARAMETERS_SIGN_BATCH
                 .replace(TAG_VALUE_TRANSACTION, transactionId)
@@ -1276,6 +1276,7 @@ public class FireClient {
     		}
     		else {
     			// El codigo de error no revela lo ocurrido, pero quizas se pueda determinar por otras vias
+    			// La peticion excedio el tamano permitido
     			if (errorResponse.getStatus() == 413) {
     				return new HttpTooLargeContentException(FIReErrors.TOO_LARGE_CONTENT);
     			}
@@ -1288,7 +1289,7 @@ public class FireClient {
     	// comunicacion
     	if (errorResponse.getStatus() == HttpURLConnection.HTTP_FORBIDDEN) {
     		return new HttpForbiddenException(ERROR_CODE_FORBIDEN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
-    	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+    	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_NOT_FOUND || errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
     		return new HttpNetworkException(ERROR_CODE_UNKNOWN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
     	}
     	return new HttpOperationException(ERROR_CODE_UNKNOWN, "Error desconocido en la llamada a FIRe: " + HTTP_ERROR_PREFIX + errorResponse.getStatus()); //$NON-NLS-1$
