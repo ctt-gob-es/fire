@@ -245,8 +245,8 @@ public class TransactionService implements ITransactionService {
 	public List<TransactionDTO> getTransactionsByApplication(Integer month, Integer year, List<String> apps,
 			List<String> orgs) {
 		String[] selectColumns = { 
-				"t.aplicacion", 
-				"SUM(t.correcta) AS corrects",
+				"t.aplicacion",
+		        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 				"SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects", 
 				"t.dir3_code" 
 				};
@@ -261,10 +261,10 @@ public class TransactionService implements ITransactionService {
 				month, year, null, null, 
 				apps, orgs,
 				row -> {
-					String app = row[0] != null ? (String) row[0] : "Indeterminado";
+					String app = row[0] != null ? (String) row[0] : "No definido";
 					int corr = ((BigDecimal) row[1]).intValue();
 					int inc = ((BigDecimal) row[2]).intValue();
-					String dir3Code = row[3] != null ? (String) row[3] : "Indeterminado";
+					String dir3Code = row[3] != null ? (String) row[3] : "No definido";
 			return new TransactionDTO(app, corr, inc, corr + inc, app, dir3Code);
 		});
 		
@@ -287,7 +287,7 @@ public class TransactionService implements ITransactionService {
 			final List<String> apps, final List<String> orgs) {
 		String[] selectColumns = {
 	        "t.proveedor",
-	        "SUM(t.correcta) AS corrects",
+	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.aplicacion",
 	        "t.dir3_code"
@@ -303,12 +303,12 @@ public class TransactionService implements ITransactionService {
 			month, year, null, null, 
 			apps, orgs,
 			row -> {
-				if (row[0] != null) {
-					String provider   = row[0] != null ? (String)row[0] : "Indeterminado";
+				if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
+					String provider   = row[0] != null ? (String)row[0] : "No definido";
 		            int corrects      = ((BigDecimal)row[1]).intValue();
 		            int incorrects    = ((BigDecimal)row[2]).intValue();
-		            String application= row[3] != null ? (String)row[3] : "Indeterminado";
-		            String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+		            String application= row[3] != null ? (String)row[3] : "No definido";
+		            String organization = row[4] != null ? (String)row[4] : "No definido";
 		            return new TransactionDTO(
 		                provider,
 		                corrects,
@@ -355,9 +355,9 @@ public class TransactionService implements ITransactionService {
             month, year, null, null,
             apps, orgs,
             row -> {
-                String application   = row[0] != null ? (String)row[0] : "Indeterminado";
+                String application   = row[0] != null ? (String)row[0] : "No definido";
                 double sizeMb        = Math.floor(((BigDecimal)row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-                String organization  = row[2] != null ? (String)row[2] : "Indeterminado";
+                String organization  = row[2] != null ? (String)row[2] : "No definido";
                 return new TransactionDTO(
                     application,
                     sizeMb,
@@ -405,14 +405,14 @@ public class TransactionService implements ITransactionService {
             month, year, null, null,
             apps, orgs,
             row -> {
-                String aplicacion               = row[0] != null ? (String) row[0] : "Indeterminado";
+                String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
                 Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
                 Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
                 Integer totalSimple             = ((BigDecimal) row[3]).intValue();
                 Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
                 Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
                 Integer totalBatch              = ((BigDecimal) row[6]).intValue();
-                String organizacion             = row[7] != null ? (String) row[7] : "Indeterminado";
+                String organizacion             = row[7] != null ? (String) row[7] : "No definido";
 
                 return new TransactionDTO(
                     aplicacion,
@@ -453,7 +453,7 @@ public class TransactionService implements ITransactionService {
 			final List<String> orgs) {
 		String[] selectColumns = {
 	        "t.aplicacion",
-	        "SUM(t.correcta) AS corrects",
+	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.dir3_code"
 	    };
@@ -468,10 +468,10 @@ public class TransactionService implements ITransactionService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String application    = row[0] != null ? (String) row[0] : "Indeterminado";
+                String application    = row[0] != null ? (String) row[0] : "No definido";
                 int corrects          = ((BigDecimal) row[1]).intValue();
                 int incorrects        = ((BigDecimal) row[2]).intValue();
-                String organization   = row[3] != null ? (String) row[3] : "Indeterminado";
+                String organization   = row[3] != null ? (String) row[3] : "No definido";
                 return new TransactionDTO(
                     application,
                     corrects,
@@ -504,7 +504,7 @@ public class TransactionService implements ITransactionService {
 			final List<String> orgs) {
 		String[] selectColumns = {
 	        "t.proveedor",
-	        "SUM(t.correcta) AS corrects",
+	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.aplicacion",
 	        "t.dir3_code"
@@ -521,12 +521,12 @@ public class TransactionService implements ITransactionService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-            	if (row[0] != null) {
-            		String proveedor    = row[0] != null ? (String) row[0] : "Indeterminado";
+            	if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
+            		String proveedor    = row[0] != null ? (String) row[0] : "No definido";
                     int corrects        = ((BigDecimal) row[1]).intValue();
                     int incorrects      = ((BigDecimal) row[2]).intValue();
-                    String aplicacion   = row[3] != null ? (String) row[3] : "Indeterminado";
-                    String dir3 		= row[4] != null ? (String) row[4] : "Indeterminado";
+                    String aplicacion   = row[3] != null ? (String) row[3] : "No definido";
+                    String dir3 		= row[4] != null ? (String) row[4] : "No definido";
                     return new TransactionDTO(
                         proveedor,
                         corrects,
@@ -576,9 +576,9 @@ public class TransactionService implements ITransactionService {
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String aplicacion   = row[0] != null ? (String) row[0] : "Indeterminado";
+	            String aplicacion   = row[0] != null ? (String) row[0] : "No definido";
 	            double sizeMb       = Math.floor(((BigDecimal) row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-	            String dir3 		= row[2] != null ? (String) row[2] : "Indeterminado";
+	            String dir3 		= row[2] != null ? (String) row[2] : "No definido";
 	            return new TransactionDTO(
 	                aplicacion,
 	                sizeMb,
@@ -628,14 +628,14 @@ public class TransactionService implements ITransactionService {
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String aplicacion               = row[0] != null ? (String) row[0] : "Indeterminado";
+	            String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
 	            Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
 	            Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
 	            Integer totalSimple             = ((BigDecimal) row[3]).intValue();
 	            Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
 	            Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
 	            Integer totalBatch              = ((BigDecimal) row[6]).intValue();
-	            String dir3             		= row[7] != null ? (String) row[7] : "Indeterminado";
+	            String dir3             		= row[7] != null ? (String) row[7] : "No definido";
 
 	            return new TransactionDTO(
 	                aplicacion,
@@ -670,7 +670,7 @@ public class TransactionService implements ITransactionService {
 			final List<String> apps, final List<String> orgs) {
 		String[] selectColumns = {
 	        "t.dir3_code",
-	        "SUM(t.correcta) AS corrects",
+	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects"
 	    };
 		
@@ -683,7 +683,7 @@ public class TransactionService implements ITransactionService {
 	        month, year, null, null,
 	        apps, orgs,
 	        row -> {
-	            String dir3         = row[0] != null ? (String) row[0] : "Indeterminado";
+	            String dir3         = row[0] != null ? (String) row[0] : "No definido";
 	            int corrects        = ((BigDecimal) row[1]).intValue();
 	            int incorrects      = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(
@@ -718,7 +718,7 @@ public class TransactionService implements ITransactionService {
 			final List<String> orgs) {
 		String[] selectColumns = {
 	        "t.dir3_code",
-	        "SUM(t.correcta) AS corrects",
+	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects"
 	    };
 	    String[] groupByColumns = {
@@ -730,7 +730,7 @@ public class TransactionService implements ITransactionService {
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String dir3       = row[0] != null ? (String) row[0] : "Indeterminado";
+	            String dir3       = row[0] != null ? (String) row[0] : "No definido";
 	            int corrects      = ((BigDecimal) row[1]).intValue();
 	            int incorrects    = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(

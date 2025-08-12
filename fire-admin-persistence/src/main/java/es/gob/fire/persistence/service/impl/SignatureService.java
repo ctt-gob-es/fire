@@ -30,6 +30,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Function;
+import java.util.stream.Collectors;
 
 import javax.persistence.EntityManager;
 import javax.persistence.Query;
@@ -102,25 +103,34 @@ public class SignatureService implements ISignatureService {
         return "(EXTRACT(YEAR FROM f.fecha)*100 + EXTRACT(MONTH FROM f.fecha)) BETWEEN :startBoundary AND :endBoundary";
     }
     
-    private Map<String,Object> buildParameters(
-            Integer sm, Integer sy, Integer em, Integer ey,
-            List<String> apps, List<String> orgs) {
-        Map<String,Object> p = new HashMap<>();
-        if (em == null || ey == null) {
-            p.put("month", sm);
-            p.put("year", sy);
-        } else {
-            p.put("startBoundary", sy * 100 + sm);
-            p.put("endBoundary",   ey * 100 + em);
-        }
-        if (apps != null && !apps.isEmpty()) {
-            p.put("aplicaciones", apps);
-        }
-        if (orgs != null && !orgs.isEmpty()) {
-            p.put("dir3Codes", orgs);
-        }
-        return p;
-    }
+    private Map<String, Object> buildParameters(Integer sm, Integer sy, Integer em, Integer ey, List<String> apps, List<String> orgs) {
+		Map<String, Object> params = new HashMap<>();
+
+		if (em == null || ey == null) {
+			params.put("month", sm);
+			params.put("year", sy);
+		} else {
+			params.put("startBoundary", sy * 100 + sm);
+			params.put("endBoundary", ey * 100 + em);
+		}
+
+		if (apps != null && !apps.isEmpty()) {
+			params.put("applications", apps);
+		}
+
+		// Agregar parámetro "organizations" solo si hay valores distintos de "__UNDEFINED__"
+		if (orgs != null && !orgs.isEmpty()) {
+			boolean containsOnlyUndefined = orgs.stream().allMatch(o -> "__UNDEFINED__".equals(o));
+			if (!containsOnlyUndefined) {
+				List<String> definedOrgs = orgs.stream()
+					.filter(o -> !"__UNDEFINED__".equals(o))
+					.collect(Collectors.toList());
+				params.put("organizations", definedOrgs);
+			}
+		}
+
+		return params;
+	}
     
     /**
      * Método auxiliar para ejecutar queries nativas utilizando parámetros nombrados.
@@ -145,23 +155,45 @@ public class SignatureService implements ISignatureService {
     /**
      * Método que arma la cláusula opcional de filtrado por f.aplicacion o f.dir3_code.
      */
-    private String buildFilterClause(List<String> apps, List<String> orgs) {
-        if ((apps == null || apps.isEmpty()) && (orgs == null || orgs.isEmpty())) {
-            return "";
-        }
-        StringBuilder f = new StringBuilder(" AND (");
-        boolean primero = true;
-        if (apps != null && !apps.isEmpty()) {
-            f.append("f.aplicacion IN (:aplicaciones)");
-            primero = false;
-        }
-        if (orgs != null && !orgs.isEmpty()) {
-            if (!primero) f.append(" OR ");
-            f.append("f.dir3_code IN (:dir3Codes)");
-        }
-        f.append(")");
-        return f.toString();
-    }
+    private String buildFilterClause(List<String> applications, List<String> organizations) {
+		StringBuilder filter = new StringBuilder();
+
+		if ((applications != null && !applications.isEmpty()) || (organizations != null && !organizations.isEmpty())) {
+			filter.append(" AND (");
+			boolean added = false;
+
+			if (applications != null && !applications.isEmpty()) {
+				filter.append("f.aplicacion IN (:applications)");
+				added = true;
+			}
+
+			if (organizations != null && !organizations.isEmpty()) {
+				if (added) {
+					filter.append(" OR ");
+				}
+
+				boolean includeUndefined = organizations.contains("__UNDEFINED__");
+				List<String> definedOrganizations = new ArrayList<>();
+				for (String org : organizations) {
+					if (!"__UNDEFINED__".equals(org)) {
+						definedOrganizations.add(org);
+					}
+				}
+
+				if (!definedOrganizations.isEmpty() && includeUndefined) {
+					filter.append("(f.dir3_code IN (:organizations) OR f.dir3_code IS NULL OR TRIM(f.dir3_code) = '')");
+				} else if (!definedOrganizations.isEmpty()) {
+					filter.append("f.dir3_code IN (:organizations)");
+				} else if (includeUndefined) {
+					filter.append("f.dir3_code IS NULL OR TRIM(f.dir3_code) = ''");
+				}
+			}
+
+			filter.append(") ");
+		}
+
+		return filter.toString();
+	}
 
     // =================== MÉTODOS SIN RANGO (filtro por mes y año) ===================
 
@@ -187,11 +219,11 @@ public class SignatureService implements ISignatureService {
             month, year, null, null,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name         = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects     = ((BigDecimal)row[1]).intValue();
                 int    incorrects   = ((BigDecimal)row[2]).intValue();
                 String application  = name;
-                String dir3 = row[3] != null ? (String)row[3] : "Indeterminado";
+                String dir3 = row[3] != null ? (String)row[3] : "No definido";
                 return new SignatureDTO(
                     name, corrects, 
                     incorrects,
@@ -235,12 +267,12 @@ public class SignatureService implements ISignatureService {
             month, year, null, null,
             apps, orgs,
             row -> {
-            	if (row[0] != null) {
-            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+            	if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
+            		String name         = row[0] != null ? (String)row[0] : "No definido";
                     int    corrects     = ((BigDecimal)row[1]).intValue();
                     int    incorrects   = ((BigDecimal)row[2]).intValue();
-                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    String application  = row[3] != null ? (String)row[3] : "No definido";
+                    String organization = row[4] != null ? (String)row[4] : "No definido";
                     return new SignatureDTO(
                         name, 
                         corrects, 
@@ -288,11 +320,11 @@ public class SignatureService implements ISignatureService {
             month, year, null, null,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name         = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects     = ((BigDecimal)row[1]).intValue();
                 int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String dir3 = row[4] != null ? (String)row[4] : "Indeterminado";
+                String application  = row[3] != null ? (String)row[3] : "No definido";
+                String dir3 = row[4] != null ? (String)row[4] : "No definido";
                 return new SignatureDTO(
                     name, 
                     corrects, 
@@ -337,11 +369,11 @@ public class SignatureService implements ISignatureService {
             apps, orgs,
             row -> {
             	if (row[0] != null) {
-            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+            		String name         = row[0] != null ? (String)row[0] : "No definido";
                     int    corrects     = ((BigDecimal)row[1]).intValue();
                     int    incorrects   = ((BigDecimal)row[2]).intValue();
-                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    String application  = row[3] != null ? (String)row[3] : "No definido";
+                    String organization = row[4] != null ? (String)row[4] : "No definido";
                     return new SignatureDTO(
                         name, corrects, incorrects,
                         corrects + incorrects,
@@ -388,11 +420,11 @@ public class SignatureService implements ISignatureService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name         = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects     = ((BigDecimal)row[1]).intValue();
                 int    incorrects   = ((BigDecimal)row[2]).intValue();
                 String application  = name;
-                String organization = row[3] != null ? (String)row[3] : "Indeterminado";
+                String organization = row[3] != null ? (String)row[3] : "No definido";
                 return new SignatureDTO(
                     name, corrects, incorrects,
                     corrects + incorrects,
@@ -436,12 +468,12 @@ public class SignatureService implements ISignatureService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-            	if (row[0] != null) {
-            		String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+            	if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
+            		String name         = row[0] != null ? (String)row[0] : "No definido";
                     int    corrects     = ((BigDecimal)row[1]).intValue();
                     int    incorrects   = ((BigDecimal)row[2]).intValue();
-                    String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                    String organization = row[4] != null ? (String)row[4] : "Indeterminado";
+                    String application  = row[3] != null ? (String)row[3] : "No definido";
+                    String organization = row[4] != null ? (String)row[4] : "No definido";
                     return new SignatureDTO(
                         name, corrects, incorrects,
                         corrects + incorrects,
@@ -492,11 +524,11 @@ public class SignatureService implements ISignatureService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String name         = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name         = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects     = ((BigDecimal)row[1]).intValue();
                 int    incorrects   = ((BigDecimal)row[2]).intValue();
-                String application  = row[3] != null ? (String)row[3] : "Indeterminado";
-                String dir3 = row[4] != null ? (String)row[4] : "Indeterminado";
+                String application  = row[3] != null ? (String)row[3] : "No definido";
+                String dir3 = row[4] != null ? (String)row[4] : "No definido";
                 return new SignatureDTO(
                     name, 
                     corrects, 
@@ -550,8 +582,8 @@ public class SignatureService implements ISignatureService {
 
                     int corrects   = row[1] != null ? ((BigDecimal) row[1]).intValue() : 0;
                     int incorrects = row[2] != null ? ((BigDecimal) row[2]).intValue() : 0;
-                    String application = row[3] != null ? (String) row[3] : "Indeterminado";
-                    String dir3        = row[4] != null ? (String) row[4] : "Indeterminado";
+                    String application = row[3] != null ? (String) row[3] : "No definido";
+                    String dir3        = row[4] != null ? (String) row[4] : "No definido";
 
                     return new SignatureDTO(
                         improved,
@@ -596,7 +628,7 @@ public class SignatureService implements ISignatureService {
             month, year, null, null,
             apps, orgs,
             row -> {
-                String name       = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name       = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects   = ((BigDecimal)row[1]).intValue();
                 int    incorrects = ((BigDecimal)row[2]).intValue();
                 return new SignatureDTO(
@@ -642,7 +674,7 @@ public class SignatureService implements ISignatureService {
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String name       = row[0] != null ? (String)row[0] : "Indeterminado";
+                String name       = row[0] != null ? (String)row[0] : "No definido";
                 int    corrects   = ((BigDecimal)row[1]).intValue();
                 int    incorrects = ((BigDecimal)row[2]).intValue();
                 return new SignatureDTO(

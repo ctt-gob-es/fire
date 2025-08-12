@@ -38,14 +38,14 @@
 					<div class="form-group">
 						<label for="organization" class="col-form-label"
 							th:text="#{form.application.organization}"></label>
-						<input type="text" id="organization" th:field="*{organization}" class="form-control" />
 						<span id="organization_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
+						<input type="text" id="organization" th:field="*{organization}" class="form-control" />
 						
 						<label for="dir3Code" class="col-form-label"
 							th:text="#{form.application.dir3Code}"></label>
-						<input type="text" id="dir3Code" th:field="*{dir3Code}" class="form-control" />
 						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 	
-					</div>
+						<input type="text" id="dir3Code" th:field="*{dir3Code}" class="form-control" />
+						</div>
 					
 					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.customConfiguration}"></h5>
 					
@@ -170,11 +170,72 @@
 </div>
 <script th:inline="javascript">
 var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
+var messageOrgDir3Pair = /*[[#{form.application.validation.organizationDir3BothOrNone}]]*/ 'Rellena ambos campos o deja ambos vacíos';
+
+function getOrganizationValue() {
+    var $org = $('#organization');
+    if ($org.length === 0) return '';
+    if ($org.is('select')) {
+        var val = $org.val();
+        if (val == null) return '';
+        if (Array.isArray(val)) val = val[0] || '';
+        return (val + '').trim();
+    }
+    return ($org.val() || '').trim();
+}
+
+function validateOrgDir3(showSpans = true) {
+    var $org  = $('#organization');
+    var $dir3 = $('#dir3Code');
+
+    var dir3Val = ($dir3.length ? ($dir3.val() || '') : '').trim();
+
+    if (dir3Val === '' && $org.length && $org.is('select')) {
+        var orgClass = $org.attr('class');
+        var $orgInput = $('<input>', {
+            type: 'text',
+            id: 'organization',
+            name: 'organization',
+            class: orgClass
+        }).val('');
+
+        $org.replaceWith($orgInput);
+        $org = $orgInput;
+    }
+
+    var orgVal = getOrganizationValue().trim();
+
+    var isValid = ((orgVal === '' && dir3Val === '') || (orgVal !== '' && dir3Val !== ''));
+
+    var orgEl  = document.getElementById('organization');
+    var dir3El = document.getElementById('dir3Code');
+
+    if (!isValid) {
+        if (orgEl)  orgEl.setCustomValidity(messageOrgDir3Pair);
+        if (dir3El) dir3El.setCustomValidity(messageOrgDir3Pair);
+        if (showSpans) {
+            $('#organization_span').text(messageOrgDir3Pair);
+            $('#dir3Code_span').text(messageOrgDir3Pair);
+        }
+    } else {
+        if (orgEl)  orgEl.setCustomValidity('');
+        if (dir3El) dir3El.setCustomValidity('');
+        if (showSpans) {
+            $('#organization_span').text('');
+            $('#dir3Code_span').text('');
+        }
+    }
+    return isValid;
+}
+
+$(document).on('input change', '#organization', function(){ validateOrgDir3(true); });
+$(document).on('input change', '#dir3Code',    function(){ validateOrgDir3(true); });
 
 $(document).ready(function() {
     cleanSpan('appEditForm');
     $('#multiselectUser').multiselect();
     $('#multiselectCertificate').multiselect();
+    validateOrgDir3(false);
 
     // Verificar si customProviders es true en appEditForm y generar la tabla directamente desde el hidden
     var customProvidersEnabled = $('#customProviderHidden').val() === 'true';
@@ -285,6 +346,8 @@ function saveEditApp() {
     
  	loading();
  	
+ 	validateOrgDir3(true);
+ 	
  	if ($('#appEditForm')[0].checkValidity() === false) {
  		  hide();
  		  
@@ -387,6 +450,7 @@ function saveEditApp() {
  			            });
 
  			            $orgInput.replaceWith($orgSelect);
+ 			           	validateOrgDir3(true);
  			        }
  			    }
 

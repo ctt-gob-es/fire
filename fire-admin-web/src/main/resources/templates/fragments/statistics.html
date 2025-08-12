@@ -82,7 +82,11 @@
         <div id="doughnutChartContainer" class="masonry-sizer bgc-white" style="display: none;">
           <div class="d-flex flex-wrap justify-content-around">
             <div style="width:45%; text-align:center">
-              <h3 th:text="#{chart.statistics.correctVsIncorrectas}"></h3>
+              <h3>
+              	<span id="doughnutCorrectDiff"></span>
+              	<span th:text="#{chart.statistics.vs}"></span>
+              	<span id="doughnutIncorrectDiff"></span>
+              </h3>
               <canvas id="doughnutChartCorrectas"></canvas>
             </div>
             <div style="width:45%; text-align:center">
@@ -260,7 +264,7 @@
 	  return `hsl(${hue}, 80%, 70%)`;
 	}
 	
-	const donutMsgs = {
+	var donutMsgs = {
 	    application:      /*[[#{doughnut.nameDiff.application}]]*/ 'AplicaciÛn',
 	    provider:         /*[[#{doughnut.nameDiff.provider}]]*/ 'Proveedor',
 	    format:           /*[[#{doughnut.nameDiff.format}]]*/ 'Formato',
@@ -269,11 +273,31 @@
 	    size:     		  /*[[#{doughnut.nameDiff.size}]]*/ 'TamaÒo',
 	    operation:     	  /*[[#{doughnut.nameDiff.operation}]]*/ 'OperaciÛn'
 	};
+	
+	var transactionCorrectVsIncorrectMsgs = {
+	    correct:      	  /*[[#{doughnut.transaction.correct}]]*/ 'Correctas',
+	    incorrect:        /*[[#{doughnut.transaction.incorrect}]]*/ 'Incorrectas'
+	};
+	
+	var signatureCorrectVsIncorrectMsgs = {
+	    correct:      	  /*[[#{doughnut.signature.correct}]]*/ 'Correctos',
+	    incorrect:        /*[[#{doughnut.signature.incorrect}]]*/ 'Incorrectos'
+	};
 
 	function setDoughnutNameDiff(text) {
 	    // Update span content safely
 	    var el = document.getElementById('doughnutNameDiff');
 	    if (el) el.textContent = text;
+	}
+	
+	function setDoughnutCorrectVsIncorrectDiff(isSignature) {
+	  var msgs = isSignature ? signatureCorrectVsIncorrectMsgs : transactionCorrectVsIncorrectMsgs;
+
+	  var correctSpan = document.getElementById('doughnutCorrectDiff');
+	  var incorrectSpan = document.getElementById('doughnutIncorrectDiff');
+
+	  if (correctSpan) correctSpan.textContent = msgs.correct;
+	  if (incorrectSpan) incorrectSpan.textContent = msgs.incorrect;
 	}
 
     // Instancias de Chart.js para poder destruirlas antes de regenerar
@@ -370,7 +394,10 @@
         if (doughnutChartCorrect) doughnutChartCorrect.destroy();
         if (doughnutChartTotals)  doughnutChartTotals.destroy();
         
-        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
+     	// Read configured max distinct entities (excludes "Others")
+        const el = document.getElementById("maxEntitiesBeforeGrouping");
+        const parsed = parseInt(el?.value ?? "", 10);
+        const max = Math.max(0, Number.isNaN(parsed) ? 8 : parsed);
 
         var datosGenerales = statisticsResponse.isSignatureQuery
             ? statisticsResponse.signatures
@@ -381,43 +408,50 @@
         	
         	if (statisticsResponse.isQueryByApplication) {
         		// Grafico por Aplicaciones
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, true);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, false);
         		setDoughnutNameDiff(donutMsgs.application);
+        		setDoughnutCorrectVsIncorrectDiff(true);
         	} else if (statisticsResponse.isQueryByProvider) {
         		// Grafico por Proveedores
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, true);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.provider);
+        		setDoughnutCorrectVsIncorrectDiff(true);
         	} else if (statisticsResponse.isQueryByFormat) {
         		// Grafico por Formatos
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, true);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.format);
+        		setDoughnutCorrectVsIncorrectDiff(true);
         	} else if (statisticsResponse.isQueryByImprovedFormat) {
         		// Grafico por Formatos longevos
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, true);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.improvedFormat);
+        		setDoughnutCorrectVsIncorrectDiff(true);
         	} else if (statisticsResponse.isQueryByOrganization) {
         		// Grafico por Organismos
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, true);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.organization);
+        		setDoughnutCorrectVsIncorrectDiff(true);
         	}
         } else {
     		const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
     		
         	if (statisticsResponse.isQueryByApplication) {
         		// Grafico por Aplicaciones
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, false);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, false);
         		setDoughnutNameDiff(donutMsgs.application);
+        		setDoughnutCorrectVsIncorrectDiff(false);
         	} else if (statisticsResponse.isQueryByProvider) {
         		// Grafico por Proveedores
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, false);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.provider);
+        		setDoughnutCorrectVsIncorrectDiff(false);
         	} else if (statisticsResponse.isQueryBySize) {
         		// Grafico por TamaÒos
         		drawDoughnutSizeChart(groupedFromValues);
@@ -428,16 +462,20 @@
         		setDoughnutNameDiff(donutMsgs.operation);
         	} else if (statisticsResponse.isQueryByOrganization) {
         		// Grafico por Aplicaciones
-        		drawDoughnutCorrectVsIncorrect(groupedFromValues);
+        		drawDoughnutCorrectVsIncorrect(groupedFromValues, false);
         		drawDoughnutTotals(groupedFromValues, statisticsResponse.queryName, true);
         		setDoughnutNameDiff(donutMsgs.organization);
+        		setDoughnutCorrectVsIncorrectDiff(false);
         	}
         }
     }
 
     // Correctas vs Incorrectas
-    function drawDoughnutCorrectVsIncorrect(data) {
-        var corr = 0, incorr = 0;
+    function drawDoughnutCorrectVsIncorrect(data, isSignature) {
+        var messageCorrect = isSignature ? signatureCorrectVsIncorrectMsgs.correct : transactionCorrectVsIncorrectMsgs.correct;
+     	var messageIncorrect = isSignature ? signatureCorrectVsIncorrectMsgs.incorrect : transactionCorrectVsIncorrectMsgs.incorrect;
+    	
+    	var corr = 0, incorr = 0;
         data.forEach(function (item) {
             corr += item.corrects || 0;
             incorr += item.incorrects || 0;
@@ -446,7 +484,7 @@
         doughnutChartCorrect = new Chart(ctx, {
             type: 'doughnut',
             data: {
-                labels: ['Correctas', 'Incorrectas'],
+                labels: [messageCorrect, messageIncorrect],
                 datasets: [{
                     data: [corr, incorr],
                     backgroundColor: ['#36A2EB', '#FF6384']
@@ -498,7 +536,7 @@
             var sortedData = items.sort((a, b) => String(a.name).localeCompare(String(b.name)));
 
             labels = sortedData.map(item => {
-            	if (item.organization == null || item.organization === '' || item.organization === 'Indeterminado') {
+            	if (item.organization == null || item.organization === '' || item.organization === 'No definido') {
             		return item.name;
             	} else {
             		return item.name + ' (' + item.organization + ')';
@@ -621,7 +659,7 @@
 	        },
 	        options: {
 	            responsive: true,
-	            title: { display: true, text: 'Totales por Aplicaci√≥n y Organizaci√≥n' },
+	            title: { display: true, text: 'Totales por Aplicacion y Organizacion' },
 	            plugins: {
 	            	legend: {
 	                    labels: {
@@ -722,7 +760,7 @@
 	    doughnutChartCorrect = new Chart(ctx1, {
 	        type: 'doughnut',
 	        data: {
-	            labels: ['Correctas', 'Incorrectas'],
+	            labels: [transactionCorrectVsIncorrectMsgs.correct, transactionCorrectVsIncorrectMsgs.incorrect],
 	            datasets: [
 	                {
 	                    label: 'Simple',
@@ -772,7 +810,7 @@
 	            responsive: true,
 	            title: {
 	                display: true,
-	                text: 'Totales Simple vs Batch por Aplicaci√≥n y Organizaci√≥n'
+	                text: 'Total Simple vs Batch'
 	            },
 	            plugins: {
 	                legend: {
@@ -825,9 +863,8 @@
 	    });
 	}
     
-	// Simple vs Batch (Correct/Incorrect) + Totals Simple/Batch grouped by App (single ring)
+	// Simple vs Batch (Correctos/Incorrectos) + Totales Simple/Batch grouped
 	function drawDoughnutOperationChartsCorrection(data) {
-	    // ===== Helpers for single-ring split colors (same hue per app) =====
 	    function hslToHex(h, s, l) {
 	        s /= 100; l /= 100;
 	        const c = (1 - Math.abs(2 * l - 1)) * s;
@@ -846,22 +883,20 @@
 	        };
 	        return `#${toHex(r)}${toHex(g)}${toHex(b)}`;
 	    }
-	    // Fallback base hue generator if not provided in your codebase
 	    if (typeof generateBaseHue !== 'function') {
 	        window.generateBaseHue = function(i, total) {
 	            return Math.round((360 * i) / Math.max(total || 1, 1));
 	        };
 	    }
-	    // Two variants per hue to distinguish Simple vs Batch
+	    // 2 variaciones del hue para distinguir Simple vs Batch
 	    function colorForType(hue, type) {
-	        // same saturation, different lightness to pair the two slices visually
 	        const s = 70;
-	        const lSimple = 55; // lighter
-	        const lBatch  = 35; // darker
+	        const lSimple = 55;
+	        const lBatch  = 35;
 	        return hslToHex(hue, s, type === 'Simple' ? lSimple : lBatch);
 	    }
 
-	    // ===== 1) Totals for first doughnut (Simple vs Batch - Correct/Incorrect) =====
+	    // ===== 1) Total para el primer donut (Simple vs Batch - Correctas/Incorrectas) =====
 	    var simpleCorrect = 0, simpleIncorrect = 0, batchCorrect = 0, batchIncorrect = 0;
 	    data.forEach(function(item) {
 	        simpleCorrect   += item.correctSimpleSignatures   || 0;
@@ -870,14 +905,13 @@
 	        batchIncorrect  += item.incorrectBatchSignatures  || 0;
 	    });
 
-	 // ===== 2) First doughnut stays the same, but legend shows datasets (Simple/Batch) =====
+	 	// ===== 2) Primer donut =====
 	    var ctx1 = document.getElementById('doughnutChartCorrectas').getContext('2d');
 	    if (window.doughnutChartCorrect) window.doughnutChartCorrect.destroy();
 
 	    var hueSimple = 207;
 	    var hueBatch  = 174;
 
-	    // shared legend config (works in v3+ under plugins.legend, and as fallback in v2 under options.legend)
 	    var datasetLegendConfig = {
 	      labels: {
 	        generateLabels: function(chart) {
@@ -885,8 +919,8 @@
 	            var meta = chart.getDatasetMeta(i);
 	            var color = Array.isArray(ds.backgroundColor) ? ds.backgroundColor[0] : ds.backgroundColor;
 	            return {
-	              text: ds.label,              // <-- "Simple" / "Batch"
-	              fillStyle: color,            // color swatch = first color of the dataset
+	              text: ds.label,
+	              fillStyle: color,
 	              hidden: meta.hidden === true,
 	              datasetIndex: i
 	            };
@@ -897,7 +931,7 @@
 	        var chart = legend.chart;
 	        var i = legendItem.datasetIndex;
 	        var meta = chart.getDatasetMeta(i);
-	        meta.hidden = meta.hidden === null ? true : null; // toggle entire ring (dataset)
+	        meta.hidden = meta.hidden === null ? true : null;
 	        chart.update();
 	      }
 	    };
@@ -927,13 +961,8 @@
 	      },
 	      options: {
 	        responsive: true,
-	        // v2 title (si usas v3+, puedes moverlo a plugins.title)
 	        title: { display: true, text: 'Firmas Simple vs Batch' },
-
-	        // Legend by datasets (v3/v4)
 	        plugins: { legend: datasetLegendConfig },
-
-	        // Tooltip queda igual (muestra "Simple - Correctas: N", etc.)
 	        tooltips: {
 	          callbacks: {
 	            label: function(t, d) {
@@ -943,120 +972,54 @@
 	          }
 	        },
 
-	        // v2 fallback (si tu Chart.js es v2)
 	        legend: datasetLegendConfig
 	      }
 	    });
 
-	    // ===== 3) Build single-ring totals per App (group by name; split each into Simple/Batch) =====
-	    // Aggregate totals across organizations by name
-	    var totalsByName = {};
+	 	// ===== 3) Totales globales (Simple vs Batch) =====
+	    var totalSimpleAll = 0;
+	    var totalBatchAll  = 0;
+
 	    data.forEach(function(item) {
-	        var name = item.name || 'Desconocido';
-	        if (!totalsByName[name]) totalsByName[name] = { simple: 0, batch: 0 };
-	        totalsByName[name].simple += item.totalSimple || 0;
-	        totalsByName[name].batch  += item.totalBatch  || 0;
-	    });
+	      totalSimpleAll += item.totalSimple || 0;
+	      totalBatchAll  += item.totalBatch  || 0;
+		});
 
-	    var names = Object.keys(totalsByName).sort(function(a, b) { return a.localeCompare(b); });
-
-	    // Assign a base hue per name, then derive two colors (Simple/Batch)
-	    var nameHueMap = {};
-	    names.forEach(function(name, i) {
-	        nameHueMap[name] = generateBaseHue(i, names.length);
-	    });
-
-	    // Flattened arrays: [App1 ó Simple, App1 ó Batch, App2 ó Simple, App2 ó Batch, ...]
-	    var flatLabels = [];
-	    var flatData = [];
-	    var flatColors = [];
-	    names.forEach(function(name) {
-	        var totals = totalsByName[name];
-	        flatLabels.push(name + ' - Simple');
-	        flatData.push(totals.simple);
-	        flatColors.push(colorForType(nameHueMap[name], 'Simple'));
-
-	        flatLabels.push(name + ' - Batch');
-	        flatData.push(totals.batch);
-	        flatColors.push(colorForType(nameHueMap[name], 'Batch'));
-	    });
-
-	    // ===== 4) Second doughnut: single dataset (single ring), adjacent slices per app =====
+	    // ===== 4) Segundo Donut: Simple vs Batch =====
 	    var ctx2 = document.getElementById('doughnutChartTotales').getContext('2d');
 	    if (window.doughnutChartTotals) window.doughnutChartTotals.destroy();
 
 	    window.doughnutChartTotals = new Chart(ctx2, {
-	        type: 'doughnut',
-	        data: {
-	            labels: flatLabels,
-	            datasets: [
-	                {
-	                    label: 'Total',
-	                    data: flatData,
-	                    backgroundColor: flatColors,
-	                    borderWidth: 1
-	                }
-	            ]
+	      type: 'doughnut',
+	      data: {
+	        labels: ['Simple', 'Batch'],
+	        datasets: [{
+	          label: 'Total',
+	          data: [totalSimpleAll, totalBatchAll],
+	          backgroundColor: ['#36A2EB', '#4BC0C0'],
+	          borderWidth: 1
+	        }]
+	      },
+	      options: {
+	        responsive: true,
+	        title: {
+	          display: true,
+	          text: 'Totales de operaciones Simple vs Batch'
 	        },
-	        options: {
-	            responsive: true,
-	            title: {
-	                display: true,
-	                text: 'Totales Simple vs Batch por AplicaciÛn'
-	            },
-	            // Custom legend: one entry per app (name). Click toggles both slices of that app.
-	            plugins: {
-	                legend: {
-	                    labels: {
-	                        generateLabels: function(chart) {
-	                            // Build first index per name (use the "Simple" slice color as swatch)
-	                            var nameIndexMap = {};
-	                            chart.data.labels.forEach(function(lbl, i) {
-	                                var name = lbl.split(' - ')[0];
-	                                var type = lbl.split(' - ')[1];
-	                                if (type === 'Simple' && nameIndexMap[name] === undefined) {
-	                                    nameIndexMap[name] = i; // index of Simple slice
-	                                }
-	                            });
-	                            return Object.keys(nameIndexMap).map(function(name) {
-	                                var i = nameIndexMap[name];
-	                                var bg = chart.data.datasets[0].backgroundColor[i];
-	                                return {
-	                                    text: name,
-	                                    fillStyle: bg,
-	                                    hidden: false,
-	                                    index: i
-	                                };
-	                            });
-	                        }
-	                    },
-	                    onClick: function(evt, legendItem, legend) {
-	                        var chart = legend.chart;
-	                        var clickedName = legendItem.text;
-	                        var meta = chart.getDatasetMeta(0);
-
-	                        // Toggle visibility for both slices (Simple & Batch) of this name
-	                        chart.data.labels.forEach(function(lbl, i) {
-	                            if (lbl.startsWith(clickedName + ' - ')) {
-	                                // Compatible toggle for doughnut elements
-	                                var el = meta.data[i];
-	                                el.hidden = !el.hidden;
-	                            }
-	                        });
-	                        chart.update();
-	                    }
-	                }
-	            },
-	            tooltips: {
-	                callbacks: {
-	                    label: function(tooltipItem, data) {
-	                        var lbl = data.labels[tooltipItem.index];     // "AppX - Simple/Batch"
-	                        var val = data.datasets[0].data[tooltipItem.index];
-	                        return lbl + ': ' + val;
-	                    }
-	                }
+	        plugins: {
+	          legend: { display: true }
+	        },
+	        legend: { display: true },
+	        tooltips: {
+	          callbacks: {
+	            label: function(tooltipItem, data) {
+	              var lbl = data.labels[tooltipItem.index];
+	              var val = data.datasets[0].data[tooltipItem.index];
+	              return lbl + ': ' + val;
 	            }
+	          }
 	        }
+	      }
 	    });
 	}
 
@@ -1221,8 +1184,10 @@
             ? statisticsResponse.signatures
             : statisticsResponse.transactions;
         
-        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
-
+     	const el = document.getElementById("maxEntitiesBeforeGrouping");
+        const parsed = parseInt(el?.value ?? "", 10);
+        const max = Math.max(0, Number.isNaN(parsed) ? 8 : parsed);
+        
         if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
 			const groupedFromValues = groupTopEntitiesByCorrectValues(datosBase, max);
         	
@@ -1395,8 +1360,8 @@
 	        	          var app   = m ? m[1] : base;                                 // "AppX"
 	        	          var org   = (m && m[2]) ? m[2] : '';                         // "Org" o ""
 
-	        	          // if org is "Indeterminado" -> drop it, keep app + type + value
-	        	          if (org && org.trim().toLowerCase() === 'indeterminado') {
+	        	          // if org is "No definido" -> drop it, keep app + type + value
+	        	          if (org && org.trim().toLowerCase() === 'no definido') {
 	        	            return (type ? (app + ' - ' + type) : app) + ': ' + value;
 	        	          }
 	        	          // default (unchanged)
@@ -1418,7 +1383,7 @@
 	        	        var m     = base.match(/^(.+?)(?: \((.+)\))?$/);
 	        	        var app   = m ? m[1] : base;
 	        	        var org   = (m && m[2]) ? m[2] : '';
-	        	        if (org && org.trim().toLowerCase() === 'indeterminado') {
+	        	        if (org && org.trim().toLowerCase() === 'no definido') {
 	        	          return (type ? (app + ' - ' + type) : app) + ': ' + value;
 	        	        }
 	        	        return label + ': ' + value;
@@ -1801,8 +1766,11 @@
             ? statisticsResponse.signaturesByMonth
             : statisticsResponse.transactionsByMonth;
         
-        const max = Math.max(0, (parseInt(document.getElementById("maxEntitiesBeforeGrouping").value) || 8) - 1);
-
+     	// Read configured max distinct entities (excludes "Others")
+        const el = document.getElementById("maxEntitiesBeforeGrouping");
+        const parsed = parseInt(el?.value ?? "", 10);
+        const max = Math.max(0, Number.isNaN(parsed) ? 8 : parsed);
+        
         if (statisticsResponse.isSignatureQuery || statisticsResponse.isQueryWithCorrectAndIncorrect) {
         	const topNames = getTopNamesByCorrectsTotals(dataByMonth, max);
         	const groupedByMonth = groupDataByMonthUsingTopNamesCorrects(dataByMonth, topNames);

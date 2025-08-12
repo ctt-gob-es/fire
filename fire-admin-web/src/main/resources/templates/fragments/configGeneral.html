@@ -14,6 +14,7 @@
 						    <div class="col-md-4">
 						        <label for="maxEntitiesBeforeGrouping" class="col-form-label" th:text="#{config.general.field.maxEntitiesBeforeGrouping}"></label>
 						        <input type="text" id="maxEntitiesBeforeGrouping" th:field="*{maxEntitiesBeforeGrouping}" class="form-control" />
+						    	<span id="maxEntitiesBeforeGrouping_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						    </div>
 						</div>
                         
@@ -68,6 +69,7 @@
 var messageSuccess = /*[[#{config.general.success}]]*/;
 var messageError = /*[[#{config.general.error}]]*/;
 var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
+var messageInvalidGrouping = /*[[#{config.general.invalidMaxEntitiesBeforeGrouping}]]*/;
 $(document).ready(function() {
     var getProviders = /*[[@{/getProvidersGeneral}]]*/;
     var table = $('#providersTable').DataTable({
@@ -138,6 +140,25 @@ $(document).ready(function() {
             $(this).find('.order-value').text(index + 1);
         });
     }
+    
+    function validateMaxEntitiesBeforeGrouping() {
+        const $field = $('#maxEntitiesBeforeGrouping');
+        const $badge = $('#maxEntitiesBeforeGrouping_span');
+
+        const raw = ($field.val() || '').trim();
+        const num = Number(raw);
+
+        $badge.text('');
+
+        const isValid = raw && Number.isFinite(num) && Number.isInteger(num) && num > 0;
+
+        if (!isValid) {
+            $badge.text(messageInvalidGrouping);
+            $field.focus();
+            return false;
+        }
+        return true;
+    }
 
     // Manejadores de eventos para mover filas
     $('#providersTable tbody').on('click', '.move-up', function(event) {
@@ -160,6 +181,8 @@ $(document).ready(function() {
 
     $('#saveConfigBtn').click(function(event) {
         event.preventDefault();
+        
+        if (!validateMaxEntitiesBeforeGrouping()) return;
 
         var saveConfigGeneral = /*[[@{/saveConfigGeneral}]]*/;
         var table = $('#providersTable').DataTable();

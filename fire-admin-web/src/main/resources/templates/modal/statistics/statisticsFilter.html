@@ -716,7 +716,7 @@
 		    items = items.concat(
 		      formData.applications.split(',').map(s => {
 		        s = s.trim();
-		        return s === '__UNDEFINED__' ? 'Indeterminado' : s;
+		        return s === '__UNDEFINED__' ? 'No definido' : s;
 		      })
 		    );
 		  }
@@ -724,7 +724,7 @@
 		    items = items.concat(
 		      formData.organizations.split(',').map(s => {
 		        s = s.trim();
-		        return s === '__UNDEFINED__' ? 'Indeterminado' : s;
+		        return s === '__UNDEFINED__' ? 'No definido' : s;
 		      })
 		    );
 		  }
@@ -742,7 +742,7 @@
 		    if (formData.filterByApplications && formData.applications) {
 		      const apps = formData.applications.split(',').map(a => {
 		        a = a.trim();
-		        return a === '__UNDEFINED__' ? 'Indeterminado' : a;
+		        return a === '__UNDEFINED__' ? 'No definido' : a;
 		      }).join('<br>');
 		      html += `<strong>Aplicaciones:</strong><br>${apps}`;
 		    }
@@ -750,7 +750,7 @@
 		      if (html) html += '<hr>';
 		      const orgs = formData.organizations.split(',').map(o => {
 		        o = o.trim();
-		        return o === '__UNDEFINED__' ? 'Indeterminado' : o;
+		        return o === '__UNDEFINED__' ? 'No definido' : o;
 		      }).join('<br>');
 		      html += `<strong>Organismos:</strong><br>${orgs}`;
 		    }
