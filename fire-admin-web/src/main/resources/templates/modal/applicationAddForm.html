@@ -29,13 +29,13 @@
 					<div class="form-group">
 						<label for="organization" class="col-form-label"
 							th:text="#{form.application.organization}"></label>
-						<span id="organization_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						<input type="text" id="organization" th:field="*{organization}" class="form-control" />
+						<span id="organization_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						
 						<label for="dir3Code" class="col-form-label"
 							th:text="#{form.application.dir3Code}"></label>
-						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span> 	
 						<input type="text" id="dir3Code" th:field="*{dir3Code}" class="form-control" />
+						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 					</div>
 					
 					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.customConfiguration}"></h5>
@@ -162,7 +162,7 @@
 
 <script th:inline="javascript">
 var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
-var messageOrgDir3Pair = /*[[#{form.application.validation.organizationDir3BothOrNone}]]*/ 'Rellena ambos campos o deja ambos vacíos';
+var messageOrgDir3Pair = /*[[#{form.application.validation.organizationDir3BothOrNone}]]*/ 'Rellena ambos campos o deja ambos vacï¿½os';
 
 function getOrganizationValue() {
     var $org = $('#organization');
@@ -213,10 +213,10 @@ function validateOrgDir3(showSpans = true) {
     } else {
         if (orgEl)  orgEl.setCustomValidity('');
         if (dir3El) dir3El.setCustomValidity('');
-        if (showSpans) {
-            $('#organization_span').text('');
-            $('#dir3Code_span').text('');
-        }
+//        if (showSpans) {
+//            $('#organization_span').text('');
+//            $('#dir3Code_span').text('');
+//        }
     }
     return isValid;
 }
@@ -260,7 +260,7 @@ function saveNewApp() {
 	// Convertimos el formulario en un objeto JSON
     var appForm = $("#appAddForm").serializeJSON();
 
-    // Añadimos los IDs de usuarios y certificados al objeto
+    // Aï¿½adimos los IDs de usuarios y certificados al objeto
     appForm.idUsersSelected = idUsersSelected;
     appForm.idCertificatesSelected = idCertificatesSelected;
 
@@ -345,14 +345,14 @@ function saveNewApp() {
  			  success: function(data){
  				 hide();
  				 
- 				// Recarga la tabla de aplicaciones en lugar de añadir la fila manualmente
+ 				// Recarga la tabla de aplicaciones en lugar de aï¿½adir la fila manualmente
  			    $('#appTable').DataTable().ajax.reload(null, false);
 
  		        // Reinicia el formulario y limpia los mensajes de error.
  		        $("#appAddForm")[0].reset();
  		        $('#appAddForm span').text('');
  		        
- 		        // Mensaje de éxito
+ 		        // Mensaje de ï¿½xito
  		        var messageResponse = /*[[#{message.success.application.add}]]*/;
  		        $('#resultAddApp')
  		            .html(messageResponse)
@@ -410,7 +410,7 @@ function saveNewApp() {
  			        	        name: 'organization',
  			        	        class: $orgInput.attr('class')
  			        	    });
- 			        	    // Agrega una opción por cada entrada en organizations
+ 			        	    // Agrega una opciï¿½n por cada entrada en organizations
  			        	    $.each(response.organizations, function(index, org) {
  			        	        $orgSelect.append($('<option>', { value: org, text: org }));
  			        	    });
@@ -530,7 +530,7 @@ function initializeProvidersTable() {
 		}
     });
     
- 	// Función para actualizar los valores de orderIndex después de mover filas
+ 	// Funciï¿½n para actualizar los valores de orderIndex despuï¿½s de mover filas
     function actualizarOrden() {
         $('#customProvidersTable tbody tr').each(function(index) {
             $(this).find('.order-value').text(index + 1);

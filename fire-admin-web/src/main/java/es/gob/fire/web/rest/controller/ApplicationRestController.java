@@ -23,12 +23,9 @@
  */
 package es.gob.fire.web.rest.controller;
 
-import java.security.GeneralSecurityException;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
@@ -48,7 +45,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
-import org.springframework.web.bind.annotation.ResponseBody;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
@@ -114,12 +110,12 @@ public class ApplicationRestController {
 	 * Constant that represents the field 'user'.
 	 */
 	private static final String FIELD_CERTIFICATE = "cert";
-	
+
 	/**
 	 * Constant that represents the field 'organization'.
 	 */
 	private static final String FIELD_ORGANIZATION = "organization";
-	
+
 	/**
 	 * Constant that represents the field 'dir3Code'.
 	 */
@@ -134,7 +130,7 @@ public class ApplicationRestController {
 	 * Constant that represents the parameter 'rowIndexApp'.
 	 */
 	private static final String FIELD_ROW_INDEX_APPLICATION = "rowIndexApp";
-	
+
 	/**
 	 * Constant that represents the field 'user'.
 	 */
@@ -153,7 +149,7 @@ public class ApplicationRestController {
 	 */
 	@Autowired
 	private ICertificateService certificateService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the
 	 * repository.
@@ -167,7 +163,7 @@ public class ApplicationRestController {
 	@Autowired
 	private MessageSource messageSource;
 
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and
 	 * forwards the list of apps to the view.
@@ -249,12 +245,12 @@ public class ApplicationRestController {
 
 	    // Bandera para detectar si existe algún error de validación
 	    boolean hasError = false;
-	    
+
 	    // Validación de que existan certificados en base de datos
-        if (certificateService.getAllCertificate().size() == 0) {
-            String errorNoCerts = messageSource.getMessage(
-                IWebViewMessages.ERROR_VAL_NO_CERTS_IN_DB, 
-                null, 
+        if (this.certificateService.getAllCertificate().size() == 0) {
+            final String errorNoCerts = this.messageSource.getMessage(
+                IWebViewMessages.ERROR_VAL_NO_CERTS_IN_DB,
+                null,
                 request.getLocale()
             );
             json.put(FIELD_CERTIFICATE + SPAN, errorNoCerts);
@@ -269,7 +265,7 @@ public class ApplicationRestController {
     	    }
         }
 
-	    // Validación del nombre de la aplicación
+	    // Validacion del nombre de la aplicación
 	    if (isAppNameBlank(appForm.getAppName())) {
 	        final String errorValEmptyAppName = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APPNAME_REQUIRED, null, request.getLocale());
 	        json.put(FIELD_APP_NAME + SPAN, errorValEmptyAppName);
@@ -280,22 +276,22 @@ public class ApplicationRestController {
 	        json.put(FIELD_APP_NAME + SPAN, errorValSizeAppName);
 	        hasError = true;
 	    }
-	    // Validación de la selección de responsables
+	    // Validacion de la selección de responsables
 	    if (!isResponsibleSelected(listUsers)) {
 	        final String errorValRespSelected = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_USER_SELECTED, null, request.getLocale());
 	        json.put(FIELD_RESPONSIBLE + SPAN, errorValRespSelected);
 	        hasError = true;
 	    }
-	    
-	    // Validación de organization y dir3Code
+
+	    // Validacion de organization y dir3Code
 	    if (appForm.getDir3Code() != null && !appForm.getDir3Code().isEmpty() && !appForm.getUpdateOrganization()) {
 	        availableOrganizations = this.appService.findOrganizationByDIR3(appForm.getDir3Code());
 	        if (availableOrganizations != null && !availableOrganizations.isEmpty()) {
 	            if (!availableOrganizations.contains(appForm.getOrganization())) {
-	                // Se añade la organization que se intenta guardar
+	                // Se anade la organizacion que se intenta guardar
 	                availableOrganizations.add(appForm.getOrganization());
-	                final String errorMsg = "El código DIR3 " + appForm.getDir3Code() + " ya está asociado a las siguientes organizations: " + availableOrganizations + ". Seleccione una de ellas.";
-	                json.put(FIELD_DIR3CODE + SPAN, errorMsg);
+	                final String errorMsg = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_APP_DIR3_WITH_MULTI_ORGANIZATION, null, request.getLocale());
+	                json.put(FIELD_ORGANIZATION + SPAN, errorMsg);
 	                hasError = true;
 	            }
 	        }
@@ -311,7 +307,7 @@ public class ApplicationRestController {
 
 	    try {
 	    	if (appForm.getUpdateOrganization()) {
-	    		int appsUpdated = this.appService.renameOrganizationByDir3Code(appForm.getDir3Code(), appForm.getOrganization());
+	    		final int appsUpdated = this.appService.renameOrganizationByDir3Code(appForm.getDir3Code(), appForm.getOrganization());
 	    	}
 	        final Application newApp = this.appService.saveApplication(appForm, listUsers, listCertificates, customProviders);
 	        return ResponseEntity.ok(newApp);
@@ -330,7 +326,7 @@ public class ApplicationRestController {
 	 * @param listCertificates A list of certificate IDs to check.
 	 * @return {@code true} if the list is not null and contains at least one certificate, {@code false} otherwise.
 	 */
-	private boolean isCertificatesSelected(List<Long> listCertificates) {
+	private boolean isCertificatesSelected(final List<Long> listCertificates) {
 		return listCertificates!=null && listCertificates.size()>0;
 	}
 
@@ -427,8 +423,8 @@ public class ApplicationRestController {
 		}
 
 		dtOutput.setDraw(NumberConstants.NUM1);
-		dtOutput.setRecordsFiltered((long) listaUser.size());
-		dtOutput.setRecordsTotal((long) listaUser.size());
+		dtOutput.setRecordsFiltered(listaUser.size());
+		dtOutput.setRecordsTotal(listaUser.size());
 		dtOutput.setData(listaUser);
 
 
@@ -442,9 +438,9 @@ public class ApplicationRestController {
 	    if (app != null) {
 	        app.setHabilitado(!app.isHabilitado());
 
-	        Application savedApp = this.appService.saveApplication(app);
-	        
-	        ApplicationDTO savedAppDTO = this.appService.applicationEntityToDto(savedApp);
+	        final Application savedApp = this.appService.saveApplication(app);
+
+	        final ApplicationDTO savedAppDTO = this.appService.applicationEntityToDto(savedApp);
 
 	        return ResponseEntity.ok(savedAppDTO);
 	    } else {
@@ -452,12 +448,12 @@ public class ApplicationRestController {
 	                             .body(Collections.singletonMap("error", "Aplicacion no encontrada"));
 	    }
 	}
-	
+
 	@GetMapping(path = "/getProvidersOfApplication")
 	public ResponseEntity<?> getApplicationProviders(@RequestParam(FIELD_ID_APPLICATION) final String appId) {
-		Application app = this.appService.getAppByAppId(appId);
-		
-		List<ProviderApplicationDTO> listProviders = this.appService.findProvidersByApplication(app);
+		final Application app = this.appService.getAppByAppId(appId);
+
+		final List<ProviderApplicationDTO> listProviders = this.appService.findProvidersByApplication(app);
 
         return ResponseEntity.ok(listProviders);
 	}
