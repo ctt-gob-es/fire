@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.web.controller.ConfigurationRestController.java.</p>
  * <b>Description:</b><p>Class that manages the REST requests related to the Configuration administration and JSON communication.</p>
  * <b>Project:</b><p>Application for signing documents of FIRe system.</p>
@@ -83,19 +83,19 @@ import es.gob.fire.service.IPlannerService;
 import es.gob.fire.service.ISchedulerService;
 import es.gob.fire.service.IServerAfirmaService;
 
-/** 
+/**
  * <p>Class that manages the REST requests related to the Configuration administration and JSON communication.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe system.</p>
  * @version 1.3, 10/03/2025.
  */
 @RestController
 public class ConfigurationRestController {
-	
+
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(ConfigurationRestController.class);
-	
+
 	/**
 	 * Constant attribute that represents the number to identify the daily planner type.
 	 */
@@ -116,43 +116,43 @@ public class ConfigurationRestController {
 	 */
 	@Autowired
 	private IPlannerService iPlannerService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private ICPlannerTypeService iCPlannerTypeService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private ISchedulerService iSchedulerService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private IProviderService providerService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private IPropertyService propertyService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private IServerAfirmaService iServerAfirmaService;
-	
+
 	/**
 	 * Attribute that represents the service object for accessing the repository.
 	 */
 	@Autowired
 	private ICAuthenticationTypeService iCAuthenticationTypeService;
-	
+
 	/**
 	 * Constant that represents the parameter 'idValmet'.
 	 */
@@ -167,7 +167,7 @@ public class ConfigurationRestController {
 	 * Constant that represents the parameter 'nameAppId'.
 	 */
 	private static final String FIELD_NAME_APP_ID = "nameAppId";
-	
+
 	/**
 	 * Constant that represents the parameter 'keystoreFile'.
 	 */
@@ -182,30 +182,30 @@ public class ConfigurationRestController {
 	 * Constant that represents the parameter 'userId'.
 	 */
 	private static final String FIELD_USER_ID = "userId";
-	
+
 	/**
 	 * Constant that represents the parameter 'password'.
 	 */
 	private static final String FIELD_PASSWORD_USER = "password";
-	
+
 	/**
 	 * Method to update the task.
 	 * @param taskForm Parameter that represents the backing form for editing a Task
 	 * @return Modified task.
 	 */
 	@RequestMapping(value = "/updatescheduler", method = RequestMethod.POST, consumes = MediaType.APPLICATION_JSON_VALUE)
-	public @ResponseBody SchedulerEditDTO updateScheduler(@RequestBody SchedulerVerifyCertExpiredDTO taskForm) {
-		
+	public @ResponseBody SchedulerEditDTO updateScheduler(@RequestBody final SchedulerVerifyCertExpiredDTO taskForm) {
+
 		try {
 			if (!validateInitDate(taskForm.getInitDayStringEdit())) {
 				taskForm.setErrorEdit(Language.getResWebFire(IWebLogMessages.ERROR_VALIDATE_DATE));
 			} else {
 				// se obtiene el planificador
-				Planner planner = iPlannerService.getPlannerById(taskForm.getIdPlannerEdit());
-				
+				final Planner planner = this.iPlannerService.getPlannerById(taskForm.getIdPlannerEdit());
+
 				// se obtiene el tipo de planificador seleccionado
-				Long idCPlannerType = taskForm.getIdPlannerTypeEdit();
-				
+				final Long idCPlannerType = taskForm.getIdPlannerTypeEdit();
+
 				// se actualizan los campos horas, minutos y segundos si el
 				// planificador es tipo periodico.
 				if (idCPlannerType.equals(PLANNING_TYPE_PERIODIC)) {
@@ -214,60 +214,60 @@ public class ConfigurationRestController {
 					planner.setMinutePeriod(taskForm.getMinutePeriodEdit());
 					planner.setSecondPeriod(taskForm.getSecondPeriodEdit());
 				}
-				
+
 				// se actualiza la fecha inicial por si se ha modificado.
-				Date initDay = UtilsDate.transformDate(taskForm.getInitDayStringEdit(), UtilsDate.FORMAT_DATE_TIME);
+				final Date initDay = UtilsDate.transformDate(taskForm.getInitDayStringEdit(), UtilsDate.FORMAT_DATE_TIME);
 				planner.setInitDay(initDay);
-				
-				CPlannerType plannerType = iCPlannerTypeService.getCPlannerTypeById(idCPlannerType);
+
+				final CPlannerType plannerType = this.iCPlannerTypeService.getCPlannerTypeById(idCPlannerType);
 				planner.setPlannerType(plannerType);
-				
-				Scheduler scheduler = iSchedulerService.getSchedulerById(taskForm.getIdSchedulerEdit());
-				
+
+				final Scheduler scheduler = this.iSchedulerService.getSchedulerById(taskForm.getIdSchedulerEdit());
+
 				// se actualiza la tarea indicando si esta habilitada o no.
 				scheduler.setActive(taskForm.getIsEnabledEdit());
-				
+
 				// actualizamos los dias de preaviso y de periodo de comunicacion
 				scheduler.setAdvanceNotice(taskForm.getDayAdviceNoticeEdit());
 				scheduler.setPeriodCommunication(taskForm.getPeriodCommunicationEdit());
-				
+
 				// persistimos los cambios del planificador y de la tarea.
-				Scheduler updatedTask = iSchedulerService.saveScheduler(scheduler);
-				iPlannerService.savePlanner(planner);
-				
+				final Scheduler updatedTask = this.iSchedulerService.saveScheduler(scheduler);
+				this.iPlannerService.savePlanner(planner);
+
 				if (updatedTask.getIdScheduler() == ISchedulerIdConstants.ID_VALIDATION_CERTIFICATES_EXPIRED) {
 					TasksManager.addOrUpdateTaskScheduler(updatedTask);
 				}
-				
-				String taskName = scheduler.getSchedulerName();
-				String infoMsg = Language.getFormatResWebFire(IWebLogMessages.INFO_UPDATE_TASK_OK, new Object[ ] { taskName });
+
+				final String taskName = scheduler.getSchedulerName();
+				final String infoMsg = Language.getFormatResWebFire(IWebLogMessages.INFO_UPDATE_TASK_OK, new Object[ ] { taskName });
 				LOGGER.info(infoMsg);
 				taskForm.setMsgOkEdit(infoMsg);
 			}
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERROR_PARSE_DATE, new Object[ ] { e.getMessage() }));
 			taskForm.setErrorEdit(Language.getResWebFire(IWebLogMessages.ERROR_UPDATE_TASK_WEB));
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERROR_UPDATE_TASK_WEB, new Object[ ] { e.getMessage() }));
 			taskForm.setErrorEdit(Language.getResWebFire(IWebLogMessages.ERROR_UPDATE_TASK_WEB));
 		}
-		
+
 		return taskForm;
-		
+
 	}
-	
+
 	/**
 	 * Method to validate the date indicated for the planning of the task.
 	 * @param taskForm Parameter that represents the backing form for editing a Task
 	 * @return true, if the date is correct.
 	 */
-	private Boolean validateInitDate(String date) {
+	private Boolean validateInitDate(final String date) {
 		Boolean result = true;
 		// se comprueba que la fecha indicada no sea anterior a la actual
-		LocalDate now = LocalDate.now();
-		DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UtilsDate.FORMAT_DATE_TIME);
+		final LocalDate now = LocalDate.now();
+		final DateTimeFormatter formatter = DateTimeFormatter.ofPattern(UtilsDate.FORMAT_DATE_TIME);
 		if(date!=null && !date.isEmpty()){
-			LocalDate initDay = LocalDate.parse(date, formatter);
+			final LocalDate initDay = LocalDate.parse(date, formatter);
 			if (initDay == null || initDay.isBefore(now)) {
 				result = false;
 			}
@@ -289,19 +289,19 @@ public class ConfigurationRestController {
 	 * @return a {@link ResponseEntity} with a success message if the configuration is saved successfully.
 	 */
     @PostMapping("/saveConfigGeneral")
-    public ResponseEntity<String> saveConfig(@RequestBody GeneralConfigDTO request) {
-    	providerService.saveProviders(request.getProviders());
-    	
-    	propertyService.saveGeneralConfig(request);
+    public ResponseEntity<String> saveConfig(@RequestBody final GeneralConfigDTO request) {
+    	this.providerService.saveProviders(request.getProviders());
+
+    	this.propertyService.saveGeneralConfig(request);
 
         return ResponseEntity.ok("Configuracion guardada exitosamente.");
     }
-    
+
     /**
      * Handles POST requests to update the configuration for WS Afirma.
      *
-     * <p>This method receives a {@link ServerAfirmaDTO} object and a keystore file 
-     * as multipart data. It validates the provided parameters, updates the server 
+     * <p>This method receives a {@link ServerAfirmaDTO} object and a keystore file
+     * as multipart data. It validates the provided parameters, updates the server
      * configuration, and saves the changes.
      *
      * @param serverAfirmaDTO the {@link ServerAfirmaDTO} object containing the server configuration details.
@@ -315,36 +315,36 @@ public class ConfigurationRestController {
      */
     @RequestMapping(value = "/updateWsAfirma", method = RequestMethod.POST, produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     public @ResponseBody ServerAfirmaDTO updateWsAfirma(@RequestPart("serverAfirmaDTO") final ServerAfirmaDTO serverAfirmaDTO, @RequestPart("keystoreFile") final MultipartFile keystoreFile) throws CipherException, KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-    	JSONObject json = new JSONObject();
-    	
+    	final JSONObject json = new JSONObject();
+
     	this.validateServerAfirmaParams(serverAfirmaDTO, json, keystoreFile);
-    	
+
     	if(json.length() > 0) {
     		serverAfirmaDTO.setError(json.toString());
     		return serverAfirmaDTO;
     	}
-    	
-    	ServerAfirma serverAfirma = iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
-    	CAuthenticationType cAuthenticationType = iCAuthenticationTypeService.obtainAllCAuthenticationType().stream().filter(p -> p.getIdAuthenticationType().equals(serverAfirmaDTO.getIdAuthenticationType())).findAny().orElse(null);
-    	
+
+    	ServerAfirma serverAfirma = this.iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
+    	final CAuthenticationType cAuthenticationType = this.iCAuthenticationTypeService.obtainAllCAuthenticationType().stream().filter(p -> p.getIdAuthenticationType().equals(serverAfirmaDTO.getIdAuthenticationType())).findAny().orElse(null);
+
     	if(serverAfirma == null) {
     		serverAfirma = new ServerAfirma();
     		serverAfirma.setIdServerAfirma(NumberConstants.NUM_1_LONG);
     	}
-    	
+
     	serverAfirma.setUrlServer(serverAfirmaDTO.getUrlServer());
     	serverAfirma.setTimeout(serverAfirmaDTO.getTimeout());
     	serverAfirma.setNameApp(serverAfirmaDTO.getNameApp());
     	serverAfirma.setcAuthenticationType(cAuthenticationType);
-    	
+
     	if(cAuthenticationType.getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
     		serverAfirma.setKeystore(serverAfirmaDTO.getKeystoreB64());
     		serverAfirma.setPasswordKeystore(AESCipher.getInstance().encryptMessageWithBC(serverAfirmaDTO.getPasswordKeystore()));
     		serverAfirma.setUser(null);
     		serverAfirma.setPassword(null);
     		// Obtenemos el subject del certificado para mostrarlo
-        	KeyStore keyStore = UtilsKeystore.loadKsPKCS12(Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64()), serverAfirmaDTO.getPasswordKeystore());
-        	X509Certificate x509Certificate = UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0);
+        	final KeyStore keyStore = UtilsKeystore.loadKsPKCS12(Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64()), serverAfirmaDTO.getPasswordKeystore());
+        	final X509Certificate x509Certificate = UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0);
         	serverAfirmaDTO.setSubject(UtilsCertificate.getReadableSubject(x509Certificate));
         	serverAfirmaDTO.setCertificateB64(Base64.getEncoder().encodeToString(x509Certificate.getEncoded()));
     	} else if(cAuthenticationType.getIdAuthenticationType().equals(NumberConstants.NUM_1_LONG)) {
@@ -360,110 +360,110 @@ public class ConfigurationRestController {
     		serverAfirma.setKeystore(null);
     		serverAfirmaDTO.setKeystoreB64(null);
     	}
-    	
-    	iServerAfirmaService.saveServerAfirma(serverAfirma);
-    	
+
+    	this.iServerAfirmaService.saveServerAfirma(serverAfirma);
+
     	return serverAfirmaDTO;
     }
 
     /**
      * Validates the parameters of a WS Afirma server configuration.
      *
-     * <p>This method checks if the required fields in the {@link ServerAfirmaDTO} object 
+     * <p>This method checks if the required fields in the {@link ServerAfirmaDTO} object
      * are properly set and adds any validation errors to the provided {@link JSONObject}.
-     * If authentication type 2 (keystore-based authentication) is selected, it also validates 
+     * If authentication type 2 (keystore-based authentication) is selected, it also validates
      * the keystore file, checks its validity, and ensures it contains only one certificate.
      *
      * @param serverAfirmaDTO the {@link ServerAfirmaDTO} object containing the server configuration details.
      * @param json the {@link JSONObject} used to store validation errors.
      * @param keystoreFile the keystore file provided as a {@link MultipartFile}, required for keystore-based authentication.
      */
-	private void validateServerAfirmaParams(ServerAfirmaDTO serverAfirmaDTO, JSONObject json, MultipartFile keystoreFile) {
+	private void validateServerAfirmaParams(final ServerAfirmaDTO serverAfirmaDTO, final JSONObject json, final MultipartFile keystoreFile) {
 		if (StringUtils.isEmpty(serverAfirmaDTO.getUrlServer())) {
-			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA001);
+			final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA001);
 			LOGGER.error(msgError);
 			json.put(FIELD_URL_SERVER_ID + "_span", msgError);
 		} else if(!serverAfirmaDTO.getUrlServer().endsWith("/")) {
-			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA015);
+			final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA015);
 			LOGGER.error(msgError);
 			json.put(FIELD_URL_SERVER_ID + "_span", msgError);
 		}
-		
+
 		if (serverAfirmaDTO.getTimeout() == null) {
-			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA002);
+			final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA002);
 			LOGGER.error(msgError);
 			json.put(FIELD_TIMEOUT_ID + "_span", msgError);
 		}
-		
+
 		if (StringUtils.isEmpty(serverAfirmaDTO.getNameApp())) {
-			String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA003);
+			final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA003);
 			LOGGER.error(msgError);
 			json.put(FIELD_NAME_APP_ID + "_span", msgError);
 		}
-		
+
 		if(serverAfirmaDTO.getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
 			if(keystoreFile.isEmpty() && (serverAfirmaDTO.getKeystoreB64() == null || serverAfirmaDTO.getKeystoreB64().isEmpty())) {
-				String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA004);
+				final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA004);
 				LOGGER.error(msgError);
 				json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 			} else if(StringUtils.isEmpty(serverAfirmaDTO.getPasswordKeystore())) {
-				String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA005);
+				final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA005);
 				LOGGER.error(msgError);
 				json.put(FIELD_PASSWORD_KEYSTORE + "_span", msgError);
 			} else {
 				try {
-					byte[] byteCert = !keystoreFile.isEmpty() ? keystoreFile.getBytes() : Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64());
+					final byte[] byteCert = !keystoreFile.isEmpty() ? keystoreFile.getBytes() : Base64.getDecoder().decode(serverAfirmaDTO.getKeystoreB64());
 					serverAfirmaDTO.setKeystoreB64(Base64.getEncoder().encodeToString(byteCert));
-					KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteCert, serverAfirmaDTO.getPasswordKeystore());
-					List<X509Certificate> listX509Certificate = UtilsKeystore.listAllX509Certificate(keyStore);
+					final KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteCert, serverAfirmaDTO.getPasswordKeystore());
+					final List<X509Certificate> listX509Certificate = UtilsKeystore.listAllX509Certificate(keyStore);
 					if(null == listX509Certificate || listX509Certificate.isEmpty()) {
-						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA016);
+						final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA016);
 						LOGGER.error(msgError);
 						json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 					} else if(listX509Certificate.size() > NumberConstants.NUM_1_LONG) {
-						String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);
+						final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA012);
 						LOGGER.error(msgError);
 						json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 					} else {
 						listX509Certificate.get(NumberConstants.NUM0).checkValidity();
 					}
-				} catch (CertificateExpiredException e) {
+				} catch (final CertificateExpiredException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA013);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA013);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
-				} catch (CertificateNotYetValidException e) {
+				} catch (final CertificateNotYetValidException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA014);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA014);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
-				} catch (KeyStoreException e) {
+				} catch (final KeyStoreException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA006);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA006);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
-				} catch (NoSuchAlgorithmException e) {
+				} catch (final NoSuchAlgorithmException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA007);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA007);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
-				} catch (CertificateException e) {
+				} catch (final CertificateException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA008);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA008);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
-				} catch (IOException e) {
+				} catch (final IOException e) {
 					LOGGER.error(e);
-					String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA009);
+					final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA009);
 					json.put(FIELD_KEYSTORE_FILE + "_span", msgError);
 				}
 			}
 		}
-		
+
 		if(serverAfirmaDTO.getIdAuthenticationType().equals(NumberConstants.NUM_1_LONG)) {
 			if(StringUtils.isEmpty(serverAfirmaDTO.getUser())) {
-				String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA010);
+				final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA010);
 				LOGGER.error(msgError);
 				json.put(FIELD_USER_ID + "_span", msgError);
 			}
-			
+
 			if(StringUtils.isEmpty(serverAfirmaDTO.getPassword())) {
-				String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA011);
+				final String msgError = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_CSA011);
 				LOGGER.error(msgError);
 				json.put(FIELD_PASSWORD_USER + "_span", msgError);
 			}

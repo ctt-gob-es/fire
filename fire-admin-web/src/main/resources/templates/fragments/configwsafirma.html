@@ -62,7 +62,7 @@
 						<div class="form-group row">
 						    <label for="keystoreFile" class="col-sm-3" th:text="#{ws.afirma.field.keystore}"></label>
 						    <div class="col-sm-6 custom-file">
-								<input type="file" class="custom-file-input" id="keystoreFile" accept=".p12" name="keystoreFile" th:field="*{keystoreFile}" aria-describedby="fileHelp" th:disabled="*{disabledKeystore}">
+								<input type="file" class="custom-file-input" id="keystoreFile" accept=".p12,.pfx" name="keystoreFile" th:field="*{keystoreFile}" aria-describedby="fileHelp" th:disabled="*{disabledKeystore}">
 						        <label class="custom-file-label" for="keystoreFile" th:text="#{ws.afirma.field.keystore.file.choose}"></label>
 						        <span id="keystoreFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left: -15px;"></span>
 							</div>
