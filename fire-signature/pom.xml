@@ -105,6 +105,12 @@
 		    		<artifactId>javax.json</artifactId>
 				</dependency>
 		
+				<!-- Libreria para la salida de los logs -->
+				<dependency>
+    				<groupId>org.slf4j</groupId>
+    				<artifactId>slf4j-jdk14</artifactId>
+				</dependency>
+		
 				<!-- Dependencia para la compatibilidad con firmas XML -->
 				<dependency>
 					<groupId>org.apache.santuario</groupId>
@@ -125,7 +131,6 @@
 					<artifactId>junit</artifactId>
 					<scope>test</scope>
 				</dependency>		
-		
 			</dependencies>
 		</profile>
 

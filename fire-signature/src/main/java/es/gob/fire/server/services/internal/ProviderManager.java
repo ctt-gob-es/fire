@@ -123,17 +123,6 @@ public class ProviderManager {
 
 		final ApplicationsDAO dao = ApplicationsDAOFactory.getApplicationsDAO();
 		final ApplicationOperationConfig config = dao.getOperationConfig(appId, logF);
-
-
-		//XXX: BORRAR
-		String provs = "";
-		for (final ProviderElement prov : config.getProviders()) {
-			provs += prov.getName() + ", ";
-		}
-		LOGGER.info(logF.f(" =================== Proveedores habilitados para la aplicacion " + appId + ": ") + provs);
-
-
-
 		return config.getProviders();
 	}
 

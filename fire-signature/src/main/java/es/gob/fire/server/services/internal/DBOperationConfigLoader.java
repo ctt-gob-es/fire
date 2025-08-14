@@ -13,7 +13,6 @@ import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.logging.Logger;
 
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.signature.ConfigException;
@@ -51,20 +50,13 @@ public class DBOperationConfigLoader {
 	 */
 	public ApplicationOperationConfig getOperationConfig(final String app) {
 
-		Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ******** Se ha solicitado la carga de la configuracion para la aplicacion " + app + " de base de datos");
-
 		ApplicationOperationConfig config = null;
 
 		if (app != null) {
 			config = (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_APP_PREFIX + app);
-
-			Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ******** Configuracion de la aplicacion: " + config);
 		}
 
 		if (config == null) {
-
-			Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ******** Como no habia configuracion para la aplicacion, se utiliza la por defecto");
-
 			config = (ApplicationOperationConfig) this.configLoader.getObject(CONFIG_DEFAULT);
 		}
 
@@ -83,10 +75,6 @@ public class DBOperationConfigLoader {
 
 		@Override
 		public Hashtable<Object, Object> loadConfiguration() throws IOException, ConfigException {
-
-			Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ******** Cargamos toda la configuracion de base de datos");
-
-
 			final Hashtable<Object, Object> result = new Hashtable<>();
 
 			try (final Connection conn = DbManager.getConnection()) {
@@ -152,23 +140,10 @@ public class DBOperationConfigLoader {
 			try (final PreparedStatement st = conn.prepareStatement(SQL_SELECT_DEFAULT_PROVIDERS);
 					ResultSet rs = st.executeQuery()) {
 
-				String provs = "";
 				while (rs.next()) {
 					final ProviderElement prov = new ProviderElement(rs.getString(1), rs.getBoolean(2));
-
-					provs += prov.getName() + ",";
-
-
 					providers.add(prov);
 				}
-
-
-				Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ========= Proveedores extraidos por defecto de la base de datos: " + provs);
-
-
-
-
-
 			}
 
 			if (providers.isEmpty()) {
@@ -234,11 +209,7 @@ public class DBOperationConfigLoader {
 			try (final PreparedStatement st = conn.prepareStatement(SQL_SELECT_APP_PROVIDERS);
 					ResultSet rs = st.executeQuery()) {
 
-				Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ========= Cargamos los proveedores particulares de BD");
-
-
 				while (rs.next()) {
-
 					final String appId = rs.getString(1);
 					final String providerName = rs.getString(2);
 					final boolean mandatory = rs.getBoolean(3);
@@ -249,14 +220,7 @@ public class DBOperationConfigLoader {
 					}
 					providerList.add(new ProviderElement(providerName, mandatory));
 					providers.put(appId, providerList);
-
-
-
-					Logger.getLogger(DBOperationConfigLoader.class.getName()).info(" ========= La aplicacion " + appId + " tiene dado de alta el proveedor particular " + providerName);
 				}
-
-
-
 			}
 
 			return providers;
