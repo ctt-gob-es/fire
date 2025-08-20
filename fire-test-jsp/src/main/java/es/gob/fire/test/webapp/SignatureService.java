@@ -76,7 +76,6 @@ public class SignatureService extends HttpServlet {
 		final String algorithm = config.getAlgorithm();
 		final String extraparams = config.getExtraParamsB64();
 		final String upgrade = config.getUpgrade();
-		final String language = config.getLanguage();
 		final byte[] data = config.getData();
 
 		if (op == null || op.isEmpty() || format == null || format.isEmpty() ||
@@ -124,6 +123,10 @@ public class SignatureService extends HttpServlet {
         if (configManager.isSkipCertSelection()) {
         	confProperties.setProperty("skipCertSelection", Boolean.TRUE.toString()); //$NON-NLS-1$
         }
+        
+        if (config.getLanguage() != null) {
+        	confProperties.setProperty("language", config.getLanguage()); //$NON-NLS-1$
+        }
 
         // Desactivacion del periodo de gracia (puede ser necesario si se configura politica de firma)
        	confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
@@ -144,7 +147,6 @@ public class SignatureService extends HttpServlet {
 		try {
 			signResult = configManager.getFireClient(appId).sign(
 					userId,
-					language,
 					op,
 					format,
 					algorithm,

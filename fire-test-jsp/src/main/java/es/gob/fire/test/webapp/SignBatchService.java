@@ -55,15 +55,13 @@ public class SignBatchService extends HttpServlet {
 			return;
 		}
 
-		final String userId = (String) session.getAttribute("user"); //$NON-NLS-1$
-		
-		final String language = (String) session.getAttribute("language"); //$NON-NLS-1$
+		final String userId = (String) session.getAttribute("user"); //$NON-NLS-1$	
 
 		final boolean stopOnError = request.getParameter("stoponerror") != null; //$NON-NLS-1$	
 
 		SignOperationResult signOperationResult;
 		try {
-			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId, language,
+			signOperationResult = ConfigManager.getInstance().getFireClient(appId).signBatch(transactionId, userId,
 					stopOnError);
 		} catch (final Exception e) {
 			LOGGER.error("Error durante la operacion de firma del lote", e); //$NON-NLS-1$

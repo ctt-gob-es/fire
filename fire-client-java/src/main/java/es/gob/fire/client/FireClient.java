@@ -56,6 +56,7 @@ import es.gob.fire.client.HttpsConnection.Method;
 public class FireClient {
 
     private static final String PROPERTY_KEY_SERVICE_URL = "fireUrl"; //$NON-NLS-1$
+    private static final String PROPERTY_LANGUAGE = "language"; //$NON-NLS-1$
 
     private static final String TAG_VALUE_APP_ID = "$$APPID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_OPERATION = "$$OPERATION$$"; //$NON-NLS-1$
@@ -75,6 +76,11 @@ public class FireClient {
     private static final String TAG_VALUE_LANGUAGE = "$$LANGUAGE$$"; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_BASE =
+            "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
+            "&appid=" + TAG_VALUE_APP_ID + //$NON-NLS-1$
+    		"&subjectid=" + TAG_VALUE_SUBJECT_ID; //$NON-NLS-1$
+    
+    private static final String URL_PARAMETERS_BASE_WITH_LANGUAGE =
             "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
             "&appid=" + TAG_VALUE_APP_ID + //$NON-NLS-1$
     		"&subjectid=" + TAG_VALUE_SUBJECT_ID + //$NON-NLS-1$
@@ -165,6 +171,8 @@ public class FireClient {
     private final String appId;
 
     private final String serviceUrl;
+    
+    private String language;
 
     private HttpsConnection conn;
 
@@ -289,7 +297,6 @@ public class FireClient {
      */
 	public SignOperationResult sign(
 			final String subjectId,
-			final String language,
 			final SignProcessConstants.SignatureOperation op,
 			final SignProcessConstants.SignatureFormat ft,
 			final SignProcessConstants.SignatureAlgorithm algth,
@@ -325,15 +332,10 @@ public class FireClient {
             );
         }
         
-        String languageUsed = language;
-        if (languageUsed == null || languageUsed.isEmpty()) {
-        	languageUsed = "es";
-        }
-
         final String dataB64 = Base64.encode(d, true);
         final String extraParamsB64 = Utils.properties2Base64(prop, true);
 
-        return sign(subjectId, languageUsed, op.toString(), ft.toString(),
+        return sign(subjectId, op.toString(), ft.toString(),
                 algth.toString(), extraParamsB64, dataB64, config);
     }
 
@@ -372,7 +374,7 @@ public class FireClient {
      * 				Error gen&eacute;rico en la operaci&oacute;n de firma.
      */
     public SignOperationResult sign(
-    		final String subjectId, final String language, final String op, final String ft,
+    		final String subjectId, final String op, final String ft,
     		final String algth, final String propB64,
     		final String dataB64, final Properties config)
             throws IOException, HttpNetworkException, HttpForbiddenException,
@@ -404,16 +406,18 @@ public class FireClient {
             );
         }
         
-        String languageUsed = language;
-        if (languageUsed == null || languageUsed.isEmpty()) {
-        	languageUsed = "es";
+        String urlParamsBase = URL_PARAMETERS_BASE;
+        
+    	this.language = config.getProperty(PROPERTY_LANGUAGE);
+        if (this.language != null && !this.language.isEmpty()) {
+        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
+        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
         }
-
+        
         final String urlParameters =
-        		URL_PARAMETERS_BASE
+        		urlParamsBase
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
         		URL_PARAMETERS_SIGN
         		.replace(TAG_VALUE_CRYPTO_OPERATION, op)
@@ -749,9 +753,17 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-
+        
+        String urlParamsBase = URL_PARAMETERS_BASE;
+        
+    	this.language = config.getProperty(PROPERTY_LANGUAGE);
+        if (this.language != null && !this.language.isEmpty()) {
+        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
+        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
+        }
+        
         String urlParameters =
-        		URL_PARAMETERS_BASE
+        		urlParamsBase
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.CREATE_BATCH.getId()) +
@@ -761,7 +773,7 @@ public class FireClient {
                 .replace(TAG_VALUE_ALGORITHM, algth)
                 .replace(TAG_VALUE_EXTRA_PARAM, doBase64UrlSafe(propB64))
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
-
+        
         // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
         if (upgrade != null && !upgrade.isEmpty()) {
         	urlParameters = urlParameters.replace(TAG_VALUE_UPGRADE, upgrade);
@@ -948,7 +960,6 @@ public class FireClient {
      * @param transactionId Identificador de la transacci&oacute;n devuelta por la
      * operaci&oacute;n de creaci&oacute;n del lote.
      * @param subjectId Identificador del usuario que realiza la transacci&oacute;n.
-     * @param language Idioma que se ha configurado.
      * @param stopOnError Indica si se debe detener el proceso de firma al fallar una de las firmas.
      * @return Objeto con la URL de redirecci&oacute;n para la firma del lote.
      * @throws IOException Cuando no se puede conectar con el servicio.
@@ -958,7 +969,7 @@ public class FireClient {
      * @throws InvalidTransactionException
      * 			   Cuando la transacci&oacute;n no existe o est&aacute; caducada.
      */
-    public SignOperationResult signBatch(final String transactionId, final String subjectId, final String language, final boolean stopOnError)
+    public SignOperationResult signBatch(final String transactionId, final String subjectId, final boolean stopOnError)
     		throws IOException, HttpForbiddenException, HttpNetworkException, HttpOperationException,
     			InvalidTransactionException {
 
@@ -973,16 +984,17 @@ public class FireClient {
             );
         }
         
-        String languageUsed = language;
-        if (languageUsed == null || languageUsed.isEmpty()) {
-        	languageUsed = "es";
+        String urlParamsBase = URL_PARAMETERS_BASE;
+        
+        if (this.language != null && !this.language.isEmpty()) {
+        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
+        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
         }
         
         final String urlParameters =
-        		URL_PARAMETERS_BASE
+        		urlParamsBase
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
-        		.replace(TAG_VALUE_LANGUAGE, languageUsed) 
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +
         		URL_PARAMETERS_SIGN_BATCH
                 .replace(TAG_VALUE_TRANSACTION, transactionId)

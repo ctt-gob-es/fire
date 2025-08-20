@@ -134,4 +134,16 @@
 			</form>
 		</div>
 	</body>
+	<script>
+		// Se omite el parametro language en caso de que se haya seleccionado un valor no definido
+		document.addEventListener("DOMContentLoaded", function() {
+		  const form = document.querySelector("form");
+		  form.addEventListener("submit", function(e) {
+		    const selected = form.querySelector('input[name="language"]:checked');
+		    if (selected && selected.value === "") {
+		      selected.removeAttribute("name");
+		    }
+		  });
+		});
+	</script>
 </html>

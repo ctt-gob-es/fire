@@ -87,7 +87,7 @@ public class CreateBatchService extends HttpServlet {
         }
 
         // Configuramos que se ignore el periodo de gracia en el caso de actualizarse o validarse la firma
-        confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$
+        confProperties.setProperty("updater.ignoreGracePeriod", Boolean.TRUE.toString()); //$NON-NLS-1$       
 
         // Podemos configurar un DocumentManager configurado en el componente central.
         // Con esto, en lugar de tomar los datos que le pasamos a la aplicacion, se cargaran
@@ -101,6 +101,11 @@ public class CreateBatchService extends HttpServlet {
 		final String extraparams = request.getParameter("extraParams"); //$NON-NLS-1$
 		final String upgrade = request.getParameter("upgrade"); //$NON-NLS-1$
 		final String language = request.getParameter("language"); //$NON-NLS-1$
+		
+        // Configuramos el idioma (opcional)
+        if (language != null) {
+        	confProperties.setProperty("language", language); //$NON-NLS-1$
+        }
 
 		CreateBatchResult createBatchResult;
 		try {
