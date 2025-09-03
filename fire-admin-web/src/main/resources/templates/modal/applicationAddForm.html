@@ -29,13 +29,13 @@
 					<div class="form-group">
 						<label for="organization" class="col-form-label"
 							th:text="#{form.application.organization}"></label>
+						<span id="organization_span" class="badge bgc-red-50 c-red-700 organism-span badge-pill"></span>
 						<input type="text" id="organization" th:field="*{organization}" class="form-control" />
-						<span id="organization_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 						
 						<label for="dir3Code" class="col-form-label"
 							th:text="#{form.application.dir3Code}"></label>
+						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 organism-span  badge-pill"></span>
 						<input type="text" id="dir3Code" th:field="*{dir3Code}" class="form-control" />
-						<span id="dir3Code_span" class="badge bgc-red-50 c-red-700 p-10 lh-0  badge-pill"></span>
 					</div>
 					
 					<h5 class="c-grey-900 mB-10" th:text="#{form.application.section.customConfiguration}"></h5>
@@ -160,6 +160,15 @@
 	</div>
 </div>
 
+<style>
+	.organism-span {
+	    margin-left: 0.5rem;
+	    line-height: 1;
+	    padding: 0.3rem 0.6rem;
+	    margin-top: 0.5rem;
+	}
+</style>
+
 <script th:inline="javascript">
 var messageEnableProvider = /*[[#{config.general.enableProvider}]]*/;
 var messageOrgDir3Pair = /*[[#{form.application.validation.organizationDir3BothOrNone}]]*/ 'Rellena ambos campos o deja ambos vac�os';
@@ -213,10 +222,10 @@ function validateOrgDir3(showSpans = true) {
     } else {
         if (orgEl)  orgEl.setCustomValidity('');
         if (dir3El) dir3El.setCustomValidity('');
-//        if (showSpans) {
-//            $('#organization_span').text('');
-//            $('#dir3Code_span').text('');
-//        }
+        if (showSpans) {
+            $('#organization_span').text('');
+            $('#dir3Code_span').text('');
+        }
     }
     return isValid;
 }

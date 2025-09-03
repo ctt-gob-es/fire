@@ -190,9 +190,13 @@ public class ApplicationService implements IApplicationService{
 			appToSave.setHabilitado(appDto.getHabilitado());
 			if (appDto.getOrganization() != null && !appDto.getOrganization().isEmpty()) {
 				appToSave.setOrganization(appDto.getOrganization());
+			} else {
+				appToSave.setOrganization(null);
 			}
 			if (appDto.getDir3Code() != null && !appDto.getDir3Code().isEmpty()) {
 				appToSave.setDir3Code(appDto.getDir3Code());
+			} else {
+				appToSave.setDir3Code(null);
 			}
 			appToSave.setCustomProvider(appDto.isCustomProvider());
 			appToSave.setCustomSize(appDto.isCustomSize());

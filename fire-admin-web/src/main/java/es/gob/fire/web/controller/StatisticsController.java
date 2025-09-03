@@ -34,6 +34,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -97,6 +98,9 @@ public class StatisticsController {
 	 * Constant that represents the parameter log.
 	 */
 	private static final Logger LOGGER = Logger.getLogger(StatisticsController.class);
+	
+	private static final String UNDEFINED_CODE = "__UNDEFINED__";
+	private static final String UNDEFINED_NAME = "No Definido";
 
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of platforms
@@ -133,31 +137,64 @@ public class StatisticsController {
 		List<String> applications = new ArrayList<>(allApplications);
 		Collections.sort(applications);
 		
-		Set<OrganizationDTO> allOrganizations = new HashSet<>();
-		allOrganizations.addAll(transactionService.getDifferentOrganizations());
-		allOrganizations.addAll(signatureService.getDifferentOrganizations());
+		final String UNDEFINED_CODE = "__UNDEFINED__";
+        final String UNDEFINED_NAME = "No Definido";
 
-		List<OrganizationDTO> organizations = new ArrayList<>(allOrganizations);
-		Collections.sort(organizations, new Comparator<OrganizationDTO>() {
-			@Override
-			public int compare(OrganizationDTO o1, OrganizationDTO o2) {
-				if (o1 == null && o2 == null) return 0;
-		        if (o1 == null) return 1;
-		        if (o2 == null) return -1;
+     // --- Organizations: group by DIR3, keep all names, expose one line per DIR3 ---
+        java.util.Set<OrganizationDTO> rawOrganizations = new java.util.HashSet<OrganizationDTO>();
+        rawOrganizations.addAll(transactionService.getDifferentOrganizations());
+        rawOrganizations.addAll(signatureService.getDifferentOrganizations());
 
-		        if (o1.getOrganization() == null && o2.getOrganization() == null) return 0;
-		        if (o1.getOrganization() == null) return 1;
-		        if (o2.getOrganization() == null) return -1;
-		        
-				return o1.getOrganization().compareToIgnoreCase(o2.getOrganization());
-			}
-		});
-		
-		organizations.add(0, new OrganizationDTO("No Definido", "__UNDEFINED__"));
+        // Map DIR3 -> names (LinkedHashSet preserves insertion order)
+        java.util.Map<String, java.util.LinkedHashSet<String>> dir3ToNames =
+                new java.util.TreeMap<String, java.util.LinkedHashSet<String>>(String.CASE_INSENSITIVE_ORDER);
+
+        for (OrganizationDTO o : rawOrganizations) {
+            String code = (o != null && org.springframework.util.StringUtils.hasText(o.getDir3Code()))
+                    ? o.getDir3Code().trim()
+                    : UNDEFINED_CODE;
+            String name = (o != null && org.springframework.util.StringUtils.hasText(o.getOrganization()))
+                    ? o.getOrganization().trim()
+                    : UNDEFINED_NAME;
+
+            java.util.LinkedHashSet<String> names = dir3ToNames.get(code);
+            if (names == null) {
+                names = new java.util.LinkedHashSet<String>();
+                dir3ToNames.put(code, names);
+            }
+            names.add(name);
+        }
+
+        // One DTO per DIR3; use a compact representative name
+        java.util.List<OrganizationDTO> organizations = new java.util.ArrayList<OrganizationDTO>();
+        for (java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
+            String code = e.getKey();
+            String displayName = choosePrimaryName(e.getValue());
+            organizations.add(new OrganizationDTO(displayName, code));
+        }
+
+        // Ensure undefined first
+        java.util.List<OrganizationDTO> orderedOrganizations = new java.util.ArrayList<OrganizationDTO>(organizations.size() + 1);
+        orderedOrganizations.add(new OrganizationDTO(UNDEFINED_NAME, UNDEFINED_CODE));
+        for (OrganizationDTO o : organizations) {
+            if (!UNDEFINED_CODE.equals(o.getDir3Code())) {
+                orderedOrganizations.add(o);
+            }
+        }
+
+        // Expose alias maps
+        java.util.Map<String, java.util.List<String>> organizationsNamesListByDir3 = new java.util.HashMap<String, java.util.List<String>>(dir3ToNames.size());
+        java.util.Map<String, String> organizationsNamesByDir3 = new java.util.HashMap<String, String>(dir3ToNames.size());
+        for (java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
+            organizationsNamesListByDir3.put(e.getKey(), new java.util.ArrayList<String>(e.getValue()));
+            organizationsNamesByDir3.put(e.getKey(), joinAllNames(e.getValue()));
+        }
 				
 		model.addAttribute("queries", queries);
 		model.addAttribute("applications", applications);
-		model.addAttribute("organizations", organizations);
+		model.addAttribute("organizations", orderedOrganizations);
+		model.addAttribute("organizationsNamesListByDir3", organizationsNamesListByDir3);
+		model.addAttribute("organizationsNamesByDir3", organizationsNamesByDir3);
 
         return "modal/statistics/statisticsFilter.html";
     }
@@ -623,5 +660,24 @@ public class StatisticsController {
 		}
 		
 		return maxEntitiesBeforeGrouping;
+	}
+	
+	private String choosePrimaryName(final java.util.Collection<String> names) {
+	    String best = UNDEFINED_NAME;
+	    for (String n : names) {
+	        if (n == null) continue;
+	        String t = n.trim();
+	        if (t.isEmpty()) continue;
+	        if (UNDEFINED_NAME.equals(best)) { best = t; continue; }
+	        if (t.length() < best.length() || (t.length() == best.length() && t.compareToIgnoreCase(best) < 0)) {
+	            best = t;
+	        }
+	    }
+	    return best;
+	}
+
+	/** Join all names for optional tooltip/popover (kept for convenience). */
+	private String joinAllNames(final java.util.Collection<String> names) {
+	    return String.join(" - ", names);
 	}
 }
