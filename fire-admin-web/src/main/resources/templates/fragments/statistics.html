@@ -1979,13 +1979,13 @@
 	        // Simple
 	        if (stats[name].simpleC.some(v => v > 0) || stats[name].simpleI.some(v => v > 0)) {
 	            datasets.push({
-	                label: name + ' – Simple Correctas',
+	                label: name + ' - Simple Correctas',
 	                data: stats[name].simpleC.map(v => v > 0 ? v : null),
 	                backgroundColor: generateCorrectColor(hue),
 	                stack: name + '_simple'
 	            });
 	            datasets.push({
-	                label: name + ' – Simple Incorrectas',
+	                label: name + ' - Simple Incorrectas',
 	                data: stats[name].simpleI.map(v => v > 0 ? v : null),
 	                backgroundColor: generateIncorrectColor(hue),
 	                stack: name + '_simple'
@@ -1994,13 +1994,13 @@
 	        // Batch
 	        if (stats[name].batchC.some(v => v > 0) || stats[name].batchI.some(v => v > 0)) {
 	            datasets.push({
-	                label: name + ' – Batch Correctas',
+	                label: name + ' - Batch Correctas',
 	                data: stats[name].batchC.map(v => v > 0 ? v : null),
 	                backgroundColor: generateCorrectBatchColor(hue),
 	                stack: name + '_batch'
 	            });
 	            datasets.push({
-	                label: name + ' – Batch Incorrectas',
+	                label: name + ' - Batch Incorrectas',
 	                data: stats[name].batchI.map(v => v > 0 ? v : null),
 	                backgroundColor: generateIncorrectBatchColor(hue),
 	                stack: name + '_batch'
@@ -2022,7 +2022,8 @@
 	            maintainAspectRatio: false,
 	            scales: {
 	                x: {
-	                    stacked: false,                   // no apilamos simple & batch juntos
+	                    stacked: true,                   // no apilamos simple & batch juntos
+	                    offset: true,
 	                    title: { display: true, text: 'Mes/Año' }
 	                },
 	                y: {
@@ -2032,41 +2033,61 @@
 	                }
 	            },
 	            plugins: {
-	                legend: {
-	                    labels: {
-	                        // una sola entrada por cada app
-	                        generateLabels: function(chart) {
-	                            return apps.map(function(name) {
-	                                var i = chart.data.datasets.findIndex(ds => ds.label.split(' – ')[0] === name);
-	                                return {
-	                                    text: name,
-	                                    fillStyle: chart.data.datasets[i].backgroundColor,
-	                                    hidden: false,
-	                                    index: i
-	                                };
-	                            });
-	                        }
-	                    },
-	                    onClick: function(evt, legendItem, legend) {
-	                        var clicked = legendItem.text;
-	                        // ocultar/mostrar todas las barras (simple & batch) de esa app
-	                        legend.chart.data.datasets.forEach(function(ds) {
-	                            if (ds.label.split(' – ')[0] === clicked) {
-	                                ds.hidden = !ds.hidden;
-	                            }
-	                        });
-	                        legend.chart.update();
-	                    }
-	                },
-	                tooltip: {
-	                    callbacks: {
-	                        // mantenemos el tooltip original
-	                        label: function(context) {
-	                            return context.dataset.label + ': ' + context.parsed.y;
-	                        }
-	                    }
-	                }
-	            }
+	            	  legend: {
+	            	    labels: {
+	            	      generateLabels: function(chart) {
+	            	        const ds = chart.data?.datasets || [];
+
+	            	        // Map first dataset index per app actually present
+	            	        const appToFirstIdx = new Map();
+	            	        ds.forEach((d, i) => {
+	            	          const app = getAppFromLabel(d.label);
+	            	          if (app && !appToFirstIdx.has(app)) appToFirstIdx.set(app, i);
+	            	        });
+
+	            	        // Build legend items only for apps that have datasets
+	            	        return Array.from(appToFirstIdx.entries()).map(([app, i]) => {
+	            	          const first = ds[i];
+	            	          // hidden if all datasets of that app are hidden
+	            	          const allHiddenForApp = ds
+	            	            .filter(d => getAppFromLabel(d.label) === app)
+	            	            .every(d => !!d.hidden);
+
+	            	          return {
+	            	            text: app,
+	            	            fillStyle: first?.backgroundColor ?? '#999',
+	            	            strokeStyle: first?.borderColor ?? '#999',
+	            	            hidden: allHiddenForApp,
+	            	            datasetIndex: i // v3 expects this; your onClick no lo usa, pero mejor incluirlo
+	            	          };
+	            	        });
+	            	      }
+	            	    },
+	            	    onClick: function(evt, legendItem, legend) {
+	            	      const app = legendItem.text;
+	            	      legend.chart.data.datasets.forEach(function(ds) {
+	            	        if (getAppFromLabel(ds.label) === app) {
+	            	          ds.hidden = !ds.hidden;
+	            	        }
+	            	      });
+	            	      legend.chart.update();
+	            	    }
+	            	  },
+	            	  tooltip: {
+	            	    callbacks: {
+	            	      label: function(context) {
+	            	        return context.dataset.label + ': ' + context.parsed.y;
+	            	      }
+	            	    }
+	            	  }
+	            	},
+	            datasets: {
+		            bar: {
+			            categoryPercentage: 0.9, // ocupa toda la categor�a (mes)
+			            barPercentage: 1.0,      // cada grupo usa su ancho completo
+			            maxBarThickness: 60
+		            }
+	           	}
 	        }
 	    });
 	}
@@ -2128,7 +2149,7 @@
                     },
                     y: {
                         beginAtZero: true,
-                        title: { display: true, text: 'Bytes' }
+                        title: { display: true, text: 'Megabytes' }
                     }
                 },
                 plugins: {
@@ -2721,6 +2742,12 @@
       setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
     }
 
+    function getAppFromLabel(label) {
+    	  if (!label) return '';
+    	  // split on space + hyphen/en-dash + space
+    	  const parts = String(label).split(/\s[-�]\s/);
+    	  return parts[0] || '';
+    	}
 </script>
 
 <style>
