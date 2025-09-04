@@ -56,7 +56,6 @@ import es.gob.fire.client.HttpsConnection.Method;
 public class FireClient {
 
     private static final String PROPERTY_KEY_SERVICE_URL = "fireUrl"; //$NON-NLS-1$
-    private static final String PROPERTY_LANGUAGE = "language"; //$NON-NLS-1$
 
     private static final String TAG_VALUE_APP_ID = "$$APPID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_OPERATION = "$$OPERATION$$"; //$NON-NLS-1$
@@ -73,18 +72,11 @@ public class FireClient {
     private static final String TAG_VALUE_ALLOW_PARTIAL_UPGRADE = "$$PARTIAL$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_DOCUMENT_ID = "$$DOCID$$"; //$NON-NLS-1$
     private static final String TAG_VALUE_STOP_ON_ERROR = "$$STOPERROR$$"; //$NON-NLS-1$
-    private static final String TAG_VALUE_LANGUAGE = "$$LANGUAGE$$"; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_BASE =
             "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
             "&appid=" + TAG_VALUE_APP_ID + //$NON-NLS-1$
     		"&subjectid=" + TAG_VALUE_SUBJECT_ID; //$NON-NLS-1$
-    
-    private static final String URL_PARAMETERS_BASE_WITH_LANGUAGE =
-            "op=" + TAG_VALUE_OPERATION + //$NON-NLS-1$
-            "&appid=" + TAG_VALUE_APP_ID + //$NON-NLS-1$
-    		"&subjectid=" + TAG_VALUE_SUBJECT_ID + //$NON-NLS-1$
-    		"&language=" + TAG_VALUE_LANGUAGE; //$NON-NLS-1$
 
     private static final String URL_PARAMETERS_SIGN =
     		"&cop=" + TAG_VALUE_CRYPTO_OPERATION + //$NON-NLS-1$
@@ -171,8 +163,6 @@ public class FireClient {
     private final String appId;
 
     private final String serviceUrl;
-    
-    private String language;
 
     private HttpsConnection conn;
 
@@ -331,7 +321,7 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
+
         final String dataB64 = Base64.encode(d, true);
         final String extraParamsB64 = Utils.properties2Base64(prop, true);
 
@@ -405,17 +395,9 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
-        String urlParamsBase = URL_PARAMETERS_BASE;
-        
-    	this.language = config.getProperty(PROPERTY_LANGUAGE);
-        if (this.language != null && !this.language.isEmpty()) {
-        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
-        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
-        }
-        
+
         final String urlParameters =
-        		urlParamsBase
+        		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN.getId()) +
@@ -753,17 +735,9 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
-        String urlParamsBase = URL_PARAMETERS_BASE;
-        
-    	this.language = config.getProperty(PROPERTY_LANGUAGE);
-        if (this.language != null && !this.language.isEmpty()) {
-        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
-        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
-        }
-        
+
         String urlParameters =
-        		urlParamsBase
+        		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.CREATE_BATCH.getId()) +
@@ -773,7 +747,7 @@ public class FireClient {
                 .replace(TAG_VALUE_ALGORITHM, algth)
                 .replace(TAG_VALUE_EXTRA_PARAM, doBase64UrlSafe(propB64))
                 .replace(TAG_VALUE_CONFIG, Utils.properties2Base64(config, true));
-        
+
         // Si se ha indicado un formato de upgrade, lo actualizamos; si no, lo eliminamos de la URL
         if (upgrade != null && !upgrade.isEmpty()) {
         	urlParameters = urlParameters.replace(TAG_VALUE_UPGRADE, upgrade);
@@ -983,16 +957,9 @@ public class FireClient {
                     "El identificador del titular no puede ser nulo" //$NON-NLS-1$
             );
         }
-        
-        String urlParamsBase = URL_PARAMETERS_BASE;
-        
-        if (this.language != null && !this.language.isEmpty()) {
-        	urlParamsBase = URL_PARAMETERS_BASE_WITH_LANGUAGE;
-        	urlParamsBase = urlParamsBase.replace(TAG_VALUE_LANGUAGE, this.language);
-        }
-        
+
         final String urlParameters =
-        		urlParamsBase
+        		URL_PARAMETERS_BASE
         		.replace(TAG_VALUE_APP_ID, this.appId)
         		.replace(TAG_VALUE_SUBJECT_ID, subjectId)
         		.replace(TAG_VALUE_OPERATION, FIReServiceOperation.SIGN_BATCH.getId()) +

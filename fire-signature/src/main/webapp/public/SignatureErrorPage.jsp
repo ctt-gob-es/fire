@@ -1,6 +1,7 @@
 <%@page import="es.gob.fire.server.services.FIReError"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
+<%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
@@ -38,10 +39,8 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 	}
 	
 	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
+
+	Language currentLanguage = MessagesFireSignature.getLanguage(language);
 
 	// Recuperamos la informacion del la aplicacion
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
@@ -94,7 +93,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><%= Language.getResFireSignature(IWebViewMessages.ERROR_PAGE) %></title>
+	<title><%= currentLanguage.getResFireSignature(IWebViewMessages.ERROR_PAGE) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -113,19 +112,19 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>	
 					<% if (appName != null && appName.length() > 0) { %>				
-						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%=appName %></div>	
+						<div class="mod_claim_text_sec"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%=appName %></div>	
 					<% } %>				
 				</div>
 			</div>
 			<div class="clr"></div>
-			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+			<div class="header_menu_right"><%= currentLanguage.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
-				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
-				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
-				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
-				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
-				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
-				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				<option value="es_ES" <%= language != null && language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="ca_ES" <%= language != null && language.equals("ca_ES") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl_ES" <%= language != null && language.equals("gl_ES") ? "selected" : "" %>>Galego</option>
+				<option value="eu_ES" <%= language != null && language.equals("eu_ES") ? "selected" : "" %>>Euskera</option>
+				<option value="va_ES" <%= language != null && language.equals("va_ES") ? "selected" : "" %>>Valenciano</option>
+				<option value="en_US" <%= language != null && language.equals("en_US") ? "selected" : "" %>>English</option>
 			</select>
 		</div>
 		</div>
@@ -151,7 +150,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 							</form>
 						
 							<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-								<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
+								<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 							</a>
 						</div>
 					<% if (!originForced) { %>
@@ -166,7 +165,7 @@ response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$N
 						
 							<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 								<span class="arrow-left-white"></span>
-								<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
+								<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 							</a>
 					<% } %>
 						</div>

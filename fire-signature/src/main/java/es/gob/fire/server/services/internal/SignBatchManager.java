@@ -45,7 +45,6 @@ public class SignBatchManager {
     	final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
     	final String subjectId 	   = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
 		final String stopOnError   = params.getParameter(ServiceParams.HTTP_PARAM_BATCH_STOP_ON_ERROR);
-		final String language 	   = params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
 
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
@@ -94,6 +93,14 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
+        
+        String language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
+        
+        if (language == null || language.isEmpty()) {
+			language = "es_ES"; //$NON-NLS-1$
+		}
+        
+		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 
         // Guardamos los datos de la transaccion en la coleccion de sesiones y en la sesion del propio servidor
         session.saveIntoHttpSession(request.getSession());
@@ -103,13 +110,9 @@ public class SignBatchManager {
         final String subjectRef = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_REF);
 
         // Componemos los parametros del servicio
-		String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
+		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
     			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
-		
-		if (language != null && !language.isEmpty()) {
-			redirectUrl += "&" + ServiceParams.HTTP_PARAM_LANGUAGE + "=" + language; //$NON-NLS-1$ //$NON-NLS-2$
-		}
 		
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual

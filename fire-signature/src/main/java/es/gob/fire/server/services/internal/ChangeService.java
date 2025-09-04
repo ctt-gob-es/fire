@@ -3,7 +3,6 @@ package es.gob.fire.server.services.internal;
 import java.io.IOException;
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
-import java.util.Locale;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
@@ -12,7 +11,6 @@ import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
-import es.gob.fire.i18n.Language;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
@@ -95,7 +93,6 @@ public class ChangeService extends HttpServlet {
 		
 		// Actualizamos la sesion con el idioma en caso de que se haya indicado por parametro
 		if (language != null && !language.isEmpty()) {
-			Language.changeFireSignatureMessagesConfiguration(new Locale(language));
 			session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 		}
 		

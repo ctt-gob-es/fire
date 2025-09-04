@@ -22,6 +22,7 @@
 <%@page import="java.util.List"%>
 <%@page import="java.util.Locale"%>
 <%@page import="es.gob.fire.server.services.internal.SignBatchConfig"%>
+<%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.MiniAppletHelper"%>
 <%@page import="es.gob.fire.server.services.internal.BatchResult"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
@@ -59,10 +60,8 @@
 	}
 	
 	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
+
+	Language currentLanguage = MessagesFireSignature.getLanguage(language);
 
 	String appId = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ID);
 	trAux.setAppId(appId);
@@ -196,11 +195,11 @@
 	<meta http-equiv="Expires" content="0" />
 	<meta http-equiv="Content-Security-Policy" content="style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src *; connect-src 'self' afirma: 127.0.0.1">
 
-	<meta name="description" content="<%= Language.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %>">
+	<meta name="description" content="<%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %>">
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><%= Language.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %></title>
+	<title><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -398,18 +397,18 @@
 				var appVersion;
 				var href;
 				if (AutoScript.isAndroid()) {
-					app = "Cliente @firma Android";
-					appVersion = "<%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING_ANDORID_VERSION) %>";
+					app = "Autofirma App Android";
+					appVersion = "<%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING_ANDORID_VERSION) %>";
 					href = "https://play.google.com/store/apps/details?id=es.gob.afirma";
 				}
 				else if (AutoScript.isIOS()) {
-					app = "Cliente @firma iOS";
-					appVersion = "<%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING_IOS_VERSION) %>";
+					app = "Autofirma App iOS";
+					appVersion = "<%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING_IOS_VERSION) %>";
 					href = "https://itunes.apple.com/es/app/cliente-firma-movil/id627410001?mt=8&uo=4";
 				}
 				else {
-					app = "AutoFirma";
-					appVersion = "<%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING_AUTOFIRMA_VERSION) %>";
+					app = "Autofirma";
+					appVersion = "<%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING_AUTOFIRMA_VERSION) %>";
 					href = "http://firmaelectronica.gob.es/Home/Descargas";
 				}
 
@@ -437,19 +436,19 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
 			<div class="clr"></div>
-			<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+			<div class="header_menu_right"><%= currentLanguage.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 				<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
-				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
-				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
-				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
-				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
-				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
-				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				<option value="es_ES" <%= language != null && language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="ca_ES" <%= language != null && language.equals("ca_ES") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl_ES" <%= language != null && language.equals("gl_ES") ? "selected" : "" %>>Galego</option>
+				<option value="eu_ES" <%= language != null && language.equals("eu_ES") ? "selected" : "" %>>Euskera</option>
+				<option value="va_ES" <%= language != null && language.equals("va_ES") ? "selected" : "" %>>Valenciano</option>
+				<option value="en_US" <%= language != null && language.equals("en_US") ? "selected" : "" %>>English</option>
 				</select>
 			</div>
 		</div>
@@ -462,19 +461,19 @@
 			
 			<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold"><%= Language.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %></span></h1>
+						<h1 class="title"><span class="bold"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_WITH_LOCAL_CERT) %></span></h1>
 					</div>
 					
 				</div>
 
 			<div class="contenido-opciones temp-hide" id="errorButtonsPanel">
 				<div id="mensaje_error" class="mensaje-error" >
-				<h2 id="errorMsg"><%= Language.getResFireSignature(IWebViewMessages.ERROR_SIGN_OPERATION) %></h2>
+				<h2 id="errorMsg"><%= currentLanguage.getResFireSignature(IWebViewMessages.ERROR_SIGN_OPERATION) %></h2>
 				</div>
 				
 				<div id="containerError" class="botones">
-					<input id="buttonRetry" type="button" class="button-operacion" value="<%= Language.getResFireSignature(IWebViewMessages.RETRY_BTN) %>" onclick="<%= formFunction %>"/>&nbsp;
-					<input id="buttonCancel" type="button" class="button-operacion" value="<%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %>" onclick="doCancel()"/>
+					<input id="buttonRetry" type="button" class="button-operacion" value="<%= currentLanguage.getResFireSignature(IWebViewMessages.RETRY_BTN) %>" onclick="<%= formFunction %>"/>&nbsp;
+					<input id="buttonCancel" type="button" class="button-operacion" value="<%= currentLanguage.getResFireSignature(IWebViewMessages.CANCEL_BTN) %>" onclick="doCancel()"/>
 				</div>
 			</div>
 
@@ -489,13 +488,13 @@
 					<input id="inputerrormsg" type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_MESSAGE %>" />
 					<input id="afirmaBatchResult" type="hidden" name="<%= ServiceParams.HTTP_PARAM_AFIRMA_BATCH_RESULT %>" />
 					<input id="cert" type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT %>" value="" />
-					<input id="buttonSign" type="button" class="button_firmar" value="<%= Language.getResFireSignature(IWebViewMessages.SIGN_BTN) %>" onclick="<%= formFunction %>"/>
+					<input id="buttonSign" type="button" class="button_firmar" value="<%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_BTN) %>" onclick="<%= formFunction %>"/>
 				</form>
 			</div>		
 			<div class="nota-firmar">
-					<span class="bold"><%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING) %>:</span> 
-					<%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING_SIGN_WITH) %> <span id="signningApp" class="bold">AutoFirma</span>. 
-					<%= Language.getResFireSignature(IWebViewMessages.MSG_WARNING_VERSION) %> 
+					<span class="bold"><%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING) %>:</span> 
+					<%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING_SIGN_WITH) %> <span id="signningApp" class="bold">AutoFirma</span>. 
+					<%= currentLanguage.getResFireSignature(IWebViewMessages.MSG_WARNING_VERSION) %> 
 						<a id="linkDownload" href="#" target="_blanc"> <span id="signningAppVersion" class="bold">AutoFirma</span>.</a>		
 			</div>
 			
@@ -515,10 +514,10 @@
 		
 		<% if (docInfos != null && docInfos.length > 0) { %>
 		<section class="contenido-firmar-listadocs">
-			<div class="titulo-listaDocs" ><%= Language.getResFireSignature(IWebViewMessages.DOCUMENTS_TO_SIGN) %></div>
+			<div class="titulo-listaDocs" ><%= currentLanguage.getResFireSignature(IWebViewMessages.DOCUMENTS_TO_SIGN) %></div>
 			<div id="listDocs" class="container-box">
-					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_ID) %></div>		
-					<div class="cabecera-listaDocs"><%= Language.getResFireSignature(IWebViewMessages.DOCUMENT_TITLE) %></div>
+					<div class="cabecera-listaDocs"><%= currentLanguage.getResFireSignature(IWebViewMessages.DOCUMENT_ID) %></div>		
+					<div class="cabecera-listaDocs"><%= currentLanguage.getResFireSignature(IWebViewMessages.DOCUMENT_TITLE) %></div>
 				<% int i=1;
 				for (DocInfo docInfo : docInfos)  { %>
 					<div class="celda-listaDocs"><%= docInfo.getName() != null ? docInfo.getName() : "" %></div>	
@@ -538,7 +537,7 @@
 			</form>
 		
 			<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-				<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
+				<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 			</a>
 		<% } else { %>
 			<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
@@ -550,7 +549,7 @@
 		
 			<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 				<span class="arrow-left-white"></span>
-				<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>	
+				<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>	
 			</a>
 		<% } %>
 		</div>
@@ -603,7 +602,7 @@
 		
 		/** Muestra y actualiza el dialogo de progreso. */
 		function showProgress() {
-			document.getElementById("progressText").innerHTML = "<%= Language.getResFireSignature(IWebViewMessages.EXECUTING_SIGN) %>"; 
+			document.getElementById("progressText").innerHTML = "<%= currentLanguage.getResFireSignature(IWebViewMessages.EXECUTING_SIGN) %>"; 
 			document.getElementById("progressDialog").style.display = "block";
 		}
 

@@ -2,6 +2,7 @@
 <%@page import="es.gob.fire.server.services.FIReError"%>
 <%@page import="es.gob.fire.server.services.ProjectConstants"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
+<%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
 <%@page import="es.gob.fire.server.services.internal.FirePages"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionConfig"%>
@@ -56,10 +57,8 @@
 	trAux.setAppId(appId);
 	
 	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
+
+	Language currentLanguage = MessagesFireSignature.getLanguage(language);
 	
 	String providerName = null;
 	final ProviderInfo info = ProviderManager.getProviderInfo(
@@ -105,7 +104,7 @@
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><%= Language.getResFireSignature(IWebViewMessages.CERT_NOT_AVAILABLE) %></title>
+	<title><%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_NOT_AVAILABLE) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -126,19 +125,19 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
 			<div class="clr"></div>
-		<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+		<div class="header_menu_right"><%= currentLanguage.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
-				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
-				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
-				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
-				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
-				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
-				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				<option value="es_ES" <%= language != null && language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="ca_ES" <%= language != null && language.equals("ca_ES") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl_ES" <%= language != null && language.equals("gl_ES") ? "selected" : "" %>>Galego</option>
+				<option value="eu_ES" <%= language != null && language.equals("eu_ES") ? "selected" : "" %>>Euskera</option>
+				<option value="va_ES" <%= language != null && language.equals("va_ES") ? "selected" : "" %>>Valenciano</option>
+				<option value="en_US" <%= language != null && language.equals("en_US") ? "selected" : "" %>>English</option>
 			</select>
 		</div>
 		</div>
@@ -151,13 +150,13 @@
 			
 				<div  class="container-box-title">
 					<div class="container_tit">
-						<h1 class="title"><span class="bold"><%= Language.getResFireSignature(IWebViewMessages.CERT_NOT_HAVE) %> <%= providerName != null ? providerName : Language.getResFireSignature(IWebViewMessages.CERT_PROVIDER)%></span></h1>
+						<h1 class="title"><span class="bold"><%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_NOT_HAVE) %> <%= providerName != null ? providerName : currentLanguage.getResFireSignature(IWebViewMessages.CERT_PROVIDER)%></span></h1>
 					</div>		
 				</div>
 				
 				<div class="container-box-error-new">
 					<div class="container-textbox-error">
-						<p class="text-error-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_NEW_CERT_CLOUD) %></p>
+						<p class="text-error-box"><%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_NEW_CERT_CLOUD) %></p>
 					</div>
 					<div class="error-box">
 						<form method="POST" action="<%= ServiceNames.PUBLIC_SERVICE_REQ_CERT %>">
@@ -166,7 +165,7 @@
 			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 							<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_APPLICATION_ID %>" value="<%= appId %>">
 			  				<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN_FORCED %>" value="<%= originForced %>">
-			  				<input type="submit" class="button_firmar" value="<%= Language.getResFireSignature(IWebViewMessages.CERT_ISSUE) %>" />
+			  				<input type="submit" class="button_firmar" value="<%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_ISSUE) %>" />
 						</form>
 					</div>
 				</div>
@@ -174,7 +173,7 @@
 				<% if (!originForced) { %>
 			  		<div class="container-box-error-local">
 						<div id="certLocalText" class="container-textbox-error hide">					
-							<p class="text-error-box"><%= Language.getResFireSignature(IWebViewMessages.CERT_SIGN_LOCAL) %></p>
+							<p class="text-error-box"><%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_SIGN_LOCAL) %></p>
 						</div>								  				
 						<div  id="certLocalcontainer" class="error-box hide">
 							<form method="POST" id="certLocal" action="<%= ServiceNames.PUBLIC_SERVICE_CHOOSE_CERT_ORIGIN %>">
@@ -182,7 +181,7 @@
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_SUBJECT_REF %>" value="<%= subjectRef %>">
 						  		<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_ERROR_URL %>" value="<%= errorUrl %>" />
 								<input type="hidden" name="<%= ServiceParams.HTTP_PARAM_CERT_ORIGIN %>" value="local" />
-								<input type="submit" class="button_firmar" value="<%= Language.getResFireSignature(IWebViewMessages.CERT_USE_LOCAL) %>" />
+								<input type="submit" class="button_firmar" value="<%= currentLanguage.getResFireSignature(IWebViewMessages.CERT_USE_LOCAL) %>" />
 							</form>
 						</div>
 					</div>			
@@ -211,7 +210,7 @@
 						</form>
 					
 						<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-							<span ><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
+							<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 						</a>
 					<% } else { %>
 						<form method="GET" action="<%= ServiceNames.PUBLIC_SERVICE_BACK %>" id="formBack">
@@ -223,7 +222,7 @@
 					
 						<a class="button-volver" onclick="document.getElementById('formBack').submit();" href="javascript:{}">
 							<span class="arrow-left-white"></span>
-							<span ><%= Language.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
+							<span ><%= currentLanguage.getResFireSignature(IWebViewMessages.RETURN_BTN) %></span>
 						</a>
 					<% } %>
 				</div>

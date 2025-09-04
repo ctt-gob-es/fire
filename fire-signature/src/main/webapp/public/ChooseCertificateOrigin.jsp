@@ -15,6 +15,7 @@
 <%@page import="java.util.Map"%>
 <%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
+<%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
 <%@page import="es.gob.fire.i18n.Language"%>
@@ -52,10 +53,8 @@
 	String errorUrl = connConfig.getRedirectErrorUrl();
 	
 	String language = fireSession.getString(ServiceParams.SESSION_PARAM_LANGUAGE);
-	if (language == null || language.isEmpty()) {
-		language = "es";
-	}
-	Language.changeFireSignatureMessagesConfiguration(new Locale(language));
+	
+	Language currentLanguage = MessagesFireSignature.getLanguage(language);
 
 	// Preparamos el logo de la pantalla
 	String logoUrl = ConfigManager.getPagesLogoUrl();
@@ -91,7 +90,7 @@
 	<meta name="author" content="Gobierno de España">
 	<meta name="robots" content="noindex, nofollow">
 	<meta name="viewport" content="width=device-width, initial-scale=1.0">
-	<title><%= Language.getResFireSignature(IWebViewMessages.SIGN_MECHANISM_SYSTEM_SUBTITLE) %></title>
+	<title><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_MECHANISM_SYSTEM_SUBTITLE) %></title>
 	<link rel="shortcut icon" href="img/general/dms/favicon.png">
 	<link rel="stylesheet" type="text/css" href="css/layout.css">
 	<link rel="stylesheet" type="text/css" href="css/headerFooter.css">
@@ -111,19 +110,19 @@
 				<div class="mod_claim_in_der">
 					<div class="mod_claim_text"><%= ConfigManager.getPagesTitle() %></div>
 					<% if (appName != null && appName.length() > 0) { %>
-						<div class="mod_claim_text_sec"><%= Language.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
+						<div class="mod_claim_text_sec"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_REQUESTED_BY_TITLE) %> <%= appName %></div>
 					<% } %>
 				</div>
 			</div>
 			<div class="clr"></div>
-		<div class="header_menu_right"><%= Language.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
+		<div class="header_menu_right"><%= currentLanguage.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
-				<option value="es" <%= language != null && language.equals("es") ? "selected" : "" %>>Espa&ntilde;ol</option>
-				<option value="en" <%= language != null && language.equals("en") ? "selected" : "" %>>English</option>
-				<option value="ca" <%= language != null && language.equals("ca") ? "selected" : "" %>>Catal&agrave;</option>
-				<option value="gl" <%= language != null && language.equals("gl") ? "selected" : "" %>>Galego</option>
-				<option value="eu" <%= language != null && language.equals("eu") ? "selected" : "" %>>Euskera</option>
-				<option value="va" <%= language != null && language.equals("va") ? "selected" : "" %>>Valenciano</option>
+				<option value="es_ES" <%= language != null && language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="ca_ES" <%= language != null && language.equals("ca_ES") ? "selected" : "" %>>Catal&agrave;</option>
+				<option value="gl_ES" <%= language != null && language.equals("gl_ES") ? "selected" : "" %>>Galego</option>
+				<option value="eu_ES" <%= language != null && language.equals("eu_ES") ? "selected" : "" %>>Euskera</option>
+				<option value="va_ES" <%= language != null && language.equals("va_ES") ? "selected" : "" %>>Valenciano</option>
+				<option value="en_US" <%= language != null && language.equals("en_US") ? "selected" : "" %>>English</option>
 			</select>
 		</div>
 			
@@ -136,7 +135,7 @@
 		<section class="contenido">		
 		<div class="container-title">
 			<div class="title-head">
-				<h1 class="title"><%= Language.getResFireSignature(IWebViewMessages.SIGN_SYSTEM_SELECT_TITLE) %></h1>
+				<h1 class="title"><%= currentLanguage.getResFireSignature(IWebViewMessages.SIGN_SYSTEM_SELECT_TITLE) %></h1>
 			</div>	
 		</div>
 		
@@ -163,7 +162,7 @@
 					<h2 class="title-box"><%= info.getHeader() %></h2>
 					<% if (info.isNeedJavaScript()) { %>
 						<noscript>
-							<p class="text-box"><%= Language.getResFireSignature(IWebViewMessages.JAVASCRIPT_WARNING) %></p>
+							<p class="text-box"><%= currentLanguage.getResFireSignature(IWebViewMessages.JAVASCRIPT_WARNING) %></p>
 						</noscript>
 					<% } %>
 					<p name="provider-description" class="text-box <%= info.isNeedJavaScript() ? "hide" : "" %>">
@@ -171,7 +170,7 @@
 					</p>
 				</div>
 				<a name="provider-option" class="button <%= info.isNeedJavaScript() ? "invisible" : "" %>" title="<%= info.getHeader() %>" onclick="document.getElementById('form<%= info.getName() %>').submit();" href="javascript:{}">
-					<span><%= Language.getResFireSignature(IWebViewMessages.ACCESS_BTN) %></span>
+					<span><%= currentLanguage.getResFireSignature(IWebViewMessages.ACCESS_BTN) %></span>
 					<span class="arrow-right arrow-right-inicio"></span>
 				</a>
 			</div>
@@ -197,7 +196,7 @@
 
 				<div class="title-button">
 					<a class="button-cancelar" onclick="document.getElementById('formCancel').submit();" href="javascript:{}">
-						<span><%= Language.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
+						<span><%= currentLanguage.getResFireSignature(IWebViewMessages.CANCEL_BTN) %></span>
 					</a>
 				</div>
 			</div>

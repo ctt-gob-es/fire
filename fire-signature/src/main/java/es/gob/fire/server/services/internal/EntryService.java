@@ -13,7 +13,6 @@ import java.io.IOException;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import javax.servlet.ServletException;
 import javax.servlet.http.HttpServlet;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
@@ -59,7 +58,6 @@ public class EntryService extends HttpServlet {
 		
 		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
 		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-		final String language = params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
 
 		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
@@ -104,6 +102,8 @@ public class EntryService extends HttpServlet {
 			LOGGER.info(logF.f("Se selecciona automaticamente el unico proveedor disponible " + LogUtils.cleanText(provs[0]))); //$NON-NLS-1$
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs[0]);
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
+			
+			final String language = (String) session.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
 
 			final ProviderInfo provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
 
@@ -122,9 +122,6 @@ public class EntryService extends HttpServlet {
 			}
 			return;
         }
-		
-		// Guardamos el idioma usado.
-		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 
 		// Registramos los datos guardados
 		SessionCollector.commit(session, trAux);
