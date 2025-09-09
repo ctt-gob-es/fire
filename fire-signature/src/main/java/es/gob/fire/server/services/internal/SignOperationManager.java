@@ -175,14 +175,17 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
         session.setAttribute(ServiceParams.SESSION_PARAM_SKIP_CERT_SELECTION, Boolean.toString(skipSelection));
     	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.SIGN);
-    	
 
-        String language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
-        
+
+        String language = null;
+        if (connConfig.getProperties() != null) {
+        	language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
+        }
+
         if (language == null || language.isEmpty()) {
 			language = "es_ES"; //$NON-NLS-1$
 		}
-        
+
 		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
@@ -296,7 +299,7 @@ public class SignOperationManager {
 		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
     			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
-    			
+
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);

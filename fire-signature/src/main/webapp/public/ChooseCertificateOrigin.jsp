@@ -117,7 +117,7 @@
 			<div class="clr"></div>
 		<div class="header_menu_right"><%= currentLanguage.getResFireSignature(IWebViewMessages.SELECT_LANGUAGE) %>:						
 			<select id="languageSelect" name="languageSelect" onchange="changeLanguage()">
-				<option value="es_ES" <%= language != null && language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
+				<option value="es_ES" <%= language == null || language.equals("es_ES") ? "selected" : "" %>>Espa&ntilde;ol</option>
 				<option value="ca_ES" <%= language != null && language.equals("ca_ES") ? "selected" : "" %>>Catal&agrave;</option>
 				<option value="gl_ES" <%= language != null && language.equals("gl_ES") ? "selected" : "" %>>Galego</option>
 				<option value="eu_ES" <%= language != null && language.equals("eu_ES") ? "selected" : "" %>>Euskera</option>

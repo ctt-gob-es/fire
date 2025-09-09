@@ -93,13 +93,16 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_STOP_ON_ERROR, stopOnError);
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
-        
-        String language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
-        
+
+        String language = null;
+        if (connConfig.getProperties() != null) {
+        	language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
+        }
+
         if (language == null || language.isEmpty()) {
 			language = "es_ES"; //$NON-NLS-1$
 		}
-        
+
 		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
 
         // Guardamos los datos de la transaccion en la coleccion de sesiones y en la sesion del propio servidor
@@ -113,7 +116,7 @@ public class SignBatchManager {
 		final String redirectUrl = ServiceNames.PUBLIC_SERVICE_ENTRY_POINT
     			+ "?" +  ServiceParams.HTTP_PARAM_TRANSACTION_ID + "=" + transactionId //$NON-NLS-1$ //$NON-NLS-2$
     			+ "&" + ServiceParams.HTTP_PARAM_SUBJECT_REF + "=" + subjectRef; //$NON-NLS-1$ //$NON-NLS-2$;
-		
+
 		// Obtenemos la URL de las paginas web de FIRe (parte publica). Si no se define,
 		// se calcula en base a la URL actual
 		final String redirectUrlBase = PublicContext.getPublicContext(request);

@@ -68,12 +68,12 @@ public final class Language {
 	 * Constant attribute that represents the string to identify the bundle name to the file related with fire signature module.
 	 */
 	private static final String BUNDLENAME_FIRESIGNATURE = "messages.signature.fire"; //$NON-NLS-1$
-	
+
 	/**
 	 * Attribute that represents the properties for the locale for the core bundle messages for fire-signature.
 	 */
 	private ResourceBundle resFireSignatureBundle = null;
-	
+
 	/**
 	 * Constructor method for the class Language.java.
 	 */
@@ -81,21 +81,20 @@ public final class Language {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
 		try {
 			this.classLoaderMessages = Language.class.getClassLoader();
-			loadFireSignatureMessagesConfiguration(newLocale);
+			this.currentLocale = newLocale;
+			loadFireSignatureMessagesConfiguration();
 		} catch (final RuntimeException e) {
 			LOGGER.error(e);
 		}
 	}
-	
+
 	/**
-	 * Method that loads the configured locale and reload the text messages for the fire signature module.
-	 * @param newLocale locale to configure
+	 * Method that loads the configured locale and the text messages for the fire signature module.
 	 */
-	public void loadFireSignatureMessagesConfiguration(final Locale newLocale) {
-		this.currentLocale = newLocale;
-		this.resFireSignatureBundle = ResourceBundle.getBundle(BUNDLENAME_FIRESIGNATURE, newLocale, this.classLoaderMessages);
+	private void loadFireSignatureMessagesConfiguration() {
+		this.resFireSignatureBundle = ResourceBundle.getBundle(BUNDLENAME_FIRESIGNATURE, this.currentLocale, this.classLoaderMessages);
 	}
-	
+
 
 	/**
 	 * Gets the message with the key and values indicated as input parameters for fire-signature.
@@ -107,7 +106,7 @@ public final class Language {
 		return new MessageFormat(this.resFireSignatureBundle.getString(key), this.currentLocale).format(values);
 	}
 
-	
+
 	/**
 	 * Gets the message with the key indicated as input parameters for fire signature module.
 	 * @param key Key for obtain the message.
