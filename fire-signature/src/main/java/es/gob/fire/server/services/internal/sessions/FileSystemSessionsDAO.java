@@ -21,6 +21,8 @@ import java.nio.file.NoSuchFileException;
 import java.nio.file.attribute.FileAttribute;
 import java.nio.file.attribute.PosixFilePermission;
 import java.nio.file.attribute.PosixFilePermissions;
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.logging.Level;
@@ -86,6 +88,16 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 		final File sessionFile = new File(this.dir, id);
 
+		return loadSessionFromFile(id, sessionFile);
+	}
+
+	/**
+	 *  Carga la sesi&oacute;n de un fichero.
+	 * @param id Identificador de la sesi&oacute;n (el nombre del fichero).
+	 * @param sessionFile Fichero de sesi&oacute;n.
+	 * @return Sesi&oacute;n cargada de FIRe o {@code null} si no se pudo cargar.
+	 */
+	private static FireSession loadSessionFromFile(final String id, final File sessionFile) {
 		final Map<String, Object> sessionData;
 		try {
 			sessionData = loadSessionData(sessionFile);
@@ -151,21 +163,42 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	}
 
 	@Override
-	public boolean deleteExpiredSessions(final long expirationTime) throws IOException {
+	public FireSession[] deleteExpiredSessions(final long expirationTime, final boolean loadSessions) throws IOException {
 
-		boolean deleted = false;
-    	for (final File tempFile : this.dir.listFiles(new ExpiredFileFilter(expirationTime))) {
+		final List<FireSession> deletedSessions = new ArrayList<>();
+
+		// Obtenemos la lista de ficheros de sesion caducados
+		final File[] sessionFiles = this.dir.listFiles(new ExpiredFileFilter(expirationTime));
+
+		// Recorremos el listado cargando las sesiones si es necesario y eliminando despues
+		// los ficheros
+    	for (final File tempFile : sessionFiles) {
+
+    		FireSession fireSession = null;
+    		if (loadSessions) {
+    			fireSession = loadSessionFromFile(tempFile.getName(), tempFile);
+    		}
+
+    		boolean deleted;
     		try {
-    			Files.delete(tempFile.toPath());
-    			deleted = true;
+    			deleted = Files.deleteIfExists(tempFile.toPath());
     		}
     		catch (final Exception e) {
     			LOGGER.warning("No se pudo eliminar la sesion caducada " + tempFile.getName() + //$NON-NLS-1$
     					": " + e); //$NON-NLS-1$
+    			deleted = false;
+    		}
+
+    		// Si se cargaron los datos de la sesion y hemos eliminado nosotros el fichero del
+    		// almacenamiento compartido (impidiendo que lo haga algun otro nodo), agregamos la
+    		// sesion al listado de sesiones eliminadas
+    		if (fireSession != null && deleted) {
+    			deletedSessions.add(fireSession);
     		}
     	}
-		return deleted;
+		return deletedSessions.toArray(new FireSession[0]);
 	}
+
 
 	@Override
 	public TempDocumentsDAO getAssociatedDocumentsDAO() {

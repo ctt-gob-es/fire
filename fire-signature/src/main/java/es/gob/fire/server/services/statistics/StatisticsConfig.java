@@ -60,7 +60,7 @@ public class StatisticsConfig {
 	}
 
 	/**
-	 * Indica a nivel general si se deben guardar las estad&acute;sticas.
+	 * Indica a nivel general si se deben guardar las estad&iacute;sticas.
 	 * @return {@code true} si la generaci&oacute;n no est&aacute; desactivada.
 	 * {@code false} si s&iacute; se deben generar los datos.
 	 */

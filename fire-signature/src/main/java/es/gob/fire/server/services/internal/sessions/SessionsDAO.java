@@ -58,10 +58,12 @@ public interface SessionsDAO {
 	 * Elimina las sesiones caducadas.
 	 * @param expirationTime Tiempo que puede haber trasncurrido desde su uso creaci&oacute;n/modificaci&oacute;n antes
 	 * de considerarse caducada.
-	 * @return {@code true} si la sesion se elimin&oacute; y {@code false} si no exist&iacute;a o no pudo eliminarse.
+	 * @param loadSessions Indica si se deben cargar las sesiones que se eliminen del almac&eacute;n temporal.
+	 * @return Listado de sesiones que se pudieron cargar y eliminar del almac&eacute;n compartido o {@code null} si
+	 * se proporcion&oacute; el par&aacute;metro {@code loadSessions} era {@code false}.
 	 * @throws IOException Cuando ocurre alg&uacute;n error al borrar los ficheros.
 	 */
-	boolean deleteExpiredSessions(long expirationTime) throws IOException;
+	FireSession[] deleteExpiredSessions(long expirationTime, boolean loadSessions) throws IOException;
 
 	/**
 	 * Recupera el gestor de documentos temporales asociado a un gestor de sesiones.

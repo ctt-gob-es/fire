@@ -19,21 +19,21 @@ public class AlarmsManager {
 	private static final Logger LOGGER = Logger.getLogger(AlarmsManager.class.getName());
 
 	private static final String CONFIG_FILE = "alarms_config.properties"; //$NON-NLS-1$
-	
+
 	private static final String GRAYLOG_CONFIG_FILE = "alarms_graylog_config.properties"; //$NON-NLS-1$
-	
+
 	private static final String EVENTMANAGER_CONFIG_FILE = "alarms_eventmanager_config.properties"; //$NON-NLS-1$
-	
+
 	private static final String ALARM_GRAYLOG_CLASS = "es.gob.fire.alarms.graylog.GrayLogAlarmNotifier"; //$NON-NLS-1$
-	
+
 	private static final String ALARM_EVENTMANAGER_CLASS = "es.gob.fire.alarms.eventmanager.EventManagerAlarmNotifier"; //$NON-NLS-1$
-	
+
 	private static final String PARAM_ALARM_NOTIFIER_SEPARATOR = ","; //$NON-NLS-1$
 
 	private static AlarmNotifier graylogNotifier;
-	
+
 	private static AlarmNotifier eventManagerNotifier;
-	
+
 	private static AlarmNotifier notifier;
 
 	private static boolean initialized = false;
@@ -49,11 +49,11 @@ public class AlarmsManager {
 		if (initialized) {
 			return;
 		}
-		
+
 		// Solo configuramos el administrador de alarmas si se ha configurado una clase para ello
 		if (notifierClassname != null && !notifierClassname.isEmpty()) {
 			final String [] notifierNames = notifierClassname.split(PARAM_ALARM_NOTIFIER_SEPARATOR);
-		
+
 			for (final String className : notifierNames) {
 				if (!notifierClassname.isEmpty()) {
 					if (ALARM_GRAYLOG_CLASS.equals(className)) {
@@ -63,19 +63,19 @@ public class AlarmsManager {
 					}
 				}
 			}
-		}
-		
-		// Si no se han conseguio inicializar los notificadores con sus propios archivos de configuracion,
-		// se intentara inicializar el notificador mediante el archivo de configuracion antiguo
-		if (graylogNotifier == null && eventManagerNotifier == null) {
-			initOldNotifier(moduleName, notifierClassname);
+
+			// Si no se han conseguio inicializar los notificadores con sus propios archivos de configuracion,
+			// se intentara inicializar el notificador mediante el archivo de configuracion antiguo
+			if (graylogNotifier == null && eventManagerNotifier == null) {
+				initOldNotifier(moduleName, notifierClassname);
+			}
 		}
 
 		initialized = true;
 	}
-	
+
 	private static void initGraylogNotifier(final String moduleName, final String notifierClassname) {
-		
+
 		try {
 			final Class<?> notifierClass = Class.forName(notifierClassname);
 			graylogNotifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
@@ -101,16 +101,16 @@ public class AlarmsManager {
 			graylogNotifier = null;
 		}
 	}
-	
+
 	private static void initEventManagerNotifier(final String moduleName, final String notifierClassname) {
-		
+
 		try {
 			final Class<?> notifierClass = Class.forName(notifierClassname);
 			eventManagerNotifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
 			final Properties config = ConfigFileLoader.loadConfigFile(EVENTMANAGER_CONFIG_FILE);
 			eventManagerNotifier.init(config);
 			eventManagerNotifier.setModule(moduleName);
-		}		
+		}
 		catch (final IOException e) {
 			LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + EVENTMANAGER_CONFIG_FILE //$NON-NLS-1$
 					+ " con la configuracion para la notificacion de alarmas. " //$NON-NLS-1$
@@ -129,16 +129,16 @@ public class AlarmsManager {
 			eventManagerNotifier = null;
 		}
 	}
-	
+
 	private static void initOldNotifier(final String moduleName, final String notifierClassname) {
-		
+
 		try {
 			final Class<?> notifierClass = Class.forName(notifierClassname);
 			notifier = (AlarmNotifier) notifierClass.getConstructor().newInstance();
 			final Properties config = ConfigFileLoader.loadConfigFile(CONFIG_FILE);
 			notifier.init(config);
 			notifier.setModule(moduleName);
-		}		
+		}
 		catch (final IOException e) {
 			LOGGER.log(Level.WARNING, "No se pudo cargar el fichero " + CONFIG_FILE //$NON-NLS-1$
 					+ " con la configuracion para la notificacion de alarmas. " //$NON-NLS-1$

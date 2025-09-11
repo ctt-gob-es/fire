@@ -107,14 +107,15 @@ public final class SessionCollector {
     		}
     	}
 
-    	// Ejecutamos el proceso de borrado de sesiones caducadas (que no habra ninguna)
-    	// y temporales
+    	// Comprobamos si es necesario registrar el resultado de las transacciones
+    	needRegistry = StatisticsConfig.needRegistry() || AuditConfig.needRegistry();
+
+    	// Ejecutamos el proceso de borrado de sesiones caducadas. En memoria no habra ninguna,
+    	// pero puede haberlas en el almacenamiento compartido si esta definido
     	deleteExpiredSessions(new TransactionAuxParams());
 
     	// Inicializamos el generador de aleatorios
     	random = new SecureRandom();
-
-    	needRegistry = StatisticsConfig.needRegistry() || AuditConfig.needRegistry();
     }
 
 
@@ -350,7 +351,7 @@ public final class SessionCollector {
     	final FireSession fireSession = FireSession.loadFireSession(id, httpSession);
 		if (fireSession != null && fireSession.isExpired()) {
 			httpSession.removeAttribute(id);
-			removeSession(fireSession, trAux);
+			removeSession(fireSession, true, trAux);
 			return null;
 		}
 
@@ -367,7 +368,7 @@ public final class SessionCollector {
 
     	final FireSession fireSession = sessions.get(id);
     	if (fireSession != null && fireSession.isExpired()) {
-			removeSession(fireSession, trAux);
+			removeSession(fireSession, true, trAux);
 			return null;
 		}
 
@@ -389,7 +390,7 @@ public final class SessionCollector {
 		if (dao != null) {
 			fireSession = dao.recoverSession(id, session);
 			if (fireSession != null && fireSession.isExpired()) {
-				removeSession(fireSession, trAux);
+				removeSession(fireSession, true, trAux);
 				return null;
 			}
 		}
@@ -405,9 +406,19 @@ public final class SessionCollector {
     	if (fireSession == null) {
     		return;
     	}
+    	removeSession(fireSession, fireSession.isExpired(), trAux);
+    }
 
-    	// Comprobamos si la sesion estaba caducada
-    	final boolean expired = fireSession.isExpired();
+    /**
+     * Elimina por completo una sesi&oacute;n y sus ficheros temporales.
+     * @param fireSession Sesi&oacute;n que hay que eliminar.
+     * @param expired Indica si era una sesi&oacute;n caducada.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+     */
+    static void removeSession(final FireSession fireSession, final boolean expired, final TransactionAuxParams trAux) {
+    	if (fireSession == null) {
+    		return;
+    	}
 
     	// Eliminamos los temporales
    		removeAssociattedTempFiles(fireSession, trAux);
@@ -422,17 +433,16 @@ public final class SessionCollector {
    			sessions.remove(fireSession.getTransactionId());
    		}
 
-    	// Eliminamos la sesion del espacio compartido con el resto de nodos.
-   		// Ademas, si somos los primeros en eliminarla (cualquier intento futuro no la
-   		// encontrara en el almacenamiento compartido) y la sesion estaba caducada,
-   		// registramos el error. En cualquier otro caso, interpretaremos que ya se
-   		// registro la caducidad
-   		if (dao == null) {
+   		// Si la sesion esta caducada, debemos registrarla como tal. Si solo hay un nodo,
+   		// no hay problema, siempre se registra; pero si hay varios nodos, solo lo
+   		// registraremos si somos los primeros en eliminar la sesion del almacenamiento
+   		// compartido
+    	if (dao == null) {
    			if (expired && needRegistry) {
    				registryExpirationErrors(fireSession);
    			}
    		} else {
-   			final boolean removed = removeSessionFromDao(fireSession);
+   			final boolean removed = dao.deleteSession(fireSession.getTransactionId());
    			if (expired && removed && needRegistry) {
    				registryExpirationErrors(fireSession);
    			}
@@ -448,14 +458,14 @@ public final class SessionCollector {
      * como caducadas.
      * @param fireSession Informaci&oacute;n de la transacci&oacute;n.
      */
-    private static void registryExpirationErrors(final FireSession fireSession) {
+    static void registryExpirationErrors(final FireSession fireSession) {
 
     	// Si se trata de una operacion de firma, marcamos que tanto la transaccion como la firma caducaron
     	final TransactionType op = (TransactionType) fireSession.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE);
     	if (op == TransactionType.SIGN) {
-    		AUDITSIGNLOGGER.register(fireSession, false, null, DEFAULT_EXPIRED_ERROR_TEXT);
     		SIGNLOGGER.register(fireSession, false, null);
     		TRANSLOGGER.register(fireSession, false);
+    		AUDITSIGNLOGGER.register(fireSession, false, null, DEFAULT_EXPIRED_ERROR_TEXT);
     		AUDITTRANSLOGGER.register(fireSession, false, DEFAULT_EXPIRED_ERROR_TEXT);
     	}
     	// Si se trata de una operacion de lote
@@ -488,15 +498,11 @@ public final class SessionCollector {
 		while (it.hasNext()) {
 			final String docId = it.next();
 			if (!batchResult.isSignRecovered(docId) && !batchResult.isSignFailed(docId)) {
-				AUDITSIGNLOGGER.register(fireSession, false, null, DEFAULT_EXPIRED_ERROR_TEXT);
-	    		SIGNLOGGER.register(fireSession, false, null);
-			}
+				SIGNLOGGER.register(fireSession, false, docId);
+				AUDITSIGNLOGGER.register(fireSession, false, docId, DEFAULT_EXPIRED_ERROR_TEXT);
+	    	}
 		}
 	}
-
-	private static boolean removeSessionFromDao(final FireSession fireSession) {
-		return dao.deleteSession(fireSession.getTransactionId());
-    }
 
     /**
      * Elimina los ficheros temporales asociados a la sesi&oacute;n.
@@ -698,29 +704,29 @@ public final class SessionCollector {
 	}
 
 
+	private static ExecutorService executorService = null;
+
     /**
      * Recorre el listado de sesiones registradas y elimina las que han sobrepasado
      * el periodo de validez.
 	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+	 *
      */
-	// TODO: Esta funcion de borrado no registra en las estadisticas/auditoria
-	// el error en las sesiones que se encuentren caducadas. Habria que plantear
-	// si merece la pena hacerlo, ya que requeriria cargar en memoria la sesion
-	// desde disco/base de datos solo para registrarla
 	private static void deleteExpiredSessions(final TransactionAuxParams trAux) {
-		ExecutorService executorService = Executors.newSingleThreadExecutor();
 
 		String[] sessionsIds;
 		synchronized (sessions) {
 			sessionsIds = sessions.keySet().toArray(new String[sessions.size()]);
 		}
 
+		executorService = Executors.newSingleThreadExecutor();
 		try {
 			cleaningProcess = executorService.submit(new ExpiredSessionCleanerThread(
 					sessionsIds,
 					sessions,
 					dao,
 					ConfigManager.getTempsTimeout(),
+					needRegistry,
 					trAux));
 		}
 		catch (final Exception e) {
@@ -728,8 +734,12 @@ public final class SessionCollector {
 					trAux.getLogFormatter().f("Error en la ejecucion del proceso de borrado de seiones expiradas"), //$NON-NLS-1$
 					e);
 		}
-		finally {
-			// Al destruir el servicio liberamos el pool de hilos
+	}
+
+	public static void release() {
+
+		// Al destruir el servicio liberamos el pool de hilos
+		if (executorService != null && !executorService.isTerminated()) {
 			executorService.shutdown();
 			try {
 				if (!executorService.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
@@ -738,15 +748,13 @@ public final class SessionCollector {
 			} catch (final InterruptedException e) {
 				executorService.shutdownNow();
 			}
-			executorService = null;
 		}
-	}
+		executorService = null;
 
-	public static void release() {
-		if (cleaningProcess != null) {
+		if (cleaningProcess != null && !cleaningProcess.isDone() && !cleaningProcess.isCancelled()) {
 			cleaningProcess.cancel(true);
-			cleaningProcess = null;
 		}
+
 		synchronized (sessions) {
 			sessions.clear();
 		}
@@ -766,6 +774,7 @@ public final class SessionCollector {
     	private final Map<String, FireSession> sessionsMap;
     	private final SessionsDAO sessionsDao;
     	private final long timeout;
+    	private final boolean registryResult;
     	private final TransactionAuxParams trAux;
 
     	/**
@@ -780,11 +789,13 @@ public final class SessionCollector {
     			final Map<String, FireSession> sessions,
     			final SessionsDAO dao,
     			final long tempTimeout,
+    			final boolean needRegistry,
         		final TransactionAuxParams trAux) {
     		this.ids = ids;
     		this.sessionsMap = sessions;
     		this.sessionsDao = dao;
     		this.timeout = tempTimeout;
+    		this.registryResult = needRegistry;
     		this.trAux = trAux;
     	}
 
@@ -797,21 +808,29 @@ public final class SessionCollector {
     		// Eliminamos la sesiones caducadas y sus datos asociados
         	for (final String id : this.ids) {
         		session = this.sessionsMap.get(id);
+        		// Podriamos usar session.isExpired() para saber si esta caducada, pero eso nos
+        		// haria leer la hora del sistema por cada sesion que comprobasemos
         		if (session != null && currentTime > session.getExpirationTime()) {
-        			// Borramos la sesion
-        			SessionCollector.removeSession(session, this.trAux);
+        			SessionCollector.removeSession(session, true, this.trAux);
         		}
         	}
 
-        	// Eliminamos las sesiones caducadas en almacenamiento compartido si se definio
-
-        	// TODO: Este hilo no registra en las estadisticas y la auditoria los
-        	// de las transacciones que no estuviesen en memoria pero se encuentren
-        	// en el almacen compartido. Habria que valorar si merece la pena, ya que
-        	// requeriria cargarlas solo para marcarlas como erroneas
-        	if (this.sessionsDao != null) {
+        	// Eliminamos las sesiones caducadas en almacenamiento compartido si lo hay
+        	if (this.sessionsDao != null && !isInterrupted()) {
         		try {
-        			this.sessionsDao.deleteExpiredSessions(this.timeout);
+        			// Borramos las sesiones del almacen e indicamos si necesitamos registrar o no el resultado
+        			// de las transacciones. Si no es necesario, no se cargaran y devolveran los objetos de
+        			// sesion.
+        			final FireSession[] deletedSessions = this.sessionsDao.deleteExpiredSessions(this.timeout, this.registryResult);
+
+        			// Si el proceso nos devolvio sesiones, las registramos como caducadas
+        			if (deletedSessions != null) {
+        				for (final FireSession fireSession : deletedSessions) {
+        					if (!isInterrupted()) {
+        						SessionCollector.registryExpirationErrors(fireSession);
+        					}
+        				}
+        			}
         		}
         		catch (final Exception e) {
         			THREAD_LOGGER.warning("Error al eliminar las sesiones caducadas: " + e); //$NON-NLS-1$
