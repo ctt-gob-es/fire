@@ -125,14 +125,15 @@ public class RecoverBatchResultManager {
 
         // El proveedor de firma debe estar establecido. Si no lo esta, podemos deducir
         // que ocurrio un error en FIRe o el proveedor pero no quedo clasificado como error
-        if (!session.containsAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN)) {
-        	final String errMessage = "No se ha encontrado proveedor seleccionado"; //$NON-NLS-1$
-        	LOGGER.warning(logF.f("Error durante la firma del lote: " + errMessage)); //$NON-NLS-1$
-        	TRANSLOGGER.register(session, false);
-        	AUDITTRANSLOGGER.register(session, false, errMessage);
-        	SessionCollector.removeSession(session, trAux);
-        	Responser.sendError(response, FIReError.BATCH_NO_SIGNED, errMessage);
-        	return;
+    	final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
+        if (providerName == null) {
+        	final String errorMessage = "No se selecciono un proveedor de firma. Probablemente el usuario no fue redirigido a la URL indicada en la transaccion"; //$NON-NLS-1$
+    		LOGGER.severe(logF.f(errorMessage));
+    		TRANSLOGGER.register(session, false);
+    		AUDITTRANSLOGGER.register(session, false, errorMessage);
+    		SessionCollector.removeSession(session, trAux);
+    		Responser.sendError(response, FIReError.PROVIDER_NOT_SELECTED);
+    		return;
         }
 
         // En el caso de firma con un certificado en la nube, todavia tendremos que
@@ -188,17 +189,6 @@ public class RecoverBatchResultManager {
     		return;
     	}
     	batchResult.setSigningCertificate(signingCert);
-    	final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-        if (providerName == null) {
-        	final String errorMessage = "No se selecciono un proveedor de firma. Probablemente el usuario no fue redirigido a la URL indicada en la transaccion"; //$NON-NLS-1$
-    		LOGGER.severe(logF.f(errorMessage));
-    		TRANSLOGGER.register(session, false);
-    		AUDITTRANSLOGGER.register(session, false, errorMessage);
-    		SessionCollector.removeSession(session, trAux);
-    		Responser.sendError(response, FIReError.PROVIDER_NOT_SELECTED);
-    		return;
-        }
-
     	batchResult.setProviderName(providerName);
 
     	// En el caso de la firma con certificado local, ya se habra realizado la firma completa
