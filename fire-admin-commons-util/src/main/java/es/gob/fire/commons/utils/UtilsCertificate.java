@@ -345,4 +345,51 @@ public class UtilsCertificate {
     public static String getReadableIssuer(X509Certificate cert) {
         return getReadableX500Principal(cert.getIssuerX500Principal());
     }
+    
+    /**
+     * Safely returns a human-readable subject string from an X.509 certificate.
+     * <p>
+     * Attempts to use {@code getReadableSubject(cert)} and falls back to the RFC2253
+     * subject representation if parsing or validity errors occur. Never throws exceptions.
+     *
+     * @param cert the X.509 certificate (nullable).
+     * @return a readable subject string, RFC2253 format fallback, or {@code null} if unavailable.
+     */
+    public static String getReadableSubjectSafe(X509Certificate cert) {
+        if (cert == null) { return null; }
+        try {
+            return getReadableSubject(cert);
+        } catch (Exception e) {
+            try {
+                X500Principal p = cert.getSubjectX500Principal();
+                return p != null ? p.getName(X500Principal.RFC2253) : null;
+            } catch (Exception ex) {
+                return null;
+            }
+        }
+    }
+
+    /**
+     * Performs a non-throwing validity check on an X.509 certificate.
+     * <p>
+     * Evaluates the certificate's validity period against the current system time.
+     * Returns {@code true} if valid, {@code false} if expired or not-yet-valid,
+     * and {@code null} if the check cannot be determined due to errors or a null input.
+     *
+     * @param certificate the X.509 certificate to validate (nullable).
+     * @return {@code Boolean.TRUE} if currently valid,
+     *         {@code Boolean.FALSE} if expired or not-yet-valid,
+     *         {@code null} if the result is indeterminate (e.g., null input or unexpected error).
+     */
+    public static Boolean isCurrentlyValid(X509Certificate certificate) {
+        if (certificate == null) return null;
+        try {
+            certificate.checkValidity();
+            return Boolean.TRUE;
+        } catch (CertificateExpiredException | CertificateNotYetValidException e) {
+            return Boolean.FALSE;
+        } catch (Exception e) {
+            return null;
+        }
+    }
 }

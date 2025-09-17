@@ -1192,8 +1192,7 @@
 		    const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
 
 		    if (statisticsResponse.isQueryByApplication) {
-		      // App -> sin split por org
-		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, true);
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, true, true);
 		    } else if (statisticsResponse.isQueryByProvider) {
 		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  true);
 		    } else if (statisticsResponse.isQueryByFormat) {
@@ -1208,7 +1207,7 @@
 		    const groupedFromValues = groupTopEntitiesByCorrectValues(datosGenerales, max);
 
 		    if (statisticsResponse.isQueryByApplication) {
-		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, false);
+		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, true, false, true);
 		    } else if (statisticsResponse.isQueryByProvider) {
 		      drawBarCorrectVsIncorrectFlexible(groupedFromValues, false,  false);
 		    } else if (statisticsResponse.isQueryBySize) {
@@ -2596,151 +2595,214 @@
    	  return grouped;
    	}
     
- 	// Replacement: legend shows distinct "name" values (not Correct/Incorrect)
-    function drawBarCorrectVsIncorrectFlexible(data, splitByOrg, isSignature) {
-      function destroyByCanvasId(id) {
-        const canvas = document.getElementById(id);
-        if (!canvas) return;
-        if (typeof Chart.getChart === 'function') {
-          const inst = Chart.getChart(canvas);
-          if (inst) inst.destroy();
-        } else if (Chart.instances) {
-          Object.keys(Chart.instances).forEach(k => {
-            const ch = Chart.instances[k];
-            if (ch && ch.chart && ch.chart.canvas && ch.chart.canvas.id === id) {
-              try { ch.destroy(); } catch(e) {}
-            }
-          });
-        }
-      }
-
-      const labelCorrect   = isSignature ? signatureCorrectVsIncorrectMsgs.correct   : transactionCorrectVsIncorrectMsgs.correct;
-      const labelIncorrect = isSignature ? signatureCorrectVsIncorrectMsgs.incorrect : transactionCorrectVsIncorrectMsgs.incorrect;
-
-      const canvasId = 'barChart';
-      const ctx = document.getElementById(canvasId).getContext('2d');
-      destroyByCanvasId(canvasId);
-      if (window.barChart) { try { window.barChart.destroy(); } catch(e) {} }
-
-      if (!Array.isArray(data) || data.length === 0) {
-        window.barChart = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
-        return;
-      }
-
-      let labelsNames = [];
-      let datasets = [];
-
-      if (splitByOrg) {
-        labelsNames = Array.from(new Set(data.map(it => it.name))).sort((a,b)=>a.localeCompare(b));
-
-        const stats = {};
-        labelsNames.forEach(n => stats[n] = {});
-        data.forEach(item => {
-          const n = item.name;
-          const o = item.organization || '';
-          if (!stats[n][o]) stats[n][o] = { correct: 0, incorrect: 0 };
-          stats[n][o].correct   += item.corrects   || 0;
-          stats[n][o].incorrect += item.incorrects || 0;
-        });
-
-        const stackId = 'stack';
-        labelsNames.forEach((name, idx) => {
-          const orgs = Object.keys(stats[name]);
-          const hue  = generateBaseHue(idx, labelsNames.length);
-          const colorC = generateCorrectColor(hue);
-          const colorI = generateIncorrectColor(hue);
-
-          orgs.forEach(org => {
-            const vC = stats[name][org].correct;
-            const vI = stats[name][org].incorrect;
-
-            const arrC = labelsNames.map((_, i) => i === idx ? vC : 0);
-            const arrI = labelsNames.map((_, i) => i === idx ? vI : 0);
-            const base = (org && org.trim().toLowerCase() !== 'no definido') ? `${name} (${org})` : `${name}`;
-
-            datasets.push({ label: `${base} - ${labelCorrect}`,   data: arrC, backgroundColor: colorC, stack: stackId });
-            datasets.push({ label: `${base} - ${labelIncorrect}`, data: arrI, backgroundColor: colorI, stack: stackId });
-          });
-        });
-
-      } else {
-        labelsNames = Array.from(new Set(data.map(i => i.name))).sort((a,b)=>a.localeCompare(b));
-
-        const correctBy = {}; const incorrectBy = {};
-        labelsNames.forEach(n => { correctBy[n]=0; incorrectBy[n]=0; });
-        data.forEach(item => {
-          correctBy[item.name]   += item.corrects   || 0;
-          incorrectBy[item.name] += item.incorrects || 0;
-        });
-
-        const correctArr   = labelsNames.map(n => correctBy[n]);
-        const incorrectArr = labelsNames.map(n => incorrectBy[n]);
-
-        const colorsCorrect   = labelsNames.map((_, i) => generateCorrectColor(generateBaseHue(i, labelsNames.length)));
-        const colorsIncorrect = labelsNames.map((_, i) => generateIncorrectColor(generateBaseHue(i, labelsNames.length)));
-
-        datasets = [
-          { label: labelCorrect,   data: correctArr,   backgroundColor: colorsCorrect,   stack: 'stack' },
-          { label: labelIncorrect, data: incorrectArr, backgroundColor: colorsIncorrect, stack: 'stack' }
-        ];
-      }
-
-      window.barChart = new Chart(ctx, {
-        type: 'bar',
-        data: { labels: labelsNames, datasets },
-        options: {
-          responsive: true,
-          maintainAspectRatio: false,
-          scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
-          plugins: {
-            legend: {
-              labels: {
-                generateLabels(chart) {
-                  const names  = chart.data.labels || [];
-                  const ds0    = chart.data.datasets?.[0];
-                  const bgList = Array.isArray(ds0?.backgroundColor) ? ds0.backgroundColor : [];
-                  return names.map((name, i) => ({
-                    text: name,
-                    fillStyle: bgList[i] || generateCorrectColor(generateBaseHue(i, names.length)),
-                    hidden: chart.getDataVisibility ? !chart.getDataVisibility(i) : false,
-                    index: i
-                  }));
-                }
-              },
-              onClick(evt, legendItem, legend) {
-                const chart = legend.chart;
-                const idx = legendItem.index;
-
-                if (typeof chart.toggleDataVisibility === 'function') {
-                  chart.toggleDataVisibility(idx);
-                } else {
-                  chart.data.datasets.forEach(ds => {
-                    if (!ds._origData) ds._origData = ds.data.slice();
-                    ds.data[idx] = (ds.data[idx] === 0 && ds._lastHiddenIndex === idx) ? ds._origData[idx] : 0;
-                    ds._lastHiddenIndex = (ds._lastHiddenIndex === idx) ? null : idx;
-                  });
-                }
-                chart.update();
-              }
-            },
-            tooltip: {
-              callbacks: {
-                label(ctx) {
-                  const name = ctx.chart.data.labels[ctx.dataIndex];
-                  const dsLabel = ctx.dataset.label || '';
-                  const value = ctx.parsed.y;
-                  
-                  if (splitByOrg) return `${dsLabel}: ${value}`;
-                  return `${name} - ${dsLabel}: ${value}`;
-                }
-              }
-            }
-          }
-        }
-      });
-
-      setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
-    }
+ 	function drawBarCorrectVsIncorrectFlexible(data, splitByOrg, isSignature, correctFirstWhenSplit = false) {
+	  // Helper to safely destroy a Chart.js instance by canvas id (v2/v3 compatible)
+	  function destroyByCanvasId(id) {
+	    const canvas = document.getElementById(id);
+	    if (!canvas) return;
+	    if (typeof Chart.getChart === 'function') {
+	      const inst = Chart.getChart(canvas);
+	      if (inst) inst.destroy();
+	    } else if (Chart.instances) {
+	      Object.keys(Chart.instances).forEach(k => {
+	        const ch = Chart.instances[k];
+	        if (ch && ch.chart && ch.chart.canvas && ch.chart.canvas.id === id) {
+	          try { ch.destroy(); } catch(e) {}
+	        }
+	      });
+	    }
+	  }
+	
+	  // Labels for correct/incorrect depending on context
+	  const labelCorrect   = isSignature ? signatureCorrectVsIncorrectMsgs.correct   : transactionCorrectVsIncorrectMsgs.correct;
+	  const labelIncorrect = isSignature ? signatureCorrectVsIncorrectMsgs.incorrect : transactionCorrectVsIncorrectMsgs.incorrect;
+	
+	  const canvasId = 'barChart';
+	  const canvasEl = document.getElementById(canvasId);
+	  if (!canvasEl) return; // Early exit if canvas is missing
+	  const ctx = canvasEl.getContext('2d');
+	
+	  // Ensure old instances are cleaned up
+	  destroyByCanvasId(canvasId);
+	  if (window.barChart) { try { window.barChart.destroy(); } catch(e) {} }
+	
+	  // Empty-state chart
+	  if (!Array.isArray(data) || data.length === 0) {
+	    window.barChart = new Chart(ctx, { type: 'bar', data: { labels: [], datasets: [] }, options: { responsive: true, maintainAspectRatio: false } });
+	    return;
+	  }
+	
+	  let labelsNames = [];
+	  let datasets = [];
+	
+	  if (splitByOrg) {
+	    // Build labels (apps) and aggregate by app + organization
+	    labelsNames = Array.from(new Set(data.map(it => it.name))).sort((a,b)=>a.localeCompare(b));
+	
+	    // stats: { appName: { orgName: { correct, incorrect } } }
+	    const stats = {};
+	    labelsNames.forEach(n => stats[n] = {});
+	    data.forEach(item => {
+	      const app = item.name;
+	      const org = item.organization || '';
+	      if (!stats[app][org]) stats[app][org] = { correct: 0, incorrect: 0 };
+	      stats[app][org].correct   += item.corrects   || 0;
+	      stats[app][org].incorrect += item.incorrects || 0;
+	    });
+	
+	    const stackId = 'stack';
+	
+	    if (correctFirstWhenSplit) {
+	      // Push ALL "correct" datasets first, then ALL "incorrect" datasets.
+	      const correctDatasets = [];
+	      const incorrectDatasets = [];
+	
+	      labelsNames.forEach((appName, idx) => {
+	        const orgs = Object.keys(stats[appName]);
+	        const hue  = generateBaseHue(idx, labelsNames.length);
+	        const colorC = generateCorrectColor(hue);
+	        const colorI = generateIncorrectColor(hue);
+	
+	        orgs.forEach(org => {
+	          const vC = stats[appName][org].correct;
+	          const vI = stats[appName][org].incorrect;
+	
+	          // Isolate contribution to the current app's x-index
+	          const arrC = labelsNames.map((_, i) => i === idx ? vC : 0);
+	          const arrI = labelsNames.map((_, i) => i === idx ? vI : 0);
+	          const base = (org && org.trim().toLowerCase() !== 'no definido') ? `${appName} (${org})` : `${appName}`;
+	
+	          correctDatasets.push({
+	            label: `${base} - ${labelCorrect}`,
+	            data: arrC,
+	            backgroundColor: colorC,
+	            stack: stackId
+	          });
+	          incorrectDatasets.push({
+	            label: `${base} - ${labelIncorrect}`,
+	            data: arrI,
+	            backgroundColor: colorI,
+	            stack: stackId
+	          });
+	        });
+	      });
+	
+	      datasets = [...correctDatasets, ...incorrectDatasets];
+	
+	    } else {
+	      // Original interleaved behavior: for each org push Correct then Incorrect
+	      labelsNames.forEach((appName, idx) => {
+	        const orgs = Object.keys(stats[appName]);
+	        const hue  = generateBaseHue(idx, labelsNames.length);
+	        const colorC = generateCorrectColor(hue);
+	        const colorI = generateIncorrectColor(hue);
+	
+	        orgs.forEach(org => {
+	          const vC = stats[appName][org].correct;
+	          const vI = stats[appName][org].incorrect;
+	
+	          const arrC = labelsNames.map((_, i) => i === idx ? vC : 0);
+	          const arrI = labelsNames.map((_, i) => i === idx ? vI : 0);
+	          const base = (org && org.trim().toLowerCase() !== 'no definido') ? `${appName} (${org})` : `${appName}`;
+	
+	          datasets.push({
+	            label: `${base} - ${labelCorrect}`,
+	            data: arrC,
+	            backgroundColor: colorC,
+	            stack: stackId
+	          });
+	          datasets.push({
+	            label: `${base} - ${labelIncorrect}`,
+	            data: arrI,
+	            backgroundColor: colorI,
+	            stack: stackId
+	          });
+	        });
+	      });
+	    }
+	
+	  } else {
+	    // No split by org: aggregate by app name only
+	    labelsNames = Array.from(new Set(data.map(i => i.name))).sort((a,b)=>a.localeCompare(b));
+	
+	    const correctBy = {}; const incorrectBy = {};
+	    labelsNames.forEach(n => { correctBy[n]=0; incorrectBy[n]=0; });
+	    data.forEach(item => {
+	      correctBy[item.name]   += item.corrects   || 0;
+	      incorrectBy[item.name] += item.incorrects || 0;
+	    });
+	
+	    const correctArr   = labelsNames.map(n => correctBy[n]);
+	    const incorrectArr = labelsNames.map(n => incorrectBy[n]);
+	
+	    const colorsCorrect   = labelsNames.map((_, i) => generateCorrectColor(generateBaseHue(i, labelsNames.length)));
+	    const colorsIncorrect = labelsNames.map((_, i) => generateIncorrectColor(generateBaseHue(i, labelsNames.length)));
+	
+	    datasets = [
+	      { label: labelCorrect,   data: correctArr,   backgroundColor: colorsCorrect,   stack: 'stack' },
+	      { label: labelIncorrect, data: incorrectArr, backgroundColor: colorsIncorrect, stack: 'stack' }
+	    ];
+	  }
+	
+	  // Create chart
+	  window.barChart = new Chart(ctx, {
+	    type: 'bar',
+	    data: { labels: labelsNames, datasets },
+	    options: {
+	      responsive: true,
+	      maintainAspectRatio: false,
+	      scales: { x: { stacked: true }, y: { stacked: true, beginAtZero: true } },
+	      plugins: {
+	        legend: {
+	          labels: {
+	            // Custom legend labels painted with dataset 0 colors (fallback to generated)
+	            generateLabels(chart) {
+	              const names  = chart.data.labels || [];
+	              const ds0    = chart.data.datasets?.[0];
+	              const bgList = Array.isArray(ds0?.backgroundColor) ? ds0.backgroundColor : [];
+	              return names.map((name, i) => ({
+	                text: name,
+	                fillStyle: bgList[i] || generateCorrectColor(generateBaseHue(i, names.length)),
+	                hidden: chart.getDataVisibility ? !chart.getDataVisibility(i) : false,
+	                index: i
+	              }));
+	            }
+	          },
+	          // Toggle visibility per x-index
+	          onClick(evt, legendItem, legend) {
+	            const chart = legend.chart;
+	            const idx = legendItem.index;
+	
+	            if (typeof chart.toggleDataVisibility === 'function') {
+	              chart.toggleDataVisibility(idx);
+	            } else {
+	              chart.data.datasets.forEach(ds => {
+	                if (!ds._origData) ds._origData = ds.data.slice();
+	                ds.data[idx] = (ds.data[idx] === 0 && ds._lastHiddenIndex === idx) ? ds._origData[idx] : 0;
+	                ds._lastHiddenIndex = (ds._lastHiddenIndex === idx) ? null : idx;
+	              });
+	            }
+	            chart.update();
+	          }
+	        },
+	        tooltip: {
+	          callbacks: {
+	            label(ctx) {
+	              const name = ctx.chart.data.labels[ctx.dataIndex];
+	              const dsLabel = ctx.dataset.label || '';
+	              const value = ctx.parsed.y;
+	              if (splitByOrg) return `${dsLabel}: ${value}`;
+	              return `${name} - ${dsLabel}: ${value}`;
+	            }
+	          }
+	        }
+	      }
+	    }
+	  });
+	
+	  // Nudge layout for some environments
+	  setTimeout(() => window.dispatchEvent(new Event('resize')), 0);
+	}
 
     function getAppFromLabel(label) {
     	  if (!label) return '';

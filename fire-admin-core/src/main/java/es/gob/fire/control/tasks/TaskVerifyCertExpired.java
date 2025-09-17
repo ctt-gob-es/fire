@@ -232,8 +232,8 @@ public class TaskVerifyCertExpired extends FireTask {
 		LOGGER.info(Language.getResWebFire(IWebLogMessages.LOG_CTV023));
 		final ServerAfirma serverAfirma = ApplicationContextProvider.getApplicationContext().getBean(IServerAfirmaService.class).obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
 		if(null != serverAfirma && serverAfirma.getcAuthenticationType().getIdAuthenticationType().equals(NumberConstants.NUM_2_LONG)) {
-			final byte[] byteKeyStore = Base64.decode(serverAfirma.getKeystore());
-			final String passwordKeystore = AESCipher.getInstance().decryptMessageBC(serverAfirma.getPasswordKeystore());
+			final byte[] byteKeyStore = serverAfirma.getKsBlob();
+			final String passwordKeystore = AESCipher.getInstance().decryptMessageBC(serverAfirma.getKsPassword());
 			final KeyStore keyStore = UtilsKeystore.loadKsPKCS12(byteKeyStore, passwordKeystore);
 			final X509Certificate x509Certificate = UtilsKeystore.listAllX509Certificate(keyStore).get(NumberConstants.NUM0);
 			try{
