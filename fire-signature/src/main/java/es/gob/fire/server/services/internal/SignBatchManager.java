@@ -94,17 +94,6 @@ public class SignBatchManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_PREVIOUS_OPERATION, SessionFlags.OP_SIGN);
         session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_SIGNED, Boolean.TRUE);
 
-        String language = null;
-        if (connConfig.getProperties() != null) {
-        	language = connConfig.getProperties().getProperty(ServiceParams.HTTP_PARAM_LANGUAGE);
-        }
-
-        if (language == null || language.isEmpty()) {
-			language = "es_ES"; //$NON-NLS-1$
-		}
-
-		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
-
         // Guardamos los datos de la transaccion en la coleccion de sesiones y en la sesion del propio servidor
         session.saveIntoHttpSession(request.getSession());
         SessionCollector.commit(session, trAux);
