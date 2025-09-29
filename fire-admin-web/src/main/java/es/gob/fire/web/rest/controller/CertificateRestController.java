@@ -60,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.exceptions.FireException;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.IWebViewMessages;
@@ -219,37 +220,25 @@ public class CertificateRestController {
 			listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 
 			if (isAliasBlank(certAddForm.getAlias())) {
-
 				final String errorValEmptyAlias = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_ALIAS_REQUIRED, null, request.getLocale());
-
 				json.put(FIELD_ALIAS + SPAN, errorValEmptyAlias);
 			}
 
 			if (isAliasSizeNotValid(certAddForm.getAlias())) {
-
 				final String errorValSizeAlias = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_ALIAS_SIZE, null, request.getLocale());
-
 				json.put(FIELD_ALIAS + SPAN, errorValSizeAlias);
 			}
 
-
 			if (hasNoCertData(certFile)) {
-
 				//"Al menos debe indicarse un archivo de certificado"
-
 				final String errorValCert = this.messageSource.getMessage(IWebViewMessages.ERROR_VAL_CERT_REQUIRED, null, request.getLocale());
-
 				json.put(FIELD_FILE_CERTIFICATE + SPAN, errorValCert);
-
 			}
 
 			dtOutput.setError(json.toString());
-
 		} else {
-
 			String msgerror = null;
 			try {
-
 				msgerror = "Error al instanciar el proveedor X.509";
 				final CertificateFactory certFactory = CertificateFactory.getInstance("X.509"); //$NON-NLS-1$
 
@@ -359,17 +348,20 @@ public class CertificateRestController {
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				}
-
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
+			} catch (FireException e) {
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
+				msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC017);
+				json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+			    dtOutput.setError(json.toString());
 			}
 		}
 
 		return dtOutput;
-
 	}
 
 	/**
@@ -546,12 +538,13 @@ public class CertificateRestController {
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				}
-
 			} catch (IOException | CertificateException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
+			} catch (FireException e) {
+				
 			}
 		}
 

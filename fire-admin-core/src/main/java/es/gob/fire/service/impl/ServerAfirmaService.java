@@ -100,6 +100,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 
 	        // ===== Keystore =====
 	        dto.setKsType(defaultString(sa.getKsType(), "PKCS12"));
+	        dto.setKeystoreExt(inferExtByType(dto.getKsType(), "jks"));
 	        dto.setKsCertAlias(sa.getKsCertAlias());
 
 	        dto.setKsPassword(null);
@@ -138,6 +139,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 
 	        // ===== Truststore =====
 	        dto.setTruststoreType(defaultString(sa.getTruststoreType(), "JKS"));
+	        dto.setTruststoreExt(inferExtByType(dto.getTruststoreType(), "jks"));
 	        dto.setTruststorePassword(null);
 	        dto.setHasTruststorePassword(sa.getTruststorePassword() != null);
 	        
@@ -147,6 +149,7 @@ public class ServerAfirmaService implements IServerAfirmaService {
 
 	        // ===== Auth Truststore =====
 	        dto.setAuthTruststoreType(defaultString(sa.getAuthTsType(), "JKS"));
+	        dto.setAuthTruststoreExt(inferExtByType(dto.getAuthTruststoreType(), "jks"));
 	        dto.setAuthTruststorePassword(null);
 	        dto.setAuthCertAlias(sa.getAuthCertAlias());
 	        dto.setHasAuthTruststorePassword(sa.getAuthTsPassword() != null);
@@ -258,5 +261,16 @@ public class ServerAfirmaService implements IServerAfirmaService {
 	        }
 	    }
 	    return null;
+	}
+	
+	private static String inferExtByType(String type, String fallback) {
+	    if (type == null) return fallback;
+	    switch (type.toUpperCase(java.util.Locale.ROOT)) {
+	        case "JKS": return "jks";
+	        case "PKCS12":
+	        case "PKCS#12":
+	        case "P12": return "p12";
+	        default: return fallback;
+	    }
 	}
 }

@@ -195,6 +195,11 @@ public class ServerAfirmaDTO {
     private boolean clearAuthTruststore;
     
     /**
+     * Attribute that indicates the SSL Truststore must be cleared.
+     */
+    private boolean clearTruststore;
+    
+    /**
      * Attribute that indicates if the ServerAfirma has a keystore password.
      */
     private boolean hasKsPassword;
@@ -218,6 +223,21 @@ public class ServerAfirmaDTO {
      * Attribute that indicates if the ServerAfirma has user password.
      */
     private boolean hasUserPassword;
+    
+    /**
+     * Attribute that indicates the ServerAfirma keystore extension.
+     */
+    private String keystoreExt;
+    
+    /**
+     * Attribute that indicates the ServerAfirma SSL truststore extension.
+     */
+    private String truststoreExt;
+    
+    /**
+     * Attribute that indicates the ServerAfirma authentication truststore extension.
+     */
+    private String authTruststoreExt;
 	
 	/**
 	 * Default constructor for {@link ServerAfirmaDTO}.
@@ -789,5 +809,61 @@ public class ServerAfirmaDTO {
 	 */
 	public void setHasUserPassword(boolean hasUserPassword) {
 		this.hasUserPassword = hasUserPassword;
+	}
+
+	/**
+	 * @return the clearTruststore
+	 */
+	public boolean isClearTruststore() {
+		return clearTruststore;
+	}
+
+	/**
+	 * @param clearTruststore the clearTruststore to set
+	 */
+	public void setClearTruststore(boolean clearTruststore) {
+		this.clearTruststore = clearTruststore;
+	}
+
+	/**
+	 * @return the keystoreExt
+	 */
+	public String getKeystoreExt() {
+		return keystoreExt;
+	}
+
+	/**
+	 * @param keystoreExt the keystoreExt to set
+	 */
+	public void setKeystoreExt(String keystoreExt) {
+		this.keystoreExt = keystoreExt;
+	}
+
+	/**
+	 * @return the truststoreExt
+	 */
+	public String getTruststoreExt() {
+		return truststoreExt;
+	}
+
+	/**
+	 * @param truststoreExt the truststoreExt to set
+	 */
+	public void setTruststoreExt(String truststoreExt) {
+		this.truststoreExt = truststoreExt;
+	}
+
+	/**
+	 * @return the authTruststoreExt
+	 */
+	public String getAuthTruststoreExt() {
+		return authTruststoreExt;
+	}
+
+	/**
+	 * @param authTruststoreExt the authTruststoreExt to set
+	 */
+	public void setAuthTruststoreExt(String authTruststoreExt) {
+		this.authTruststoreExt = authTruststoreExt;
 	}
 }

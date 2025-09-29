@@ -301,7 +301,10 @@ public class ApplicationRestController {
 	    if (hasError) {
 	        final JSONObject errorResponse = new JSONObject();
 	        errorResponse.put("error", json.toString());
-	        errorResponse.put("organizations", availableOrganizations);
+	        
+	        if (availableOrganizations != null && !availableOrganizations.isEmpty()) {
+		        errorResponse.put("organizations", availableOrganizations);
+	        }
 	        return ResponseEntity.badRequest().body(errorResponse.toString());
 	    }
 

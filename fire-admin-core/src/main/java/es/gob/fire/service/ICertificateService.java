@@ -34,6 +34,7 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.exceptions.FireException;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
 import es.gob.fire.persistence.entity.User;
@@ -68,7 +69,7 @@ public interface ICertificateService {
 	 * @param userDto a {@link CertificateDTO} with the information of the certificate.
 	 * @return {@link Certificate} The Certificate.
 	 */
-	Certificate saveCertificate(CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException;
+	Certificate saveCertificate(CertificateDTO certificateDto, X509Certificate x509Certificate) throws FireException;
 					
 	/**
 	 * Method that deletes a certificate in the persistence.

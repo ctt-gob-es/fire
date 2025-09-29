@@ -454,25 +454,52 @@ public class ConfigurationRestController {
         // =====================================================================
         // 2) Truststore (TLS)
         // =====================================================================
-        byte[] tsCandidate = resolveBytesPreferFile(truststoreFile, serverAfirmaDTO.getTruststoreB64());
-        if (tsCandidate != null && !bytesEqual(prevTs, tsCandidate)) {
-            serverAfirma.setTruststoreBlob(tsCandidate);
-            serverAfirma.setTruststoreVersion(incrementVersion(prevTsVer));
-            tsChanged = true;
-        }
-        if (!isBlank(serverAfirmaDTO.getTruststoreType())) { 
-        	serverAfirma.setTruststoreType(serverAfirmaDTO.getTruststoreType().trim()); 
+        byte[] tsCandidate = null;
+        
+        if (!serverAfirmaDTO.isClearTruststore() && truststoreFile != null && !truststoreFile.isEmpty()) {
+        	tsCandidate = resolveBytesPreferFile(truststoreFile, serverAfirmaDTO.getTruststoreB64());
+        	
+        	if (tsCandidate != null && !bytesEqual(prevTs, tsCandidate)) {
+                serverAfirma.setTruststoreBlob(tsCandidate);
+                serverAfirma.setTruststoreVersion(incrementVersion(prevTsVer));
+                tsChanged = true;
+            }
+        } else if (serverAfirmaDTO.isClearTruststore()) {
+        	if (prevTsVer != null) {
+		        serverAfirma.setTruststoreBlob(null);
+		        serverAfirma.setTruststoreVersion(incrementVersion(prevTsVer));
+		        tsChanged = true;
+		    } else {
+		        serverAfirma.setTruststoreBlob(null);
+		    }
+		    serverAfirma.setTruststoreType(null);
+		    serverAfirma.setTruststorePassword(null);
+		
+		    serverAfirmaDTO.setTruststoreB64(null);
+        } else {
+        	tsCandidate = resolveBytesPreferFile(null, serverAfirmaDTO.getAuthTruststoreB64());
+		    if (tsCandidate != null && !bytesEqual(prevAuthTs, tsCandidate)) {
+		        serverAfirma.setTruststoreBlob(tsCandidate);
+		        serverAfirma.setTruststoreVersion(incrementVersion(prevTsVer));
+		        authTsChanged = true;
+		    }
         }
         
-        if (!isBlank(serverAfirmaDTO.getTruststorePassword()) && !isSentinel(serverAfirmaDTO.getTruststorePassword())) {
-            serverAfirma.setTruststorePassword(AESCipher.getInstance().encryptMessageWithBC(serverAfirmaDTO.getTruststorePassword()));
+        if (!serverAfirmaDTO.isClearTruststore()) {
+        	if (!isBlank(serverAfirmaDTO.getTruststoreType())) { 
+            	serverAfirma.setTruststoreType(serverAfirmaDTO.getTruststoreType().trim()); 
+            }
+            
+            if (!isBlank(serverAfirmaDTO.getTruststorePassword()) && !isSentinel(serverAfirmaDTO.getTruststorePassword())) {
+                serverAfirma.setTruststorePassword(AESCipher.getInstance().encryptMessageWithBC(serverAfirmaDTO.getTruststorePassword()));
+            }
         }
+        
         // =====================================================================
 		// 3) Auth Truststore
 		// =====================================================================
 		byte[] authTsCandidate = null;
 		
-		// Priority 1: uploaded file wins
 		if (!serverAfirmaDTO.isClearAuthTruststore() && authTruststoreFile != null && !authTruststoreFile.isEmpty()) {
 		    authTsCandidate = resolveBytesPreferFile(authTruststoreFile, null);
 		    if (authTsCandidate != null && !bytesEqual(prevAuthTs, authTsCandidate)) {
@@ -505,7 +532,6 @@ public class ConfigurationRestController {
 		    }
 		}
 		
-		// Metadata update if provided (only when not cleared)
 		if (!serverAfirmaDTO.isClearAuthTruststore()) {
 		    if (!isBlank(serverAfirmaDTO.getAuthTruststoreType())) {
 		        serverAfirma.setAuthTsType(serverAfirmaDTO.getAuthTruststoreType().trim());

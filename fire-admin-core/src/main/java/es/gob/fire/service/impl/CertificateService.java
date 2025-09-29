@@ -64,6 +64,7 @@ import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.crypto.aes.AESCipher;
+import es.gob.fire.exceptions.FireException;
 import es.gob.fire.i18n.IPersistenceGeneral;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
@@ -224,7 +225,7 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#saveCertificate(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
 	@Override
-	public Certificate saveCertificate(final CertificateDTO certificateDto, X509Certificate x509Certificate) throws IOException {
+	public Certificate saveCertificate(final CertificateDTO certificateDto, X509Certificate x509Certificate) throws FireException {
 
 		Certificate newCertificate = null;
 
@@ -234,10 +235,16 @@ public class CertificateService implements ICertificateService{
 			md = MessageDigest.getInstance("SHA-1"); //$NON-NLS-1$
 
 			if (certificateDto.getCertBytes() != null) {
-
 				final byte[] digest = md.digest(certificateDto.getCertBytes());
-				certificateDto.setHuella(Base64.encode(digest));
-				certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
+	            final String huella = Base64.encode(digest);
+
+	            // Check if certificate with same fingerprint exists
+	            if (this.repository.findByHuella(huella).isPresent()) {
+	                throw new FireException("Certificado con la misma huella ya existente en base de datos");
+	            }
+
+	            certificateDto.setHuella(huella);
+	            certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
 			}
 		
 		} catch (final NoSuchAlgorithmException e) {
@@ -248,6 +255,7 @@ public class CertificateService implements ICertificateService{
 		newCertificate.setFechaAlta(new Date());
 		newCertificate.setFechaInicio(x509Certificate.getNotBefore());
 		newCertificate.setFechaCaducidad(x509Certificate.getNotAfter());
+		
 		final String certSubject = x509Certificate.getSubjectX500Principal().getName();
 		final String[] txtCert = certSubject.split(",");
 		newCertificate.setSubject(txtCert[0]);
@@ -689,12 +697,15 @@ public class CertificateService implements ICertificateService{
 	    //logFullWsConfig(cfg);
 
 	    // Preflight (solo relevante para BST)
-	    try {
-	        preflightCheckBstKeystore(cfg);
-	        LOGGER.debug("[BST Preflight] OK");
-	    } catch (Exception pfEx) {
-	        LOGGER.error("[BST Preflight] Keystore/alias/password no válidos o no utilizables", pfEx);
-	        throw new WSServiceInvokerException("Falló el preflight del keystore BST", pfEx);
+	    
+	    if (safeEquals(authType, AUTH_BST)) {
+	    	try {
+		        checkPropertiesForBstKeystore(cfg);
+		        LOGGER.debug("[BST Check Properties] OK");
+		    } catch (Exception pfEx) {
+		        LOGGER.error("[BST Check Properties] Keystore/alias/password no válidos o no utilizables", pfEx);
+		        throw new WSServiceInvokerException("Falló el preflight del keystore BST", pfEx);
+		    }
 	    }
 
 	    // 6) Inicializar conector y realizar la llamada
@@ -919,7 +930,7 @@ public class CertificateService implements ICertificateService{
 	}
 
 	/**
-	 * Performs a preflight validation for BST (BinarySecurityToken) keystore usage.
+	 * Performs a validation for BST (BinarySecurityToken) keystore usage.
 	 *
 	 * Validates keystore path, type, and passwords, loads the keystore, resolves a usable
 	 * private key alias (autodetects if missing), checks the certificate, and executes a
@@ -929,7 +940,7 @@ public class CertificateService implements ICertificateService{
 	 * @param cfg effective configuration properties (expects ks path/type/password, optional alias/key password).
 	 * @throws Exception if any validation fails (missing config, unreadable keystore, bad passwords, no private key, etc.).
 	 */
-	private static void preflightCheckBstKeystore(final Properties cfg) throws Exception {
+	private static void checkPropertiesForBstKeystore(final Properties cfg) throws Exception {
 	    final String ksPathStr   = cfg.getProperty("webservices.authorization.ks.path");
 	    final String ksType      = defaultString(cfg.getProperty("webservices.authorization.ks.type"), "PKCS12");
 	    final String ksPassStr   = cfg.getProperty("webservices.authorization.ks.password");
@@ -937,17 +948,17 @@ public class CertificateService implements ICertificateService{
 	    final String keyPassStr  = defaultString(cfg.getProperty("webservices.authorization.ks.cert.password"), ksPassStr);
 
 	    if (isBlank(ksPathStr) || isBlank(ksType) || isBlank(ksPassStr)) {
-	        throw new IllegalStateException("Missing keystore configuration (path/type/password).");
+	        throw new IllegalStateException("Falta configuracion del keystore (path/type/password).");
 	    }
 
 	    final Path ksPath = Paths.get(ksPathStr).toAbsolutePath().normalize();
-	    LOGGER.info("[BST Preflight] Keystore path={}, type={}", ksPath, ksType);
+	    LOGGER.debug("[BST Check Properties] Keystore path={}, type={}", ksPath, ksType);
 
 	    if (!Files.exists(ksPath)) {
-	        throw new IOException("Keystore file does not exist: " + ksPath);
+	        throw new IOException("El fichero del almacen no existe: " + ksPath);
 	    }
 	    if (!Files.isReadable(ksPath)) {
-	        throw new IOException("Keystore file not readable: " + ksPath);
+	        throw new IOException("El fichero del almacen no se puede leer: " + ksPath);
 	    }
 
 	    final char[] ksPassword  = ksPassStr.toCharArray();
@@ -962,9 +973,9 @@ public class CertificateService implements ICertificateService{
 	    if (isBlank(alias) || !ks.isKeyEntry(alias)) {
 	        alias = findFirstPrivateKeyAlias(ks, keyPassword);
 	        if (alias == null) {
-	            throw new IllegalStateException("No private key entry found in keystore.");
+	            throw new IllegalStateException("Ninguna clave privada detectada en el almacen.");
 	        }
-	        LOGGER.warn("[BST Preflight] Using autodetected alias: {}", alias);
+	        LOGGER.warn("[BST Check Properties] Usando el alias autodetectado: {}", alias);
 	        // Opcional: propagar al cfg para que el handler lo use
 	        cfg.setProperty("webservices.authorization.ks.cert.alias", alias);
 	    }
@@ -975,10 +986,10 @@ public class CertificateService implements ICertificateService{
 	    }
 	    final X509Certificate cert = (X509Certificate) ks.getCertificate(alias);
 	    if (cert == null) {
-	        throw new IllegalStateException("Certificate not found for alias: " + alias);
+	        throw new IllegalStateException("Certificado no encontrado para el alias: " + alias);
 	    }
 
-	    LOGGER.info("[BST Preflight] Alias={}, keyAlg={}, sigAlgNameCert={}, subjectCN={}, notBefore={}, notAfter={}",
+	    LOGGER.debug("[BST Check Properties] Alias={}, keyAlg={}, sigAlgNameCert={}, subjectCN={}, notBefore={}, notAfter={}",
 	            alias,
 	            key.getAlgorithm(),
 	            safeCertSigAlg(cert),
