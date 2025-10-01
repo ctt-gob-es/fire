@@ -312,9 +312,15 @@ public class CertificateRestController {
 						dtOutput.setError(json.toString());
 					} else {
 						if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
-							msgerror = verifyAfirmaCertificateResponse.getDescription();
-							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-							dtOutput.setError(json.toString());
+							if (verifyAfirmaCertificateResponse.getMinorCode().equalsIgnoreCase("NotSupported")) {
+								msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC018);
+								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+								dtOutput.setError(json.toString());
+							} else {
+								msgerror = verifyAfirmaCertificateResponse.getDescription();
+								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+								dtOutput.setError(json.toString());
+							}
 						} else {
 							msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
 							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
@@ -497,9 +503,15 @@ public class CertificateRestController {
 							dtOutput.setError(json.toString());
 						} else {
 							if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
-								msgerror = verifyAfirmaCertificateResponse.getDescription();
-								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-								dtOutput.setError(json.toString());
+								if (verifyAfirmaCertificateResponse.getMinorCode().equalsIgnoreCase("NotSupported")) {
+									msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC018);
+									json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+									dtOutput.setError(json.toString());
+								} else {
+									msgerror = verifyAfirmaCertificateResponse.getDescription();
+									json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+									dtOutput.setError(json.toString());
+								}
 							} else {
 								msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
 								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
@@ -544,7 +556,10 @@ public class CertificateRestController {
 				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
 			} catch (FireException e) {
-				
+				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
+				msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC017);
+				json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+			    dtOutput.setError(json.toString());
 			}
 		}
 

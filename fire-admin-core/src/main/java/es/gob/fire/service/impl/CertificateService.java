@@ -240,7 +240,7 @@ public class CertificateService implements ICertificateService{
 
 	            // Check if certificate with same fingerprint exists
 	            if (this.repository.findByHuella(huella).isPresent()) {
-	                throw new FireException("Certificado con la misma huella ya existente en base de datos");
+	                throw new FireException("El certificado ya está dado de alta en el sistema.");
 	            }
 
 	            certificateDto.setHuella(huella);

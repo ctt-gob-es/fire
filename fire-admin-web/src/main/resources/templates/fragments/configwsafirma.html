@@ -108,7 +108,7 @@
               </div>
             </div>
 
-            <!-- Keystore type + version (version always disabled) -->
+            <!-- Keystore type + version -->
             <div class="form-group row">
               <label for="ksType" class="col-sm-3" th:text="#{ws.afirma.field.keystore.type}">Tipo Keystore</label>
               <div class="col-sm-3">
@@ -118,12 +118,12 @@
                 </select>
                 <span id="ksType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
               </div>
-              <label for="keystoreVersion" class="col-sm-2" th:text="#{ws.afirma.field.keystore.version}">Versión</label>
-              <div class="col-sm-2">
-                <input type="number" id="keystoreVersion" th:field="*{keystoreVersion}" class="form-control"
-                       min="0" step="1" readonly="readonly" disabled="disabled"/>
-                <span id="keystoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
-              </div>
+              <label for="keystoreVersion" class="col-sm-2 d-none" th:text="#{ws.afirma.field.keystore.version}">Versión</label>
+			  <div class="col-sm-2 d-none">
+			    <input type="number" id="keystoreVersion" th:field="*{keystoreVersion}" class="form-control"
+			           min="0" step="1" readonly="readonly" disabled="disabled"/>
+			    <span id="keystoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+			  </div>
             </div>
 
             <!-- Keystore password -->
@@ -232,11 +232,12 @@
 			      </select>
 			      <span id="truststoreType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
 			    </div>
-			    <label for="truststoreVersion" class="col-sm-2" th:text="#{ws.afirma.field.truststore.version}">Versión</label>
-			    <div class="col-sm-2">
-			      <input type="number" id="truststoreVersion" th:field="*{truststoreVersion}" class="form-control" min="0" step="1" readonly disabled/>
-			      <span id="truststoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
-			    </div>
+			    <label for="truststoreVersion" class="col-sm-2 d-none" th:text="#{ws.afirma.field.truststore.version}">Versión</label>
+				  <div class="col-sm-2 d-none">
+				    <input type="number" id="truststoreVersion" th:field="*{truststoreVersion}" class="form-control"
+				           min="0" step="1" readonly disabled/>
+				    <span id="truststoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+				  </div>
 			  </div>
 			
 			  <div class="form-group row">
@@ -299,11 +300,12 @@
 			      </select>
 			      <span id="authTruststoreType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
 			    </div>
-			    <label for="authenticationVersion" class="col-sm-2" th:text="#{ws.afirma.field.auth.ts.version}">Versión</label>
-			    <div class="col-sm-2">
-			      <input type="number" id="authenticationVersion" th:field="*{authenticationVersion}" class="form-control" min="0" step="1" readonly disabled/>
-			      <span id="authenticationVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
-			    </div>
+			    <label for="authenticationVersion" class="col-sm-2 d-none" th:text="#{ws.afirma.field.auth.ts.version}">Versión</label>
+				<div class="col-sm-2 d-none">
+				    <input type="number" id="authenticationVersion" th:field="*{authenticationVersion}" class="form-control"
+				           min="0" step="1" readonly disabled/>
+			    	<span id="authenticationVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+				</div>
 			  </div>
 			
 			  <div class="form-group row">
@@ -427,10 +429,6 @@
       });
 
       setButtonVisual(isClear);
-
-      // Versions always locked
-      $("#keystoreVersion, #truststoreVersion, #authenticationVersion")
-        .prop("readonly", true).prop("disabled", true);
     }
 
     // Initial state from hidden
@@ -460,16 +458,22 @@
   }
 
 
-  // Show/hide download buttons depending on hidden b64 presence
-  function refreshDownloadButtonsVisibility() {
+	//Show/hide action buttons depending on hidden b64 presence
+  function refreshStoreActionButtons() {
     toggleBtn('#btnDownloadKeystore',       '#keystoreB64');
     toggleBtn('#btnDownloadTruststore',     '#truststoreB64');
     toggleBtn('#btnDownloadAuthTruststore', '#authTruststoreB64');
+
+    // Delete buttons visible only if there's persisted store (mirror download logic)
+    toggleBtn('#btnTsDelete',               '#truststoreB64');
+    toggleBtn('#btnAuthTsDelete',           '#authTruststoreB64');
+
     function toggleBtn(btnSel, hiddenSel) {
       var hasData = !!$(hiddenSel).val();
       $(btnSel).toggle(hasData);
     }
   }
+
 
   // Hide/enable sections by auth type (UT=1, BST=2)
   function applyAuthUI(authVal) {
@@ -497,16 +501,12 @@
     setGroupEnabled(ksInputs, isBST);
     setGroupEnabled(userInputs, isUT);
 
-    $("#keystoreVersion, #truststoreVersion, #authenticationVersion")
-      .prop("readonly", true)
-      .prop("disabled", true);
-
     if (!isBST) {
       $("#subject").val("");
       $("#idDownLoadCert").hide();
       $("#keystoreB64").val("");
     }
-    refreshDownloadButtonsVisibility();
+    refreshStoreActionButtons();
   }
 
   // Remove sentinel passwords from DTO before submit
@@ -543,6 +543,128 @@
       (window.URL || window.webkitURL).revokeObjectURL(save.href);
     };
     reader.readAsDataURL(keystoreBlob);
+  }
+  
+  //-------- Client-side validation (rules per new spec) ----------
+  function validateBeforeSubmit() {
+    var hasErrors = false;
+
+    function showError(spanId, msg) {
+      $("#" + spanId).text(msg);
+      hasErrors = true;
+    }
+    function hasNewFile(inputSel) {
+      var f = $(inputSel).prop("files");
+      return !!(f && f.length > 0);
+    }
+    function hasPersisted(b64Sel) {
+      return $.trim($(b64Sel).val() || "") !== "";
+    }
+    function isEmpty(val) {
+      return $.trim(val || "") === "";
+    }
+    function isSentinel($el) {
+      return $el.attr("data-sentinel") === "1" && $el.val() === SECRET_SENTINEL;
+    }
+    function isNonEmptyNonSentinel($el) {
+      var v = $.trim($el.val() || "");
+      return v !== "" && !(isSentinel($el));
+    }
+
+    // --- Always required: URL, Timeout, App Name ---
+    var urlVal = $("#urlServerId").val();
+    var timeoutVal = $("#timeoutId").val();
+    var appNameVal = $("#nameAppId").val();
+
+    if (isEmpty(urlVal)) {
+      showError("urlServerId_span", /*[[#{ws.afirma.val.url.required}]]*/ "URL del servidor obligatoria");
+    }
+    if (isEmpty(timeoutVal) || isNaN(timeoutVal) || Number(timeoutVal) <= 0) {
+      showError("timeoutId_span", /*[[#{ws.afirma.val.timeout.required}]]*/ "Timeout de conexión obligatorio (> 0)");
+    }
+    if (isEmpty(appNameVal)) {
+      showError("nameAppId_span", /*[[#{ws.afirma.val.appname.required}]]*/ "Identificador de aplicación obligatorio");
+    }
+
+    // --- Auth-specific rules ---
+    var authVal = $("#authenticationId").val();
+
+    // UsernameToken (1): user + password obligatorios
+    if (authVal === "1") {
+      if (isEmpty($("#userId").val())) {
+        showError("userId_span", /*[[#{ws.afirma.val.user.required}]]*/ "Usuario obligatorio");
+      }
+      var $utPass = $("#password");
+      // Permite sentinel; si no hay sentinel ni valor, error
+      if (isEmpty($utPass.val()) && !isSentinel($utPass)) {
+        showError("password_span", /*[[#{ws.afirma.val.password.required}]]*/ "Contraseña obligatoria");
+      }
+    }
+
+    // BinarySecurityToken (2): SOLO exigir password del keystore SI hay keystore (nuevo o persistido)
+    if (authVal === "2") {
+      var ksNew  = hasNewFile("#keystoreFile");
+      var ksPrev = hasPersisted("#keystoreB64");
+      if (ksNew || ksPrev) {
+        var $ksPass = $("#ksPassword");
+        if (ksNew) {
+          // Si se sube archivo nuevo, debe teclearse (no vale sentinel)
+          if (!isNonEmptyNonSentinel($ksPass)) {
+            showError("passwordKeystore_span", /*[[#{ws.afirma.val.ks.pass.required}]]*/ "Password del keystore obligatoria");
+          }
+        } else { // persistido
+          if (isEmpty($ksPass.val()) && !isSentinel($ksPass)) {
+            showError("passwordKeystore_span", /*[[#{ws.afirma.val.ks.pass.required}]]*/ "Password del keystore obligatoria");
+          }
+        }
+      }
+      // NOTA: No obligamos alias ni password del certificado (ksCertAlias/ksCertPassword) según nueva especificación.
+    }
+
+    // --- Truststore TLS: password obligatoria SOLO si hay TS (nuevo o persistido) y NO está marcado para eliminar ---
+    var tsClear = String($("#truststoreClear").val()).toLowerCase() === "true";
+    var tsNew   = hasNewFile("#truststoreFile");
+    var tsPrev  = hasPersisted("#truststoreB64");
+    if (!tsClear && (tsNew || tsPrev)) {
+      var $tsPass = $("#truststorePassword");
+      if (tsNew) {
+        if (!isNonEmptyNonSentinel($tsPass)) {
+          showError("truststorePassword_span", /*[[#{ws.afirma.val.ts.pass.required}]]*/ "Password del Truststore obligatoria");
+        }
+      } else {
+        if (isEmpty($tsPass.val()) && !isSentinel($tsPass)) {
+          showError("truststorePassword_span", /*[[#{ws.afirma.val.ts.pass.required}]]*/ "Password del Truststore obligatoria");
+        }
+      }
+    }
+
+    // --- Auth Truststore: mismas reglas que el TS estándar; alias NO obligatorio ---
+    var atsClear = String($("#authTruststoreClear").val()).toLowerCase() === "true";
+    var atsNew   = hasNewFile("#authTruststoreFile");
+    var atsPrev  = hasPersisted("#authTruststoreB64");
+    if (!atsClear && (atsNew || atsPrev)) {
+      var $atsPass = $("#authTruststorePassword");
+      if (atsNew) {
+        if (!isNonEmptyNonSentinel($atsPass)) {
+          showError("authTruststorePassword_span", /*[[#{ws.afirma.val.ats.pass.required}]]*/ "Password del Auth Truststore obligatoria");
+        }
+      } else {
+        if (isEmpty($atsPass.val()) && !isSentinel($atsPass)) {
+          showError("authTruststorePassword_span", /*[[#{ws.afirma.val.ats.pass.required}]]*/ "Password del Auth Truststore obligatoria");
+        }
+      }
+      // No exigir alias (authCertAlias) según especificación.
+    }
+
+    // Focus first error
+    if (hasErrors) {
+      var $first = $('span.badge').filter(function(){ return $.trim($(this).text()) !== ""; }).first();
+      if ($first.length) {
+        var $field = $first.closest('.form-group').find('input,select,button,textarea').first();
+        if ($field.length) { $field.focus(); }
+      }
+    }
+    return !hasErrors;
   }
 
   $(document).ready(function () {
@@ -587,12 +709,16 @@
 
     // Initial state
     applyAuthUI($("#authenticationId").val());
-    refreshDownloadButtonsVisibility();
+    refreshStoreActionButtons();
 
     // Submit
     $("#updateWsAfirmaBtn").click(function (event) {
       event.preventDefault();
       cleanSpan();
+      
+      if (!validateBeforeSubmit()) {
+   	    return;
+   	  }
 
       var dto = $("#serverAfirmaFormId").serializeJSON();
       stripSentinelPasswords(dto);
@@ -673,7 +799,7 @@
             setFileLabel($("#authTruststoreFile"), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
 
             // Refresh downloads visibility
-            refreshDownloadButtonsVisibility();
+            refreshStoreActionButtons();
           }
         },
         error: function (xhr) {

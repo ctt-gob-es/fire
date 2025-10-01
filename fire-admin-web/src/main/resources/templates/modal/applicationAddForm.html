@@ -272,6 +272,9 @@ function saveNewApp() {
     // A�adimos los IDs de usuarios y certificados al objeto
     appForm.idUsersSelected = idUsersSelected;
     appForm.idCertificatesSelected = idCertificatesSelected;
+    
+    appForm.customSize = $('#customSize').prop('checked');
+    appForm.customProvider = $('#customProvider').prop('checked');
 
     // Construimos el array de proveedores personalizados
     var customProvidersData = [];

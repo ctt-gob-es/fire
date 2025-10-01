@@ -204,7 +204,7 @@ public class ApplicationService implements IApplicationService{
 			if (appDto.isCustomSize()) {
 				appToSave.setMaxSizeDoc(convertMegabytesToBytes(appDto.getMaxSizeDoc()));
 				appToSave.setMaxSizePetition(convertMegabytesToBytes(appDto.getMaxSizePetition()));
-				appToSave.setMaxAmountDocs(appDto.getMaxAmountDocs());
+				appToSave.setMaxAmountDocs(appDto.getMaxAmountDocs() != null ? appDto.getMaxAmountDocs() : 0);
 			} else {
 				appToSave.setMaxSizeDoc(null);
 				appToSave.setMaxSizePetition(null);
