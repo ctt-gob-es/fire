@@ -111,11 +111,11 @@
     				<artifactId>slf4j-jdk14</artifactId>
 				</dependency>
 		
-				<!-- Dependencia para la compatibilidad con firmas XML -->
+				<!-- Dependencia para la compatibilidad con firmas XML de curva eliptica -->
 				<dependency>
 					<groupId>org.apache.santuario</groupId>
 					<artifactId>xmlsec</artifactId>
-					<version>2.2.3</version>
+					<version>3.0.6</version>
 				</dependency>
 				
 				<!--  Dependencia servlets -->
