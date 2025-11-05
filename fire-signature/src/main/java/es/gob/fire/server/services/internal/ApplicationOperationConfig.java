@@ -80,7 +80,7 @@ public class ApplicationOperationConfig {
 
 	/**
 	 * Establece el listado de proveedores habilitados.
-	 * @param providerElements Listado de proveedores habilitados.
+	 * @param providers Listado de proveedores habilitados.
 	 */
 	public void setProviders(final ProviderElement[] providers) {
 		this.providers = providers;

@@ -152,10 +152,15 @@ function openLogFile ( e, dt, node, config ) {
         	// Cargamos en el componente padre de la tabla el HTML recuperado
 			$("#tableLogFiles").parent().html(data);
         },
-        error:function(data){
+        error:function(data, xhr, error){
         	// Se oculta la capa 'cargando...'
         	hide();
         
+        	if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion");
+            }
 		}
 	});
 }
@@ -176,10 +181,15 @@ function disconnectToLogServer ( e, dt, node, config ) {
         	// Cargamos el listado de SPL en el componente padre de la tabla
 			$("#tableLogFiles").parent().html(data);
         },
-        error:function(data){
+        error:function(data, xhr, error){
         	// Se oculta la capa 'cargando...'
         	hide();
         
+        	if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion");
+            }
 		}
 	});
 }

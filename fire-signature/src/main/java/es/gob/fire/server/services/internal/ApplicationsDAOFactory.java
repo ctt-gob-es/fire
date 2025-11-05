@@ -23,7 +23,7 @@ public class ApplicationsDAOFactory {
 	}
 
 	private static ApplicationsDAO loadDAOInstance() {
-		if (ConfigManager.getDatasourceJNDIName() != null && !ConfigManager.getDatasourceJNDIName().isEmpty()) {
+		if (ConfigManager.getDatasourceJNDIName() != null) {
 			return new DBApplicationsDAO();
 		}
 		return new ConfigFileApplicationsDAO();

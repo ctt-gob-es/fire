@@ -36,6 +36,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servicio para la solicitud de un nuevo certificado de firma. */
 public final class GenerateCertificateService extends HttpServlet {
@@ -44,12 +45,6 @@ public final class GenerateCertificateService extends HttpServlet {
 	private static final long serialVersionUID = -6991704995319197156L;
 
 	private static final Logger LOGGER = Logger.getLogger(GenerateCertificateService.class.getName());
-
-    private static final String PARAMETER_NAME_APPLICATION_ID = "appid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_APPLICATION_ID = "appId"; //$NON-NLS-1$
-
-    private static final String PARAMETER_NAME_SUBJECT_ID = "subjectid"; //$NON-NLS-1$
-    private static final String OLD_PARAMETER_NAME_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
 
     @Override
     public void init() throws ServletException {
@@ -72,7 +67,7 @@ public final class GenerateCertificateService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
     /** Solicitud de un nuevo certificado de firma. */
@@ -99,30 +94,39 @@ public final class GenerateCertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
-		
-		// Verificar si los servicios antiguos están habilitados
+
+        // Verificar si los servicios antiguos estan habilitados
 	    if (!ConfigManager.isLegacyServicesEnabled()) {
-	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
-	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
 	        return;
 	    }
 
-    	final RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-    		return;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
 		}
 
-    	updateParamNames(params);
+	    // Obtenemos el identificador de aplicacion para configuracion el log y
+	    // sus permisos
+    	final String appId = params.getAppId();
+    	final String trId  = params.getTransactionId();
 
-    	final String appId = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-    	final String trId	= params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(LogUtils.limitText(appId), LogUtils.limitText(trId));
+    	final TransactionAuxParams trAux = new TransactionAuxParams(appId, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobamos que la peticion este autorizada
@@ -150,22 +154,27 @@ public final class GenerateCertificateService extends HttpServlet {
             return;
 		}
 
+    	// Comprobamos los parametros de la peticion
+    	try {
+    		params.checkParameters(appId, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
     	// Comprobamos si se indica un proveedor y, si no, se utiliza el
     	// por defecto de Clave Firma
     	String certOrigin = params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
     	if (certOrigin == null) {
     		certOrigin = ProviderLegacy.PROVIDER_NAME_CLAVEFIRMA;
     	}
-    	params.put(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
+    	params.putParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN, certOrigin);
 
     	// Una vez realizadas las comprobaciones de seguridad y envio de estadisticas,
     	// delegamos el procesado de la operacion
     	generateCertificate(params, response, trAux);
-    }
-
-    private static void updateParamNames(final RequestParameters params) {
-    	params.replaceParamKey(OLD_PARAMETER_NAME_APPLICATION_ID, PARAMETER_NAME_APPLICATION_ID);
-    	params.replaceParamKey(OLD_PARAMETER_NAME_SUBJECT_ID, PARAMETER_NAME_SUBJECT_ID);
     }
 
     /**

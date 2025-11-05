@@ -8,20 +8,20 @@
 <%@page import="es.gob.fire.server.services.internal.SessionFlags"%>
 <%@page import="es.gob.fire.server.services.internal.FireSession"%>
 <%@page import="es.gob.fire.server.services.internal.SessionCollector"%>
-<%@page import="java.net.URLEncoder"%>
-<%@page import="java.util.Properties"%>
 <%@page import="es.gob.fire.signature.ConfigManager"%>
 <%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@page import="java.util.Map"%>
-<%@page import="java.util.Locale"%>
 <%@page import="es.gob.afirma.core.misc.AOUtil"%>
 <%@page import="es.gob.afirma.core.misc.Base64"%>
-<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="es.gob.fire.signature.i18n.Language"%>
+<%@page import="es.gob.fire.signature.i18n.IWebViewMessages"%>
+<%@page import="java.net.URLEncoder"%>
 <%@page import="java.security.cert.X509Certificate"%>
-<%@page import="es.gob.fire.i18n.Language"%>
-<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
+<%@page import="java.text.SimpleDateFormat"%>
+<%@page import="java.util.Locale"%>
+<%@page import="java.util.Map"%>
+<%@page import="java.util.Properties"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8"%>
 <%

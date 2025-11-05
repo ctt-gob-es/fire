@@ -45,6 +45,8 @@ public class FireStatistics {
 	public static final void init(final String path, final String time, final String datasourceJndiName, final boolean processCurrentDay)
 					throws IOException {
 
+		LOGGER.info("Programamos el volcado recurrente de las estadisticas"); //$NON-NLS-1$
+
 		if (path == null) {
 			throw new NullPointerException("No se ha indicado la ruta del directorio con los ficheros de datos estadisticos"); //$NON-NLS-1$
 		}
@@ -53,10 +55,13 @@ public class FireStatistics {
 			throw new NullPointerException("No se ha indicado la hora de arranque del volcado de los ficheros de datos estadisticos"); //$NON-NLS-1$
 		}
 
+		// Paramos cualquier tarea anterior que pudiese estar ejecutandose
+		shutdownTasks();
+
 		dataPath = path;
 		startTime = time;
 
-		// Se crea una tarea para la carga de los datos de estadistica
+		// Se crea una tarea para la carga de los datos estadisticos
 		final LoadStatisticsRunnable loadStatisticsDataTask = new LoadStatisticsRunnable(dataPath, processCurrentDay);
 
 		sch = Executors.newScheduledThreadPool(1);
@@ -111,32 +116,22 @@ public class FireStatistics {
 		final long millisPassed = now - c.getTimeInMillis();
 		final long secondsPassed = millisPassed / 1000;
 
-		// Si no ha pasado la hora, el valor sera ngeativo e indicara el tiempo que queda
+		// Si no ha pasado la hora, el valor sera negativo e indicara el tiempo que queda
 		// Si ya paso, tendremos que esperar un dia menos el tiempo que ya ha pasado
 		return secondsPassed < 0 ? -secondsPassed : SECONDS_OF_A_DAY - secondsPassed;
 	}
 
 	/**
 	 * Libera los recursos reservados al ejecutar el m&eacute;todo
-	 * {@link #init(String, String, String, String, String, String, boolean)}.
+	 * {@link #init(String, String, String, boolean)}.
 	 */
 	public static void release() {
-		if (sch != null) {
-			try {
-				sch.shutdown();
-				try {
-					if (!sch.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
-						sch.shutdownNow();
-					}
-				} catch (final InterruptedException e) {
-					sch.shutdownNow();
-				}
-			}
-			catch (final Throwable e) {
-				LOGGER.log(Level.WARNING, "Error al cerrar la tarea de volcado periodico de estadisticas", e); //$NON-NLS-1$
-			}
-		}
+		LOGGER.info("Liberamos los recursos del servicio"); //$NON-NLS-1$
 
+		// Paramos las tareas
+		shutdownTasks();
+
+		// Liberamos los recursos de base de datos que hayan usado los hilos
 		try {
 			DbManager.closeResources();
 		}
@@ -145,10 +140,28 @@ public class FireStatistics {
 		}
 	}
 
+	private static void shutdownTasks() {
+		if (sch != null) {
+		try {
+			sch.shutdown();
+			try {
+				if (!sch.awaitTermination(2000, TimeUnit.MILLISECONDS)) {
+					sch.shutdownNow();
+				}
+			} catch (final InterruptedException e) {
+				sch.shutdownNow();
+			}
+		}
+		catch (final Throwable e) {
+			LOGGER.log(Level.WARNING, "Error al cerrar la tarea de volcado periodico de estadisticas", e); //$NON-NLS-1$
+		}
+		}
+	}
+
 
 	/**
 	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estad&iacute;sticas a la base de
-	 * datos. Este metodo y el m&eacute;todo {@link #init(String, String, String, String, String, String, boolean)}
+	 * datos. Este metodo y el m&eacute;todo {@link #init(String, String, String, boolean)}
 	 * nunca se deberian ejecutar en el mismo contexto.
 	 * @param path Ruta del directorio con los datos estad&iacute;sticos.
 	 * @param jdbcDriver Clase controladora JDBC para la conexi&oacute;n con la base de datos.
@@ -162,6 +175,8 @@ public class FireStatistics {
 	public static final LoadStatisticsResult dumpData(final String path, final String jdbcDriver,
 			final String dbConnectionString, final String username, final String password, final boolean processCurrentDay)
 					throws IOException {
+
+		LOGGER.info("Ejecutamos un volcado de estadisticas"); //$NON-NLS-1$
 
 		if (path == null) {
 			throw new NullPointerException("No se ha indicado la ruta del directorio con los ficheros de datos estadisticos"); //$NON-NLS-1$
@@ -184,7 +199,7 @@ public class FireStatistics {
 		// Devolvemos el resultado que debe haber quedado registrado
 		return loadStatisticsDataTask.getResult();
 	}
-	
+
 	/**
 	 * Lanza la ejecuci&oacute;n de la carga de datos de los fichero de estad&iacute;sticas a la base de
 	 * datos. Este metodo y el m&eacute;todo {@link #init(String, String, String, String, String, String, boolean)}
@@ -202,6 +217,8 @@ public class FireStatistics {
 			final String dbConnectionString, final String username, final String password, final boolean processCurrentDay)
 					throws IOException {
 
+		LOGGER.info("Ejecutamos un volcado de estadisticas en modo consola"); //$NON-NLS-1$
+
 		if (path == null) {
 			throw new NullPointerException("No se ha indicado la ruta del directorio con los ficheros de datos estadisticos"); //$NON-NLS-1$
 		}
@@ -209,8 +226,8 @@ public class FireStatistics {
 		if (jdbcDriver == null || dbConnectionString == null) {
 			throw new NullPointerException("No se ha indicado la informacion necesaria para la comunicaci&oacute;n con la base de datos"); //$NON-NLS-1$
 		}
-		
-		Map<String, String> connectionAttributes = new HashMap<>();
+
+		final Map<String, String> connectionAttributes = new HashMap<>();
 		connectionAttributes.put("jdbcDriver", jdbcDriver);
 		connectionAttributes.put("dbConnectionString", dbConnectionString);
 		connectionAttributes.put("username", username);

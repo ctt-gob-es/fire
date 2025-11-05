@@ -19,9 +19,9 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.statistics.entity.Browser;
 
 /**
@@ -37,7 +37,7 @@ public class EntryService extends HttpServlet {
 	private static final Logger LOGGER = Logger.getLogger(EntryService.class.getName());
 
 	@Override
-	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) throws IOException {
+	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {
 
 		// Este es el punto de entrada del usuario a la operativa de FIRe,  por lo que se
 		// establece aqui el tiempo maximo de sesion
@@ -46,9 +46,10 @@ public class EntryService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		RequestParameters params;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
@@ -56,22 +57,32 @@ public class EntryService extends HttpServlet {
 			return;
 		}
 		
-		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
-		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+		// Recuperamos el identificador de transaccion
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
-        // Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+		try {
+			params.checkParameters(logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
+		final String subjectRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
+		final String language = params.getParameter(ServiceParams.HTTP_PARAM_LANGUAGE);
+
 		if (subjectRef == null) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 
@@ -103,9 +114,16 @@ public class EntryService extends HttpServlet {
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN, provs[0]);
 			session.setAttribute(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED, Boolean.TRUE.toString());
 			
-			final String language = (String) session.getObject(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
-
-			final ProviderInfo provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
+			ProviderInfo provInfo;
+			try {
+				provInfo = ProviderManager.getProviderInfo(provs[0], logF, language);
+			} catch (final IOException e) {
+				LOGGER.log(Level.SEVERE, logF.f("No se pudo cargar la informacion de un proveedor de firma"), e); //$NON-NLS-1$
+				ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, true, trAux);
+				final TransactionConfig connConfig = (TransactionConfig) session.getObject(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG);
+				Responser.redirectToExternalUrl(connConfig.getRedirectErrorUrl(), request, response, trAux);
+				return;
+			}
 
 			// Si es el proveedor de firma con certificado local, firmamos con el
 			if (provInfo.isLocalProvider()) {

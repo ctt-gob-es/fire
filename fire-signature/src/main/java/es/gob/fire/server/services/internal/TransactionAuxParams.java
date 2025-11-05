@@ -1,5 +1,7 @@
 package es.gob.fire.server.services.internal;
 
+import es.gob.fire.signature.LogUtils;
+
 /**
  * Clase con objetos y m&eacute;todos de ayuda para el tratamiento de una transacci&oacute;n concreta.
  */
@@ -35,7 +37,7 @@ public class TransactionAuxParams {
 		this.appId = appId;
 		this.transactionId = transactionId;
 
-		this.logFormatter = new LogTransactionFormatter(appId, transactionId);
+		this.logFormatter = new LogTransactionFormatter(LogUtils.limitText(appId), LogUtils.limitText(transactionId));
 	}
 
 	/**

@@ -194,7 +194,13 @@ function typeServiceChange(idPlatform, serviceType){
 		success: function(data){
 			$('#endpoint').attr('value', data.response);
 		},
-		error:function(){}
+		error:function(xhr, error){
+			if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion");
+            }
+		}
 	});
 	
 }
@@ -391,7 +397,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal .modal-body .alert').remove();
 			                    $('#altEditor-modal').modal('hide');
 			                },
-			                error:function(){}
+			                error:function(xhr, error){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+		                            window.location.reload();
+		                        } else {
+		                            console.error("Error al realizar la peticion");
+		                        }
+			                }
 			            });
 		        	}else{
 						// Se oculta la capa 'cargando...'
@@ -502,7 +514,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal .modal-body .alert').remove();
 			                    $('#altEditor-modal').modal('hide');
 			                },
-			                error:function(){}
+			                error:function(xhr, error){
+			                	if (xhr.status === 401 || xhr.status === 403) {
+		                            window.location.reload();
+		                        } else {
+		                            console.error("Error al realizar la peticion");
+		                        }
+			                }
 			            });
 		        	}else{
 						// Se oculta la capa 'cargando...'
@@ -586,9 +604,16 @@ $(document).ready(function() {
 				   }
 				  
 			  },
-			  error:function(){
+			  error:function(xhr, error){
 				  $('#errorModalTimer').remove();
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+                      window.location.reload();
+                  } else {
+                      console.error("Error al realizar la peticion");
+                  }
+				  
 				  if (checkTypeTime($('#frequencyTime')) == $('#frequencyTime')[0].value){
 					$('#timerForm').append('<div id="errorModalTimer" class="alert alert-danger" role="alert"><strong>' + [[#{timer.admin.error.badFormat}]] + '</strong></div>');
 				  }
@@ -726,8 +751,15 @@ $(document).ready(function() {
 				   }
 				  
 			  },
-			  error:function(data){
+			  error:function(data, xhr, error){
 				  hide();
+				  
+				  if (xhr.status === 401 || xhr.status === 403) {
+                      window.location.reload();
+                  } else {
+                      console.error("Error al realizar la peticion");
+                  }
+				  
 				  if (data.error == "-1"){
 					  if ($('#errorModalService').length == 0){
 					  	$('#serviceForm').append('<div id="errorModalService" class="alert alert-danger" role="alert"><strong>' + [[#{service.admin.error.sameName}]] + '</strong></div>');

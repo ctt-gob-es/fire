@@ -16,9 +16,6 @@ import java.util.concurrent.Future;
  * Gestor con los m&eacute;todos para la espera de un pool de tareas.
  */
 public class TasksPoolManager {
-	
-	//Objeto usado para la sincronizacion del uso de session, sin tener que utilizar el propio objeto session para ello
-	private static final Object sessionLock = new Object();
 
 	/**
 	 * Espera indefinidamente a que finalicen todos las tareas de un listado. Si se indica
@@ -29,8 +26,9 @@ public class TasksPoolManager {
 	 * @param session Sesi&oacute;n en la que guardar el n&uacute;mero de hilos que
 	 * a&uacute;n no han terminado.
 	 * @param attrName Nombre del atributo de sesi&oacute;n con el que se guardar&aacute;.
+	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 */
-	public static void waitTasks(final List<Future<String>> tasks, final boolean stopOnError, final FireSession session, final String attrName) {
+	public static void waitTasks(final List<Future<String>> tasks, final boolean stopOnError, final FireSession session, final String attrName, final TransactionAuxParams trAux) {
 
         boolean stopTasks = false;
         int lives;
@@ -58,8 +56,13 @@ public class TasksPoolManager {
 
         	// Actualizamos en la sesion el numero de hilos que faltan por terminar
         	if (session != null && attrName != null) {
-        		synchronized (sessionLock) {
-        			session.setAttribute(attrName, Integer.valueOf(lives));
+
+        		final Integer oldLiveSessions = (Integer) session.getObject(attrName);
+        		if (oldLiveSessions == null || oldLiveSessions.intValue() != lives) {
+        			synchronized (session) {
+        				session.setAttribute(attrName, Integer.valueOf(lives));
+        				SessionCollector.commit(session, trAux);
+        			}
         		}
         	}
 

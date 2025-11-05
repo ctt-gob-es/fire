@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.3, 04/03/2025.
+ * @version 1.3, 06/03/2025.
  */
 package es.gob.fire.service.impl;
 
@@ -38,14 +38,19 @@ import java.security.cert.CertificateException;
 import java.security.cert.CertificateExpiredException;
 import java.security.cert.CertificateNotYetValidException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Calendar;
+import java.util.Date;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
+import java.util.concurrent.TimeoutException;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.beans.factory.config.ConfigurableBeanFactory;
@@ -57,13 +62,14 @@ import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsCertificate;
+import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
@@ -77,7 +83,7 @@ import es.gob.fire.web.authentication.DniAuthenticationToken;
 /**
  * <p>Class that implements the communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.3, 04/03/2025.
+ * @version 1.3, 06/03/2025.
  */
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
@@ -86,10 +92,13 @@ public class LoginService implements ILoginService {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(LoginService.class);
+	private static final Logger LOGGER = LogManager.getLogger(LoginService.class);
 
-	@Value("${conf.cert.path.truststore.issuers}")
-	private String confCertPathTruststoreIssuers;
+	@Value("${conf.cert.path.truststore}")
+	private String confCertPathTruststore;
+
+	@Value("${conf.cert.path.truststore.password}")
+	private String confCertPathTruststorePassword;
 
 	/**
 	 * Attribute that represents the url to service pasarela.
@@ -99,7 +108,12 @@ public class LoginService implements ILoginService {
 	/**
 	 * Attribute that represents the administrator role.
 	 */
-	public static final String ROLE_ADMIN = "Administrator";
+	public static final String ROLE_ADMIN = "Administrator"; //$NON-NLS-1$
+
+	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin"; //$NON-NLS-1$
+
+	@Autowired
+	private ThreadInfoDataSecureDTO threadInfoDataSecure;
 
 	/**
 	 * Attribute that represents the service object for accessing the repository of control access.
@@ -144,16 +158,16 @@ public class LoginService implements ILoginService {
 	@Override
 	public String generateCookieValue() {
         // Generamos un UUID aleatorio
-        final String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones
+        final String uuid = UUID.randomUUID().toString().replace("-", ""); // Eliminar guiones //$NON-NLS-1$ //$NON-NLS-2$
 
-        // Convertimos UUID a bytes y codificar en Base64 para mayor entropía
+        // Convertimos UUID a bytes y codificar en Base64 para mayor entropia
         final String encoded = Base64.getUrlEncoder().withoutPadding().encodeToString(uuid.getBytes(StandardCharsets.UTF_8));
 
-        // Agregamos un número aleatorio al final similar a la estructura del valor
+        // Agregamos un numero aleatorio al final similar a la estructura del valor
         final int randomInt = (int) (Math.random() * Integer.MAX_VALUE);
 
-        // Concatenamos con un símbolo especial
-        return encoded + "!-" + randomInt;
+        // Concatenamos con un simbolo especial
+        return encoded + "!-" + randomInt; //$NON-NLS-1$
     }
 
 	/**
@@ -166,14 +180,14 @@ public class LoginService implements ILoginService {
         try {
             final URL url = new URL(URL_SERVICE_PASARELA);
             connection = (HttpURLConnection) url.openConnection();
-            connection.setRequestMethod("GET");
+            connection.setRequestMethod("GET"); //$NON-NLS-1$
             connection.setConnectTimeout(5000); // 5 segundos de timeout
             connection.setReadTimeout(5000);
             connection.connect();
 
             return connection.getResponseCode() == NumberConstants.NUM200;
         } catch (final IOException e) {
-            LOGGER.error(e);
+            LOGGER.error("La pasarela de Cl@ve no esta disponible: " + e); //$NON-NLS-1$
             return false;
         } finally {
             if (connection != null) {
@@ -217,11 +231,10 @@ public class LoginService implements ILoginService {
     	KeyStore trustStoreUsers = null;
     	try {
     		// Cargamos el TrustStore
-			final String passTrustStoreUsers = "changeit";
-			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststoreIssuers, UtilsKeystore.JKS, passTrustStoreUsers);
+			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststore, UtilsKeystore.JKS, this.confCertPathTruststorePassword);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
-		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
+		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
 		}
 		return trustStoreUsers;
 	}
@@ -249,7 +262,7 @@ public class LoginService implements ILoginService {
     		}
     	} catch (final KeyStoreException e) {
     		LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
-    		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
+    		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
 		}
 
 		return issuerCert;
@@ -265,7 +278,7 @@ public class LoginService implements ILoginService {
     		UtilsKeystore.verify(certificate, issuerCert);
 		} catch (InvalidKeyException | CertificateException | NoSuchAlgorithmException | NoSuchProviderException | SignatureException e) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009), e);
-			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML009));
 		}
 	}
 
@@ -338,8 +351,8 @@ public class LoginService implements ILoginService {
     	final Authentication authentication = new DniAuthenticationToken(user.getDni(), grantedAuths);
 
     	if (!PermissionsChecker.hasPermission(user, Permissions.ACCESS)) {
-    		LOGGER.error("El usuario con DNI "+ user.getDni() +" no tiene permisos de acceso "); //$NON-NLS-1$
-			throw new InsufficientAuthenticationException("El usuario con DNI " + user.getDni() + " no tiene permisos de acceso"); //$NON-NLS-1$
+    	    LOGGER.error("El usuario no tiene permisos de acceso."); //$NON-NLS-1$
+    	    throw new InsufficientAuthenticationException("Acceso denegado: permisos insuficientes."); //$NON-NLS-1$
 		}
 
     	// Asignamos al bean de spring del usuario para usarlo en la app
@@ -349,18 +362,62 @@ public class LoginService implements ILoginService {
 		this.userLoggedDTO.setName(user.getName());
 		this.userLoggedDTO.setPhone(user.getPhone());
 		this.userLoggedDTO.setRenovationCode(user.getRenovationCode());
-		this.userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate()));
+		this.userLoggedDTO.setRenovationDate(user.getRenovationDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getRenovationDate())); //$NON-NLS-1$
 		this.userLoggedDTO.setRestPassword(user.getRestPassword());
 		this.userLoggedDTO.setRoot(user.getRoot());
-		this.userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate()));
+		this.userLoggedDTO.setStartDate(user.getStartDate() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getStartDate())); //$NON-NLS-1$
 		this.userLoggedDTO.setSurnames(user.getSurnames());
 		this.userLoggedDTO.setUserId(user.getUserId());
-		this.userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso()));
+		this.userLoggedDTO.setFecUltimoAcceso(user.getFecUltimoAcceso() == null ? null : new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").format(user.getFecUltimoAcceso())); //$NON-NLS-1$
 
-		// Actualizamos la fecha de último acceso
+		// Actualizamos la fecha de ultimo acceso
 		user.setFecUltimoAcceso(Calendar.getInstance().getTime());
 		this.iUserService.saveUser(user);
 
 		return authentication;
+	}
+
+	/**
+   	 * {@inheritDoc}
+	 * @throws TimeoutException
+   	 * @see es.gob.fire.persistence.service#validateIfSignSecure(es.gob.fire.crypto.cades.verifier.CAdESAnalizer)
+   	 */
+	@Override
+	public void validateIfSignSecure(final CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException {
+		final String strSigned = new String(analizer.getContent());
+		final String token = this.threadInfoDataSecure.getRandomStringLogin();
+		if (token == null) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML019));
+			throw new TimeoutException (Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+}
+		if (!strSigned.equalsIgnoreCase(token)) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		}
+
+		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
+
+		final Date pastDate = simpleDateFormat.parse(this.threadInfoDataSecure.getLimitSignGen());
+
+		final Date currentDate = new Date();
+
+		long differenceInMillis = currentDate.getTime() - pastDate.getTime();
+
+		// Convertimos a minutos
+		long differenceInMinutes = differenceInMillis / (60 * 1000);
+
+		if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML017));
+			throw new TimeoutException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		}
+
+		differenceInMillis = currentDate.getTime() - analizer.getSigningTime().getTime();
+
+		differenceInMinutes = differenceInMillis / (60 * 1000);
+
+		if (differenceInMinutes >= NumberConstants.NUM_5_LONG) {
+			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML018));
+			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
+		}
 	}
 }

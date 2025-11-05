@@ -18,8 +18,8 @@
 <%@page import="es.gob.fire.server.services.internal.MessagesFireSignature"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceParams"%>
 <%@page import="es.gob.fire.server.services.internal.ServiceNames"%>
-<%@page import="es.gob.fire.i18n.Language"%>
-<%@page import="es.gob.fire.i18n.IWebViewMessages"%>
+<%@page import="es.gob.fire.signature.i18n.Language"%>
+<%@page import="es.gob.fire.signature.i18n.IWebViewMessages"%>
 
 <%@page language="java" contentType="text/html; charset=UTF-8" pageEncoding="UTF-8" %>
 <%
@@ -142,7 +142,12 @@
 		<div class="container-box">	
 		<%
 		for (String provider : providers) {
-			ProviderInfo info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter(), language);
+				ProviderInfo info;
+				try {
+					info = ProviderManager.getProviderInfo(provider, trAux.getLogFormatter(), language);
+				} catch (Exception e) {
+					continue;
+				}
 		%>
 			<div name="provider-option" class="main-box-left" id="option<%= info.getName() %>">
 			

@@ -57,7 +57,13 @@ $(document).ready(function() {
 	 							$('#modal').html(data);
 	 							$('#modalUserAdd').modal('show');																
 	 						},
-	 						error : function() {}
+	 						error : function(xhr) {
+	 							if (xhr.status === 401 || xhr.status === 403) {
+	 	                            window.location.reload();
+	 	                        } else {
+	 	                            console.error("Error al realizar la peticion");
+	 	                        }
+	 						}
 	 					});
 				  } // fin action
 	    
@@ -73,19 +79,26 @@ $(document).ready(function() {
 		                   selected: !0
 						  });
 						  debugger;
-						  var email = d.data()[0][a[5].id];
+						  
+						  var userId = d.data()[0][a[0].id]; // a[0] = userId (columna oculta)
 						  var menuEdit = /*[[@{/menuedit}]]*/;
 						  $.ajax({
 		 						url : menuEdit,
 		 						type : 'GET',
-		 						data : $.param({'email':email}),
+		 						data : $.param({'userId': userId}),
 		 						cache : false,
 		 						success : function(data) {
 		 							hide();
 		 							$('#modal').html(data);
 		 							$('#modalUserEdit').modal('show');																
 		 						},
-		 						error : function() {}
+		 						error : function(xhr) {
+		 							if (xhr.status === 401 || xhr.status === 403) {
+		 	                            window.location.reload();
+		 	                        } else {
+		 	                            console.error("Error al realizar la peticion");
+		 	                        }
+		 						}
 		 					});
 					  } // fin action
 				  }, // fin edit
@@ -108,11 +121,12 @@ $(document).ready(function() {
       				  	 
       				  	  hide();
       				  	 
-      					  var email = d.data()[0][a[5].id];
+      				  	  var userId = d.data()[0][a[0].id]; // a[0] = userId (columna oculta)
+
       					  var index = dt.row({selected: !0}).index();
       					  var indexRow = index-1;
       					  $.ajax(actionDelete,{
-      									data:$.param({'email':email, 'index':indexRow}),
+      									data:$.param({'userId': userId, 'index': indexRow}),
       							        type:'POST',
    						                success: function(data){
    						                	
@@ -136,7 +150,13 @@ $(document).ready(function() {
    						                	}
    						                	*/
    						                },
-   						                error:function(){}
+   						                error:function(xhr, error){
+   						                	if (xhr.status === 401 || xhr.status === 403) {
+   					                            window.location.reload();
+   					                        } else {
+   					                            console.error("Error al realizar la peticion");
+   					                        }
+   						                }
       					});
       		 	 	}
                 	},
@@ -213,7 +233,13 @@ $(document).ready(function() {
 			                    $('#altEditor-modal').modal('hide');
 		                	}
 		                },
-		                error:function(){}
+		                error:function(xhr, error){
+		                	if (xhr.status === 401 || xhr.status === 403) {
+	                            window.location.reload();
+	                        } else {
+	                            console.error("Error al realizar la peticion");
+	                        }
+		                }
 		            });
 		            break;
 		        default:
@@ -263,8 +289,15 @@ $(document).ready(function() {
 				}
 			}
 		  },
-		  error:function(){
+		  error:function(xhr, error){
 			  hide();
+			  
+			  if (xhr.status === 401 || xhr.status === 403) {
+                  window.location.reload();
+              } else {
+                  console.error("Error al realizar la peticion");
+              }
+			  
 			  $('#errorModalUser').remove();
 			  $('#userFormPassword').append('<div id="errorModalUser" class="alert alert-danger" role="alert"><strong>' + [[#{message.error}]] + '</strong></div>');
 		  },

@@ -7,7 +7,7 @@ import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Clase para la composici&oacute;n y recuperaci&oacute;n de la firma iniciada
@@ -55,7 +55,7 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
     	// ID que pudieran haberse hecho para evitar problemas con los ID repetidos
     	final TriphaseData currentTd = new TriphaseData();
         for (final TriSign triSign : this.partialTd.getTriSigns()) {
-        	if (this.docId.equals(FIReTriSignIdProcessor.unmake(triSign.getId()))) {
+        	if (this.docId.equals(triSign.getSignatureId()) || this.docId.equals(FIReTriSignIdProcessor.unmake(triSign.getId()))) {
         		currentTd.addSignOperation(triSign);
         	}
         }

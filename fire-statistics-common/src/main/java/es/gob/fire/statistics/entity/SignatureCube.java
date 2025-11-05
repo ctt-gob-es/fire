@@ -5,12 +5,15 @@ import java.util.Date;
 import java.util.Objects;
 
 /**
- * Conjunto de datos de las firmas que se registran con objeto de obtener estad&iacute;sticas.
+ * Conjunto de datos de las firmas que se registran con objeto de obtener
+ * estad&iacute;sticas.
  */
 public class SignatureCube {
 
 	private Date date;
 	private String application;
+	private String dir3Code;
+	private String organization;
 	private String format;
 	private String improvedFormat;
 	private String algorithm;
@@ -22,17 +25,22 @@ public class SignatureCube {
 	private String idTransaction;
 	private long dataSize = 0;
 
-	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el momento
+	// Valor utilizado para almacenar el numero de ocurrencias encontradas hasta el
+	// momento
 	private long total = 1;
 
 	/**
-	 * Construye un objeto cargando sus propiedades de una cadena de texto con el formato
+	 * Construye un objeto cargando sus propiedades de una cadena de texto con el
+	 * formato
 	 * "Formato;FormatoMejorado;Algoritmo;Proveedor;Navegador;ResultadoOperacion;IdTransaccion;Tama&ntilde;oFichero".<br>
 	 * <ul>
-	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
-	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
+	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se
+	 * solicit&oacute; actualizar.</li>
+	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso
+	 * contrario.</li>
 	 * <li>Tama&ntilde;oFichero: Tama&ntilde;o del fichero firmado en bytes.</li>
 	 * </ul>
+	 * 
 	 * @param registry Cadena de texto con las propiedades de la transacci&oacute;n.
 	 * @return Informaci&oacute;n de la transacci&oacute;n.
 	 * @throws ParseException Cuando se encuentra una fecha mal formada.
@@ -43,39 +51,45 @@ public class SignatureCube {
 			throw new IllegalArgumentException("Se ha proporcionado una cadena vacia"); //$NON-NLS-1$
 		}
 
-		final String [] cube = registry.split(";"); //$NON-NLS-1$
+		final String[] cube = registry.split(";"); //$NON-NLS-1$
 		if (!checkRegistryData(cube)) {
 			throw new IllegalArgumentException("Se ha encontrado un registro con formato no valido: " + registry); //$NON-NLS-1$
 		}
 
-		final SignatureCube sign =  new SignatureCube();
+		final SignatureCube sign = new SignatureCube();
 
 		// Aplicacion
 		sign.setApplication(cube[0]);
 
+		// Codigo DIR3
+		sign.setDir3Code(cube[1]);
+
+		// Organizacion
+		sign.setOrganization(cube[2]);
+
 		// Formato
-		sign.setFormat(cube[1]);
+		sign.setFormat(cube[3]);
 
 		// Formato Mejorado
-		sign.setImprovedFormat(cube[2].isEmpty() ? null : cube[2]);
+		sign.setImprovedFormat(cube[4].isEmpty() ? null : cube[4]);
 
 		// Algoritmo
-		sign.setAlgorithm(cube[3]);
+		sign.setAlgorithm(cube[5]);
 
 		// Proveedor
-		sign.setProvider(cube[4]);
+		sign.setProvider(cube[6]);
 
 		// Navegador
-		sign.setBrowser(cube[5]);
+		sign.setBrowser(cube[7]);
 
 		// Resultado de la firma
-		sign.setResultSign("1".equals(cube[6])); //$NON-NLS-1$
+		sign.setResultSign("1".equals(cube[8])); //$NON-NLS-1$
 
 		// Identificador de la transaccion
-		sign.setIdTransaction(cube[7]);
+		sign.setIdTransaction(cube[9]);
 
 		// Tamano de la firma
-		sign.setDataSize(Long.parseLong(cube[8]));
+		sign.setDataSize(Long.parseLong(cube[10]));
 
 		return sign;
 	}
@@ -83,20 +97,21 @@ public class SignatureCube {
 	/**
 	 * Comprueba que un registro de datos contenga el numero de campos adecuado y
 	 * que estos contengan un valor.
+	 * 
 	 * @param registryDatas Listado de campos del registro.
 	 * @return {@code true} si el registro contiene los campos requeridos,
-	 * {@code false} en caso contrario.
+	 *         {@code false} en caso contrario.
 	 */
 	private static boolean checkRegistryData(final String[] registryDatas) {
 
-		if (registryDatas == null || registryDatas.length != 9) {
+		if (registryDatas == null || registryDatas.length != 11) {
 			return false;
 		}
 
 		for (int i = 0; i < registryDatas.length; i++) {
 
 			// El campo de formato mejorado puede estar vacio
-			if (i == 2) {
+			if (i == 4) {
 				continue;
 			}
 
@@ -112,48 +127,61 @@ public class SignatureCube {
 
 	/**
 	 * Obtiene la fecha.
+	 * 
 	 * @return Fecha de firma.
 	 */
 	public final Date getDate() {
 		return this.date;
 	}
+
 	/**
 	 * Establece la fecha.
+	 * 
 	 * @param date Fecha de firma.
 	 */
 	public final void setDate(final Date date) {
 		this.date = date;
 	}
+
 	/**
 	 * Obtiene el formtato del cubo de la firma
+	 * 
 	 * @return Formato de firma.
 	 */
 	public final String getFormat() {
 		return this.format;
 	}
+
 	/**
 	 * Establece el formtato del cubo de la firma
+	 * 
 	 * @param format Formato de firma.
 	 */
 	public final void setFormat(final String format) {
 		this.format = format;
 	}
+
 	/**
 	 * Obtiene el algoritmo del cubo de la firma
+	 * 
 	 * @return Algoritmo de firma.
 	 */
 	public final String getAlgorithm() {
 		return this.algorithm;
 	}
+
 	/**
-	 *Establece el algoritmo del cubo de la firma
+	 * Establece el algoritmo del cubo de la firma
+	 * 
 	 * @param algorithm Algoritmo de firma.
 	 */
 	public final void setAlgorithm(final String algorithm) {
 		this.algorithm = algorithm;
 	}
+
 	/**
 	 * Obtiene el proveedor del cubo de la firma
+	 * 
 	 * @return Proveedor de certificados utilizado en la firma.
 	 */
 	public final String getProvider() {
@@ -162,6 +190,7 @@ public class SignatureCube {
 
 	/**
 	 * Establece el proveedor del cubo de la firma
+	 * 
 	 * @param provider Proveedor de certificados utilizado en la firma.
 	 */
 	public final void setProvider(final String provider) {
@@ -169,7 +198,8 @@ public class SignatureCube {
 	}
 
 	/**
-	 * Obtiene el navegador  del cubo de la firma.
+	 * Obtiene el navegador del cubo de la firma.
+	 * 
 	 * @return Navegador utilizado en la operaci&oacute;n.
 	 */
 	public final String getBrowser() {
@@ -177,7 +207,8 @@ public class SignatureCube {
 	}
 
 	/**
-	 *  Establece el navegador del cubo de la firma.
+	 * Establece el navegador del cubo de la firma.
+	 * 
 	 * @param browser Navegador utilizado en la operaci&oacute;n.
 	 */
 	public final void setBrowser(final String browser) {
@@ -186,13 +217,17 @@ public class SignatureCube {
 
 	/**
 	 * Indica si la firma termin&oacute; correctamente.
-	 * @return {@code true} si la firma se complet&oacute; correctamente, {@code false} en caso contrario.
+	 * 
+	 * @return {@code true} si la firma se complet&oacute; correctamente,
+	 *         {@code false} en caso contrario.
 	 */
 	public final boolean isResultSign() {
 		return this.resultSign;
 	}
+
 	/**
 	 * Establece si la firma termin&oacute; correctamente o no.
+	 * 
 	 * @param resultSign Resultado de la operaci&oacute;n de firma.
 	 */
 	public final void setResultSign(final boolean resultSign) {
@@ -200,16 +235,22 @@ public class SignatureCube {
 	}
 
 	/**
-	 * Recupera el identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
-	 * @return Identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 * Recupera el identificador de transaci&oacute;n en la cual se realiz&oacute;
+	 * la firma.
+	 * 
+	 * @return Identificador de transaci&oacute;n en la cual se realiz&oacute; la
+	 *         firma.
 	 */
 	public String getIdTransaction() {
 		return this.idTransaction;
 	}
 
 	/**
-	 * Establece el identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
-	 * @param idTransaction Identificador de transaci&oacute;n en la cual se realiz&oacute; la firma.
+	 * Establece el identificador de transaci&oacute;n en la cual se realiz&oacute;
+	 * la firma.
+	 * 
+	 * @param idTransaction Identificador de transaci&oacute;n en la cual se
+	 *                      realiz&oacute; la firma.
 	 */
 	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
@@ -217,6 +258,7 @@ public class SignatureCube {
 
 	/**
 	 * Recupera el tama&ntilde;o de datos firmados.
+	 * 
 	 * @return Tama&ntilde;o de los datos firmados.
 	 */
 	public final long getDataSize() {
@@ -225,6 +267,7 @@ public class SignatureCube {
 
 	/**
 	 * Establece el tama&ntilde;o de datos firmados.
+	 * 
 	 * @param size Tama&ntilde;o de los datos firmados.
 	 */
 	public final void setDataSize(final long size) {
@@ -233,6 +276,7 @@ public class SignatureCube {
 
 	/**
 	 * Establece el formato longevo al que se actualiz&oacute; la firma.
+	 * 
 	 * @return Formato longevo al que se actualiz&oacute; la firma.
 	 */
 	public final String getImprovedFormat() {
@@ -241,6 +285,7 @@ public class SignatureCube {
 
 	/**
 	 * Recupera el formato longevo al que se actualiz&oacute; la firma.
+	 * 
 	 * @param improvedFormat Formato longevo al que se actualiz&oacute; la firma.
 	 */
 	public final void setImprovedFormat(final String improvedFormat) {
@@ -248,7 +293,9 @@ public class SignatureCube {
 	}
 
 	/**
-	 * Recupera el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 * Recupera el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la
+	 * firma.
+	 * 
 	 * @return C&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
 	 */
 	public final String getApplication() {
@@ -256,15 +303,57 @@ public class SignatureCube {
 	}
 
 	/**
-	 * Establece el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
-	 * @param aplication C&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la firma.
+	 * Establece el c&oacute;digo DIR3 de la aplicaci&oacute;n.
+	 * 
+	 * @param dir3Code C&oacute;digo DIR3 de la aplicaci&oacute;n.
+	 */
+	public final void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
+	}
+
+	/**
+	 * Recupera el c&oacute;digo DIR3.
+	 * 
+	 * @return C&oacute;digo DIR3 de la aplicaci&oacute;n que realiz&oacute; la
+	 *         firma.
+	 */
+	public final String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	/**
+	 * Establece la organizaci&oacute;n de la aplicaci&oacute;n.
+	 * 
+	 * @param organization Nombre de la organizaci&oacute;n.
+	 */
+	public final void setOrganization(final String organization) {
+		this.organization = organization;
+	}
+
+	/**
+	 * Recupera el nombre de la organizaci&oacute;n.
+	 * 
+	 * @return Nombre de la organizaci&oacute;n.
+	 */
+	public final String getOrganization() {
+		return this.organization;
+	}
+
+	/**
+	 * Establece el c&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la
+	 * firma.
+	 * 
+	 * @param aplication C&oacute;digo de la aplicaci&oacute;n que realiz&oacute; la
+	 *                   firma.
 	 */
 	public final void setApplication(final String aplication) {
 		this.application = aplication;
 	}
 
 	/**
-	 * Agrega un n&uacute;mero de firmas al total de firmas acorde a la configuraci&oacute;n establecida.
+	 * Agrega un n&uacute;mero de firmas al total de firmas acorde a la
+	 * configuraci&oacute;n establecida.
+	 * 
 	 * @param n N&uacute;mero de firmas.
 	 */
 	public void addToTotal(final long n) {
@@ -272,7 +361,9 @@ public class SignatureCube {
 	}
 
 	/**
-	 * Recupera el n&uacute;mero total de firmas que se realizaron acorde a la configuraci&oacute;n establecida.
+	 * Recupera el n&uacute;mero total de firmas que se realizaron acorde a la
+	 * configuraci&oacute;n establecida.
+	 * 
 	 * @return N&uacute;mero total de firmas.
 	 */
 	public long getTotal() {
@@ -283,8 +374,10 @@ public class SignatureCube {
 	 * Devuelve una cadena con las propiedades del objeto con el formato
 	 * "Formato;FormatoMejorado;Algoritmo;Proveedor;Navegador;ResultadoOperacion;IdTransaccion;Tama&ntilde;oFichero".<br>
 	 * <ul>
-	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se solicit&oacute; actualizar.</li>
-	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso contrario.</li>
+	 * <li>FormatoMejorado: Formato longevo de firma o vacio si no se
+	 * solicit&oacute; actualizar.</li>
+	 * <li>ResultadoOperacion: 0 si la operaci&oacute;n fall&oacute;, 1 en caso
+	 * contrario.</li>
 	 * <li>Tama&ntilde;oFichero: Tama&ntilde;o del fichero firmado en bytes.</li>
 	 * </ul>
 	 */
@@ -294,130 +387,111 @@ public class SignatureCube {
 		final StringBuilder result = new StringBuilder();
 
 		// Aplicacion
-		if (this.getApplication() != null) {
-			result.append(clean(this.getApplication(), 45));
+		if (getApplication() != null) {
+			result.append(clean(getApplication(), 45));
+		}
+		result.append(";");//$NON-NLS-1$
+
+		// Codigo DIR3
+		if (getDir3Code() != null) {
+			result.append(clean(getDir3Code(), 50));
+		}
+		result.append(";");//$NON-NLS-1$
+
+		// Organizacion
+		if (getOrganization() != null) {
+			result.append(clean(getOrganization(), 255));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Formato
-		if (this.getFormat() != null) {
-			result.append(clean(this.getFormat(), 20));
+		if (getFormat() != null) {
+			result.append(clean(getFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Formato forzado
-		if (this.getImprovedFormat() != null) {
-			result.append(clean(this.getImprovedFormat(), 20));
+		if (getImprovedFormat() != null) {
+			result.append(clean(getImprovedFormat(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Algoritm
-		if (this.getAlgorithm() != null) {
-			result.append(clean(this.getAlgorithm(), 20));
+		if (getAlgorithm() != null) {
+			result.append(clean(getAlgorithm(), 20));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Nombre del proveedor
-		if (this.getProvider() != null) {
-			result.append(clean(this.getProvider(), 45));
+		if (getProvider() != null) {
+			result.append(clean(getProvider(), 45));
 		}
 		result.append(";");//$NON-NLS-1$
 
 		// Navegador
-		if (this.getBrowser() != null) {
-			result.append(this.getBrowser());
+		if (getBrowser() != null) {
+			result.append(getBrowser());
 		}
 		result.append(";") //$NON-NLS-1$
-			.append(this.isResultSign() ? "1" : "0").append(";")  //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
-			.append(this.getIdTransaction()).append(";") //$NON-NLS-1$
-			.append(this.getDataSize());
+				.append(isResultSign() ? "1" : "0").append(";") //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
+				.append(getIdTransaction()).append(";") //$NON-NLS-1$
+				.append(getDataSize());
 
 		return result.toString();
 	}
 
 	/**
-	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un tama&ntilde;o m&aacute;ximo.
-	 * @param text Texto que hay que limpiar.
+	 * Elimina caracteres problem&aacute;ticos de un texto y lo ajusta a un
+	 * tama&ntilde;o m&aacute;ximo.
+	 * 
+	 * @param text      Texto que hay que limpiar.
 	 * @param maxLength Longitud m&aacute;xima del texto.
 	 * @return Cadena de texto limpia.
 	 */
 	private static String clean(final String text, final int maxLength) {
 		String cleanedText = text.replace(';', ' ').replace('\n', ' ');
 		if (maxLength > 0 && cleanedText.length() > maxLength) {
-			cleanedText = cleanedText.substring(0,  maxLength);
+			cleanedText = cleanedText.substring(0, maxLength);
 		}
 		return cleanedText.trim();
 	}
 
 	/**
 	 * Compara este objeto con otro.
+	 * 
 	 * @param obj Objeto con el que comparar.
 	 * @return true si son iguales , false si son distintos
 	 */
 	@Override
 	public boolean equals(final Object obj) {
-
-		if (obj == null) {
+		if (this == obj)
+			return true;
+		if (!(obj instanceof SignatureCube))
 			return false;
-		}
-
-		// Solo implementamos un nuevo modo de comparacion cuando el objeto al que se compara
-		// es de tipo SignatureCube
-		if (!(obj instanceof SignatureCube)) {
-			return super.equals(obj);
-		}
-
-		// Comparamos cada valor contenido para ver si son iguales (ambos nulos o iguales entre si)
-
-		final SignatureCube signature = (SignatureCube) obj;
-
-		// Aplicacion
-		if (!(getApplication() == null && signature.getApplication() == null ||
-				getApplication() != null && getApplication().equals(signature.getApplication()))) {
-			return false;
-		}
-
-		// Algoritmo
-		if (!(getAlgorithm() == null && signature.getAlgorithm() == null ||
-				getAlgorithm() != null && getAlgorithm().equals(signature.getAlgorithm()))) {
-			return false;
-		}
-
-		// Formato
-		if (!(getFormat() == null && signature.getFormat() == null ||
-				getFormat() != null && getFormat().equals(signature.getFormat()))) {
-			return false;
-		}
-
-		// Formato longevo
-		if (!(getImprovedFormat() == null && signature.getImprovedFormat() == null ||
-				getImprovedFormat() != null && getImprovedFormat().equals(signature.getImprovedFormat()))) {
-			return false;
-		}
-
-		// Proveedor
-		if (!(getProvider() == null && signature.getProvider() == null ||
-				getProvider() != null && getProvider().equals(signature.getProvider()))) {
-			return false;
-		}
-
-		// Navegador
-		if (!(getBrowser() == null && signature.getBrowser() == null ||
-				getBrowser() != null && getBrowser().equals(signature.getBrowser()))) {
-			return false;
-		}
-
-		// Resultado
-		if (isResultSign() != signature.isResultSign()) {
-			return  false;
-		}
-
-		return true;
+		SignatureCube other = (SignatureCube) obj;
+		return Objects.equals(application, other.application)
+				&& Objects.equals(dir3Code, other.dir3Code)
+				&& Objects.equals(organization, other.organization)
+				&& Objects.equals(format, other.format)
+				&& Objects.equals(improvedFormat, other.improvedFormat)
+				&& Objects.equals(algorithm, other.algorithm)
+				&& Objects.equals(provider, other.provider)
+				&& Objects.equals(browser, other.browser)
+				&& resultSign == other.resultSign;
 	}
 
 	@Override
 	public int hashCode() {
-		return Objects.hash(this.application, this.algorithm, this.format, this.improvedFormat,
-				this.provider, this.browser, new Boolean(this.resultSign));
+		return Objects.hash(
+				application,
+				organization, 
+				dir3Code,
+				format,
+				improvedFormat,
+				algorithm,
+				provider,
+				browser,
+				resultSign,
+				idTransaction);
 	}
 }

@@ -4,7 +4,8 @@ import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
 
-import es.gob.fire.i18n.Language;
+import es.gob.fire.signature.i18n.Language;
+
 
 /**
  * Clase que carga e instancia los recursos de los distintos idiomas disponibles.

@@ -27,7 +27,6 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpSession;
 
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.internal.sessions.SessionException;
 import es.gob.fire.server.services.internal.sessions.SessionsDAO;
 import es.gob.fire.server.services.internal.sessions.SessionsDAOFactory;
@@ -40,6 +39,7 @@ import es.gob.fire.server.services.statistics.StatisticsConfig;
 import es.gob.fire.server.services.statistics.TransactionRecorder;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Gestiona las transacciones de firma de la aplicaciones almacenando los datos de cada
@@ -145,7 +145,9 @@ public final class SessionCollector {
     		fireSession.setAttribute(ServiceParams.SESSION_PARAM_SUBJECT_REF, subjectRef);
     	}
 
-   		LOGGER.fine(trAux.getLogFormatter().fTr(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
+    	if (LOGGER.isLoggable(Level.FINE)) {
+    		LOGGER.fine(trAux.getLogFormatter().fTr(transactionId, "Se crea la transaccion " + transactionId)); //$NON-NLS-1$
+    	}
 
     	return fireSession;
     }
@@ -277,8 +279,8 @@ public final class SessionCollector {
 		if (!needForceLoad && session != null && session.getAttribute(trId) != null) {
 			fireSession = findSessionFromCurrentSession(trId, session, trAux);
 
-			if (fireSession != null) {
-				LOGGER.info(trAux.getLogFormatter().fTr(trId, "Sesion ya cargada")); //$NON-NLS-1$
+			if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+				LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion ya cargada")); //$NON-NLS-1$
 			}
 		}
 
@@ -290,8 +292,8 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.saveIntoHttpSession(session);
 				}
-				if (fireSession != null) {
-					LOGGER.info(trAux.getLogFormatter().fTr(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
+				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion cargada de memoria")); //$NON-NLS-1$
 				}
 			}
 
@@ -301,8 +303,8 @@ public final class SessionCollector {
 				if (fireSession != null && session != null) {
 					fireSession.saveIntoHttpSession(session);
 				}
-				if (fireSession != null) {
-					LOGGER.info(trAux.getLogFormatter().fTr(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
+				if (fireSession != null && LOGGER.isLoggable(Level.FINE)) {
+					LOGGER.fine(trAux.getLogFormatter().fTr(trId, "Sesion cargada de almacenamiento persistente")); //$NON-NLS-1$
 				}
 			}
 		}
@@ -450,7 +452,9 @@ public final class SessionCollector {
 
 		fireSession.invalidate();
 
-    	LOGGER.fine(trAux.getLogFormatter().fTr(fireSession.getTransactionId(), "Se elimina la transaccion")); //$NON-NLS-1$
+		if (LOGGER.isLoggable(Level.FINE)) {
+			LOGGER.fine(trAux.getLogFormatter().fTr(fireSession.getTransactionId(), "Se elimina la transaccion")); //$NON-NLS-1$
+		}
     }
 
     /**

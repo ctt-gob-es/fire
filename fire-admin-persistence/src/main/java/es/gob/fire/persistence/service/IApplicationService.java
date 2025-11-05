@@ -10,8 +10,8 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.ProviderApplicationDTO;
-import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.CertificatesApplication;
@@ -192,4 +192,12 @@ public interface IApplicationService {
 	ProviderApplicationDTO convertProviderEntityToProviderApplicationDTO(Provider entity, Application application);
 
 	ProviderApplication convertProviderApplicationDTOToEntity(ProviderApplicationDTO dto, Application application);
+
+	List<String> findOrganizationByDIR3(String dir3Code);
+	
+	int renameOrganizationByDir3Code(String dir3Code, String newOrganization);
+	
+	List<OrganizationDTO> findOrganizations();
+	
+	List<Application> findAllApplicationsOrdered();
 }

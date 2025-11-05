@@ -16,13 +16,14 @@ import java.util.logging.Logger;
 
 import javax.servlet.http.HttpServletResponse;
 
+import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.statistics.AuditSignatureRecorder;
 import es.gob.fire.server.services.statistics.SignatureRecorder;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 
 /**
@@ -119,6 +120,7 @@ public class RecoverBatchSignatureManager {
         // Si fallo la operacion de firma, se notifica un error en la operacion
         if (batchResult.isSignFailed(docId)) {
             LOGGER.severe(logF.f("El documento solicitado del lote no se firmo correctamente")); //$NON-NLS-1$
+            AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  "El documento solicitado del lote no se firmo correctamente");   //$NON-NLS-1$
         	Responser.sendError(response, FIReError.BATCH_SIGNING);
         	return;
         }
@@ -151,7 +153,7 @@ public class RecoverBatchSignatureManager {
         	session.setAttribute(ServiceParams.SESSION_PARAM_BATCH_RESULT, batchResult);
         	SIGNLOGGER.register(session, false, docId);
         	AUDITSIGNLOGGER.register(session, false, docId, errorMessage);
-
+        	AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR, errorMessage);  
         	SessionCollector.commit(session, trAux);
         	Responser.sendError(response, FIReError.INVALID_TRANSACTION);
         	return;

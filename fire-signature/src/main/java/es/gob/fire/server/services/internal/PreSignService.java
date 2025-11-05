@@ -37,13 +37,13 @@ import es.gob.fire.server.connector.FIReConnectorUnknownUserException;
 import es.gob.fire.server.connector.LoadResult;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.FIReTriHelper;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.ServiceUtil;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.statistics.TransactionType;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servicio de carga y prefirma de datos para su posterior firma a trav&eacute;s
@@ -82,17 +82,37 @@ public final class PreSignService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		RequestParameters params;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
-    	final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
+
+		// Recuperamos el identificador de transaccion
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		try {
+			params.checkParameters(logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
     	final String userRef = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_REF);
     	String certB64 = params.getParameter(ServiceParams.HTTP_PARAM_CERT);
 		String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
@@ -104,33 +124,23 @@ public final class PreSignService extends HttpServlet {
         	redirectErrorUrl = (String) request.getAttribute(ServiceParams.HTTP_ATTR_ERROR_URL);
     	}
 
-    	final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-    	final LogTransactionFormatter logF = trAux.getLogFormatter();
-
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de prefirma")); //$NON-NLS-1$
-
-        // Comprobamos que se hayan proporcionado los parametros indispensables
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning(logF.f("No se ha proporcionado el ID de transaccion")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
 
         if (userRef == null || userRef.isEmpty()) {
             LOGGER.warning(logF.f("No se ha proporcionado la referencia del firmante")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
             return;
         }
 
         if (certB64 == null || certB64.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el certificado del firmante")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
         	return;
         }
 
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 		try {

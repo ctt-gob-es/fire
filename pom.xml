@@ -89,6 +89,7 @@
 				<module>fire-admin-persistence</module>
 				<module>fire-alarms</module>
 				<module>fire-alarms-graylog</module>
+				<module>fire-alarms-mail</module>
 				<module>fire-client-java</module>
 				<module>fire-log-handlers</module>
 				<module>fire-signature-common-libraries</module>
@@ -113,7 +114,7 @@
 			<modules>
 				<module>fire-admin-web</module>
 				<module>clavefirma-test-services</module>
-				<module>fire-signature</module>
+				<module>fire-signature</module>	
 				<module>fire-test-jsp</module>
 				<module>log-consumer-service</module>
 			</modules>
@@ -134,6 +135,7 @@
 				<module>fire-alarms-eventmanager</module>
 			</modules>
 		</profile>
+
 	</profiles>
 
 	<dependencyManagement>
@@ -164,83 +166,60 @@
 				<version>${fire.version}</version>
 			</dependency>
 			<dependency>
-				<groupId>es.gob.afirma</groupId>
-				<artifactId>afirma-core</artifactId>
-				<version>${clienteafirma.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>es.gob.afirma</groupId>
-				<artifactId>afirma-server-triphase-signer-core</artifactId>
-				<version>${clienteafirma.version}</version>
-			</dependency>
-
-			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-client</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-common-libraries</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-connector</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-connector-clavefirma</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-connector-clavefirma-test</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-document</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-decipher</artifactId>
 				<version>${fire.version}</version>
-			</dependency>
-			
+			</dependency>			
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-signature-i18n</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-upgrade</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-upgrade-afirma</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-alarms-graylog</artifactId>
@@ -253,9 +232,37 @@
 			</dependency>
 			<dependency>
 				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-alarms-mail</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-mail</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-statistics-common</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.fire</groupId>
+				<artifactId>fire-log-handlers</artifactId>
+				<version>${fire.version}</version>
+			</dependency>
+			
+			<!-- Cliente afirma -->
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>es.gob.afirma</groupId>
+				<artifactId>afirma-server-triphase-signer-core</artifactId>
+				<version>${clienteafirma.version}</version>
+			</dependency>
+			
 			<!-- Hibernate 5 -->
 			<dependency>
 				<groupId>org.hibernate</groupId>
@@ -273,18 +280,6 @@
 				<version>${hibernate.version}</version>
 			</dependency>
 			<!-- Core -->
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-statistics-common</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-log-handlers</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-
 			<dependency>
 				<groupId>es.fnmt.fire</groupId>
 				<artifactId>fnmt-fire-connector</artifactId>
@@ -362,7 +357,7 @@
 			<!-- BouncyCastle -->
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
-				<artifactId>bcmail-jdk18on</artifactId>
+				<artifactId>bcprov-jdk18on</artifactId>
 				<version>1.77</version>
 			</dependency>
 			<dependency>
@@ -532,7 +527,4 @@
 		<releases> <enabled>true</enabled> <updatePolicy>never</updatePolicy> </releases> 
 		<snapshots> <enabled>false</enabled> <updatePolicy>never</updatePolicy> </snapshots> 
 		</pluginRepository> </pluginRepositories> -->
-	<modules>
-		<module>fire-mail</module>
-	</modules>
 </project>

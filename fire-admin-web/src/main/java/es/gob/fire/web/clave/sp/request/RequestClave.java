@@ -1,9 +1,9 @@
 /*
- * La plataforma TS@ es de libre distribución cuyo código fuente puede ser consultado
+ * La plataforma TS@ es de libre distribucion cuyo codigo fuente puede ser consultado
  * y descargado desde http://forja-ctt.administracionelectronica.gob.es
  *
  * Copyright 2019 Gobierno de España
- * Este fichero se distribuye bajo las licencias EUPL versión 1.1  y GPL versión 3, o superiores, según las
+ * Este fichero se distribuye bajo las licencias EUPL version 1.1  y GPL version 3, o superiores, según las
  * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
  * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
  */
@@ -116,7 +116,7 @@ public class RequestClave {
             binaryRequestMessage = protocolEngine.generateRequestMessage(authRequest, true);
         } catch (EIDASSAMLEngineException e) {
             LOGGER.error(e.getMessage(), e);
-            throw new WebAdminException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG001));
+            throw new WebAdminException(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG014));
         }
         
         SessionHolder.sessionsSAML.put(authRequest.getId(), relayState);

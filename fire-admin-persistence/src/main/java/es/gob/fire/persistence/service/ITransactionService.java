@@ -29,6 +29,8 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.commons.utils.QueryEnum;
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 
@@ -39,68 +41,294 @@ import es.gob.fire.persistence.entity.Transaction;
  */
 public interface ITransactionService {
 
-	/**
-	 * Method that obtains the information for a transaction by its identifier.
-	 * @param transactionId The transaction identifier.
-	 * @return {@link Transaction}
-	 */
-	Transaction getTransactionByTransactionId(Long transactionId);
-	
-	/**
-     * Method that obtains from the persistence a transactions list grouped by application and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the transactions from the persistence
+    /**
+     * Method that obtains the information for a transaction by its identifier.
+     * 
+     * @param transactionId The transaction identifier.
+     * @return {@link Transaction}
      */
-	List<TransactionDTO> getTransactionsByApplication(Integer month, Integer year);
-	
-	/**
-     * Method that obtains from the persistence a transactions list grouped by provider and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the transactions from the persistence
-     */
-	List<TransactionDTO> getTransactionsByProvider(Integer month, Integer year);
-	
-	/**
-     * Method that obtains from the persistence a transactions list grouped by application and size and filtered by its year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the transactions from the persistence
-     */
-	List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer month, final Integer year);
-	
-	/**
-     * Method that obtains from the persistence a transactions list grouped by application and filtered by its operation, year and month.
-     * @param month month
-     * @param year year
-     * @return Object list that represents the transactions from the persistence
-     */
-	List<TransactionDTO> getTransactionsByOperation(final Integer month, final Integer year);
-	
-	/**
-	 * Method that stores a transaction object.
-	 * @param transaction transaction object
-	 * @return {@link Transaction}
-	 */
-	Transaction saveTransaction(Transaction transaction);
+    Transaction getTransactionByTransactionId(Long transactionId);
 
-	/**
-	 * Method that deletes a transaction in the persistence.
-	 * @param transactionId {@link Long} that represents the transaction to delete.
-	 */
-	void deleteTransactionById(Long transactionId);
+    /**
+     * Method that stores a transaction object.
+     * 
+     * @param transaction Transaction object
+     * @return {@link Transaction}
+     */
+    Transaction saveTransaction(Transaction transaction);
 
-	/**
-	 * Method that gets all the transactions from the persistence.
-	 * @return a {@link Iterable<Transaction>} with all transactions.
-	 */
-	Iterable<Transaction> getAllTransaction();
+    /**
+     * Method that deletes a transaction from the persistence.
+     * 
+     * @param transactionId {@link Long} that represents the transaction to delete.
+     */
+    void deleteTransactionById(Long transactionId);
 
-	/**
-	 * Method that returns a list of transactions to be showed in DataTable.
-	 * @param input DataTableInput with filtering, paging and sorting configuration.
-	 * @return A set of DataTable rows that matches the query.
-	 */
-	DataTablesOutput<Transaction> getAllTransaction(DataTablesInput input);
+    /**
+     * Method that gets all the transactions from the persistence.
+     * 
+     * @return an {@link Iterable<Transaction>} with all transactions.
+     */
+    Iterable<Transaction> getAllTransaction();
+
+    /**
+     * Method that returns a list of transactions to be shown in DataTable.
+     * 
+     * @param input DataTablesInput with filtering, paging and sorting configuration.
+     * @return A set of DataTable rows that matches the query.
+     */
+    DataTablesOutput<Transaction> getAllTransaction(DataTablesInput input);
+
+    // ============================= METHODS WITHOUT INTERVAL =============================
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by application,
+     * filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year Year (AAAA)
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByApplication(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by application,
+     * filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month         Month (1-12)
+     * @param year          Year (AAAA)
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByApplication(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by provider,
+     * filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year  Year (AAAA)
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByProvider(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by provider,
+     * filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month         Month (1-12)
+     * @param year          Year (AAAA)
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByProvider(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by application and size,
+     * filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year  Year (AAAA)
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByDatesSizeApp(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by application and size,
+     * filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month         Month (1-12)
+     * @param year          Year (AAAA)
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByDatesSizeApp(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by operation type,
+     * filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year  Year (AAAA)
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByOperation(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by operation type,
+     * filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month         Month (1-12)
+     * @param year          Year (AAAA)
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByOperation(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by organism,
+     * filtered by its year and month.
+     * 
+     * @param month Month (1-12)
+     * @param year  Year (AAAA)
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByOrganism(Integer month, Integer year);
+
+    /**
+     * Method that obtains from the persistence a transactions list grouped by organism,
+     * filtered by its year and month, applying optional filters on applications and organizations.
+     * 
+     * @param month         Month (1-12)
+     * @param year          Year (AAAA)
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return Object list that represents the transactions from the persistence.
+     */
+    List<TransactionDTO> getTransactionsByOrganism(Integer month, Integer year, List<String> applications, List<String> organizations);
+
+    // =========================== METHODS WITH INTERVAL ===========================
+
+    /**
+     * Retrieves a list of transactions grouped by application,
+     * within a date range defined by the provided start and end month/year.
+     *
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear  the starting year of the date range.
+     * @param endMonth   the ending month (1–12) of the date range.
+     * @param endYear    the ending year of the date range.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByApplication(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of transactions grouped by application,
+     * within a date range defined by the provided start and end month/year,
+     * applying optional filters on applications and organizations.
+     *
+     * @param startMonth    the starting month (1–12) of the date range.
+     * @param startYear     the starting year of the date range.
+     * @param endMonth      the ending month (1–12) of the date range.
+     * @param endYear       the ending year of the date range.
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByApplication(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of transactions grouped by provider,
+     * within a date range defined by the provided start and end month/year.
+     *
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear  the starting year of the date range.
+     * @param endMonth   the ending month (1–12) of the date range.
+     * @param endYear    the ending year of the date range.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByProvider(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of transactions grouped by provider,
+     * within a date range defined by the provided start and end month/year,
+     * applying optional filters on applications and organizations.
+     *
+     * @param startMonth    the starting month (1–12) of the date range.
+     * @param startYear     the starting year of the date range.
+     * @param endMonth      the ending month (1–12) of the date range.
+     * @param endYear       the ending year of the date range.
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByProvider(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of transactions grouped by application and size,
+     * within a date range defined by the provided start and end month/year.
+     *
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear  the starting year of the date range.
+     * @param endMonth   the ending month (1–12) of the date range.
+     * @param endYear    the ending year of the date range.
+     * @return a list of {@link TransactionDTO} objects filtered by size per application and date range.
+     */
+    List<TransactionDTO> getTransactionsByDatesSizeApp(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of transactions grouped by application and size,
+     * within a date range defined by the provided start and end month/year,
+     * applying optional filters on applications and organizations.
+     *
+     * @param startMonth    the starting month (1–12) of the date range.
+     * @param startYear     the starting year of the date range.
+     * @param endMonth      the ending month (1–12) of the date range.
+     * @param endYear       the ending year of the date range.
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link TransactionDTO} objects filtered by size per application and date range.
+     */
+    List<TransactionDTO> getTransactionsByDatesSizeApp(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of transactions grouped by operation type,
+     * within a date range defined by the provided start and end month/year.
+     *
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear  the starting year of the date range.
+     * @param endMonth   the ending month (1–12) of the date range.
+     * @param endYear    the ending year of the date range.
+     * @return a list of {@link TransactionDTO} objects matching the specified operation and date range.
+     */
+    List<TransactionDTO> getTransactionsByOperation(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of transactions grouped by operation type,
+     * within a date range defined by the provided start and end month/year,
+     * applying optional filters on applications and organizations.
+     *
+     * @param startMonth    the starting month (1–12) of the date range.
+     * @param startYear     the starting year of the date range.
+     * @param endMonth      the ending month (1–12) of the date range.
+     * @param endYear       the ending year of the date range.
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link TransactionDTO} objects matching the specified operation and date range.
+     */
+    List<TransactionDTO> getTransactionsByOperation(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+
+    /**
+     * Retrieves a list of transactions grouped by organism,
+     * within a date range defined by the provided start and end month/year.
+     *
+     * @param startMonth the starting month (1–12) of the date range.
+     * @param startYear  the starting year of the date range.
+     * @param endMonth   the ending month (1–12) of the date range.
+     * @param endYear    the ending year of the date range.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByOrganism(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear);
+
+    /**
+     * Retrieves a list of transactions grouped by organism,
+     * within a date range defined by the provided start and end month/year,
+     * applying optional filters on applications and organizations.
+     *
+     * @param startMonth    the starting month (1–12) of the date range.
+     * @param startYear     the starting year of the date range.
+     * @param endMonth      the ending month (1–12) of the date range.
+     * @param endYear       the ending year of the date range.
+     * @param applications  List of application names to filter or null.
+     * @param organizations List of organization names to filter or null.
+     * @return a list of {@link TransactionDTO} objects matching the specified date range.
+     */
+    List<TransactionDTO> getTransactionsByOrganism(Integer startMonth, Integer startYear, Integer endMonth, Integer endYear, List<String> applications, List<String> organizations);
+    
+    List<String> getDifferentApplications();
+    
+    List<OrganizationDTO> getDifferentOrganizations();
 }

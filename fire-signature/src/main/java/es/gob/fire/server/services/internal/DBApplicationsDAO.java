@@ -31,7 +31,8 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	private static final Logger LOGGER = Logger.getLogger(DBApplicationsDAO.class.getName());
 
-	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, tb_certificados.huella " //$NON-NLS-1$
+	private static final String STATEMENT_SELECT_ACCESS_INFO = "SELECT tb_aplicaciones.nombre, tb_aplicaciones.habilitado, " //$NON-NLS-1$
+			+ "tb_certificados.huella, tb_aplicaciones.dir3_code, tb_aplicaciones.organization " //$NON-NLS-1$
 			+ "FROM tb_aplicaciones, tb_certificados, tb_certificados_de_aplicacion " //$NON-NLS-1$
 			+ "WHERE tb_aplicaciones.id =  ? " //$NON-NLS-1$
 				+ "AND tb_aplicaciones.id=tb_certificados_de_aplicacion.id_aplicaciones " //$NON-NLS-1$
@@ -44,7 +45,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 	}
 
 	@Override
-	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final TransactionAuxParams trAux)
+	public ApplicationAccessInfo getApplicationAccessInfo(final String appId, final LogTransactionFormatter logF)
 			throws IOException {
 
 		ApplicationAccessInfo result;
@@ -57,19 +58,21 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 			try (ResultSet rs = st.executeQuery()) {
 				if (!rs.next()) {
-					LOGGER.fine(trAux.getLogFormatter().f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
+					LOGGER.fine(logF.f("No se ha encontrado en el sistema la aplicacion con el ID: " + appId)); //$NON-NLS-1$
 					return null;
 				}
 
-				DigestInfo[] digestInfo = null;
-
-				final String name = rs.getString(1);
+				final String appName = rs.getString(1);
 				final boolean enabled = rs.getBoolean(2);
+				DigestInfo[] digestInfos = null;
+				final String dir3Code = rs.getString(4);
+				final String organization = rs.getString(5);
+
 				if (enabled) {
-					digestInfo = loadCertificatesInfo(rs, trAux);
+					digestInfos = loadCertificatesInfo(rs, logF);
 				}
 
-				result = new ApplicationAccessInfo(appId, name, enabled, digestInfo);
+				result = new ApplicationAccessInfo(appId, appName, enabled, digestInfos, dir3Code, organization);
 			}
 		}
 		catch (final SQLException e) {
@@ -80,21 +83,21 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 		return result;
 	}
 
-	private static DigestInfo[] loadCertificatesInfo(final ResultSet rs, final TransactionAuxParams trAux) throws SQLException {
+	private static DigestInfo[] loadCertificatesInfo(final ResultSet rs, final LogTransactionFormatter logF) throws SQLException {
 
 		final List<DigestInfo> certDigests = new ArrayList<>();
 
 		do {
-			final DigestInfo digest1 = loadCertDigest(rs.getString(3), trAux);
-			if (digest1 != null) {
-				certDigests.add(digest1);
+			final DigestInfo digest = loadCertDigest(rs.getString(3), logF);
+			if (digest != null) {
+				certDigests.add(digest);
 			}
 		} while (rs.next());
 
 		return !certDigests.isEmpty() ? certDigests.toArray(new DigestInfo[0]) : null;
 	}
 
-	private static DigestInfo loadCertDigest(final String certDigest, final TransactionAuxParams trAux) {
+	private static DigestInfo loadCertDigest(final String certDigest, final LogTransactionFormatter logF) {
 
 		if (certDigest == null || certDigest.isEmpty()) {
 			return null;
@@ -107,7 +110,7 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 			digestInfo = DigestInfo.create(hash);
 		}
 		catch (final Exception e) {
-			LOGGER.warning(trAux.getLogFormatter().f("Una de las huellas registrada por la aplicacion no es valida: " + e)); //$NON-NLS-1$
+			LOGGER.warning(logF.f("Una de las huellas registrada por la aplicacion no es valida: " + e)); //$NON-NLS-1$
 			digestInfo = null;
 		}
 		return digestInfo;
@@ -115,7 +118,16 @@ public class DBApplicationsDAO implements ApplicationsDAO {
 
 	@Override
 	public ApplicationOperationConfig getOperationConfig(final String appId,
-			final TransactionAuxParams trAux) throws IOException {
-		return this.operationConfigLoader.getOperationConfig(appId);
+			final LogTransactionFormatter logF) throws IOException {
+
+		ApplicationOperationConfig config = this.operationConfigLoader.getOperationConfig(appId);
+
+		if (config == null) {
+			LOGGER.warning(logF.f("No se encuentra establecida ninguna configuracion para las aplicaciones. " //$NON-NLS-1$
+					+ "No se estableceran limites para el servicio")); //$NON-NLS-1$
+			config = new ApplicationOperationConfig();
 	}
+
+		return config;
+}
 }

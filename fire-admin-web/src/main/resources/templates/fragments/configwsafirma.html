@@ -1,0 +1,693 @@
+<div class="container-fluid">
+  <h4 class="c-grey-900 mT-10 mB-30" th:text="#{ws.afirma.title}"></h4>
+  <div class="row gap-20 masonry pos-r">
+    <div class="masonry-item col-md-10">
+      <div class="bgc-white p-20 bd">
+        <h4 class="c-grey-900 mB-20" th:text="#{ws.afirma.title}"></h4>
+
+        <form name="altEditor-form" role="form" id="serverAfirmaFormId" th:object="${serverAfirmaDTO}">
+          <div id="messageWsAfirmaFormId" role="alert"></div>
+
+          <!-- Hidden base -->
+          <input type="hidden" class="primarykey" id="idServerAfirma" th:field="*{idServerAfirma}">
+          <input type="hidden" id="keystoreB64" th:field="*{keystoreB64}"/>
+          <input type="hidden" id="certificateB64" th:field="*{certificateB64}"/>
+
+          <!-- Hidden (fallback B64) for new stores -->
+          <input type="hidden" id="truststoreB64" th:field="*{truststoreB64}"/>
+          <input type="hidden" id="authTruststoreB64" th:field="*{authTruststoreB64}"/>
+          
+          <input type="hidden" id="keystoreExt" th:field="*{keystoreExt}"/>
+		  <input type="hidden" id="truststoreExt" th:field="*{truststoreExt}"/>
+		  <input type="hidden" id="authTruststoreExt" th:field="*{authTruststoreExt}"/>
+          
+
+          <!-- URL -->
+          <div class="form-group row">
+            <label for="urlServerId" class="col-sm-3" th:text="#{ws.afirma.field.url}"></label>
+            <div class="col-sm-9">
+              <input type="text" id="urlServerId" th:field="*{urlServer}" class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+              <span id="urlServerId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+            </div>
+          </div>
+
+          <!-- Timeout -->
+          <div class="form-group row">
+            <label for="timeoutId" class="col-sm-3" th:text="#{ws.afirma.field.timeout}"></label>
+            <div class="col-sm-2">
+              <input type="number" id="timeoutId" th:field="*{timeout}" class="form-control" style="overflow:hidden; margin-left:-15px;" min="1"/>
+              <span id="timeoutId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+            </div>
+          </div>
+
+          <!-- Application -->
+          <div class="form-group row">
+            <label for="nameAppId" class="col-sm-3" th:text="#{ws.afirma.field.appName}"></label>
+            <div class="col-sm-4">
+              <input type="text" id="nameAppId" th:field="*{nameApp}" class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+              <span id="nameAppId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+            </div>
+          </div>
+
+          <!-- Authentication -->
+          <div class="form-group row">
+            <label for="authenticationId" th:text="#{ws.afirma.field.authentication}" class="col-sm-3"></label>
+            <select id="authenticationId" class="col-sm-3 form-control" th:field="*{idAuthenticationType}">
+              <option th:each="at: ${listCAuthenticationTypeDTO}"
+                      th:value="${at.idAuthenticationType}"
+                      th:text="${at.value}"
+                      th:selected="${idAuthenticationType == at.idAuthenticationType}"/>
+            </select>
+          </div>
+
+          <!-- ===================== UsernameToken section ===================== -->
+          <div id="sectionUserPass">
+            <!-- Username -->
+            <div class="form-group row">
+              <label for="userId" class="col-sm-3" th:text="#{ws.afirma.field.user}"></label>
+              <div class="col-sm-4">
+                <input type="text" id="userId" th:field="*{user}" class="form-control"
+                       style="overflow:hidden; margin-left:-15px;"/>
+                <span id="userId_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+            </div>
+            <!-- Password -->
+            <div class="form-group row">
+              <label for="password" class="col-sm-3" th:text="#{ws.afirma.field.password}"></label>
+              <div class="col-sm-4">
+                <input type="password" id="password" name="password"
+                   th:value="${serverAfirmaDTO.hasUserPassword} ? '******' : ''"
+                   th:attr="data-sentinel=${serverAfirmaDTO.hasUserPassword} ? '1' : '0'"
+                   autocomplete="new-password"
+                   class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+                <span id="password_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- ===================== BinarySecurityToken section ===================== -->
+          <div id="sectionKeystore">
+            <hr/>
+            <h5 class="c-grey-900 mB-10" th:text="#{ws.afirma.section.keystore}"></h5>
+
+            <!-- Keystore file -->
+            <div class="form-group row">
+              <label for="keystoreFile" class="col-sm-3" th:text="#{ws.afirma.field.keystore}"></label>
+              <div class="col-sm-6 custom-file">
+                <input type="file" class="custom-file-input" id="keystoreFile" name="keystoreFile" accept=".p12,.pfx,.jks">
+                <label class="custom-file-label" for="keystoreFile" th:text="#{ws.afirma.field.keystore.file.choose}"></label>
+                <span id="keystoreFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+              <div class="col-sm-3">
+                <button type="button"
+				        id="btnDownloadKeystore"
+				        class="btn btn-secondary"
+				        onclick="downloadStore('#keystoreB64','servidorafirma_keystore','#keystoreExt')">
+				  <i class="ti-download"></i> <span th:text="#{ws.afirma.btn.download.store}">Descargar</span>
+				</button>
+              </div>
+            </div>
+
+            <!-- Keystore type + version (version always disabled) -->
+            <div class="form-group row">
+              <label for="ksType" class="col-sm-3" th:text="#{ws.afirma.field.keystore.type}">Tipo Keystore</label>
+              <div class="col-sm-3">
+                <select id="ksType" class="form-control" th:field="*{ksType}">
+                  <option value="PKCS12">PKCS12</option>
+                  <option value="JKS">JKS</option>
+                </select>
+                <span id="ksType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+              <label for="keystoreVersion" class="col-sm-2" th:text="#{ws.afirma.field.keystore.version}">Versión</label>
+              <div class="col-sm-2">
+                <input type="number" id="keystoreVersion" th:field="*{keystoreVersion}" class="form-control"
+                       min="0" step="1" readonly="readonly" disabled="disabled"/>
+                <span id="keystoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+              </div>
+            </div>
+
+            <!-- Keystore password -->
+            <div class="form-group row">
+              <label for="ksPassword" class="col-sm-3" th:text="#{ws.afirma.field.keystore.password}"></label>
+              <div class="col-sm-4">
+                <input type="password" id="ksPassword" name="ksPassword"
+                   th:value="${serverAfirmaDTO.hasKsPassword} ? '******' : ''"
+                   th:attr="data-sentinel=${serverAfirmaDTO.hasKsPassword} ? '1' : '0'"
+                   autocomplete="new-password"
+                   class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+                <span id="passwordKeystore_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+            </div>
+
+            <!-- Cert alias -->
+            <div class="form-group row">
+              <label for="ksCertAlias" class="col-sm-3" th:text="#{ws.afirma.field.keystore.alias}">Alias cert</label>
+              <div class="col-sm-4">
+                <input type="text" id="ksCertAlias" th:field="*{ksCertAlias}" class="form-control"
+                       style="overflow:hidden; margin-left:-15px;"/>
+                <span id="keystoreCertAlias_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+            </div>
+
+            <!-- Cert password -->
+            <div class="form-group row">
+              <label for="ksCertPassword" class="col-sm-3" th:text="#{ws.afirma.field.keystore.cert.password}">Password cert</label>
+              <div class="col-sm-4">
+                <input type="password" id="ksCertPassword" name="ksCertPassword"
+                   th:value="${serverAfirmaDTO.hasKsCertPassword} ? '******' : ''"
+                   th:attr="data-sentinel=${serverAfirmaDTO.hasKsCertPassword} ? '1' : '0'"
+                   autocomplete="new-password"
+                   class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+                <span id="ksCertPassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+              </div>
+            </div>
+
+            <!-- Subject (read-only) -->
+            <div class="form-group row">
+              <div class="col-sm-6">
+                <div id="subjectContainer" name="subjectContainer" class="offset-sm-6 edit-txt"
+                     style="width:105%; margin-top:12px; height:8em; overflow-y:auto; background:#f5f5f5; border:1px solid #ccc; padding:5px;">
+                  <textarea id="subject" name="subject" th:text="*{subject}" readonly
+                            style="white-space:pre-wrap; word-wrap:break-word; font-family:monospace; margin:0; padding:0; border:none; background:transparent; width:100%; height:100%; resize:none; outline:none;"></textarea>
+                </div>
+              </div>
+            </div>
+
+            <!-- Download certificate -->
+            <div class="form-group row" id="idDownLoadCert" name="idDownLoadCert"
+                 th:style="*{keystoreB64 != '' && keystoreB64 != null ? 'display:block;' : 'display:none;'}">
+              <div class="col-sm-6 offset-sm-3">
+                <button type="button" class="btn btn-primary" onclick="downLoadCert()" style="margin-left:-15px;"
+                        th:text="#{ws.afirma.btn.update.download.cert}"></button>
+              </div>
+            </div>
+
+            <!-- ===== SSL Truststore ===== -->
+			<hr/>
+			<h5 class="c-grey-900 mB-10" th:text="#{ws.afirma.section.truststore}">Truststore (TLS)</h5>
+			<p class="text-muted small mB-15" th:text="#{ws.afirma.section.truststore.description}">
+			  
+			</p>
+			
+			<!-- Clear toggle (botón visible siempre) -->
+			<input type="hidden" id="truststoreClear" th:field="*{clearTruststore}"/>
+			<div class="form-group row">
+			  <div class="col-sm-9">
+			    <button type="button" id="btnTsDelete" class="btn btn-danger btn-sm">
+			      <i class="ti-trash"></i> <span id="btnTsDeleteText" th:text="#{ws.afirma.btn.delete.ts}">Eliminar Truststore (TLS)</span>
+			    </button>
+			  </div>
+			</div>
+			
+			<!-- Delete message (solo visible en estado "eliminar") -->
+			<div id="truststoreDeleteMsg" class="alert alert-warning d-none" role="alert">
+			  <span th:text="#{ws.afirma.msg.ts.will_be_deleted}">Se eliminará el valor guardado del Truststore al guardar los cambios.</span>
+			</div>
+			
+			<!-- Wrapper con todos los campos del Truststore; se oculta al eliminar -->
+			<div id="truststoreFieldsWrapper">
+			  <div class="form-group row">
+			    <label for="truststoreFile" class="col-sm-3" th:text="#{ws.afirma.field.truststore}">Truststore</label>
+			    <div class="col-sm-6 custom-file">
+			      <input type="file" class="custom-file-input" id="truststoreFile" name="truststoreFile" accept=".jks,.p12,.pfx">
+			      <label class="custom-file-label" for="truststoreFile" th:text="#{ws.afirma.field.keystore.file.choose}"></label>
+			      <span id="truststoreFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+			    </div>
+			    <div class="col-sm-3">
+			      	<button type="button"
+					        id="btnDownloadTruststore"
+					        class="btn btn-secondary"
+					        onclick="downloadStore('#truststoreB64','servidorafirma_truststore','#truststoreExt')">
+					  <i class="ti-download"></i> <span th:text="#{ws.afirma.btn.download.store}">Descargar</span>
+					</button>
+			    </div>
+			  </div>
+			
+			  <div class="form-group row">
+			    <label for="truststoreType" class="col-sm-3" th:text="#{ws.afirma.field.truststore.type}">Tipo</label>
+			    <div class="col-sm-3">
+			      <select id="truststoreType" class="form-control" th:field="*{truststoreType}">
+			        <option value="JKS">JKS</option>
+			        <option value="PKCS12">PKCS12</option>
+			      </select>
+			      <span id="truststoreType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+			    </div>
+			    <label for="truststoreVersion" class="col-sm-2" th:text="#{ws.afirma.field.truststore.version}">Versión</label>
+			    <div class="col-sm-2">
+			      <input type="number" id="truststoreVersion" th:field="*{truststoreVersion}" class="form-control" min="0" step="1" readonly disabled/>
+			      <span id="truststoreVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+			    </div>
+			  </div>
+			
+			  <div class="form-group row">
+			    <label for="truststorePassword" class="col-sm-3" th:text="#{ws.afirma.field.truststore.password}">Password</label>
+			    <div class="col-sm-4">
+			      <input type="password" id="truststorePassword" name="truststorePassword"
+			             th:value="${serverAfirmaDTO.hasTruststorePassword} ? '******' : ''"
+			             th:attr="data-sentinel=${serverAfirmaDTO.hasTruststorePassword} ? '1' : '0'"
+			             autocomplete="new-password"
+			             class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+			      <span id="truststorePassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+			    </div>
+			  </div>
+			</div>
+
+            <!-- ===== Authentication Truststore ===== -->
+			<hr/>
+			<h5 class="c-grey-900 mB-10" th:text="#{ws.afirma.section.auth.truststore}">Auth Truststore</h5>
+			<p class="text-muted small mB-15" th:text="#{ws.afirma.section.auth.truststore.description}">
+			  
+			</p>
+			
+			<input type="hidden" id="authTruststoreClear" th:field="*{clearAuthTruststore}"/>
+			<div class="form-group row">
+			  <div class="col-sm-9">
+			    <button type="button" id="btnAuthTsDelete" class="btn btn-danger btn-sm">
+			      <i class="ti-trash"></i> <span id="btnAuthTsDeleteText" th:text="#{ws.afirma.btn.delete.auth.ts}">Eliminar Authentication Truststore</span>
+			    </button>
+			  </div>
+			</div>
+			
+			<div id="authTruststoreDeleteMsg" class="alert alert-warning d-none" role="alert">
+			  <span th:text="#{ws.afirma.msg.auth.ts.will_be_deleted}">Se eliminará el valor guardado del Auth Truststore al guardar los cambios.</span>
+			</div>
+			
+			<div id="authTruststoreFieldsWrapper">
+			  <div class="form-group row">
+			    <label for="authTruststoreFile" class="col-sm-3" th:text="#{ws.afirma.field.auth.ts}">Auth TS</label>
+			    <div class="col-sm-6 custom-file">
+			      <input type="file" class="custom-file-input" id="authTruststoreFile" name="authTruststoreFile" accept=".jks,.p12,.pfx">
+			      <label class="custom-file-label" for="authTruststoreFile" th:text="#{ws.afirma.field.keystore.file.choose}"></label>
+			      <span id="authTruststoreFile_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+			    </div>
+			    <div class="col-sm-3">
+			      	<button type="button"
+					        id="btnDownloadAuthTruststore"
+					        class="btn btn-secondary"
+					        onclick="downloadStore('#authTruststoreB64','servidorafirma_auth_truststore','#authTruststoreExt')">
+					  <i class="ti-download"></i> <span th:text="#{ws.afirma.btn.download.store}">Descargar</span>
+					</button>
+			    </div>
+			  </div>
+			
+			  <div class="form-group row">
+			    <label for="authTruststoreType" class="col-sm-3" th:text="#{ws.afirma.field.auth.ts.type}">Tipo</label>
+			    <div class="col-sm-3">
+			      <select id="authTruststoreType" class="form-control" th:field="*{authTruststoreType}">
+			        <option value="JKS">JKS</option>
+			        <option value="PKCS12">PKCS12</option>
+			      </select>
+			      <span id="authTruststoreType_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+			    </div>
+			    <label for="authenticationVersion" class="col-sm-2" th:text="#{ws.afirma.field.auth.ts.version}">Versión</label>
+			    <div class="col-sm-2">
+			      <input type="number" id="authenticationVersion" th:field="*{authenticationVersion}" class="form-control" min="0" step="1" readonly disabled/>
+			      <span id="authenticationVersion_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill"></span>
+			    </div>
+			  </div>
+			
+			  <div class="form-group row">
+			    <label for="authTruststorePassword" class="col-sm-3" th:text="#{ws.afirma.field.auth.ts.password}">Password</label>
+			    <div class="col-sm-4">
+			      <input type="password" id="authTruststorePassword" name="authTruststorePassword"
+			             th:value="${serverAfirmaDTO.hasAuthTruststorePassword} ? '******' : ''"
+			             th:attr="data-sentinel=${serverAfirmaDTO.hasAuthTruststorePassword} ? '1' : '0'"
+			             autocomplete="new-password"
+			             class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+			      <span id="authTruststorePassword_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+			    </div>
+			  </div>
+			
+			  <div class="form-group row">
+			    <label for="authCertAlias" class="col-sm-3" th:text="#{ws.afirma.field.auth.ts.cert.alias}">Alias cert</label>
+			    <div class="col-sm-4">
+			      <input type="text" id="authCertAlias" th:field="*{authCertAlias}" class="form-control" style="overflow:hidden; margin-left:-15px;"/>
+			      <span id="authCertAlias_span" class="badge bgc-red-50 c-red-700 p-10 lh-0 badge-pill" style="margin-left:-15px;"></span>
+			    </div>
+			  </div>
+			</div>
+		  </div>
+        </form>
+
+        <div class="peer">
+          <button id="updateWsAfirmaBtn" type="submit" th:text="#{ws.afirma.btn.update}" class="btn btn-primary"></button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script th:inline="javascript" type="text/javascript">
+  var SECRET_SENTINEL = "******";
+
+  // Map password flags coming from DTO to sentinel UI
+  function applyPasswordFlagsFromDto(data) {
+    const map = [
+      { sel: "#ksPassword",              flag: "hasKsPassword" },
+      { sel: "#ksCertPassword",          flag: "hasKsCertPassword" },
+      { sel: "#truststorePassword",      flag: "hasTruststorePassword" },
+      { sel: "#authTruststorePassword",  flag: "hasAuthTruststorePassword" },
+      { sel: "#password",                flag: "hasUserPassword" }
+    ];
+    map.forEach(({sel, flag}) => {
+      if (data.hasOwnProperty(flag)) {
+        if (data[flag]) {
+          $(sel).val(SECRET_SENTINEL).attr("data-sentinel","1");
+        } else {
+          $(sel).val("").attr("data-sentinel","0");
+        }
+      }
+    });
+  }
+
+  // Update Bootstrap custom file label
+  function setFileLabel($input, defaultText) {
+    var file = $input.prop("files")[0];
+    if (file) {
+      $input.next(".custom-file-label").text(file.name);
+    } else {
+      $input.next(".custom-file-label").text(defaultText);
+    }
+  }
+
+//Build filename using base and extension from hidden input
+  function buildDownloadName(baseName, $extHidden) {
+    var base = (baseName || 'store').replace(/\.+$/, ''); // quitar puntos finales
+    var ext  = ($extHidden && $extHidden.val() || '').toLowerCase().replace(/^\./,''); // "jks"|"p12"...
+    return ext ? (base + '.' + ext) : (base + '.bin');
+  }
+
+  // Generic download using b64 + dynamic extension
+  function downloadStore(hiddenSel, baseName, extHiddenSel) {
+    var b64 = $(hiddenSel).val();
+    if (!b64) { return; }
+    var fileName = buildDownloadName(baseName, $(extHiddenSel));
+    var blob = b64toBlob(b64, 'application/octet-stream');
+    var reader = new FileReader();
+    reader.onload = function (event) {
+      var a = document.createElement('a');
+      a.href = event.target.result;
+      a.target = '_blank';
+      a.download = fileName;
+      var ev = new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true });
+      a.dispatchEvent(ev);
+      (window.URL || window.webkitURL).revokeObjectURL(a.href);
+    };
+    reader.readAsDataURL(blob);
+  }
+
+//Toggle delete for stores: hide fields + show message (+ button style/text/icon swap)
+  function bindClearToggle(opts) {
+    // opts: { btnSel, btnTextSel, clearHiddenSel, inputsToLock, i18nDelete, i18nUndo,
+    //         msgSel, fieldsWrapperSel }
+
+    function setButtonVisual(isClear) {
+      // Text
+      $(opts.btnTextSel).text(isClear ? opts.i18nUndo : opts.i18nDelete);
+
+      // Icon (Themify)
+      var $icon = $(opts.btnSel).find('i');
+      if ($icon.length === 0) { $icon = $('<i class="ti-trash"></i>').prependTo($(opts.btnSel)); }
+      $icon.toggleClass('ti-trash', !isClear).toggleClass('ti-back-left', isClear);
+
+      // Colors/styles -> when "clear" use SOLID grey (btn-secondary), not outline
+      $(opts.btnSel)
+        .removeClass('btn-danger btn-outline-secondary btn-secondary')
+        .addClass(isClear ? 'btn-secondary' : 'btn-danger');
+    }
+
+    function applyUI(isClear) {
+      // Show/hide message + fields
+      $(opts.msgSel).toggleClass('d-none', !isClear);
+      $(opts.fieldsWrapperSel).toggle(!isClear);
+
+      // Disable inputs (do not clear values)
+      (opts.inputsToLock || []).forEach(function(sel){
+        $(sel).prop('disabled', isClear).prop('readonly', isClear);
+      });
+
+      setButtonVisual(isClear);
+
+      // Versions always locked
+      $("#keystoreVersion, #truststoreVersion, #authenticationVersion")
+        .prop("readonly", true).prop("disabled", true);
+    }
+
+    // Initial state from hidden
+    var current = String($(opts.clearHiddenSel).val()).toLowerCase() === 'true';
+    applyUI(current);
+
+    // Click toggles delete/undo
+    $(opts.btnSel).on('click', function(){
+      current = !current;
+      $(opts.clearHiddenSel).val(String(current));
+      applyUI(current);
+    });
+
+    // Selecting a file cancels delete
+    var fileSel = (opts.inputsToLock || []).find(function(s){
+      return $(s).is(':file') || $(s).attr('type') === 'file';
+    });
+    if (fileSel) {
+      $(fileSel).on('change', function(){
+        if ($(this).prop('files') && $(this).prop('files').length > 0) {
+          current = false;
+          $(opts.clearHiddenSel).val('false');
+          applyUI(false);
+        }
+      });
+    }
+  }
+
+
+  // Show/hide download buttons depending on hidden b64 presence
+  function refreshDownloadButtonsVisibility() {
+    toggleBtn('#btnDownloadKeystore',       '#keystoreB64');
+    toggleBtn('#btnDownloadTruststore',     '#truststoreB64');
+    toggleBtn('#btnDownloadAuthTruststore', '#authTruststoreB64');
+    function toggleBtn(btnSel, hiddenSel) {
+      var hasData = !!$(hiddenSel).val();
+      $(btnSel).toggle(hasData);
+    }
+  }
+
+  // Hide/enable sections by auth type (UT=1, BST=2)
+  function applyAuthUI(authVal) {
+    var isUT  = (authVal === "1");
+    var isBST = (authVal === "2");
+
+    $("#sectionUserPass").toggle(isUT);
+    $("#sectionKeystore").toggle(isBST);
+
+    var ksInputs = ["#keystoreFile", "#ksType", "#ksPassword", "#ksCertAlias", "#ksCertPassword",
+        "#truststoreFile", "#truststoreType", "#truststorePassword",
+        "#authTruststoreFile", "#authTruststorType", "#authTruststorePassword",
+        "#authCertAlias", "#authTruststoreClear", "#truststoreClear"];
+    var userInputs = ["#userId", "#password"];
+
+    function setGroupEnabled(selectors, enabled) {
+      selectors.forEach(function (sel) {
+        $(sel).prop("readonly", !enabled).prop("disabled", !enabled);
+        if (!enabled && ($(sel).is(":file") || $(sel).is("input[type='file']"))) {
+          setFileLabel($(sel), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+        }
+      });
+    }
+
+    setGroupEnabled(ksInputs, isBST);
+    setGroupEnabled(userInputs, isUT);
+
+    $("#keystoreVersion, #truststoreVersion, #authenticationVersion")
+      .prop("readonly", true)
+      .prop("disabled", true);
+
+    if (!isBST) {
+      $("#subject").val("");
+      $("#idDownLoadCert").hide();
+      $("#keystoreB64").val("");
+    }
+    refreshDownloadButtonsVisibility();
+  }
+
+  // Remove sentinel passwords from DTO before submit
+  function stripSentinelPasswords(dto) {
+    ["#ksPassword", "#ksCertPassword", "#truststorePassword", "#authTruststorePassword", "#password"]
+      .forEach(function(sel) {
+        var $el = $(sel);
+        if (!$el.length) return;
+        var isSentinel = $el.attr("data-sentinel") === "1" && $el.val() === SECRET_SENTINEL;
+        if (isSentinel) {
+          delete dto[$el.attr("name")]; // keep current encrypted value in DB
+        }
+      });
+  }
+
+  function cleanSpan() {
+    $('#serverAfirmaFormId *').filter('span.badge').each(function () {
+      $(this).text("");
+    });
+  }
+
+  // Download X509 certificate (from hidden certificateB64)
+  function downLoadCert() {
+    var keystoreBlob = b64toBlob($("#certificateB64").val(), 'application/x-x509-ca-cert');
+    var fileName = "ServidorAfirma.cer";
+    var reader = new FileReader();
+    reader.onload = function (event) {
+      var save = document.createElement('a');
+      save.href = event.target.result;
+      save.target = '_blank';
+      save.download = fileName || 'certificado.cer';
+      var clicEvent = new MouseEvent('click', { 'view': window, 'bubbles': true, 'cancelable': true });
+      save.dispatchEvent(clicEvent);
+      (window.URL || window.webkitURL).revokeObjectURL(save.href);
+    };
+    reader.readAsDataURL(keystoreBlob);
+  }
+
+  $(document).ready(function () {
+    // Bind toggles for TLS Truststore and Auth Truststore
+    bindClearToggle({
+	  btnSel: '#btnTsDelete',
+	  btnTextSel: '#btnTsDeleteText',
+	  clearHiddenSel: '#truststoreClear',
+	  inputsToLock: ['#truststoreFile', '#truststoreType', '#truststorePassword'],
+	  i18nDelete: /*[[#{ws.afirma.btn.delete.ts}]]*/ 'Eliminar Truststore (TLS)',
+	  i18nUndo:   /*[[#{ws.afirma.btn.delete.ts.undo}]]*/ 'Deshacer eliminación',
+	  msgSel: '#truststoreDeleteMsg',
+	  fieldsWrapperSel: '#truststoreFieldsWrapper'
+	});
+	
+	bindClearToggle({
+	  btnSel: '#btnAuthTsDelete',
+	  btnTextSel: '#btnAuthTsDeleteText',
+	  clearHiddenSel: '#authTruststoreClear',
+	  inputsToLock: ['#authTruststoreFile', '#authTruststoreType', '#authTruststorePassword', '#authCertAlias'],
+	  i18nDelete: /*[[#{ws.afirma.btn.delete.auth.ts}]]*/ 'Eliminar Authentication Truststore',
+	  i18nUndo:   /*[[#{ws.afirma.btn.delete.auth.ts.undo}]]*/ 'Deshacer eliminación',
+	  msgSel: '#authTruststoreDeleteMsg',
+	  fieldsWrapperSel: '#authTruststoreFieldsWrapper'
+	});
+
+    // File inputs label updates
+    $("#keystoreFile").change(function () {
+      setFileLabel($(this), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+    });
+    $("#truststoreFile").change(function () {
+      setFileLabel($(this), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+    });
+    $("#authTruststoreFile").change(function () {
+      setFileLabel($(this), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+    });
+
+    // Auth type change handlers
+    $("#authenticationId").on("change", function () {
+      applyAuthUI($(this).val());
+    });
+
+    // Initial state
+    applyAuthUI($("#authenticationId").val());
+    refreshDownloadButtonsVisibility();
+
+    // Submit
+    $("#updateWsAfirmaBtn").click(function (event) {
+      event.preventDefault();
+      cleanSpan();
+
+      var dto = $("#serverAfirmaFormId").serializeJSON();
+      stripSentinelPasswords(dto);
+
+      var formData = new FormData();
+      formData.append("serverAfirmaDTO", new Blob([JSON.stringify(dto)], { type: "application/json" }));
+
+      var ksFile  = $("#keystoreFile").prop("files")[0];
+      var tsFile  = $("#truststoreFile").prop("files")[0];
+      var atsFile = $("#authTruststoreFile").prop("files")[0];
+      if (ksFile)  { formData.append("keystoreFile", ksFile); }
+      if (tsFile)  { formData.append("truststoreFile", tsFile); }
+      if (atsFile) { formData.append("authTruststoreFile", atsFile); }
+
+      loading();
+      $('#messageWsAfirmaFormId').html("").removeClass('alert alert-success alert-danger');
+
+      var updateWsAfirmaAction = /*[[@{/updateWsAfirma}]]*/;
+
+      $.ajax({
+        url: updateWsAfirmaAction,
+        type: "POST",
+        data: formData,
+        processData: false,
+        contentType: false,
+        success: function (data) {
+          hide();
+          if (data.error != "" && data.error != null) {
+            var errores = JSON.parse(data.error);
+            jQuery.each(errores, function (i, val) {
+              $('#serverAfirmaFormId *').filter('span').each(function () {
+                if (i == $(this).attr('id')) { $("#" + i).text(val); }
+              });
+            });
+          } else {
+            var messageOk = /*[[#{ws.afirma.message.update.ok}]]*/;
+            $('#messageWsAfirmaFormId').html(messageOk).addClass('alert alert-success');
+            $("#messageWsAfirmaFormId").fadeTo(5000, 500).slideUp(500, function () {
+              $("#messageWsAfirmaFormId").slideUp(500);
+            });
+
+            // Map DTO response back to inputs (skip passwords)
+            $("#serverAfirmaFormId").find(":input").each(function () {
+              var $el  = $(this);
+              var name = $el.attr("name");
+              if (!name) return;
+              if (($el.attr("type")||"").toLowerCase() === "password") return;
+              var v = data[name];
+              if (v === null || v === undefined) return;
+              $el.val(v);
+            });
+
+            // Apply sentinel flags
+            applyPasswordFlagsFromDto(data);
+
+            // Re-apply auth UI
+            applyAuthUI($("#authenticationId").val());
+
+            // Subject + certificate panel
+            if (data.subject !== undefined && data.subject !== "") {
+              $("#subject").val(data.subject);
+              $("#idDownLoadCert").show();
+            } else {
+              $("#idDownLoadCert").hide();
+            }
+
+            // Update clear flags if server responded
+            if (typeof data.clearTruststore !== 'undefined') {
+              $('#truststoreClear').val(String(!!data.clearTruststore));
+            }
+            if (typeof data.clearAuthTruststore !== 'undefined') {
+              $('#authTruststoreClear').val(String(!!data.clearAuthTruststore));
+            }
+
+            // Reset file labels
+            setFileLabel($("#keystoreFile"),       /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+            setFileLabel($("#truststoreFile"),     /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+            setFileLabel($("#authTruststoreFile"), /*[[#{ws.afirma.field.keystore.file.choose}]]*/);
+
+            // Refresh downloads visibility
+            refreshDownloadButtonsVisibility();
+          }
+        },
+        error: function (xhr) {
+          hide();
+          if (xhr.status === 401 || xhr.status === 403) {
+            window.location.reload();
+          } else {
+            console.error("Request error");
+          }
+          var messageResponse = /*[[#{ws.afirma.message.error}]]*/;
+          $('#messageWsAfirmaFormId').removeClass('alert-success').addClass('alert alert-danger');
+          $("#messageWsAfirmaFormId").html(messageResponse);
+        }
+      });
+    });
+  });
+</script>

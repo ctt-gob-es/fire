@@ -30,10 +30,10 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.services.FIReError;
-import es.gob.fire.server.services.LogUtils;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /**
  * Servicio para procesar los errores encontrados por el MiniApplet y los clientes nativos.
@@ -56,26 +56,36 @@ public class MiniAppletSuccessService extends HttpServlet {
 		// No se guardaran los resultados en cache
 		response.setHeader("Cache-Control", "no-cache, no-store, must-revalidate"); //$NON-NLS-1$ //$NON-NLS-2$
 
-		RequestParameters params;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
 		}
 		catch (final Exception e) {
 			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
 			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
-		
-		// Comprobamos que se hayan prorcionado los parametros indispensables
-		final String trId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
-        if (trId == null || trId.isEmpty()) {
-        	LOGGER.warning("No se ha proporcionado el ID de transaccion"); //$NON-NLS-1$
-        	Responser.sendError(response, FIReError.FORBIDDEN);
-            return;
-        }
 
-		final TransactionAuxParams trAux = new TransactionAuxParams(null, LogUtils.limitText(trId));
-        final LogTransactionFormatter logF = trAux.getLogFormatter();
+		// Recuperamos el identificador de transaccion
+		final String trId = params.getTransactionId();
+		if (trId == null || trId.isEmpty()) {
+			LOGGER.warning("No se ha proporcionado el identificador de transaccion"); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		final TransactionAuxParams trAux = new TransactionAuxParams(null, trId);
+		final LogTransactionFormatter logF = trAux.getLogFormatter();
+
+		try {
+			params.checkParameters(logF);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
 
 		LOGGER.fine(logF.f("Inicio de la llamada al servicio publico de exito de firma con certificado local")); //$NON-NLS-1$
 
@@ -84,7 +94,7 @@ public class MiniAppletSuccessService extends HttpServlet {
         String redirectErrorUrl = params.getParameter(ServiceParams.HTTP_PARAM_ERROR_URL);
 		if (redirectErrorUrl == null || redirectErrorUrl.isEmpty()) {
 			LOGGER.warning(logF.f("No se ha proporcionado la URL de error")); //$NON-NLS-1$
-			Responser.sendError(response, FIReError.FORBIDDEN);
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
 			return;
 		}
 		try {

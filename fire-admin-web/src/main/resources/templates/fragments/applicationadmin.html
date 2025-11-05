@@ -109,7 +109,13 @@ $(document).ready(function() {
     									$('#modal').html(data);
     									$('#appAddModal').modal('show');																
     								},
-    								error : function() {}
+    								error : function(xhr) {
+    									if (xhr.status === 401 || xhr.status === 403) {
+    			                            window.location.reload();
+    			                        } else {
+    			                            console.error("Error al realizar la peticion");
+    			                        }
+    								}
     							});
     						}
     		        	}, 
@@ -135,7 +141,13 @@ $(document).ready(function() {
     		                             $('#modal').html(data);
     		                             $('#appEditModal').modal('show');                                                                
     		                         },
-    		                         error : function() {}
+    		                         error : function(xhr) {
+    		                        	 if (xhr.status === 401 || xhr.status === 403) {
+    		                                 window.location.reload();
+    		                             } else {
+    		                                 console.error("Error al realizar la peticion");
+    		                             }
+    		                         }
     		                     });
     		                   }
                       	},
@@ -171,10 +183,15 @@ $(document).ready(function() {
             							    		$('#modal').html(data);
             										$('#modalDeleteApp').modal('show');
             							        },
-            							        error:function(data){
+            							        error: function(xhr){
             							        	// Se oculta la capa 'cargando...'
             							        	hide();
             							        
+            							        	if (xhr.status === 401 || xhr.status === 403) {
+            				                            window.location.reload();
+            				                        } else {
+            				                            console.error("Error al realizar la peticion");
+            				                        }
             									}
             					});
             		 	 	}
@@ -208,7 +225,13 @@ $(document).ready(function() {
                 							$('#modal').html(data);
                 							$('#appViewModal').modal('show');																
                 						},
-                						error : function() {}
+                						error : function(xhr) {
+                							if (xhr.status === 401 || xhr.status === 403) {
+                	                            window.location.reload();
+                	                        } else {
+                	                            console.error("Error al realizar la peticion");
+                	                        }
+                						}
                 					});
                 			}
                 		}
@@ -230,7 +253,13 @@ function confirmEnableApplication(idApplication) {
 			$('#modal').html(data);
 			$('#applicationConfirmEnableModal').modal('show');														
 		},
-		error : function() {}
+		error : function(xhr) {
+			if (xhr.status === 401 || xhr.status === 403) {
+                window.location.reload();
+            } else {
+                console.error("Error al realizar la peticion");
+            }
+		}
 	});
 }
 </script>

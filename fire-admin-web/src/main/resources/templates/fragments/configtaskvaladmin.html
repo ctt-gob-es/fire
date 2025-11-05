@@ -6,7 +6,7 @@
 <div class="row gap-20 masonry pos-r">
 	<div class="masonry-item col-md-10">
 		<div class="bgc-white p-20 bd">
-				<h5 class="c-grey-900 mB-20" id="idTitleTask"></h5>
+				<h4 class="c-grey-900 mB-20" th:text="#{task.validation.title}"></h4>
 				<div class="mT-30">
 					<form name="altEditor-form" role="form" id="taskFormIdEdit"	th:object="${taskform}" method="post" action="">
 						<div id="messageUpdateTaskId" role="alert"></div>
@@ -16,14 +16,18 @@
 						
 						<!-- Campo nombre -->	
 						<div class="form-group row">
-								<label for="nameId" class="col-form-label" th:text="#{task.validation.field.name}"></label>
+							<label for="nameId" class="col-sm-4" th:text="#{task.validation.field.name}"></label>
+							<div class="col-sm-6">
 								<input type="text" id="nameId" th:field="*{nameEdit}" style="overflow:hidden" class="form-control" readonly/>
+							</div>
 						</div>
 						
 						<!-- Campo clase implementacion -->	
 						<div class="form-group row">
-								<label for="implementationClassId" class="col-form-label" th:text="#{task.validation.field.classImplementation}"></label>
+							<label for="implementationClassId" class="col-sm-4" th:text="#{task.validation.field.classImplementation}"></label>
+							<div class="col-sm-6">
 								<input type="text" id="implementationClassId" th:field="*{implementationClassEdit}" readonly style="overflow:hidden" class="form-control" />
+							</div>
 						</div>
 						
 						<!-- Campo tarea activa -->
@@ -75,12 +79,12 @@
 						<div class="form-group row">
 							<label for="initDayId" class="col-sm-4"
 								th:text="#{task.validation.field.initDay}"></label>
-							<div class="col-sm-3">
+							<div class="col-sm-2">
 								<div class="input-group date" id="datetimepicker1">
 									<input type='text' class="form-control" id="initDayId"
 										th:field="*{initDayStringEdit}"> <span
 										class="input-group-addon"> <span
-										class="glyphicon glyphicon-calendar"></span>
+										class="glyphicon glyphicon-time"></span>
 									</span>
 	
 								</div>
@@ -118,11 +122,31 @@
 		
 		//funcion para configurar el elemento datetimepicker
 		$('#datetimepicker1').datetimepicker({
-		 format: 'DD/MM/YYYY HH:mm:ss',
-		 widgetPositioning:{
-			horizontal: 'auto',
-			vertical: 'top'
-		}
+		    format: 'HH:mm:ss',
+		    useCurrent: true,
+		    defaultDate: new Date(),
+		    allowInputToggle: true,
+		    showTodayButton: false,
+		    widgetPositioning: {
+		        horizontal: 'auto',
+		        vertical: 'top' // Abre el widget en la parte superior
+		    },
+		    icons: {
+		        time: 'fa fa-clock',
+		        date: '', // Oculta el icono del calendario
+		        up: 'fa fa-chevron-up',
+		        down: 'fa fa-chevron-down',
+		        previous: 'fa fa-chevron-left',
+		        next: 'fa fa-chevron-right',
+		        today: 'fa fa-calendar-check-o',
+		        clear: 'fa fa-trash',
+		        close: 'fa fa-times'
+		    }
+		}).on('dp.show', function () {
+		    $('.bootstrap-datetimepicker-widget .fa').css({
+		        'color': '#337ab7', 
+		        'font-weight': 'bold' 
+		    });
 		});
 
 		//si se cambia el tipo de planificador
@@ -147,11 +171,20 @@
 		
 		$("#updateTaskBtn").click(function (event){
 			event.preventDefault();
-			var formData = JSON.stringify($("#taskFormIdEdit").serializeJSON());
+			
+			var time = $('#datetimepicker1').find('input').val(); // Obtenemos la hora seleccionada
+			var currentDate = new Date().toISOString().split('T')[0]; // Obtenemos la fecha actual en formato YYYY-MM-DD
+			var fullDateTime = currentDate + ' ' + time; // Combina la fecha y hora
+			    
+			// Asignar el valor combinado a la variable de fecha
+			var taskFormIdEditJSON = $("#taskFormIdEdit").serializeJSON();
+			taskFormIdEditJSON.initDayStringEdit = fullDateTime; 
+				
+			var formData = JSON.stringify(taskFormIdEditJSON);
 
-			 loading();
+			loading();
 			 
-			 //se borra si existiera algun mensaje
+			//se borra si existiera algun mensaje
 			$('#messageUpdateTaskId').html("");
 			$('#messageUpdateTaskId').removeClass('alert alert-success');
 			$('#messageUpdateTaskId').removeClass('alert alert-danger');
@@ -173,7 +206,13 @@
 					}
 					
 				 },
-				 error: function(data){
+				 error: function(data, xhr, error){
+					 if (xhr.status === 401 || xhr.status === 403) {
+                         window.location.reload();
+                     } else {
+                         console.error("Error al realizar la peticion");
+                     }
+					 
 					 if(data.errorEdit != "" && data.errorEdit != null){
 						$('#messageUpdateTaskId').html(data.errorEdit);
 						$('#messageUpdateTaskId').addClass('alert alert-danger');

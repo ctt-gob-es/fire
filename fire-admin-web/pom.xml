@@ -20,6 +20,22 @@
 			<artifactId>fire-admin-core</artifactId>
 		</dependency>
 		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-admin-i18n</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-upgrade</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-upgrade-afirma</artifactId>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.fire</groupId>
+			<artifactId>fire-admin-i18n</artifactId>
+		</dependency>
+		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-web</artifactId>
 			<exclusions>
@@ -123,12 +139,24 @@
 					<artifactId>slf4j-api</artifactId>
 				</exclusion>
 				<exclusion>
+					<groupId>org.slf4j</groupId>
+					<artifactId>slf4j-simple</artifactId>
+				</exclusion>
+  				<exclusion>
 					<groupId>ch.qos.logback</groupId>
 					<artifactId>logback-core</artifactId>
 				</exclusion>
 				<exclusion>
 					<groupId>ch.qos.logback</groupId>
 					<artifactId>logback-classic</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+  					<artifactId>bcprov-jdk15on</artifactId>
+				</exclusion>
+				<exclusion>
+					<groupId>org.bouncycastle</groupId>
+  					<artifactId>bcpkix-jdk15on</artifactId>
 				</exclusion>
 			</exclusions>
 		</dependency>
@@ -203,8 +231,34 @@
 					<argLine>${argLine}</argLine>
 				</configuration>
 			</plugin>
+			<!-- Plugin para obtener el anyo en la propiedad "current.year" para usarlo en el copyright -->
+			<plugin>
+			  <groupId>org.codehaus.mojo</groupId>
+			  <artifactId>build-helper-maven-plugin</artifactId>
+			  <executions>
+			    <execution>
+			      <id>timestamp-property</id>
+			      <goals>
+			        <goal>timestamp-property</goal>
+			      </goals>
+			      <phase>validate</phase>
+			      <configuration>
+			        <name>current.year</name>
+			        <pattern>yyyy</pattern>
+			        <locale>es,ES</locale>
+			      </configuration>
+			    </execution>
+			  </executions>
+			</plugin>
 		</plugins>
 		<resources>
+			<resource>
+		      <directory>src/main/resources</directory>
+		      <includes>
+		        <include>version.info</include>
+		      </includes>
+		      <filtering>true</filtering>
+		    </resource>
 			<resource>
 				<directory>src/main/resources/</directory>
 				<excludes>

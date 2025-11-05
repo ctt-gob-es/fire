@@ -1,9 +1,13 @@
 package es.gob.fire.quartz.scheduler;
 
+import static org.quartz.TriggerBuilder.newTrigger;
+
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobBuilder;
 import org.quartz.JobDataMap;
@@ -17,19 +21,16 @@ import org.quartz.SimpleTrigger;
 import org.quartz.TriggerKey;
 import org.quartz.impl.StdSchedulerFactory;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IQuartzGeneralMessages;
 import es.gob.fire.i18n.Language;
-
-import static org.quartz.TriggerBuilder.newTrigger;
 
 public abstract class AbstractQuartzScheduler {
 
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(AbstractQuartzScheduler.class);
+	private static final Logger LOGGER = LogManager.getLogger(AbstractQuartzScheduler.class);
 	
 	/**
 	 * Constant attribute that represents the hyphen.

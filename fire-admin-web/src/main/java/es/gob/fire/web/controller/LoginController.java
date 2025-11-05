@@ -20,7 +20,7 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>1.0, 27/01/2020.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.5, 04/03/2025.
+ * @version 1.5, 10/03/2025.
  */
 package es.gob.fire.web.controller;
 
@@ -28,19 +28,22 @@ import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.SimpleDateFormat;
 import java.util.Base64;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.servlet.http.Cookie;
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -57,17 +60,20 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.ibm.icu.util.Calendar;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.commons.utils.UtilsDate;
+import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
+import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
+import es.gob.fire.service.impl.LoginService;
 import es.gob.fire.web.clave.sp.request.RequestClave;
-import es.gob.fire.web.config.WebSecurityConfig;
+import es.gob.fire.web.config.VersionProperties;
 import es.gob.fire.web.exception.WebAdminException;
 
 /**
@@ -79,7 +85,7 @@ import es.gob.fire.web.exception.WebAdminException;
  *
  * </p>
  *
- * @version 1.5, 04/03/2025.
+ * @version 1.5, 10/03/2025.
  */
 @Controller
 public class LoginController {
@@ -89,7 +95,7 @@ public class LoginController {
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(LoginController.class);
+	private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
 
 	/**
 	 * Attribute that represent a property configure in admin_config.properties
@@ -114,6 +120,15 @@ public class LoginController {
 	 */
 	@Autowired
 	private IUserService iUserService;
+
+	/**
+	 * Attribute that represents the DTO for current user session.
+	 */
+	@Autowired
+	private ThreadInfoDataSecureDTO threadInfoDataSecureDTO;
+
+	@Autowired
+    private VersionProperties versionProperties;
 
 	/**
 	 * Handles the login error by retrieving the authentication exception from the session and displaying
@@ -164,6 +179,10 @@ public class LoginController {
     	final StringBuilder activateMsg = new StringBuilder();
     	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
     		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
+    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
+    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
     		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
 			return "login.html";
@@ -194,7 +213,6 @@ public class LoginController {
      * @return true if contingency is activated, false otherwise
      */
 	private boolean activateCertificateContingency(final Model model, final Date currentDate, final String ipUser, final StringBuilder activateMsg) {
-		boolean activate = false;
 
 		// Obtenemos todos los controles de accesos ordenados por fecha mas antigua
     	final List<ControlAccess> listControlAccess = this.iLoginService
@@ -207,7 +225,7 @@ public class LoginController {
 		// 1.- Comprobaremos si la plataforma de clave esta disponible
     	if(!this.iLoginService.isPasarelaAvailable()) {
     		activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
-    		activate = true;
+    		return true;
     	}
 
     	// 2.- Evaluaremos si para esta ip el usuario a intentando entrar mas de X veces en menos de X segundos
@@ -220,9 +238,12 @@ public class LoginController {
             			final long secondsDifference  = (currentDate.getTime() - controlAccess.getStartDateAccess().getTime()) / NumberConstants.NUM1000;
             			// Evaluamos si supera el intervalo de X segundos de contingencia
             			if(secondsDifference >= this.confCertIntervalContingency) {
+            				LOGGER.warn(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
             				// Si es asi activamos el login con certificado por contigencia
-            				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
-            				activate = true;
+            				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
+            				// Eliminamos intentos fallidos de acceso para todas las ip puesto que clave sigue estando operativo
+            		    	this.iLoginService.deleteAllControlAccess();
+            				return true;
             			}
             		}
     			} else {
@@ -233,7 +254,7 @@ public class LoginController {
     		}
     	}
 
-    	return activate;
+    	return false;
 	}
 
 	/**
@@ -257,6 +278,10 @@ public class LoginController {
 
 	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
 	        final CAdESAnalizer analizer = this.iLoginService.analizeSignWithCAdES(signBase64Bytes);
+
+	        // Validamos si la firma es segura
+	        this.iLoginService.validateIfSignSecure(analizer);
+
 	        final List<X509Certificate> certs = analizer.getSigningCertificates();
 	        certificate = certs.get(0);
 
@@ -269,18 +294,27 @@ public class LoginController {
 	        // Buscamos en el almacen de confianza algun certificado que tenga el mismo emisor
 	        final X509Certificate issuerCert = this.iLoginService.validateIssuerWithTrustStoreUsers(certificate, trustStoreUsers);
 
-	        // Verificamos la firma del certificado con la clave pública del emisor
+	        // Verificamos la firma del certificado con la clave publica del emisor
 	        this.iLoginService.verifyPublicKeyToCertUser(certificate, issuerCert);
 
 	        // Obtenemos el dni a partir de un certificado valido
 	        dniRef.set(this.iLoginService.obtainDNIfromCertUser(certificate));
 
 	        // Buscamos al usuario en la base de datos
-	        final User user = StreamSupport.stream(this.iUserService.getAllUser().spliterator(), false)
-	        		.filter(p -> p.getDni().equals(dniRef.get()))
+	        final Iterable<User> allUsers = this.iUserService.getAllUser();
+	        final String dni = dniRef.get();
+
+	        if (allUsers == null || dni == null) {
+	            throw new BadCredentialsException(
+	                Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] { dni })
+	            );
+	        }
+
+	        final User user = StreamSupport.stream(allUsers.spliterator(), false)
+	            .filter(p -> dni.equals(p.getDni()))
 		           	.findFirst()
 		           	.orElseThrow(() -> new BadCredentialsException(
-		           			Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] {dniRef.get()})
+	                Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG006, new Object[] { dni })
 		    ));
 
 	        // Autenticamos el token utilizando el usuario consultado previamente
@@ -292,14 +326,21 @@ public class LoginController {
 	        // Eliminamos intentos fallidos de acceso para todas las ip
 	        this.iLoginService.deleteAllControlAccess();
 
-	        // Generamos una nueva cookie de sesion
-	        final Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME, this.iLoginService.generateCookieValue());
-	        cookie.setPath("/");
-	        cookie.setSecure(true);
-	        response.addCookie(cookie);
+//	        // Generamos una nueva cookie de sesion
+//	        final Cookie cookie = new Cookie(WebSecurityConfig.SESSION_TRACKING_COOKIE_NAME,
+//	        									this.iLoginService.generateCookieValue());
+//	        cookie.setPath("/");
+//	        cookie.setSecure(true);
+//	        response.addCookie(cookie);
 
-	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName()}));
-	        return "inicio.html";
+	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
+	        this.threadInfoDataSecureDTO.clear();
+
+	        model.addAttribute("appVersion", this.versionProperties.getProjectVersion());
+	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear());
+
+	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
+	        return "redirect:/inicio";
 
 	    } catch (final Exception e) {
 	        String msgerror;
@@ -308,17 +349,24 @@ public class LoginController {
 	        	msgerror = e.getMessage();
 	        } else if (e instanceof KeyStoreException) {
 	        	msgerror = e.getMessage();
+	        } else if (e instanceof TimeoutException) {
+	        	msgerror = e.getMessage();
 	        } else if (e instanceof BadCredentialsException) {
 	        	LOGGER.error(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
 	        } else {
-	        	LOGGER.error(e);
-	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015);
+	        	LOGGER.error("Error en la autenticacion con certificado; " + e);
+	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016);
 	        }
 
+    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
+    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
 	        model.addAttribute("errorMessage", msgerror);
 	        model.addAttribute("accessByCertificate", true);
 	        return "login.html";
 	    }
 	}
+
 }

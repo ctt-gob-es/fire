@@ -2,6 +2,7 @@ package es.gob.fire.signature;
 
 import java.io.IOException;
 import java.util.Hashtable;
+import java.util.logging.Level;
 import java.util.logging.Logger;
 
 /**
@@ -34,11 +35,11 @@ public abstract class TempConfigLoader extends ConfigLoader {
 				newConfig = loadConfiguration();
 			}
 			catch (final IOException e) {
-				LOGGER.warning("Error al cargar la configuracion. Se mantendra la configuracion actual: " + e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Error al cargar la configuracion. Se mantendra la configuracion actual", e); //$NON-NLS-1$
 				throw e;
 			}
 			catch (final ConfigException e) {
-				LOGGER.warning("Se han encontrado errores en la configuracion. Se mantendra la configuracion actual: " + e); //$NON-NLS-1$
+				LOGGER.log(Level.WARNING, "Se han encontrado errores en la configuracion. Se mantendra la configuracion actual", e); //$NON-NLS-1$
 				throw e;
 			}
 
@@ -53,8 +54,9 @@ public abstract class TempConfigLoader extends ConfigLoader {
 
 	/**
 	 * Carga la configuraci&acute;n de duraci&oacute;n temporal.
+	 * @return Conjunto de propiedades obtenido de la configuraci&oacute;n
 	 * @throws IOException Cuando ocurre un error durante la carga de la configuraci&oacute;n.
-	 * @
+	 * @throws ConfigException Cuando se detect&oacute; un error en la configuraci&oacute;n.
 	 */
 	public abstract Hashtable<Object, Object> loadConfiguration() throws IOException, ConfigException;
 

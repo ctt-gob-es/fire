@@ -12,22 +12,16 @@
 	</parent>
 	
 	<dependencies>
-		<!-- Fire -->
+		<!-- SLF4J -->
 		<dependency>
-			<groupId>es.gob.fire</groupId>
-			<artifactId>fire-admin-commons-util</artifactId>
-		</dependency>
-		<!-- Spring -->
-		<dependency>
-			<groupId>org.springframework.boot</groupId>
-			<artifactId>spring-boot-starter-web</artifactId>
+		    <groupId>org.slf4j</groupId>
+		    <artifactId>slf4j-api</artifactId>
 		</dependency>
 		<!-- JavaMail -->
 		<dependency>
 			<groupId>com.sun.mail</groupId>
 			<artifactId>javax.mail</artifactId>
 		</dependency>
-
 	</dependencies>
 	
 	<build>

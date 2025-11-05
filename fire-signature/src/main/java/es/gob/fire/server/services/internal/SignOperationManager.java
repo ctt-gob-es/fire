@@ -40,14 +40,14 @@ public class SignOperationManager {
 	/**
 	 * Inicia la operaci&oacute;n de firma asociada al componente central.
 	 * @param request Solicitud HTTP.
-	 * @param appName Nombre de la aplicaci&oacute;n.
+	 * @param appInfo Informaci&oacute;n de la aplicaci&oacute;n.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
 	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
 	 * @param response Respuesta HTTP.
 	 * @throws IOException Cuando se produce un error en la comunicaci&oacute;n con el cliente
 	 * o en el guardado de temporales.
 	 */
-	public static void sign(final HttpServletRequest request, final String appName, final RequestParameters params,
+	public static void sign(final HttpServletRequest request, final ApplicationInfo appInfo, final RequestParameters params,
 			final TransactionAuxParams trAux, final HttpServletResponse response) throws IOException {
 
 		final String appId			= params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
@@ -121,7 +121,14 @@ public class SignOperationManager {
 		String[] provs;
 		final String[] requestedProvs = connConfig.getProviders();
 		if (requestedProvs != null) {
-			provs = ProviderManager.getFilteredProviders(requestedProvs);
+			try {
+				provs = ProviderManager.getFilteredProviders(appId, requestedProvs, logF);
+			}
+			catch (final Exception e) {
+				LOGGER.warning(logF.f("No se ha podido cargar el listado de proveedores configurados en el sistema")); //$NON-NLS-1$
+				Responser.sendError(response, FIReError.INTERNAL_ERROR);
+				return;
+			}
 			if (provs.length == 0) {
 				LOGGER.warning(logF.f("No hay proveedores dados de alta que se ajusten a los criterios establecidos en la peticion")); //$NON-NLS-1$
 				Responser.sendError(response, FIReError.PARAMETER_PROVIDERS_INVALID);
@@ -129,7 +136,7 @@ public class SignOperationManager {
 			}
 		}
         else {
-        	provs = ProviderManager.getProviderNames();
+        	provs = ProviderManager.getProviderNames(appId, logF);
         }
 
 		// Se identifica si se debe omitir
@@ -164,7 +171,7 @@ public class SignOperationManager {
 
         // Guardamos en la sesion la configuracion de la operacion
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ID, appId);
-        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appName);
+        session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_NAME, appInfo.getName());
         session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_TITLE, appTitle);
         session.setAttribute(ServiceParams.SESSION_PARAM_CONNECTION_CONFIG, connConfig.cleanConfig());
         session.setAttribute(ServiceParams.SESSION_PARAM_ALGORITHM, algorithm);
@@ -176,6 +183,13 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_SKIP_CERT_SELECTION, Boolean.toString(skipSelection));
     	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.SIGN);
 
+    	if (appInfo.getDir3Code() != null && !appInfo.getDir3Code().isEmpty()) {
+    		session.setAttribute(ServiceParams.SESSION_PARAM_DIR3_CODE, appInfo.getDir3Code());
+    	}
+    	
+        if (appInfo.getOrganization() != null && !appInfo.getOrganization().isEmpty()) {
+    		session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION, appInfo.getOrganization());
+    	}
 
         String language = null;
         if (connConfig.getProperties() != null) {
@@ -187,7 +201,6 @@ public class SignOperationManager {
 		}
 
 		session.setAttribute(ServiceParams.SESSION_PARAM_LANGUAGE, language);
-
         // Obtenemos el DocumentManager con el que recuperar los datos. Si no se especifico ninguno,
         // cargamos el por defecto
         FIReDocumentManager docManager;

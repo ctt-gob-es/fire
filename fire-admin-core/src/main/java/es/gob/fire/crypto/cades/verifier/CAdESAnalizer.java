@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de España
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.afirma.crypto.cades.verifier.CAdESAnalizer.CAdESAnalizer.java.</p>
  * <b>Description:</b><p> Clase para el analisis y validaci&oacute;n de una firma CAdES.</p>
   * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
@@ -29,10 +29,19 @@ import java.io.IOException;
 import java.security.cert.CertificateException;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
 
+import org.bouncycastle.asn1.ASN1Encodable;
+import org.bouncycastle.asn1.ASN1GeneralizedTime;
+import org.bouncycastle.asn1.ASN1UTCTime;
+import org.bouncycastle.asn1.cms.Attribute;
+import org.bouncycastle.asn1.cms.AttributeTable;
+import org.bouncycastle.asn1.cms.CMSAttributes;
 import org.bouncycastle.cert.X509CertificateHolder;
 import org.bouncycastle.cms.CMSException;
 import org.bouncycastle.cms.CMSProcessable;
@@ -43,14 +52,12 @@ import org.bouncycastle.cms.SignerInformationVerifier;
 import org.bouncycastle.jce.provider.BouncyCastleProvider;
 import org.bouncycastle.operator.ContentVerifierProvider;
 import org.bouncycastle.operator.DefaultSignatureAlgorithmIdentifierFinder;
-import org.bouncycastle.operator.DigestCalculatorProvider;
 import org.bouncycastle.operator.OperatorCreationException;
 import org.bouncycastle.operator.bc.BcDigestCalculatorProvider;
 import org.bouncycastle.operator.jcajce.JcaContentVerifierProviderBuilder;
-import org.bouncycastle.operator.jcajce.JcaDigestCalculatorProviderBuilder;
 import org.bouncycastle.util.Store;
 
-/** 
+/**
  * <p>Clase para el analisis y validaci&oacute;n de una firma CAdES.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * @version 1.0, 17/05/2023.
@@ -59,6 +66,7 @@ public class CAdESAnalizer {
 
 	private byte[] signature = null;
 	private byte[] content = null;
+	private Date signingTime = null;
 	private List<SignerInfo> signers = null;
 	private CertificateFactory certFactory = null;
 
@@ -82,7 +90,8 @@ public class CAdESAnalizer {
 
 	/**
 	 * Analiza la firma y extrae la informaci&oacute;n que se necesita de ella.
-	 * @throws IOException Cuando no se puedan obtener los certificados de la firma.
+	 * @throws IOException Cuando no se puedan obtener los certificados o la hora de la firm
+	 * 7.
 	 * @throws CertificateException Cuando no se puedan componer los certificados de la firma despu&eacute;s de obtenerlos.
 	 */
 	private void analize() throws IOException, CertificateException {
@@ -97,6 +106,8 @@ public class CAdESAnalizer {
 
 		this.content = getContent(signedData);
 
+		this.signingTime = getSigningTime(signedData);
+
 		this.signers = getSigners(signedData);
 	}
 
@@ -110,6 +121,59 @@ public class CAdESAnalizer {
 		final CMSProcessable signedContent = sd.getSignedContent();
 		return signedContent != null
 				? (byte[]) signedContent.getContent() : null;
+	}
+
+	/**
+	 * Obtiene la fecha de la firma.
+	 * @param sd Datos firmados.
+	 * @return Fecha de la firma.
+	 * @throws IOException Cuando no se pueda extraer una fecha valida de la firma.
+	 */
+	private static Date getSigningTime(final CMSSignedData sd) throws IOException {
+
+		final Collection<SignerInformation> signs = sd.getSignerInfos().getSigners();
+		final SignerInformation sign = signs.iterator().next();
+		final AttributeTable signedAttrs = sign.getSignedAttributes();
+
+
+		ASN1Encodable timeObject = null;
+
+		final Attribute attr = signedAttrs.get(CMSAttributes.signingTime);
+        if (attr != null) {
+        	final ASN1Encodable[] attrEncodables = attr.getAttributeValues();
+        	if (attrEncodables != null && attrEncodables.length > 0 && attrEncodables[0] != null) {
+        		timeObject = attrEncodables[0];
+        	}
+        }
+
+        if (timeObject == null) {
+        	throw new IOException("El objeto no contiene una fecha"); //$NON-NLS-1$
+        }
+
+
+		Date returnDate = null;
+
+		if (timeObject instanceof ASN1GeneralizedTime) {
+        	try {
+        		returnDate = ((ASN1GeneralizedTime) timeObject).getDate();
+        	}
+            catch (final ParseException ex) {
+            	throw new IOException("No es posible obtener la fecha desde el formato ASN1GeneralizedTime", ex); //$NON-NLS-1$
+            }
+        }
+        else if (timeObject instanceof ASN1UTCTime) {
+        	try {
+        		returnDate = ((ASN1UTCTime) timeObject).getDate();
+        	}
+            catch (final ParseException ex) {
+            	throw new IOException("No es posible obtener la fecha desde el formato ASN1UTCTime", ex); //$NON-NLS-1$
+            }
+        }
+        else {
+        	throw new IOException("Formato de fecha deconocido: " + timeObject.getClass().getName()); //$NON-NLS-1$
+        }
+
+        return returnDate;
 	}
 
 	private List<SignerInfo> getSigners(final CMSSignedData signedData)
@@ -170,7 +234,7 @@ public class CAdESAnalizer {
 
 	/**
 	 * Valida que la informaci&oacute;n firmada por un firmante es integra y se
-	 * firm&oacute; con el certificado indicdo.
+	 * firm&oacute; con el certificado indicado.
 	 * @param signer Informaci&oacute;n del firmante.
 	 * @param cert Certificado con el que comprobar la firma.
 	 * @return {@code true} si la informaci&oacute;n del firmante es correcta,
@@ -180,33 +244,20 @@ public class CAdESAnalizer {
 	 */
 	private static boolean verifySigner(final SignerInformation signer, final X509Certificate cert) throws InvalidSignatureException {
 		try {
-			
-			// Con la nueva versión de Bouncycastle, la llamada al método verify cambia.
-			// Es necesario instanciar un objeto SignerInformationVerifier.
-			JcaContentVerifierProviderBuilder jcaContentVerifierProviderBuilder = new JcaContentVerifierProviderBuilder();
-			jcaContentVerifierProviderBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-			
-			ContentVerifierProvider contentVerifierProvider = jcaContentVerifierProviderBuilder.build(cert);
+			final ContentVerifierProvider contentVerifierProvider =
+					new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert);
 
-			JcaDigestCalculatorProviderBuilder digestCalculatorProviderBuilder = new JcaDigestCalculatorProviderBuilder();
-			digestCalculatorProviderBuilder.setProvider(BouncyCastleProvider.PROVIDER_NAME);
-			DigestCalculatorProvider digestCalculatorProvider = digestCalculatorProviderBuilder.build();
-							
 			return signer.verify(
-					// En la nueva versión de Bouncycastle, la signatura del constructor SignerInformationVerifier, es:
-					// public SignerInformationVerifier(CMSSignatureAlgorithmNameGenerator sigNameGenerator, SignatureAlgorithmIdentifierFinder sigAlgorithmFinder, ContentVerifierProvider verifierProvider, DigestCalculatorProvider digestProvider)
-//					new SignerInformationVerifier(
-//							new JcaContentVerifierProviderBuilder().setProvider(new BouncyCastleProvider()).build(cert),
-//							new BcDigestCalculatorProvider()));
 					new SignerInformationVerifier(
-			            	new	DefaultCMSSignatureAlgorithmNameGenerator(),
-			            	new DefaultSignatureAlgorithmIdentifierFinder(),
-			            	contentVerifierProvider,
-			            	digestCalculatorProvider));
+							new DefaultCMSSignatureAlgorithmNameGenerator(),
+							new DefaultSignatureAlgorithmIdentifierFinder(),
+							contentVerifierProvider,
+							new BcDigestCalculatorProvider()));
 		} catch (OperatorCreationException | CMSException e) {
 			throw new InvalidSignatureException("Error durante la validacion de un firmante", e); //$NON-NLS-1$
 		}
 	}
+
 
 	/**
 	 * Valida la integridad de la firma y comprueba que todas las firmas que
@@ -268,6 +319,11 @@ public class CAdESAnalizer {
 		return this.content;
 	}
 
+	public Date getSigningTime() {
+		checkInit();
+		return this.signingTime;
+	}
+
 	/**
 	 * Informaci&oacute;n de un firmante, lo cual incluye la informaci&oacute;n
 	 * que declara y el certificado de firma utilizado.
@@ -290,5 +346,4 @@ public class CAdESAnalizer {
 			return this.cert;
 		}
 	}
-
 }

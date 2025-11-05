@@ -28,6 +28,7 @@ import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.fire.alarms.Alarm;
+import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
@@ -42,6 +43,7 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;
@@ -58,14 +60,12 @@ public final class SignService extends HttpServlet {
     private static final Logger LOGGER = Logger.getLogger(SignService.class.getName());
 
     // Parametros que necesitamos de la URL.
-    private static final String PARAMETER_NAME_APPLICATION_ID = "appId"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_OPERATION = "operation"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_ALGORITHM = "algorithm"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_FORMAT = "format"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_CERT = "cert"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_EXTRA_PARAM = "properties"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_UPGRADE = "upgrade"; //$NON-NLS-1$
-    private static final String PARAMETER_NAME_TRANSACTION_ID = "transactionid"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_DATA = "data"; //$NON-NLS-1$
     private static final String PARAMETER_NAME_TRIPHASE_DATA = "tri"; //$NON-NLS-1$
 
@@ -90,7 +90,7 @@ public final class SignService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
     /** Recepci&oacute;n de la petici&oacute;n POST y realizaci&oacute;n de la
@@ -117,38 +117,38 @@ public final class SignService extends HttpServlet {
 	    		return;
 	    	}
 		}
-		
-		// Verificar si los servicios antiguos están habilitados
+
+        // Verificar si los servicios antiguos estan habilitados
 	    if (!ConfigManager.isLegacyServicesEnabled()) {
-	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
-	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
+	        AlarmsManager.notify(Alarm.ACCESS_ERROR, "Acceso denegado: las peticiones a los servicios antiguos están deshabilitadas"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
 	        return;
 	    }
 
-        // Recepcion de los parametros.
-    	final RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-    		return;
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
 		}
 
-    	final String appId      = params.getParameter(PARAMETER_NAME_APPLICATION_ID);
-        final String op         = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
-        final String format     = params.getParameter(PARAMETER_NAME_FORMAT);
-        final String algorithm  = params.getParameter(PARAMETER_NAME_ALGORITHM);
-        final String extraParamsB64 = params.getParameter(PARAMETER_NAME_EXTRA_PARAM);
-        final String certB64    = params.getParameter(PARAMETER_NAME_CERT);
-        final String upgrade    = params.getParameter(PARAMETER_NAME_UPGRADE);
-        final String transactId = params.getParameter(PARAMETER_NAME_TRANSACTION_ID);
-        final String dataB64    = params.getParameter(PARAMETER_NAME_DATA);
-        final String tdB64      = params.getParameter(PARAMETER_NAME_TRIPHASE_DATA);
-        String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
+    	final String appId      = params.getAppId();
+        final String transactId = params.getTransactionId();
 
-        final TransactionAuxParams trAux = new TransactionAuxParams(appId);
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
+
+	    final TransactionAuxParams trAux = new TransactionAuxParams(appId, transactId);
     	final LogTransactionFormatter logF = trAux.getLogFormatter();
 
     	// Comprobamos que la peticion este autorizada
@@ -167,6 +167,7 @@ public final class SignService extends HttpServlet {
 		}
     	catch (final UnauthorizedApplicacionException e) {
     		LOGGER.log(Level.WARNING, logF.f("Acceso denegado: ") + e); //$NON-NLS-1$
+    		AlarmsManager.notify(Alarm.ACCESS_ERROR, AlarmInternalMessages.getString("Alarm.13", appId) + " - " + "Acceso denegado"); //$NON-NLS-1$ //$NON-NLS-2$ //$NON-NLS-3$
             Responser.sendError(response, HttpServletResponse.SC_UNAUTHORIZED);
             return;
 		}
@@ -175,6 +176,26 @@ public final class SignService extends HttpServlet {
             Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR);
             return;
 		}
+
+        // Comprobacion de los parametros
+    	try {
+    		params.checkParameters(appId, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
+        final String op         = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
+        final String format     = params.getParameter(PARAMETER_NAME_FORMAT);
+        final String algorithm  = params.getParameter(PARAMETER_NAME_ALGORITHM);
+        final String extraParamsB64 = params.getParameter(PARAMETER_NAME_EXTRA_PARAM);
+        final String certB64    = params.getParameter(PARAMETER_NAME_CERT);
+        final String upgrade    = params.getParameter(PARAMETER_NAME_UPGRADE);
+        final String dataB64    = params.getParameter(PARAMETER_NAME_DATA);
+        final String tdB64      = params.getParameter(PARAMETER_NAME_TRIPHASE_DATA);
+        String providerName  	= params.getParameter(ServiceParams.HTTP_PARAM_CERT_ORIGIN);
 
         if (dataB64 == null || dataB64.isEmpty()) {
         	LOGGER.warning(logF.f("No se han proporcionado los datos a firmar")); //$NON-NLS-1$

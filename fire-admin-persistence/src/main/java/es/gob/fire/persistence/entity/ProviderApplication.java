@@ -21,11 +21,9 @@ public class ProviderApplication implements Serializable {
     private Application application;
 
     @Column(name = "OBLIGATORIO", nullable = false)
-    @Type(type = "yes_no")
     private boolean mandatory;
 
     @Column(name = "HABILITADO", nullable = false)
-    @Type(type = "yes_no")
     private boolean enabled;
 
     @Column(name = "ORDEN", nullable = false)

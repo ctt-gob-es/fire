@@ -213,4 +213,9 @@ public class EventManagerAlarmNotifier implements AlarmNotifier {
 
 		this.client.send(alert, this.config);
 	}
+
+	@Override
+	public void destroy() {
+		this.initialized = false;
+	}
 }

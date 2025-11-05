@@ -61,5 +61,43 @@ public class ConstantsMail {
 	 * Attribute that represents the mail.smtp.auth property.
 	 */
 	public static final String MAIL_SMTP_AUTH = "mail.smtp.auth";
+
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones CRITICAL
+	 * para enviar un correo.
+	 */
+	public static final String MAIL_CRITICAL_NOTIFY_LIMIT = "mail.critical.notify.limit"; //$NON-NLS-1
+
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones ERROR
+	 * para enviar un correo.
+	 */
+	public static final String MAIL_ERROR_NOTIFY_LIMIT = "mail.error.notify.limit"; //$NON-NLS-1$
 	
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones WARNING
+	 * para enviar un correo.
+	 */
+	public static final String MAIL_WARNING_NOTIFY_LIMIT = "mail.warning.notify.limit"; //$NON-NLS-1$
+	
+	/**
+	 * Nombre de la propiedad de configuraci&oacute;n que determina el limite de notificaciones INFO
+	 * para enviar un correo.
+	 */
+	public static final String MAIL_INFO_NOTIFY_LIMIT = "mail.info.notify.limit"; //$NON-NLS-1$
+
+	/**
+	 * Intervalo de tiempo en el que se comprobar&aacute; cuantas alarmas hay registradas.
+	 */
+	public static final String MAIL_NOTIFY_DELAY = "mail.notify.delay.time"; //$NON-NLS-1$
+
+	/**
+	 * Asunto del correo a enviar.
+	 */
+	public static final String MAIL_SUBJECT = "mail.subject"; //$NON-NLS-1$
+
+	/**
+	 * Entorno desde el que se notifica.
+	 */
+	public static final String MAIL_ENVIRONMENT = "mail.environment"; //$NON-NLS-1$
 }

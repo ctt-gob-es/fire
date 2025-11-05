@@ -120,8 +120,14 @@ $(document)
 				hide();
 				$("#" + idResult).html(responseText);
 			},
-			error : function(e) {
+			error : function(e, xhr) {
 				alert("Error al cargar el certificado");
+				
+				if (xhr.status === 401 || xhr.status === 403) {
+                    window.location.reload();
+                } else {
+                    console.error("Error al realizar la peticion");
+                }
 			}
 		});
 
@@ -132,136 +138,137 @@ $(document)
 		previewCert(event);
 	});
 
-		$("input[type=file]").change(
-				function() {
-					var fieldVal = $(this).val();
+	$("input[type=file]").change(function() {
+		  var fieldVal = $(this).val();
+		  fieldVal = fieldVal.replace("C:\\fakepath\\", "");
+		  if (fieldVal !== undefined && fieldVal !== "") { // <= fix
+		    $(this).next(".custom-file-label").attr('data-content', fieldVal);
+		    $(this).next(".custom-file-label").text(fieldVal);
+		  }
+		});
 
-					// Change the node's value by removing the fake path (Chrome)
-					fieldVal = fieldVal.replace("C:\\fakepath\\", "");
-
-					if (fieldVal != undefined || fieldVal != "") {
-						$(this).next(".custom-file-label").attr('data-content',	fieldVal);
-						$(this).next(".custom-file-label").text(fieldVal);
-					}
-
-				});
 		
 
 		
 function saveEditCert() {
-	
-	var saveeditcert = /*[[@{/saveeditcert}]]*/;
-	var formData = new FormData();
-	
- 	var file =  $('#certFile').prop('files')[0];
- 	
- 	if (file == undefined) {
- 		file = new File([""], "nofile", {type: "text/plain", lastModified: new Date()});
- 	}
- 	
-    var blob = new Blob([JSON.stringify($("#certEditForm").serializeJSON())], {type: "application/json"});
-    
-    formData.append('certEditForm', blob);
-    formData.append("certFile", file);
- 	
- 	loading();
- 	
- 	if ($('#certEditForm')[0].checkValidity() === false) {
- 		  hide();
- 		  
- 		  $('#certEditForm *').filter(':input').each(function(){
- 	  	    
- 	      	if(!$(this)[0].checkValidity()){
- 	  	  	 	$("#" + $(this).attr('id')).addClass("has-error");
- 	  	    } else {
- 	  	  	 	$("#" + $(this).attr('id')).removeClass("has-error");
- 	  	    }
- 	  	    
- 	  	  });
- 		  
- 	  } else{
- 		  
- 		 $.ajax({
- 		 	  url: saveeditcert,
- 			  type: "POST",
- 			  data: formData,
- 			  processData: false,
- 			  contentType: false,
- 			  success: function(data){
- 				  
- 				  hide();		 
- 				  
- 				  if (data.error != null){
- 					  
- 					  var errores = JSON.parse(data.error);
- 					  
- 					  jQuery.each(errores, function(i, val) {
- 						  
- 						 if(i == "errorSaveCertificate"){
- 							var messageError = val;
- 							$('#resultEditCert').html(messageError);
- 							$('#resultEditCert').addClass('alert alert-danger');
- 						}  	
- 						 
- 					  	$('#certEditForm *').filter('span').each(function(){
- 							if (i == $(this).attr('id')){
- 								$("#" + i).text(val);
- 							}
- 						});
- 					  });
- 				  }else{
- 					
- 					 hide();
- 					// Encuentra la fila en la tabla usando una función de búsqueda
-  					var row = $('#certServiceTable').DataTable().row(function (idx, rowData, node) {
-  					    return rowData.idCertificate === data.data[0].idCertificate;
-  					});
+	  var saveeditcert = /*[[@{/saveeditcert}]]*/;
+	  var formData = new FormData();
 
-  					if (row.length) {
-  					    // Si la fila existe, actualiza los datos y redibuja la tabla
-  					    row.data(data.data[0]).invalidate().draw(false); // .invalidate() asegura que los cambios se reflejen
-  					} else {
-  					    // Si no existe, añade una nueva fila
-  					    $('#certServiceTable').DataTable().row.add(data.data[0]).draw(false);
-  					}
- 				  
- 					 $("#certEditForm")[0].reset();
- 					 $('#certEditForm *').filter('span').each(function(){
- 							$(this).text('');
- 						}); 					  
- 					  
- 					var messageResponse = /*[[#{message.success.certificate.edit}]]*/;
- 					 								  
- 					//se muestra un mensaje
- 					$('#resultEditCert').html(messageResponse);
- 					$('#resultEditCert').removeClass('alert-danger')	
- 					$('#resultEditCert').addClass('alert alert-success');
- 				 	$("#resultEditCert").fadeTo(2000, 500).slideUp(500, function() {
- 						$("#resultEditCert").slideUp(500);
- 						
- 						//se cierra modal
- 	 				   closeModal('certEditModal');
- 					});
- 				 	
- 				   
- 				 	
- 				  } 				 
- 				  			  
- 				  $('#certEditForm *').filter(':input').each(function(){
- 					  $("#" + $(this).attr('id')).removeClass("has-error");
- 				  });
- 				  		  
- 			  },
- 			  error:function(){
- 				  hide();
- 				 var messageResponse = /*[[#{message.error.certificate.edit}]]*/;
- 				  $('#resultEditCert').removeClass('alert-success')	
- 				  $('#resultEditCert').addClass('alert alert-danger');
- 				  $("#resultEditCert").html(messageResponse);
- 			  }
- 			});
- 	  }
- }
+	  var file = $('#certFile').prop('files')[0];
+	  if (file === undefined) {
+	    file = new File([""], "nofile", { type: "text/plain", lastModified: new Date() });
+	  }
+
+	  var blob = new Blob([JSON.stringify($("#certEditForm").serializeJSON())], { type: "application/json" });
+
+	  formData.append('certEditForm', blob);
+	  formData.append("certFile", file);
+
+	  loading();
+
+	  if ($('#certEditForm')[0].checkValidity() === false) {
+	    hide();
+
+	    $('#certEditForm *').filter(':input').each(function () {
+	      if (!$(this)[0].checkValidity()) {
+	        $("#" + $(this).attr('id')).addClass("has-error");
+	      } else {
+	        $("#" + $(this).attr('id')).removeClass("has-error");
+	      }
+	    });
+
+	  } else {
+
+	    $.ajax({
+	      url: saveeditcert,
+	      type: "POST",
+	      data: formData,
+	      processData: false,
+	      contentType: false,
+	      success: function (resp) {
+	        hide();
+
+	        // Caso 1: Backend devuelve errores (dtOutput.setError(...))
+	        if (resp && resp.error) {
+	          var errores = {};
+	          try { errores = JSON.parse(resp.error); } catch (e) { /* ignore */ }
+
+	          $.each(errores, function (i, val) {
+	            if (i === "errorSaveCertificate") {
+	              $('#resultEditCert').html(val).removeClass('alert-success').addClass('alert alert-danger');
+	            }
+	            $('#certEditForm *').filter('span').each(function () {
+	              if (i === $(this).attr('id')) { $("#" + i).text(val); }
+	            });
+	          });
+
+	          return; // no seguimos
+	        }
+
+	        // Caso 2: Backend devuelve filas (resp.data)
+	        if (resp && Array.isArray(resp.data) && resp.data.length > 0) {
+	          var rowDataNew = resp.data[0];
+
+	          var table = $('#certServiceTable').DataTable();
+
+	          // Busca por idCertificate con coerción por si viene string/number
+	          var row = table.row(function (idx, data /*, node*/) {
+	            return String(data.idCertificate) === String(rowDataNew.idCertificate);
+	          });
+
+	          if (row.any()) {
+	            row.data(rowDataNew).draw(false); // actualiza
+	          } else {
+	            table.row.add(rowDataNew).draw(false); // inserta si no existe
+	          }
+
+	          // Limpieza de formulario + spans
+	          $("#certEditForm")[0].reset();
+	          $('#certEditForm *').filter('span').each(function () { $(this).text(''); });
+
+	          // Mensaje OK y cierre del modal
+	          var messageResponse = /*[[#{message.success.certificate.edit}]]*/;
+	          $('#resultEditCert')
+	            .html(messageResponse)
+	            .removeClass('alert-danger')
+	            .addClass('alert alert-success');
+
+	          $("#resultEditCert").fadeTo(2000, 500).slideUp(500, function () {
+	            $("#resultEditCert").slideUp(500);
+	            closeModal('certEditModal');
+	          });
+
+	        } else {
+	          // Caso 3: No hay error ni data: avisamos sin romper
+	          $('#resultEditCert')
+	            .text('No se devolvió ninguna fila desde el servidor.')
+	            .removeClass('alert-success')
+	            .addClass('alert alert-danger');
+	        }
+
+	        // Quita marcas de error campo a campo
+	        $('#certEditForm *').filter(':input').each(function () {
+	          $("#" + $(this).attr('id')).removeClass("has-error");
+	        });
+	      },
+	      error: function (xhr) {
+	        hide();
+
+	        if (xhr.status === 401 || xhr.status === 403) {
+	          window.location.reload();
+	        } else {
+	          console.error("Error al realizar la peticion");
+	        }
+
+	        var messageResponse = /*[[#{message.error.certificate.edit}]]*/;
+	        $('#resultEditCert')
+	          .removeClass('alert-success')
+	          .addClass('alert alert-danger')
+	          .html(messageResponse);
+	      }
+	    });
+	  }
+	}
  
  function dataURLtoFile(dataurl, filename) {
 	 
