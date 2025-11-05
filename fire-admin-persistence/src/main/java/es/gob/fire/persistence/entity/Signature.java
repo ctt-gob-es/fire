@@ -125,6 +125,16 @@ public class Signature implements Serializable {
 	 * Attribute that represents the signature total.
 	 */
 	private Long total;
+	
+	/**
+	 * Attribute that represents the organization.
+	 */
+	private String organization;
+
+	/**
+	 * Attribute that represents the DIR3 code.
+	 */
+	private String dir3Code;
 
 	/**
 	 * Gets the value of the attribute {@link #logServerId}.
@@ -335,4 +345,25 @@ public class Signature implements Serializable {
 		this.total = totalP;
 	}
 
+	@Column(name = "ORGANIZATION", nullable = false, length = NumberConstants.NUM100)
+	@Size(max = NumberConstants.NUM100)
+	@NotNull
+	public String getOrganization() {
+		return this.organization;
+	}
+
+	public void setOrganization(final String organization) {
+		this.organization = organization;
+	}
+
+	@Column(name = "DIR3_CODE", nullable = false, length = NumberConstants.NUM10)
+	@Size(max = NumberConstants.NUM10)
+	@NotNull
+	public String getDir3Code() {
+		return this.dir3Code;
+	}
+
+	public void setDir3Code(final String dir3Code) {
+		this.dir3Code = dir3Code;
+	}
 }

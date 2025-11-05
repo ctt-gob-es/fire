@@ -22,11 +22,12 @@ import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
 
 import es.gob.afirma.core.misc.LoggerUtil;
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 import es.gob.fire.signature.ConfigManager;
+import es.gob.fire.signature.LogUtils;
 
 /** Servicio de almacenamiento temporal de firmas. &Uacute;til para servir de intermediario en comunicaci&oacute;n
  * entre JavaScript y <i>Apps</i> m&oacute;viles nativas.
@@ -65,17 +66,28 @@ public final class RetrieveService extends HttpServlet {
 	protected void service(final HttpServletRequest request, final HttpServletResponse response) {
 
 		LOGGER.fine("== INICIO DE LA RECUPERACION =="); //$NON-NLS-1$
-		
-		// Leemos la entrada
-		RequestParameters params;
+
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
 		try {
-			params = RequestParameters.extractParameters(request);
+			params = RequestParameters.parseParameters(request, false);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
+		}
+
+		// Leemos la entrada
+		try {
+			params.checkParameters();
 		}
 		catch (final Exception e) {
 			LOGGER.warning(ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
 			sendResult(response, ErrorManager.genError(ErrorManager.ERROR_EXTRACTING_PARAMETERS));
 			return;
 		}
+
 
 		final String operation = params.getParameter(PARAMETER_NAME_OPERATION);
 		response.setHeader("Access-Control-Allow-Origin", "*"); //$NON-NLS-1$ //$NON-NLS-2$

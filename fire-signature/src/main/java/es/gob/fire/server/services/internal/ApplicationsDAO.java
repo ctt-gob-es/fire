@@ -23,11 +23,11 @@ public interface ApplicationsDAO {
 	 * estar deshabilitada la aplicaci&oacute;n, puede omitirse la informaci&oacute;n de los certificados
 	 * necesarios para la autenticaci&oacute;n.
 	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+	 * @param logF Formateador de logs.
 	 * @return Informaci&oacute;n de acceso o {@code null} si la aplicacion no tiene informaci&oacute;n de acceso asociada.
 	 * @throws IOException Cuando no se puede realizar la comprobaci&oacute;n.
 	 */
-	ApplicationAccessInfo getApplicationAccessInfo(String appId, TransactionAuxParams trAux)
+	ApplicationAccessInfo getApplicationAccessInfo(String appId, LogTransactionFormatter logF)
 			throws IOException;
 
 	/**
@@ -35,10 +35,10 @@ public interface ApplicationsDAO {
 	 * estar deshabilitada la aplicaci&oacute;n, puede omitirse la informaci&oacute;n de los certificados
 	 * necesarios para la autenticaci&oacute;n.
 	 * @param appId Identificador de la aplicaci&oacute;n.
-	 * @param trAux Informaci&oacute;n auxiliar de la transacci&oacute;n.
+	 * @param logF Formateador de logs.
 	 * @return Informaci&oacute;n de acceso o {@code null} si la aplicacion no tiene informaci&oacute;n de acceso asociada.
 	 * @throws IOException Cuando no se puede realizar la comprobaci&oacute;n.
 	 */
-	ApplicationOperationConfig getOperationConfig(String appId, TransactionAuxParams trAux)
+	ApplicationOperationConfig getOperationConfig(String appId, LogTransactionFormatter logF)
 			throws IOException;
 }

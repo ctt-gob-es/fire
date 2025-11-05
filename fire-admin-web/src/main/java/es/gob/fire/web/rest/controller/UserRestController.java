@@ -156,8 +156,8 @@ public class UserRestController {
 	        return userTable;
 	    }).collect(Collectors.toList());
 
-	    // 1. Aplicar la búsqueda global con manejo de valores nulos
-	    String searchValue = input.getSearch().getValue(); // Valor de búsqueda global
+	    // 1. Aplicar la busqueda global con manejo de valores nulos
+	    String searchValue = input.getSearch().getValue(); // Valor de busqueda global
 	    if (searchValue != null && !searchValue.isEmpty()) {
 	        dtoList = dtoList.stream()
 	            .filter(dto -> 
@@ -171,16 +171,16 @@ public class UserRestController {
 	            .collect(Collectors.toList());
 	    }
 
-	    // 2. Aplicar la ordenación con manejo de valores nulos usando expresiones lambda
+	    // 2. Aplicar la ordenacion con manejo de valores nulos usando expresiones lambda
 	    List<Order> orders = input.getOrder();
 	    if (!orders.isEmpty()) {
-	        Order order = orders.get(0); // Obtener la primera ordenación (solo manejamos una por ahora)
-	        int columnIndex = order.getColumn(); // Índice de la columna a ordenar
-	        String sortDirection = order.getDir(); // Dirección ('asc' o 'desc')
+	        Order order = orders.get(0); // Obtener la primera ordenacion (solo manejamos una por ahora)
+	        int columnIndex = order.getColumn(); // Indice de la columna a ordenar
+	        String sortDirection = order.getDir(); // Direccion ('asc' o 'desc')
 
 	        Comparator<UserTableDTO> comparator = null;
 
-	        // Determinar la columna por la cual se está ordenando y manejar los valores nulos
+	        // Determinar la columna por la cual se esta ordenando y manejar los valores nulos
 	        switch (input.getColumns().get(columnIndex).getData()) {
 	            case "email":
 	                comparator = (dto1, dto2) -> {
@@ -246,7 +246,7 @@ public class UserRestController {
 	                };
 	        }
 
-	        // Aplicar la dirección de la ordenación (ascendente o descendente)
+	        // Aplicar la direccion de la ordenacion (ascendente o descendente)
 	        if ("desc".equalsIgnoreCase(sortDirection)) {
 	            comparator = comparator.reversed();
 	        }
@@ -255,16 +255,16 @@ public class UserRestController {
 	        dtoList = dtoList.stream().sorted(comparator).collect(Collectors.toList());
 	    }
 
-	    // 3. Paginación
-	    int start = input.getStart(); // Índice de inicio de los resultados
-	    int length = input.getLength(); // Cantidad de resultados por página
+	    // 3. Paginacion
+	    int start = input.getStart(); // Indice de inicio de los resultados
+	    int length = input.getLength(); // Cantidad de resultados por pagina
 	    List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
 
 	    // 4. Configurar el resultado para DataTables
 	    DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
 	    dtoOutput.setDraw(input.getDraw()); // Configurar el valor de "draw"
-	    dtoOutput.setRecordsTotal(dtoList.size()); // Total de registros antes de la paginación
-	    dtoOutput.setRecordsFiltered(dtoList.size()); // Registros filtrados después de la búsqueda
+	    dtoOutput.setRecordsTotal(dtoList.size()); // Total de registros antes de la paginacion
+	    dtoOutput.setRecordsFiltered(dtoList.size()); // Registros filtrados despues de la busqueda
 	    dtoOutput.setData(paginatedList); // Datos paginados
 
 	    return dtoOutput;
@@ -376,7 +376,7 @@ public class UserRestController {
 					json.put("dniAdd" + SPAN, "El DNI debe tener un formato correcto.");
 				}
 				
-				// Validaremos que el dni/nif no esté repetido
+				// Validaremos que el dni/nif no este repetido
 				if (this.userService.getUserByDni(userForm.getDniAdd())!=null) {
 					error = true;
 					json.put("dniAdd" + SPAN, "Ya existe un usuario con el DNI introducido.");
@@ -415,7 +415,7 @@ public class UserRestController {
 			return userTable;
 		}).collect(Collectors.toList());
 
-		// Configurar registros totales (sin paginación)
+		// Configurar registros totales (sin paginacion)
 		dtOutput.setRecordsTotal(dtoList.size());
 		dtOutput.setRecordsFiltered(dtoList.size());
 		dtOutput.setData(dtoList);
@@ -539,7 +539,7 @@ public class UserRestController {
 			return userTable;
 		}).collect(Collectors.toList());
 
-		// Configurar registros totales (sin paginación)
+		// Configurar registros totales (sin paginacion)
 		dtOutput.setRecordsTotal(dtoList.size());
 		dtOutput.setRecordsFiltered(dtoList.size());
 		dtOutput.setData(dtoList);

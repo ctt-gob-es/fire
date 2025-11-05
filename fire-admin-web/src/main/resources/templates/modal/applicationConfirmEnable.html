@@ -68,12 +68,18 @@
     			
     			$('#appTable').DataTable().ajax.reload(null, false);
            },
-           error: function(xhr) {
+           error: function(xhr, error) {
                // Captura el mensaje de error desde la respuesta JSON
                var errorMessage = "Ocurrió un error al habilitar la aplicación.";
                
                if (xhr.status === 404 && xhr.responseJSON && xhr.responseJSON.error) {
                    errorMessage = xhr.responseJSON.error; // "Aplicación no encontrada"
+               }
+               
+               if (xhr.status === 401 || xhr.status === 403) {
+                   window.location.reload();
+               } else {
+                   console.error("Error al realizar la peticion");
                }
 
                // Mostrar mensaje de error en el div correspondiente

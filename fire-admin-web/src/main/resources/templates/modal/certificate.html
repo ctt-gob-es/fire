@@ -166,6 +166,13 @@ $(document).ready(function() {
 			                },
 			                error:function(xhr,status,error){
 			                	hide();
+			                	
+			                	if (xhr.status === 401 || xhr.status === 403) {
+		                            window.location.reload();
+		                        } else {
+		                            console.error("Error al realizar la peticion");
+		                        }
+			                	
 			                	var responseText = jQuery.parseJSON(xhr.responseText);
 			                	var messageException = responseText.message;
 			                	var messageError = "";
@@ -200,7 +207,13 @@ $(document).ready(function() {
 		                    $('#altEditor-modal .modal-body .alert').remove();
 		                    $('#altEditor-modal').modal('hide');
 		                },
-		                error:function(){}
+		                error:function(xhr, error){
+		                	if (xhr.status === 401 || xhr.status === 403) {
+	                            window.location.reload();
+	                        } else {
+	                            console.error("Error al realizar la peticion");
+	                        }
+		                }
 		            });
 		            break;
 		        default:

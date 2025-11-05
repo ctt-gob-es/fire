@@ -7,6 +7,8 @@ public class GeneralConfigDTO {
 	private Long maxSizePetition;
 	private Long maxAmountDocs;
 	
+	private Long maxEntitiesBeforeGrouping;
+	
 	private List<ProviderDTO> providers;
 
 	public Long getMaxSizeDoc() {
@@ -39,5 +41,13 @@ public class GeneralConfigDTO {
 
 	public void setProviders(List<ProviderDTO> providers) {
 		this.providers = providers;
+	}
+
+	public Long getMaxEntitiesBeforeGrouping() {
+		return maxEntitiesBeforeGrouping;
+	}
+
+	public void setMaxEntitiesBeforeGrouping(Long maxEntitiesBeforeGrouping) {
+		this.maxEntitiesBeforeGrouping = maxEntitiesBeforeGrouping;
 	}
 }

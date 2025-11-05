@@ -34,6 +34,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
+import es.gob.fire.web.config.VersionProperties;
 
 /** 
  * <p>Controller for handling HTTP GET requests and navigating between views.</p>
@@ -47,17 +48,17 @@ public class AppController {
 	private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 	
 	@Autowired
-	private UserLoggedDTO userLoggedDTO;
-
+    private VersionProperties versionProperties;
+	
 	@GetMapping({"/"})
 	public String index(final Model model) {
 		return "login.html";
 	}
 
 	@GetMapping("/inicio")
-	public String inicio() {
-		// Informamos en la traza que el usuario X se ha logueado en la administracion
-		LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {userLoggedDTO.getName()}));
+	public String inicio(final Model model) {
+		model.addAttribute("appVersion", versionProperties.getProjectVersion());
+        model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
 		return "inicio.html";
 	}
 	@GetMapping("/user-form")

@@ -39,4 +39,9 @@ public interface AlarmNotifier {
 	 */
 	void notify(AlarmLevel level, Alarm alarm, String... source)
 			throws IOException;
+
+	/**
+	 * Detiene la notificacion de alarmas y libera los recursos.
+	 */
+	void destroy();
 }

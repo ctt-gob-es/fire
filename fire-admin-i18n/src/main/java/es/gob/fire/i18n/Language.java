@@ -32,7 +32,7 @@
  * </p>
  *
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.4, 07/02/2025.
+ * @version 1.5, 04/03/2025.
  */
 package es.gob.fire.i18n;
 
@@ -45,7 +45,7 @@ import es.gob.fire.i18n.utils.Logger;
 /**
  * <p>Class responsible for managing the access to language resources.</p>
  * <b>Project:</b><p>Application for signing documents of FIRe suite systems.</p>
- * @version 1.4, 07/02/2025.
+ * @version 1.5, 04/03/2025.
  */
 public final class Language {
 
@@ -112,6 +112,11 @@ public final class Language {
 	private static final String CONTENT_CORE_TASKS_PATH = "messages.core.tasks";
 	
 	/**
+	 * Attribute that represents the location of file that contains the TSL messages core module.
+	 */
+	private static final String BUNDLENAME_CORE_FIRE= "messages.core.fire";
+	
+	/**
 	 * Constant attribute that represents the key for the configured locale for the platform.
 	 */
 	private static final String LANGUAGE = "LANGUAGE";
@@ -150,6 +155,11 @@ public final class Language {
 	 * Attribute that represents the resource bundle with the general messages for the tasks.
 	 */
 	private static ResourceBundle resCoreTasks = null;
+	
+	/**
+	 * Attribute that represents the resource bundle with the general messages for the core fire.
+	 */
+	private static ResourceBundle resCoreFire = null;
 	
 	static {
 		// Preparamos el URLClassLoader con el que se cargaran los mensajes de logs
@@ -205,6 +215,7 @@ public final class Language {
 		quartzGeneral = ResourceBundle.getBundle(CONTENT_QUARTZ_GENERAL_PATH, currentLocale, classLoaderMessages);
 		// Se cargan los mensajes del modulo del core
 		resCoreTasks = ResourceBundle.getBundle(CONTENT_CORE_TASKS_PATH, currentLocale, classLoaderMessages);
+		resCoreFire = ResourceBundle.getBundle(BUNDLENAME_CORE_FIRE, currentLocale, classLoaderMessages);
 	}
 	
 	/**
@@ -338,5 +349,24 @@ public final class Language {
 	 */
 	public static String getResCoreTask(final String key) {
 		return resCoreTasks.getString(key);
+	}
+
+	/**
+	 * Gets the Task message (core module) with the key and values indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @param values Values for insert in the message.
+	 * @return String with the message well-formed.
+	 */
+	public static String getFormatResCoreFire(final String key, final Object... values) {
+		return new MessageFormat(resCoreFire.getString(key), currentLocale).format(values);
+	}
+	
+	/**
+	 * Gets the Task message (core module) with the key indicated as input parameters.
+	 * @param key Key for obtain the message.
+	 * @return String with the message.
+	 */
+	public static String getResCoreFire(final String key) {
+		return resCoreFire.getString(key);
 	}
 }

@@ -24,10 +24,14 @@
  */
 package es.gob.fire.persistence.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.entity.Signature;
 
 /** 
@@ -45,4 +49,9 @@ public interface SignatureRepository extends JpaRepository<Signature, Long>, Jpa
 	 */
 	Signature findBySignatureId(Long signatureId);
   
+	@Query("SELECT DISTINCT s.application FROM Signature s")
+	List<String> findDistinctApplications();
+
+	@Query("SELECT new es.gob.fire.persistence.dto.OrganizationDTO(s.organization, s.dir3Code) FROM Signature s GROUP BY s.organization, s.dir3Code")
+	List<OrganizationDTO> findOrganizations();
 }

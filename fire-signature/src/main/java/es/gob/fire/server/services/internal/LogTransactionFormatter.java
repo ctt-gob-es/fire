@@ -13,6 +13,10 @@ public class LogTransactionFormatter {
 
 	private String logHeader;
 
+	public LogTransactionFormatter() {
+		this(null, null);
+	}
+
 	public LogTransactionFormatter(final String appId) {
 		this(appId, null);
 	}

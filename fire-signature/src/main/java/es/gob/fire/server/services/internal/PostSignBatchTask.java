@@ -18,7 +18,7 @@ import java.util.logging.Logger;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.server.document.FIReDocumentManager;
 import es.gob.fire.server.document.FireDocumentManagerBase;
-import es.gob.fire.server.services.LogUtils;
+import es.gob.fire.signature.LogUtils;
 import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.SignatureValidator;
 import es.gob.fire.upgrade.UpgradeException;

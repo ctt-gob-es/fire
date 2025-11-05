@@ -24,10 +24,14 @@
  */
 package es.gob.fire.persistence.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.entity.Transaction;
 
 /** 
@@ -45,4 +49,9 @@ public interface TransactionRepository extends JpaRepository<Transaction, Long>,
 	 */
 	Transaction findByTransactionId(Long transactionId);
   
+	@Query("SELECT DISTINCT t.application FROM Transaction t")
+	List<String> findDistinctApplications();
+
+	@Query("SELECT new es.gob.fire.persistence.dto.OrganizationDTO(t.organization, t.dir3Code) FROM Transaction t GROUP BY t.organization, t.dir3Code")
+	List<OrganizationDTO> findOrganizations();
 }

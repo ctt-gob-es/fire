@@ -1255,6 +1255,7 @@ public class FireClient {
     		}
     		else {
     			// El codigo de error no revela lo ocurrido, pero quizas se pueda determinar por otras vias
+    			// La peticion excedio el tamano permitido
     			if (errorResponse.getStatus() == 413) {
     				return new HttpTooLargeContentException(FIReErrors.TOO_LARGE_CONTENT);
     			}
@@ -1267,7 +1268,7 @@ public class FireClient {
     	// comunicacion
     	if (errorResponse.getStatus() == HttpURLConnection.HTTP_FORBIDDEN) {
     		return new HttpForbiddenException(ERROR_CODE_FORBIDEN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
-    	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
+    	} else if (errorResponse.getStatus() == HttpURLConnection.HTTP_NOT_FOUND || errorResponse.getStatus() == HttpURLConnection.HTTP_CLIENT_TIMEOUT) {
     		return new HttpNetworkException(ERROR_CODE_UNKNOWN, HTTP_ERROR_PREFIX + errorResponse.getStatus());
     	}
     	return new HttpOperationException(ERROR_CODE_UNKNOWN, "Error desconocido en la llamada a FIRe: " + HTTP_ERROR_PREFIX + errorResponse.getStatus()); //$NON-NLS-1$

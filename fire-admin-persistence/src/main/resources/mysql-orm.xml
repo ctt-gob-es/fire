@@ -1,46 +1,380 @@
 <?xml version="1.0" encoding="UTF-8"?>
- 
 <entity-mappings
     xmlns="http://xmlns.jcp.org/xml/ns/persistence/orm"
     xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
     xsi:schemaLocation="http://xmlns.jcp.org/xml/ns/persistence/orm orm_2_1.xsd"
     version="2.1">
+
     <package>es.gob.fire.persistence.entity</package>
+    
+    <!-- ====== tb_certificados ====== -->
+    <entity class="Certificate" access="PROPERTY">
+      <table name="tb_certificados"/>
+      <attributes>
+        <id name="idCertificado">
+          <generated-value strategy="IDENTITY"/>
+          <column name="ID_CERTIFICADO"/>
+        </id>
+        <basic name="certificateName"><column name="NOMBRE_CERT"/></basic>
+        <basic name="fechaAlta"><column name="FEC_ALTA"/></basic>
+        <basic name="certificate"><column name="CERTIFICADO"/></basic>
+        <basic name="huella"><column name="HUELLA"/></basic>
+        <basic name="fechaInicio"><column name="FEC_INICIO"/></basic>
+        <basic name="fechaCaducidad"><column name="FEC_CADUCIDAD"/></basic>
+        <basic name="subject"><column name="SUBJECT"/></basic>
+        <basic name="dateLastCommunication"><column name="FECHA_ULTIMA_COMUNICACION"/></basic>
+      </attributes>
+    </entity>
+
+    <!-- ====== tb_aplicaciones ====== -->
+    <entity class="Application" access="PROPERTY">
+      <table name="tb_aplicaciones"/>
+      <attributes>
+        <id name="appId"><column name="ID"/></id>
+        <basic name="appName"><column name="NOMBRE"/></basic>
+        <basic name="fechaAltaApp"><column name="FECHA_ALTA"/></basic>
+        <basic name="habilitado"><column name="HABILITADO"/></basic>
+        <basic name="organization"><column name="ORGANIZATION"/></basic>
+        <basic name="dir3Code"><column name="DIR3_CODE"/></basic>
+        <basic name="customProvider"><column name="PROVEEDOR_PERSONALIZADO"/></basic>
+        <basic name="customSize"><column name="TAMANO_PERSONALIZADO"/></basic>
+        <basic name="maxSizeDoc"><column name="TAMANO_MAXIMO_DOCUMENTO"/></basic>
+        <basic name="maxSizePetition"><column name="TAMANO_MAXIMO_PETICION"/></basic>
+        <basic name="maxAmountDocs"><column name="CANTIDAD_MAXIMA_DOCUMENTOS"/></basic>
+      </attributes>
+    </entity>
+
+    <!-- tb_usuarios -->
     <entity class="User" access="PROPERTY">
-    	<table name="tb_usuarios" />
+        <table name="tb_usuarios"/>
         <attributes>
-            <id name="userId">
+            <id name="idUser">
                 <generated-value strategy="IDENTITY"/>
                 <column name="id_usuario"/>
             </id>
+            <basic name="firstName"><column name="nombre" length="45" nullable="false"/></basic>
+            <basic name="lastName"><column name="apellidos" length="120" nullable="false"/></basic>
+            <basic name="email"><column name="correo_elec" length="60"/></basic>
+            <basic name="phone"><column name="telf_contacto" length="45"/></basic>
+            <basic name="roleId"><column name="fk_rol" nullable="false"/></basic>
+            <basic name="createdAt"><column name="fec_alta" nullable="false"/></basic>
+            <basic name="defaultUser"><column name="usu_defecto" nullable="false"/></basic>
+            <basic name="renewCode"><column name="codigo_renovacion" length="100"/></basic>
+            <basic name="renewAt"><column name="fec_renovacion"/></basic>
+            <basic name="resetPassword"><column name="rest_clave"/></basic>
+            <basic name="dni"><column name="dni" length="9" unique="true"/></basic>
+            <basic name="lastAccessAt"><column name="fec_ultimo_acceso" nullable="false"/></basic>
         </attributes>
     </entity>
-    <entity class="Certificate" access="PROPERTY">
-    	<table name="tb_certificados" />
+
+    <!-- tb_servidores_log -->
+    <entity class="ServerLog" access="PROPERTY">
+        <table name="tb_servidores_log"/>
         <attributes>
-            <id name="idCertificado">
-                <generated-value strategy="IDENTITY"/>
-                <column name="id_certificado"/>
-            </id>
-        </attributes>
-    </entity>
-    <entity class="Application" access="PROPERTY">
-    	<table name="tb_aplicaciones" />
-        <attributes>
-            <id name="appId">
-                <!--  <generated-value strategy="IDENTITY"/> -->
-                <generator class="es.gob.fire.persistence.generator.ApplicationIdGenerator"/>
-                <column name="id"/>
-            </id>
-        </attributes>
-    </entity>
-    <entity class="LogServer" access="PROPERTY">
-    	<table name="tb_servidores_log" />
-        <attributes>
-            <id name="logServerId">
+            <id name="idServer">
                 <generated-value strategy="IDENTITY"/>
                 <column name="id_servidor"/>
             </id>
+            <basic name="name"><column name="nombre" length="45" nullable="false"/></basic>
+            <basic name="logServiceUrl"><column name="url_servicio_log" length="500" nullable="false"/></basic>
+            <basic name="secretKey"><column name="clave" length="45" nullable="false"/></basic>
+            <basic name="verifySsl"><column name="verificar_ssl"/></basic>
         </attributes>
     </entity>
+
+    <!-- tb_firmas -->
+    <entity class="Signature" access="PROPERTY">
+        <table name="tb_firmas"/>
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id"/>
+            </id>
+            <basic name="date"><column name="fecha"/></basic>
+            <basic name="application"><column name="aplicacion" length="45"/></basic>
+            <basic name="dir3Code"><column name="dir3_code" length="50"/></basic>
+            <basic name="organization"><column name="organization" length="255"/></basic>
+            <basic name="format"><column name="formato" length="20"/></basic>
+            <basic name="upgradedFormat"><column name="formato_mejorado" length="20"/></basic>
+            <basic name="algorithm"><column name="algoritmo" length="20"/></basic>
+            <basic name="provider"><column name="proveedor" length="45"/></basic>
+            <basic name="browser"><column name="navegador" length="20" nullable="false"/></basic>
+            <basic name="ok"><column name="correcta"/></basic>
+            <basic name="total"><column name="total"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_transacciones -->
+    <entity class="Transaction" access="PROPERTY">
+        <table name="tb_transacciones"/>
+        <attributes>
+            <id name="id">
+                <generated-value strategy="IDENTITY"/>
+                <column name="id"/>
+            </id>
+            <basic name="date"><column name="fecha" nullable="false"/></basic>
+            <basic name="application"><column name="aplicacion" length="45" nullable="false"/></basic>
+            <basic name="dir3Code"><column name="dir3_code" length="50"/></basic>
+            <basic name="organization"><column name="organization" length="255"/></basic>
+            <basic name="operation"><column name="operacion" length="10" nullable="false"/></basic>
+            <basic name="provider"><column name="proveedor" length="45" nullable="false"/></basic>
+            <basic name="forcedProvider"><column name="proveedor_forzado"/></basic>
+            <basic name="ok"><column name="correcta"/></basic>
+            <basic name="size"><column name="tamanno"/></basic>
+            <basic name="total"><column name="total"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_roles -->
+    <entity class="Role" access="PROPERTY">
+        <table name="tb_roles"/>
+        <attributes>
+            <id name="id"><column name="id"/></id>
+            <basic name="roleName"><column name="nombre_rol" length="45" nullable="false" unique="true"/></basic>
+            <basic name="permissions"><column name="permisos" length="45"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_responsable_de_aplicaciones -->
+    <entity class="ApplicationResponsible" access="PROPERTY">
+        <table name="tb_responsable_de_aplicaciones"/>
+        <id-class class="ApplicationResponsiblePK"/>
+        <attributes>
+            <many-to-one name="application" optional="false">
+                <join-column name="ID_APLICACION"/>
+            </many-to-one>
+            <many-to-one name="responsible" optional="false">
+                <join-column name="ID_USUARIO"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <!-- tb_certificados_de_aplicacion (PK compuesta via @IdClass) -->
+    <entity class="CertificatesApplication" access="PROPERTY">
+        <table name="tb_certificados_de_aplicacion"/>
+        <id-class class="CertificatesApplicationPK"/>
+        <attributes>
+            <many-to-one name="application" optional="false">
+                <join-column name="ID_APLICACION"/>
+            </many-to-one>
+            <many-to-one name="certificate" optional="false">
+                <join-column name="ID_CERTIFICADO"/>
+            </many-to-one>
+        </attributes>
+    </entity>
+
+    <!-- tb_audit_transacciones -->
+    <entity class="AuditTransaction" access="PROPERTY">
+        <table name="tb_audit_transacciones"/>
+        <attributes>
+            <id name="id"><generated-value strategy="IDENTITY"/><column name="id"/></id>
+            <basic name="date"><column name="fecha" nullable="false"/></basic>
+            <basic name="applicationId"><column name="id_aplicacion" length="48" nullable="false"/></basic>
+            <basic name="applicationName"><column name="nombre_aplicacion" length="48" nullable="false"/></basic>
+            <basic name="transactionId"><column name="id_transaccion" length="45" nullable="false"/></basic>
+            <basic name="operation"><column name="operacion" length="10" nullable="false"/></basic>
+            <basic name="cryptoOperation"><column name="operacion_criptografica" length="10" nullable="false"/></basic>
+            <basic name="format"><column name="formato" length="20" nullable="false"/></basic>
+            <basic name="upgradedFormat"><column name="formato_actualizado" length="20"/></basic>
+            <basic name="algorithm"><column name="algoritmo" length="20" nullable="false"/></basic>
+            <basic name="provider"><column name="proveedor" length="45" nullable="false"/></basic>
+            <basic name="forcedProvider"><column name="proveedor_forzado" nullable="false"/></basic>
+            <basic name="browser"><column name="navegador" length="20" nullable="false"/></basic>
+            <basic name="size"><column name="tamanno"/></basic>
+            <basic name="node"><column name="nodo" length="45"/></basic>
+            <basic name="result"><column name="resultado" nullable="false"/></basic>
+            <basic name="errorDetail"><column name="error_detalle" length="150"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_audit_firmas -->
+    <entity class="AuditSignature" access="PROPERTY">
+        <table name="tb_audit_firmas"/>
+        <attributes>
+            <id name="id"><generated-value strategy="IDENTITY"/><column name="id"/></id>
+            <basic name="transactionId"><column name="id_transaccion" length="45" nullable="false"/></basic>
+            <basic name="cryptoOperation"><column name="operacion_criptografica" length="10" nullable="false"/></basic>
+            <basic name="format"><column name="formato" length="20" nullable="false"/></basic>
+            <basic name="upgradedFormat"><column name="formato_actualizado" length="20"/></basic>
+            <basic name="size"><column name="tamanno"/></basic>
+            <basic name="result"><column name="resultado" nullable="false"/></basic>
+            <basic name="errorDetail"><column name="error_detalle" length="150"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_TIPO_PLANIFICADOR -->
+    <entity class="CPlannerType" access="PROPERTY">
+        <table name="TB_TIPO_PLANIFICADOR"/>
+        <attributes>
+            <id name="idPlannerType">
+                <generated-value strategy="IDENTITY"/>
+                <column name="ID_TIPO_PLANIFICADOR"/>
+            </id>
+            <basic name="tokenName"><column name="NOMBRE_TOKEN" length="30" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_PLANIFICADOR -->
+    <entity class="Planner" access="PROPERTY">
+      <table name="TB_PLANIFICADOR"/>
+      <attributes>
+        <id name="idPlanner"><column name="ID_PLANIFICADOR"/></id>
+        <basic name="hourPeriod"><column name="HORA_PERIODO"/></basic>
+        <basic name="minutePeriod"><column name="MINUTO_PERIODO"/></basic>
+        <basic name="secondPeriod"><column name="SEGUNDO_PERIODO"/></basic>
+        <basic name="initDay"><column name="DIA_INICIO"/></basic>
+        <basic name="advanceNotice"><column name="AVISO_ANTICIPADO"/></basic>
+        <many-to-one name="plannerType" fetch="LAZY" optional="false">
+          <join-column name="ID_TIPO_PLANIFICADOR"/>
+        </many-to-one>
+      </attributes>
+    </entity>
+
+    <!-- TB_PROGRAMADOR -->
+    <entity class="Programmer" access="PROPERTY">
+        <table name="TB_PROGRAMADOR"/>
+        <attributes>
+            <id name="idProgrammer">
+                <generated-value strategy="IDENTITY"/>
+                <column name="ID_PROGRAMADOR"/>
+            </id>
+            <basic name="tokenName"><column name="NOMBRE_TOKEN" length="30" nullable="false"/></basic>
+            <basic name="className"><column name="NOMBRE_CLASE" length="255" nullable="false"/></basic>
+            <basic name="active"><column name="ESTA_ACTIVO" nullable="false"/></basic>
+            <basic name="threadsNumber"><column name="NUM_HILOS"/></basic>
+            <basic name="processesNumber"><column name="NUM_PROCESOS"/></basic>
+            <basic name="expiredPeriod"><column name="PERIODO_EXPIRADO"/></basic>
+            <basic name="reassignTime"><column name="TIEMPO_REASIGNACION"/></basic>
+            <basic name="reactivationTime"><column name="TIEMPO_REACTIVACION"/></basic>
+            <basic name="checkTime"><column name="TIEMPO_COMPROBACION"/></basic>
+            <basic name="noticeDays"><column name="DIAS_PREAVISO"/></basic>
+            <basic name="communicationPeriod"><column name="PERIODO_COMUNICACION"/></basic>
+            <basic name="plannerId"><column name="ID_PLANIFICADOR" nullable="false"/></basic>
+            <basic name="programmerName"><column name="NOMBRE_PROGRAMADOR" length="50" nullable="false" unique="true"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_CONTROL_ACCESO -->
+    <entity class="ControlAccess" access="PROPERTY">
+        <table name="TB_CONTROL_ACCESO"/>
+        <attributes>
+            <id name="idControlAccess">
+                <generated-value strategy="IDENTITY"/>
+                <column name="ID_CONTROL_ACCESO"/>
+            </id>
+            <basic name="ip"><column name="IP" length="45" nullable="false"/></basic>
+            <basic name="accessStartAt"><column name="FECHA_INICIO_ACCESO" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_PROVEEDORES -->
+    <entity class="Provider" access="PROPERTY">
+        <table name="TB_PROVEEDORES"/>
+        <attributes>
+            <id name="id"><column name="ID_PROVEEDOR"/></id>
+            <basic name="name"><column name="NOMBRE" length="50" nullable="false"/></basic>
+            <basic name="mandatory"><column name="OBLIGATORIO"/></basic>
+            <basic name="enabled"><column name="HABILITADO"/></basic>
+            <basic name="orderIndex"><column name="ORDEN" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_PROVEEDORES_APLICACION -->
+    <entity class="ProviderApplication" access="PROPERTY">
+        <table name="TB_PROVEEDORES_APLICACION"/>
+        <id-class class="ProviderApplicationPK"/>
+        <attributes>
+            <many-to-one name="provider" optional="false">
+                <join-column name="ID_PROVEEDOR"/>
+            </many-to-one>
+            <many-to-one name="application" optional="false">
+                <join-column name="ID_APLICACION"/>
+            </many-to-one>
+            <basic name="mandatory"><column name="OBLIGATORIO"/></basic>
+            <basic name="enabled"><column name="HABILITADO"/></basic>
+            <basic name="orderIndex"><column name="ORDEN" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_propiedades -->
+    <entity class="Property" access="PROPERTY">
+        <table name="tb_propiedades"/>
+        <attributes>
+            <id name="key"><column name="clave" length="255"/></id>
+            <basic name="textValue"><column name="valor_texto" length="4000"/></basic>
+            <basic name="numericValue"><column name="valor_numerico" precision="19" scale="4"/></basic>
+            <basic name="dateValue"><column name="valor_fecha"/></basic>
+            <basic name="type"><column name="tipo" length="20" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_C_TIPO_AUTENTICACION -->
+    <entity class="CAuthenticationType" access="PROPERTY">
+        <table name="TB_C_TIPO_AUTENTICACION"/>
+        <attributes>
+            <id name="idAuthenticationType"><column name="ID_TIPO_AUTENTICACION"/></id>
+            <basic name="tokenName"><column name="NOMBRE_TOKEN" length="45" nullable="false"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- TB_SERVIDOR_AFIRMA -->
+    <entity class="ServerAfirma" access="PROPERTY">
+      <table name="TB_SERVIDOR_AFIRMA"/>
+      <attributes>
+        <id name="idServerAfirma"><column name="ID_SERVIDOR_AFIRMA"/></id>
+        <basic name="urlServer"><column name="URL_SERVIDOR"/></basic>
+        <basic name="timeout"><column name="FIN_CONEXION"/></basic>
+        <basic name="nameApp"><column name="NOMBRE_APLICACION"/></basic>
+
+        <many-to-one name="cAuthenticationType" fetch="LAZY" optional="false">
+          <join-column name="ID_TIPO_AUTENTICACION"/>
+        </many-to-one>
+
+        <basic name="user"><column name="USUARIO"/></basic>
+        <basic name="password"><column name="PASSWORD"/></basic>
+
+        <basic name="truststoreBlob"><lob/><column name="TRUSTSTORE"/></basic>
+        <basic name="truststorePassword"><column name="TRUSTSTORE_PASSWORD"/></basic>
+        <basic name="truststoreType"><column name="TRUSTSTORE_TYPE"/></basic>
+        <basic name="truststoreVersion"><column name="TRUSTSTORE_VERSION"/></basic>
+
+        <basic name="ksBlob"><lob/><column name="KEYSTORE"/></basic>
+        <basic name="ksPassword"><column name="KS_PASSWORD"/></basic>
+        <basic name="ksType"><column name="KS_TYPE"/></basic>
+        <basic name="ksCertAlias"><column name="KS_CERT_ALIAS"/></basic>
+        <basic name="ksCertPassword"><column name="KS_CERT_PASSWORD"/></basic>
+        <basic name="keystoreVersion"><column name="KEYSTORE_VERSION"/></basic>
+
+        <basic name="authTsBlob"><lob/><column name="AUTH_TRUSTSTORE"/></basic>
+        <basic name="authTsPassword"><column name="AUTH_TS_PASSWORD"/></basic>
+        <basic name="authTsType"><column name="AUTH_TS_TYPE"/></basic>
+        <basic name="authCertAlias"><column name="AUTH_CERT_ALIAS"/></basic>
+        <basic name="authenticationVersion"><column name="AUTHENTICATION_VERSION"/></basic>
+
+        <basic name="dateLastCommunication"><column name="FECHA_ULTIMA_COMUNICACION"/></basic>
+      </attributes>
+    </entity>
+
+    <!-- tb_servidores_log -->
+    <entity class="LogServer" access="PROPERTY">
+        <table name="tb_servidores_log"/>
+        <attributes>
+            <id name="idServer"><generated-value strategy="IDENTITY"/><column name="id_servidor"/></id>
+            <basic name="name"><column name="nombre" length="45" nullable="false"/></basic>
+            <basic name="logServiceUrl"><column name="url_servicio_log" length="500" nullable="false"/></basic>
+            <basic name="secretKey"><column name="clave" length="45" nullable="false"/></basic>
+            <basic name="verifySsl"><column name="verificar_ssl"/></basic>
+        </attributes>
+    </entity>
+
+    <!-- tb_roles -->
+    <entity class="Rol" access="PROPERTY">
+        <table name="tb_roles"/>
+        <attributes>
+            <id name="id"><column name="id"/></id>
+            <basic name="roleName"><column name="nombre_rol" length="45" nullable="false" unique="true"/></basic>
+            <basic name="permissions"><column name="permisos" length="45"/></basic>
+        </attributes>
+    </entity>
+
 </entity-mappings>

@@ -105,11 +105,17 @@
 		    		<artifactId>javax.json</artifactId>
 				</dependency>
 		
-				<!-- Dependencia para la compatibilidad con firmas XML -->
+				<!-- Libreria para la salida de los logs -->
+				<dependency>
+    				<groupId>org.slf4j</groupId>
+    				<artifactId>slf4j-jdk14</artifactId>
+				</dependency>
+		
+				<!-- Dependencia para la compatibilidad con firmas XML de curva eliptica -->
 				<dependency>
 					<groupId>org.apache.santuario</groupId>
 					<artifactId>xmlsec</artifactId>
-					<version>2.2.3</version>
+					<version>3.0.6</version>
 				</dependency>
 				
 				<!--  Dependencia servlets -->
@@ -125,7 +131,6 @@
 					<artifactId>junit</artifactId>
 					<scope>test</scope>
 				</dependency>		
-		
 			</dependencies>
 		</profile>
 
@@ -222,6 +227,22 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-alarms-eventmanager</artifactId>
+				</dependency>
+			</dependencies>
+		</profile>
+		
+		<!-- Perfil que agrega el modulo para el envio de notificaciones por correo electronico -->
+		<profile>
+			<id>mail</id>	
+			<activation>
+				<property>
+					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
+				</property>
+			</activation>
+			<dependencies>
+				<dependency>
+					<groupId>es.gob.fire</groupId>
+					<artifactId>fire-alarms-mail</artifactId>
 				</dependency>
 			</dependencies>
 		</profile>

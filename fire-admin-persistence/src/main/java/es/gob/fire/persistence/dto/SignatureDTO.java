@@ -50,6 +50,16 @@ public class SignatureDTO {
 	 * Attribute that represents the value of the total signatures.
 	 */
 	private Integer total;
+	
+	/**
+	 * Attribute that represents the value of the associated application.
+	 */
+	private String application;
+	
+	/**
+	 * Attribute that represents the value of the associated application.
+	 */
+	private String organization;
 
 	public SignatureDTO(final String name, final Integer corrects, final Integer incorrects, final Integer total) {
 		this.name = name;
@@ -57,7 +67,18 @@ public class SignatureDTO {
 		this.incorrects = incorrects;
 		this.total = total;
 	}
-
+	
+	public SignatureDTO(String name, Integer corrects, Integer incorrects, Integer total, String application,
+			String organization) {
+		super();
+		this.name = name;
+		this.corrects = corrects;
+		this.incorrects = incorrects;
+		this.total = total;
+		this.application = application;
+		this.organization = organization;
+	}
+	
 	public String getName() {
 		return this.name;
 	}
@@ -90,4 +111,19 @@ public class SignatureDTO {
 		this.total = totalP;
 	}
 
+	public String getApplication() {
+		return application;
+	}
+
+	public void setApplication(String application) {
+		this.application = application;
+	}
+
+	public String getOrganization() {
+		return organization;
+	}
+
+	public void setOrganization(String organization) {
+		this.organization = organization;
+	}
 }

@@ -20,15 +20,18 @@
   * <b>Project:</b><p></p>
  * <b>Date:</b><p>18/02/2025.</p>
  * @author Gobierno de Espa&ntilde;a.
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 package es.gob.fire.service;
 
+import java.io.IOException;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
+import java.text.ParseException;
 import java.util.List;
+import java.util.concurrent.TimeoutException;
 
 import org.springframework.security.core.Authentication;
 
@@ -40,7 +43,7 @@ import es.gob.fire.persistence.repository.ControlAccessRepository;
 /**
  * <p>Interface that provides communication with the operations of the persistence layer.</p>
  * <b>Project:</b><p></p>
- * @version 1.2, 20/02/2025.
+ * @version 1.3, 06/03/2025.
  */
 public interface ILoginService {
 
@@ -62,7 +65,7 @@ public interface ILoginService {
 
 	/**
     * Checks if the Pasarela service is available by sending a GET request to its URL.
-    * <p>This method attempts to establish a connection to the Pasarela service and checks if the response code is 200 (OK). 
+    * <p>This method attempts to establish a connection to the Pasarela service and checks if the response code is 200 (OK).
     * If successful, it returns {@code true}, otherwise, it returns {@code false}.</p>
     *
     * @return {@code true} if the Pasarela service responds with a status code of 200, otherwise {@code false}.
@@ -108,7 +111,7 @@ public interface ILoginService {
 	 * @return the X.509 certificate of the issuer if found, or {@code null} if not
 	 * @throws KeyStoreException if there is an error accessing the TrustStore
 	 * @throws CertificateException if the issuer certificate is null
-	 */ 
+	 */
 	X509Certificate validateIssuerWithTrustStoreUsers(X509Certificate certificate, KeyStore trustStoreUsers) throws KeyStoreException, CertificateException;
 
 	/**
@@ -133,17 +136,32 @@ public interface ILoginService {
 	 *
 	 * @param certificate the X.509 certificate from which to extract the DNI
 	 * @return the extracted DNI as a string
-	 * @throws CertificateException if the certificate is invalid, does not contain a valid DNI, 
+	 * @throws CertificateException if the certificate is invalid, does not contain a valid DNI,
 	 *                              or is issued by an unrecognized authority
 	 */
 	String obtainDNIfromCertUser(X509Certificate certificate) throws CertificateException;
 
 	/**
-	 * Obtains an authentication token for the given user, updates their last access time, 
+	 * Obtains an authentication token for the given user, updates their last access time,
 	 * and populates the user session data.
 	 *
 	 * @param user the user to authenticate and update
 	 * @return an {@link Authentication} token containing the user's credentials and roles
 	 */
 	Authentication obtainAuthAndUpdateLastAccess(User user);
+
+	/**
+	 * Validates the signature security by comparing the signature and the time limits.
+	 *
+	 * This method checks if the signature provided in the {@link CAdESAnalizer} matches the stored
+	 * random string login and verifies if the limit sign generation time has passed.
+	 * It throws a {@link CertificateException} if the validation fails, such as if the signature
+	 * doesn't match or if the time difference exceeds the allowed limit.
+	 *
+	 * @param analizer the {@link CAdESAnalizer} containing the content to be validated
+	 * @throws CertificateException if the signature is invalid or the time limit has expired
+	 * @throws ParseException if the time format cannot be parsed correctly
+	 * @throws TimeoutException if the token to init session has expired
+	 */
+	void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException;
 }

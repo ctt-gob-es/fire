@@ -38,14 +38,12 @@ import es.gob.fire.server.services.internal.TransactionAuxParams;
 import es.gob.fire.signature.ConfigFilesException;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.signature.InvalidConfigurationException;
+import es.gob.fire.signature.LogUtils;
 
 /** Servlet para la obtenci&oacute;n de certificados de un usuario. */
 public final class CertificateService extends HttpServlet {
 
     private static final long serialVersionUID = 9165731108863824136L;
-
-	private static final String PARAM_APPLICATION_ID = "appId"; //$NON-NLS-1$
-    private static final String PARAM_SUBJECT_ID = "subjectId"; //$NON-NLS-1$
 
     private static final Logger LOGGER = Logger.getLogger(CertificateService.class.getName());
 
@@ -70,7 +68,7 @@ public final class CertificateService extends HttpServlet {
     	}
 
     	// Configuramos el modulo de alarmas
-    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierClassName());
+    	AlarmsManager.init(ModuleConstants.MODULE_NAME, ConfigManager.getAlarmsNotifierName());
     }
 
 	@Override
@@ -94,25 +92,36 @@ public final class CertificateService extends HttpServlet {
 	    		return;
 	    	}
 		}
-		
-		// Verificar si los servicios antiguos están habilitados
+
+        // Verificar si los servicios antiguos estan habilitados
 	    if (!ConfigManager.isLegacyServicesEnabled()) {
 	        LOGGER.log(Level.WARNING, "Acceso denegado: las peticiones a los servicios antiguos estan deshabilitadas"); //$NON-NLS-1$
-	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos están deshabilitados"); //$NON-NLS-1$
+	        Responser.sendError(response, HttpServletResponse.SC_FORBIDDEN, "Acceso denegado: los servicios antiguos estan deshabilitados"); //$NON-NLS-1$
 	        return;
 	    }
-		
-    	final RequestParameters params;
-    	try {
-    		params = RequestParameters.extractParameters(request);
-    	}
-    	catch (final Exception e) {
-    		LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
-    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
-    		return;
+
+		// Leemos los parametros de la peticion
+		final RequestParameters params;
+		try {
+			params = RequestParameters.parseParameters(request, true);
+		}
+		catch (final Exception e) {
+			LOGGER.log(Level.WARNING, "Error en la lectura de los parametros de entrada", e); //$NON-NLS-1$
+			Responser.sendError(response, FIReError.READING_PARAMETERS);
+			return;
 		}
 
-    	final String appId = params.getParameter(PARAM_APPLICATION_ID);
+	    // Obtenemos el identificador de aplicacion para configuracion el log y
+	    // sus permisos
+    	final String appId = params.getAppId();
+
+		// El identificador de aplicacion es obligatorio, incluso si no es necesario
+		// validarlo posteriormente
+    	if (appId == null || appId.isEmpty()) {
+    		LOGGER.warning("No se ha proporcionado el identificador de la aplicacion en una peticion entrante"); //$NON-NLS-1$
+            Responser.sendError(response, FIReError.PARAMETER_APP_ID_NEEDED);
+            return;
+        }
 
     	final TransactionAuxParams trAux = new TransactionAuxParams(appId);
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
@@ -142,7 +151,18 @@ public final class CertificateService extends HttpServlet {
             return;
 		}
 
-        final String subjectId = params.getParameter(PARAM_SUBJECT_ID);
+        // Validamos los parametros
+    	try {
+    		params.checkParameters(appId, logF);
+    	}
+    	catch (final Exception e) {
+    		LOGGER.log(Level.WARNING, logF.f("Error en la comprobacion de los parametros de entrada"), e); //$NON-NLS-1$
+    		Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST);
+    		return;
+		}
+
+
+        final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
         if (subjectId == null || subjectId.isEmpty()) {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador del titular"));//$NON-NLS-1$
         	Responser.sendError(response,

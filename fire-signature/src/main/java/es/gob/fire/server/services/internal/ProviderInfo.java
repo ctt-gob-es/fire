@@ -76,9 +76,9 @@ public class ProviderInfo {
 			throw new NullPointerException("La configuracion del proveedor no puede ser nula"); //$NON-NLS-1$
 		}
 		if (language == null) {
-			this.language = "";
+			this.language = ""; //$NON-NLS-1$
 		} else {
-			this.language = "." + language;
+			this.language = "." + language; //$NON-NLS-1$
 		}
 		this.name = name;
 		this.config = (Properties) config.clone();
@@ -231,7 +231,7 @@ public class ProviderInfo {
 	public boolean isLocalProvider() {
 		return PROVIDER_LOCAL_NAME.equals(this.name);
 	}
-	
+
 	/**
 	 * Obtiene el idioma configurado para el proveedor.
 	 * @return Idioma del proveedor.

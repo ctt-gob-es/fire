@@ -8,15 +8,18 @@ ADD `dni` VARCHAR(9) NULL,
 ADD `fec_ultimo_acceso` datetime NOT NULL DEFAULT CURRENT_TIMESTAMP;
 
 UPDATE `tb_usuarios`
-SET `dni` = 'X0000000T';
+SET `dni` = 'X0000000T'
+WHERE id_usuario = 1;
 
+-- TABLA USUARIOS
+ALTER TABLE `tb_usuarios` CHANGE COLUMN `correo_elec` `huella` varchar(45);
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `nombre_usuario`;
 ALTER TABLE `tb_usuarios` DROP COLUMN IF EXISTS `clave`;
-
+ALTER TABLE `tb_usuarios` ADD CONSTRAINT UNIQUE KEY `dni_UNIQUE` (`dni`);
 
 -- TABLA DE CERTIFICADOS
 ALTER TABLE `tb_certificados` CHANGE COLUMN `cert_principal` `certificado` varchar(5000);
-ALTER TABLE `tb_certificados` CHANGE COLUMN `huella_principal` `huella` varchar(45);
+ALTER TABLE `tb_certificados` CHANGE COLUMN `correo_elec` varchar(60);
 ALTER TABLE `tb_certificados` DROP COLUMN `cert_backup`;
 ALTER TABLE `tb_certificados` DROP COLUMN `huella_backup`;
 ALTER TABLE `tb_certificados` ADD `fec_caducidad` datetime NULL;
@@ -70,7 +73,7 @@ CREATE TABLE TB_PROGRAMADOR (
   ID_PROGRAMADOR BIGINT NOT NULL AUTO_INCREMENT,
   NOMBRE_TOKEN VARCHAR(30) NOT NULL,
   NOMBRE_CLASE VARCHAR(255) NOT NULL,
-  ESTA_ACTIVO CHAR(1) NOT NULL,
+  ESTA_ACTIVO tinyint(1) NOT NULL,
   NUM_HILOS BIGINT,
   NUM_PROCESOS BIGINT,
   PERIODO_EXPIRADO BIGINT,
@@ -97,10 +100,10 @@ CREATE TABLE TB_CONTROL_ACCESO (
 
 -- Tabla TB_PROVEEDORES
 CREATE TABLE `tb_proveedores` (
-  `id_proveedor` bigint NOT NULL,
+  `id_proveedor` varchar(20) NOT NULL,
   `nombre` varchar(50) NOT NULL,
-  `obligatorio` char(1) NOT NULL,
-  `habilitado` char(1) NOT NULL,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_proveedor`)
@@ -108,10 +111,10 @@ CREATE TABLE `tb_proveedores` (
 
 -- Tabla TB_PROVEEDORES_APLICACION
 CREATE TABLE `tb_proveedores_aplicacion` (
-  `id_proveedor` bigint NOT NULL,
+  `id_proveedor` varchar(20) NOT NULL,
   `id_aplicacion` varchar(48) NOT NULL,
-  `obligatorio` char(1) NOT NULL,
-  `habilitado` char(1) NOT NULL,
+  `obligatorio` tinyint(1) DEFAULT 0,
+  `habilitado` tinyint(1) DEFAULT 1,
   `orden` tinyint(4) NOT NULL,
   
   PRIMARY KEY (`id_aplicacion`, `id_proveedor`),
@@ -130,6 +133,65 @@ CREATE TABLE `tb_propiedades` (
   PRIMARY KEY (`clave`)
 ) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
+-- Tabla CATALOGO TIPO AUTENTICACION
+CREATE TABLE `TB_C_TIPO_AUTENTICACION` (
+    `ID_TIPO_AUTENTICACION`   BIGINT NOT NULL,
+    `NOMBRE_TOKEN`            VARCHAR(45) NOT NULL,
+    PRIMARY KEY (`ID_TIPO_AUTENTICACION`)
+);
+
+-- Tabla SERVIDOR_AFIRMA
+CREATE TABLE `TB_SERVIDOR_AFIRMA` (
+    `ID_SERVIDOR_AFIRMA`       BIGINT NOT NULL,
+    `URL_SERVIDOR`             VARCHAR(255) NOT NULL,
+    `FIN_CONEXION`             BIGINT NOT NULL,
+    `NOMBRE_APLICACION`        VARCHAR(45) NOT NULL,
+    `ID_TIPO_AUTENTICACION`    TINYINT NOT NULL,
+    `USUARIO`                  VARCHAR(45) NULL,
+    `PASSWORD`                 TEXT NULL,
+    `TRUSTSTORE`               LONGBLOB NULL,
+    `TRUSTSTORE_PASSWORD`      TEXT NULL,
+    `TRUSTSTORE_TYPE`          VARCHAR(16) NULL,
+    `KEYSTORE`                 LONGBLOB NULL,
+    `KS_PASSWORD`              TEXT NULL,
+    `KS_TYPE`                  VARCHAR(16) NULL,
+    `KS_CERT_ALIAS`            VARCHAR(255) NULL,
+    `KS_CERT_PASSWORD`         TEXT NULL,
+    `AUTH_TRUSTSTORE`          LONGBLOB NULL,
+    `AUTH_TS_PASSWORD`         TEXT NULL,
+    `AUTH_TS_TYPE`             VARCHAR(16) NULL,
+    `AUTH_CERT_ALIAS`          VARCHAR(255) NULL,
+    `KEYSTORE_VERSION`         BIGINT NULL,
+    `TRUSTSTORE_VERSION`       BIGINT NULL,
+    `AUTHENTICATION_VERSION`   BIGINT NULL,
+    `FECHA_ULTIMA_COMUNICACION` DATETIME NULL,
+    PRIMARY KEY (`ID_SERVIDOR_AFIRMA`),
+    CONSTRAINT `FK_ID_TIPO_AUTENTICACION`
+        FOREIGN KEY (`ID_TIPO_AUTENTICACION`)
+        REFERENCES `TB_C_TIPO_AUTENTICACION`(`ID_TIPO_AUTENTICACION`)
+);
+
+-- TABLA TB_FIRMAS
+ALTER TABLE `tb_firmas` ADD `dir3_code` VARCHAR(50) NULL;
+ALTER TABLE `tb_firmas` ADD `organization` VARCHAR(255) NULL;
+
+-- TABLA TB_TRANSACCIONES
+ALTER TABLE `tb_transacciones` ADD `dir3_code` VARCHAR(50) NULL;
+ALTER TABLE `tb_transacciones` ADD `organization` VARCHAR(255) NULL;
+
+-- Proveedores por defecto --
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('clavefirma', 'Cl@ve Firma', 1);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('clavefirmatest', 'Simulador Cl@ve Firma', 2);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('fnmt', 'CloudID', 3);
+
+INSERT INTO TB_PROVEEDORES (ID_PROVEEDOR, NOMBRE, ORDEN)
+VALUES ('local', 'Firma local', 4);
+
 -- Insertar valores en la tabla TIPO_PLANIFICADOR
 INSERT INTO TB_TIPO_PLANIFICADOR (ID_TIPO_PLANIFICADOR, NOMBRE_TOKEN) 
 VALUES (0, 'TIPO_PLANIFICADOR00');
@@ -146,4 +208,14 @@ VALUES (1, 24, 0, 0, STR_TO_DATE('01/01/2012 00:00:00', '%m/%d/%Y %H:%i:%s'), 1)
 
 -- Insertar valores en la tabla PROGRAMADOR
 INSERT INTO TB_PROGRAMADOR (ID_PROGRAMADOR, NOMBRE_TOKEN, NOMBRE_CLASE, ESTA_ACTIVO, NUM_HILOS, NUM_PROCESOS, PERIODO_EXPIRADO, TIEMPO_REASIGNACION, TIEMPO_REACTIVACION, TIEMPO_COMPROBACION, DIAS_PREAVISO, PERIODO_COMUNICACION, ID_PLANIFICADOR, NOMBRE_PROGRAMADOR) 
-VALUES (1, 'PROGRAMADOR01', 'es.gob.fire.control.tasks.TaskVerifyCertExpired', 'N', NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'TaskVerifyCertExpired');
+VALUES (1, 'PROGRAMADOR01', 'es.gob.fire.control.tasks.TaskVerifyCertExpired', 0, NULL, NULL, NULL, NULL, NULL, NULL, NULL, NULL, 1, 'TaskVerifyCertExpired');
+
+-- Insertar valores en la tabla TB_C_TIPO_AUTENTICACION
+INSERT INTO TB_C_TIPO_AUTENTICACION (ID_TIPO_AUTENTICACION, NOMBRE_TOKEN)
+VALUES (0, 'AUTHENTICATION_TYPE00');
+INSERT INTO TB_C_TIPO_AUTENTICACION (ID_TIPO_AUTENTICACION, NOMBRE_TOKEN)
+VALUES (1, 'AUTHENTICATION_TYPE01');
+INSERT INTO TB_C_TIPO_AUTENTICACION (ID_TIPO_AUTENTICACION, NOMBRE_TOKEN)
+VALUES (2, 'AUTHENTICATION_TYPE02');
+
+COMMIT;

@@ -4,5 +4,5 @@ target
 .classpath
 .properties
 dependency-reduced-pom.xml
-
+*/bin
 *.class

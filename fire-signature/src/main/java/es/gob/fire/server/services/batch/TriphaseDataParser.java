@@ -56,21 +56,25 @@ public class TriphaseDataParser {
 		if (signsArray != null) {
 			for (int i = 0 ; i < signsArray.size() ; i++) {
 				final JsonObject sign = signsArray.getJsonObject(i);
-				final JsonArray signInfo = sign.getJsonArray("signinfo"); //$NON-NLS-1$
+				final JsonArray signInfos = sign.getJsonArray("signinfo"); //$NON-NLS-1$
 
-				for (int j = 0; j < signInfo.size(); j++) {
-					final String id = signInfo.getJsonObject(j).getString("id"); //$NON-NLS-1$
-					final JsonObject params = signInfo.getJsonObject(j).getJsonObject("params"); //$NON-NLS-1$
+				for (int j = 0; j < signInfos.size(); j++) {
+					final JsonObject signInfo = signInfos.getJsonObject(j);
+					final String id = signInfo.getString("id"); //$NON-NLS-1$
+					final String signId = signInfo.getString("signid", null); //$NON-NLS-1$
+					final JsonObject params = signInfo.getJsonObject("params"); //$NON-NLS-1$
 
-					triSigns.add(new TriSign(parseParamsJSON(params), id));
+					triSigns.add(new TriSign(parseParamsJSON(params), id, signId));
 				}
 			}
 		} else {
 			final JsonArray signInfoArray = jsonObject.getJsonArray("signinfo"); //$NON-NLS-1$
 			for (int i = 0 ; i < signInfoArray.size() ; i++) {
-				final String id = signInfoArray.getJsonObject(i).getString("id"); //$NON-NLS-1$
-				final JsonObject params = signInfoArray.getJsonObject(i).getJsonObject("params"); //$NON-NLS-1$
-				triSigns.add(new TriSign(parseParamsJSON(params),id));
+				JsonObject signInfo = signInfoArray.getJsonObject(i);
+				final String id = signInfo.getString("id"); //$NON-NLS-1$
+				final String signId = signInfo.getString("signid", null); //$NON-NLS-1$
+				final JsonObject params = signInfo.getJsonObject("params"); //$NON-NLS-1$
+				triSigns.add(new TriSign(parseParamsJSON(params), id, signId));
 			}
 		}
 		return new TriphaseData(triSigns,format);
@@ -100,9 +104,6 @@ public class TriphaseDataParser {
 	 * */
 	public static JsonObject triphaseDataToJson(final TriphaseData td) {
 
-		final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
-		jsonObjectBuilder.add("format", td.getFormat() != null ? td.getFormat() : ""); //$NON-NLS-1$ //$NON-NLS-2$
-
 		final JsonArrayBuilder signInfosArrayBuilder = Json.createArrayBuilder();
 
 		final Iterator<TriSign> firmasIt = td.getTriSigns().iterator();
@@ -111,9 +112,14 @@ public class TriphaseDataParser {
 
 			final JsonObjectBuilder signInfoObjectBuilder = Json.createObjectBuilder();
 
-			// Agrefamos el identificador
+			// Agregamos el identificador
 			if (signConfig.getId() != null) {
 				signInfoObjectBuilder.add("id", signConfig.getId()); //$NON-NLS-1$
+			}
+			
+			// Agregamos el identificador de la firma concreta (en las contrafirmas una firma puede tener varias firmas)
+			if (signConfig.getSignatureId() != null) {
+				signInfoObjectBuilder.add("signid", signConfig.getSignatureId()); //$NON-NLS-1$
 			}
 
 			// Agregamos los parametros de la firma trifasica
@@ -128,6 +134,10 @@ public class TriphaseDataParser {
 			signInfosArrayBuilder.add(signInfoObjectBuilder);
 		}
 
+		final JsonObjectBuilder jsonObjectBuilder = Json.createObjectBuilder();
+		if (td.getFormat() != null) {
+			jsonObjectBuilder.add("format",  td.getFormat()); //$NON-NLS-1$
+		}
 		jsonObjectBuilder.add("signinfo", signInfosArrayBuilder.build()); //$NON-NLS-1$
 
 		return jsonObjectBuilder.build();

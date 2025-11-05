@@ -72,7 +72,7 @@ public class Scheduler implements Serializable {
     /**
      * Atributo que indica si el programador está activo (true) o no (false).
      */
-    private Boolean isActive;
+    private Boolean active;
 
     /**
      * Atributo que representa el planificador asociado.
@@ -179,21 +179,20 @@ public class Scheduler implements Serializable {
     }
 
     /**
-     * Obtiene el valor del atributo {@link #isActive}.
-     * @return el valor del atributo {@link #isActive}.
+     * Obtiene el valor del atributo {@link #active}.
+     * @return el valor del atributo {@link #active}.
      */
-    @Column(name = "ESTA_ACTIVO", nullable = false, precision = 1)
-    @Type(type = "yes_no")
-    public Boolean getIsActive() {
-        return isActive;
+    @Column(name = "ESTA_ACTIVO", nullable = false)
+    public boolean isActive() {
+        return active;
     }
 
     /**
-     * Establece el valor del atributo {@link #isActive}.
-     * @param isActiveParam El valor para el atributo {@link #isActive}.
+     * Establece el valor del atributo {@link #active}.
+     * @param active El valor para el atributo {@link #active}.
      */
-    public void setIsActive(Boolean isActiveParam) {
-        this.isActive = isActiveParam;
+    public void setActive(Boolean active) {
+        this.active = active;
     }
 
     /**

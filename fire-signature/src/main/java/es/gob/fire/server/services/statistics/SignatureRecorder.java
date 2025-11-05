@@ -168,6 +168,20 @@ public class SignatureRecorder {
 			appName = UNDEFINED_VALUE;
 		}
 		signatureCube.setApplication(appName);
+		
+		// Codigo DIR3
+		String dir3Code = fireSession.getString(ServiceParams.SESSION_PARAM_DIR3_CODE);
+		if (dir3Code == null) {
+			dir3Code = UNDEFINED_VALUE;
+		}
+		signatureCube.setDir3Code(dir3Code);
+		
+		// Organizacion
+		String organization = fireSession.getString(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION);
+		if (organization == null) {
+			organization = UNDEFINED_VALUE;
+		}
+		signatureCube.setOrganization(organization);
 
 		// Resultado
 		signatureCube.setResultSign(result);

@@ -1,5 +1,7 @@
 package es.gob.fire.persistence.repository;
 
+import java.util.Optional;
+
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.stereotype.Repository;
 
@@ -23,4 +25,14 @@ public interface CertificateRepository extends JpaRepository<Certificate, Long>{
 	 * @return Object that represents a user from the persistence.
 	 */
 	Certificate findByCertificateName(String nombre_cert);
+	
+	/**
+	 * Retrieves a {@link Certificate} entity from the database whose fingerprint ("huella") 
+	 * matches the given value.
+	 *
+	 * @param huella the fingerprint of the certificate to search for, encoded in Base64.
+	 * @return an {@link Optional} containing the {@link Certificate} if found,
+	 *         or an empty {@link Optional} if no certificate with the given fingerprint exists.
+	 */
+	Optional<Certificate> findByHuella(String huella);
 }

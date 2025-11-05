@@ -46,6 +46,8 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.transaction.Transactional;
 
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -53,14 +55,13 @@ import org.springframework.stereotype.Service;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Hexify;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
+import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.ProviderApplicationDTO;
-import es.gob.fire.persistence.dto.ProviderDTO;
 import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.ApplicationResponsible;
 import es.gob.fire.persistence.entity.ApplicationResponsiblePK;
@@ -90,7 +91,7 @@ public class ApplicationService implements IApplicationService{
 	/**
 	 * Attribute that represents the object that manages the log of the class.
 	 */
-	private static final Logger LOGGER = Logger.getLogger(ApplicationService.class);
+	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
 
 	/**
 	 *
@@ -132,25 +133,25 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Autowired
 	private CertificatesApplicationRepository certificatesApplicationRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ApplicationResponsibleRepository applicationResponsibleRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ProviderRepository providerRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD operations for the persistence.
 	 */
 	@Autowired
 	private ProviderApplicationRepository providerApplicationRepository;
-	
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getAppByAppId(java.lang.String)
 	 */
@@ -173,7 +174,8 @@ public class ApplicationService implements IApplicationService{
 	 */
 	@Override
 	@Transactional
-	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers, List<Long> listIdCertificates, List<ProviderApplicationDTO> customProviders) throws GeneralSecurityException{
+	public Application saveApplication(final ApplicationDTO appDto, final List<Long> idsUsers, final List<Long> listIdCertificates, final List<ProviderApplicationDTO> customProviders) throws GeneralSecurityException{
+
 		Application appToSave = null;
 
 		// Nueva aplicacion
@@ -188,16 +190,20 @@ public class ApplicationService implements IApplicationService{
 			appToSave.setHabilitado(appDto.getHabilitado());
 			if (appDto.getOrganization() != null && !appDto.getOrganization().isEmpty()) {
 				appToSave.setOrganization(appDto.getOrganization());
+			} else {
+				appToSave.setOrganization(null);
 			}
 			if (appDto.getDir3Code() != null && !appDto.getDir3Code().isEmpty()) {
 				appToSave.setDir3Code(appDto.getDir3Code());
+			} else {
+				appToSave.setDir3Code(null);
 			}
 			appToSave.setCustomProvider(appDto.isCustomProvider());
 			appToSave.setCustomSize(appDto.isCustomSize());
-			
+
 			if (appDto.isCustomSize()) {
-				appToSave.setMaxSizeDoc(appDto.getMaxSizeDoc());
-				appToSave.setMaxSizePetition(appDto.getMaxSizePetition());
+				appToSave.setMaxSizeDoc(convertMegabytesToBytes(appDto.getMaxSizeDoc()));
+				appToSave.setMaxSizePetition(convertMegabytesToBytes(appDto.getMaxSizePetition()));
 				appToSave.setMaxAmountDocs(appDto.getMaxAmountDocs());
 			} else {
 				appToSave.setMaxSizeDoc(null);
@@ -226,7 +232,7 @@ public class ApplicationService implements IApplicationService{
 
 			//appToSave.getListApplicationResponsible().add(appResp);
 		}
-		
+
 		// TODO: crear aplicaciones con certificados
 		CertificatesApplicationPK certAppPk = null;
 		CertificatesApplication certApp = null;
@@ -243,9 +249,9 @@ public class ApplicationService implements IApplicationService{
 			certApp.setIdCertificatesApplication(certAppPk);
 
 			updatedCertApp.add(certApp);
-			
+
 		}
-		
+
 		if (appToSave.getAppId() != null) {
 			final List<ApplicationResponsible> current = appToSave.getListApplicationResponsible();
 
@@ -258,9 +264,9 @@ public class ApplicationService implements IApplicationService{
 			}
 
 			final List<CertificatesApplication> currentCertApp = appToSave.getListCertificatesApplication();
-			
+
 			currentCertApp.removeIf(x->!updatedCertApp.contains(x));
-			
+
 			for (final CertificatesApplication ar : updatedCertApp) {
 				if (!currentCertApp.contains(ar)) {
 					currentCertApp.add(ar);
@@ -274,21 +280,30 @@ public class ApplicationService implements IApplicationService{
 
 		//app.setListApplicationResponsible(listApplicationResponsible);
 		final Application savedApp = this.repository.saveAndFlush(appToSave);
-		
+
 		//Guardar los proveedores
-		if (savedApp.getCustomProvider()) {
-			for (ProviderApplicationDTO dto : customProviders) {
-				providerApplicationRepository.save(convertProviderApplicationDTOToEntity(dto, savedApp));
+		if (savedApp.isCustomProvider()) {
+			for (final ProviderApplicationDTO dto : customProviders) {
+				ProviderApplication provApp = convertProviderApplicationDTOToEntity(dto, savedApp);
+				this.providerApplicationRepository.save(provApp);
 			}
 		} else {
-			for (ProviderApplication pa : providerApplicationRepository.findByApplicationOrderByOrderIndexAsc(savedApp)) {
-				providerApplicationRepository.delete(pa);
+			for (final ProviderApplication pa : this.providerApplicationRepository.findByApplicationOrderByOrderIndexAsc(savedApp)) {
+				this.providerApplicationRepository.delete(pa);
 			}
 		}
-
+		
 		return savedApp;
 	}
 
+	private static Long convertBytesToMegabytes(Long bytes) {
+		return Long.valueOf(bytes == null ? 0 : bytes.longValue() / (1024 * 1024));
+	}
+	
+	private static Long convertMegabytesToBytes(Long mb) {
+		return Long.valueOf(mb == null ? 0 : mb.longValue() * 1024 * 1024);
+	}
+	
 	/**
 	 * Genera un nuevo identificador de aplicaci&oacute;n.
 	 * @return Identificador de aplicaci&oacute;n.
@@ -358,23 +373,23 @@ public class ApplicationService implements IApplicationService{
 			app.setListCertificatesApplication(existingApp.getListCertificatesApplication());
 		} else {
 
-			app.setListApplicationResponsible(new ArrayList<ApplicationResponsible>());
-			app.setListCertificatesApplication(new ArrayList<CertificatesApplication>());
+			app.setListApplicationResponsible(new ArrayList<>());
+			app.setListCertificatesApplication(new ArrayList<>());
 		}
 
 		app.setFechaAltaApp(applicationDto.getFechaAltaApp());
 		app.setHabilitado(Boolean.TRUE);
-		
+
 		app.setOrganization(applicationDto.getOrganization());
 		app.setDir3Code(applicationDto.getDir3Code());
-		
+
 		app.setCustomSize(applicationDto.isCustomSize());
 		app.setCustomProvider(applicationDto.isCustomProvider());
-		
+
 		if (applicationDto.isCustomSize()) {
-			app.setMaxSizeDoc(applicationDto.getMaxSizeDoc());
-			app.setMaxSizePetition(applicationDto.getMaxSizePetition());
-			app.setMaxAmountDocs(applicationDto.getMaxAmountDocs());
+			app.setMaxSizeDoc(convertMegabytesToBytes(applicationDto.getMaxSizeDoc()));
+			app.setMaxSizePetition(convertMegabytesToBytes(applicationDto.getMaxSizePetition()));
+			app.setMaxAmountDocs(applicationDto.getMaxAmountDocs() != null ? applicationDto.getMaxAmountDocs() : 0);
 		}
 
 		return app;
@@ -394,13 +409,13 @@ public class ApplicationService implements IApplicationService{
 		appDto.setHabilitado(application.isHabilitado());
 		appDto.setOrganization(application.getOrganization());
 		appDto.setDir3Code(application.getDir3Code());
-		
-		appDto.setCustomProvider(application.getCustomProvider());
-		appDto.setCustomSize(application.getCustomSize());
-		
-		if (application.getCustomSize()) {
-			appDto.setMaxSizeDoc(application.getMaxSizeDoc());
-			appDto.setMaxSizePetition(application.getMaxSizePetition());
+
+		appDto.setCustomProvider(application.isCustomProvider());
+		appDto.setCustomSize(application.isCustomSize());
+
+		if (application.isCustomSize()) {
+			appDto.setMaxSizeDoc(convertBytesToMegabytes(application.getMaxSizeDoc()));
+			appDto.setMaxSizePetition(convertBytesToMegabytes(application.getMaxSizePetition()));
 			appDto.setMaxAmountDocs(application.getMaxAmountDocs());
 		}
 
@@ -456,7 +471,7 @@ public class ApplicationService implements IApplicationService{
 
 		return dtOutput;
 	}
-	
+
 	/**
 	 * (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.IApplicationService#getApplicationsUser(org.springframework.data.jpa.datatables.mapping.DataTablesInput, java.lang.Long)
@@ -464,11 +479,11 @@ public class ApplicationService implements IApplicationService{
 	@Override
 	@JsonView(DataTablesOutput.View.class)
 	public DataTablesOutput<ApplicationCertDTO> getApplicationsUser(final DataTablesInput input, final Long idUser) {
-		List<ApplicationCertDTO> listApplicationCertDTO = new ArrayList<>();
-		List<ApplicationResponsible> listApplicationResponsible = applicationResponsibleRepository.findByResponsibleUserId(idUser);
-		for (ApplicationResponsible applicationResponsible : listApplicationResponsible) {
-			Application application = applicationResponsible.getApplication();
-			ApplicationCertDTO applicationCertDTO = new ApplicationCertDTO(application.getAppId(), application.getAppName(), application.getFechaAltaApp());
+		final List<ApplicationCertDTO> listApplicationCertDTO = new ArrayList<>();
+		final List<ApplicationResponsible> listApplicationResponsible = this.applicationResponsibleRepository.findByResponsibleUserId(idUser);
+		for (final ApplicationResponsible applicationResponsible : listApplicationResponsible) {
+			final Application application = applicationResponsible.getApplication();
+			final ApplicationCertDTO applicationCertDTO = new ApplicationCertDTO(application.getAppId(), application.getAppName(), application.getFechaAltaApp());
 			listApplicationCertDTO.add(applicationCertDTO);
 		}
 		final DataTablesOutput<ApplicationCertDTO> dtOutput = new DataTablesOutput<>();
@@ -509,15 +524,17 @@ public class ApplicationService implements IApplicationService{
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IApplicationService#getCertificatesApplicationByAppId(java.lang.String)
 	 */
-	public List<CertificatesApplication> getCertificatesApplicationByAppId(String appId) {
+	@Override
+	public List<CertificatesApplication> getCertificatesApplicationByAppId(final String appId) {
 		return this.certificatesApplicationRepository.findByApplicationAppId(appId);
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(es.gob.fire.persistence.dto.ApplicationCertDTO, java.util.List<CertificatesApplication>)
 	 */
-	public void obtainZipWithCertificatesApp(ApplicationCertDTO appViewForm, List<CertificatesApplication> listCertificatesApplication) {
+	@Override
+	public void obtainZipWithCertificatesApp(final ApplicationCertDTO appViewForm, final List<CertificatesApplication> listCertificatesApplication) {
 		try {
 		    // Directorio temporal para guardar los certificados
 		    final File tempDir = Files.createTempDirectory("certificates").toFile();
@@ -525,16 +542,16 @@ public class ApplicationService implements IApplicationService{
 
 		    // Crear archivo ZIP y procesar los certificados
 		    try (ZipOutputStream zipOut = new ZipOutputStream(new FileOutputStream(zipFile))) {
-		        for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
+		        for (final CertificatesApplication certificatesApplication : listCertificatesApplication) {
 		            // Crear InputStream desde el certificado Base64
 		            final InputStream certIs = new ByteArrayInputStream(
 		                    Base64.getDecoder().decode(certificatesApplication.getCertificate().getCertificate()));
-		            String certFileName = certificatesApplication.getCertificate().getCertificateName() + ".cer"; // Nombre del archivo .cer
-		            File certFile = new File(tempDir, certFileName);
+		            final String certFileName = certificatesApplication.getCertificate().getCertificateName() + ".cer"; // Nombre del archivo .cer
+		            final File certFile = new File(tempDir, certFileName);
 
 		            // Guardar el certificado en un archivo .cer
 		            try (FileOutputStream fileOut = new FileOutputStream(certFile)) {
-		                byte[] buffer = new byte[4096];
+		                final byte[] buffer = new byte[4096];
 		                int bytesRead;
 		                while ((bytesRead = certIs.read(buffer)) != -1) {
 		                    fileOut.write(buffer, 0, bytesRead);
@@ -543,10 +560,10 @@ public class ApplicationService implements IApplicationService{
 
 		            // Añadir el archivo .cer al archivo ZIP
 		            try (FileInputStream fis = new FileInputStream(certFile)) {
-		                ZipEntry zipEntry = new ZipEntry(certFileName);
+		                final ZipEntry zipEntry = new ZipEntry(certFileName);
 		                zipOut.putNextEntry(zipEntry);
 
-		                byte[] buffer = new byte[4096];
+		                final byte[] buffer = new byte[4096];
 		                int bytesRead;
 		                while ((bytesRead = fis.read(buffer)) != -1) {
 		                    zipOut.write(buffer, 0, bytesRead);
@@ -559,7 +576,7 @@ public class ApplicationService implements IApplicationService{
 		    // Convertir el archivo ZIP a Base64
 		    try (FileInputStream fis = new FileInputStream(zipFile);
 		         ByteArrayOutputStream baos = new ByteArrayOutputStream()) {
-		        byte[] buffer = new byte[4096];
+		        final byte[] buffer = new byte[4096];
 		        int bytesRead;
 		        while ((bytesRead = fis.read(buffer)) != -1) {
 		            baos.write(buffer, 0, bytesRead);
@@ -568,9 +585,9 @@ public class ApplicationService implements IApplicationService{
 		    }
 
 		    // Limpiar archivos temporales
-		    File[] tempFiles = tempDir.listFiles();
+		    final File[] tempFiles = tempDir.listFiles();
 		    if (tempFiles != null) {
-		        for (File tempFile : tempFiles) {
+		        for (final File tempFile : tempFiles) {
 		            tempFile.delete();
 		        }
 		    }
@@ -582,64 +599,68 @@ public class ApplicationService implements IApplicationService{
 	}
 
 	@Override
-	public Application saveApplication(Application application) {
-		Application savedApp = repository.save(application);
+	public Application saveApplication(final Application application) {
+		final Application savedApp = this.repository.save(application);
 		return savedApp;
 	}
 
 	@Override
-	public List<ProviderApplicationDTO> findProvidersByApplication(Application application) {
+	public List<ProviderApplicationDTO> findProvidersByApplication(final Application application) {
 		if (application == null) {
-			List<ProviderApplicationDTO> res = new ArrayList<>();
-			
-			List<Provider> generalProviders = providerRepository.findAll();
-			
-			for (Provider provider : generalProviders) {
-				ProviderApplicationDTO dto = convertProviderEntityToProviderApplicationDTO(provider, application);
-				
+			final List<ProviderApplicationDTO> res = new ArrayList<>();
+
+			final List<Provider> generalProviders = this.providerRepository.findAll();
+
+			for (final Provider provider : generalProviders) {
+				final ProviderApplicationDTO dto = convertProviderEntityToProviderApplicationDTO(provider, application);
+
 				res.add(dto);
 			}
-			
+
 			return res;
 		}
-		
-		List<ProviderApplication> appProviders = providerApplicationRepository.findByApplicationOrderByOrderIndexAsc(application);
-		
-		List<ProviderApplicationDTO> response = new ArrayList<>();
-		
+
+		final List<ProviderApplication> appProviders = this.providerApplicationRepository.findByApplicationOrderByOrderIndexAsc(application);
+
+		final List<ProviderApplicationDTO> response = new ArrayList<>();
+
 		if (appProviders != null && !appProviders.isEmpty()) {
-			for (ProviderApplication provider : appProviders) {
-				ProviderApplicationDTO dto = convertEntityToDTO(provider);
-				
+			for (final ProviderApplication provider : appProviders) {
+				final ProviderApplicationDTO dto = convertEntityToDTO(provider);
+
 				response.add(dto);
 			}
 		} else {
-			List<Provider> generalProviders = providerRepository.findAll();
-			
-			for (Provider provider : generalProviders) {
-				ProviderApplicationDTO dto = convertProviderEntityToProviderApplicationDTO(provider, application);
-				
+			final List<Provider> generalProviders = this.providerRepository.findAll();
+
+			for (final Provider provider : generalProviders) {
+				final ProviderApplicationDTO dto = convertProviderEntityToProviderApplicationDTO(provider, application);
+
 				response.add(dto);
 			}
 		}
-		
+
 		return response;
 	}
 
 	@Override
-	public ProviderApplication convertDTOToEntity(ProviderApplicationDTO dto) {
-		if (dto == null) return null;
-		
-		//TODO: terminar implementación
-		
+	public ProviderApplication convertDTOToEntity(final ProviderApplicationDTO dto) {
+		if (dto == null) {
+			return null;
+		}
+
+		//TODO: terminar implementacion
+
 		return null;
 	}
 
 	@Override
-	public ProviderApplicationDTO convertEntityToDTO(ProviderApplication entity) {
-		if (entity == null) return null;
+	public ProviderApplicationDTO convertEntityToDTO(final ProviderApplication entity) {
+		if (entity == null) {
+			return null;
+		}
 
-		ProviderApplicationDTO dto = new ProviderApplicationDTO();
+		final ProviderApplicationDTO dto = new ProviderApplicationDTO();
         dto.setIdProvider(entity.getProvider().getId());
         dto.setIdApplication(entity.getApplication().getAppId());
         dto.setName(entity.getProvider().getName());
@@ -651,11 +672,13 @@ public class ApplicationService implements IApplicationService{
 	}
 
 	@Override
-	public ProviderApplicationDTO convertProviderEntityToProviderApplicationDTO(Provider entity,
-			Application application) {
-		if (entity == null) return null;
+	public ProviderApplicationDTO convertProviderEntityToProviderApplicationDTO(final Provider entity,
+			final Application application) {
+		if (entity == null) {
+			return null;
+		}
 
-		ProviderApplicationDTO dto = new ProviderApplicationDTO();
+		final ProviderApplicationDTO dto = new ProviderApplicationDTO();
         dto.setIdProvider(entity.getId());
         if (application != null) {
             dto.setIdApplication(application.getAppId());
@@ -667,31 +690,51 @@ public class ApplicationService implements IApplicationService{
 
         return dto;
 	}
-	
+
 	@Override
-	public ProviderApplication convertProviderApplicationDTOToEntity(ProviderApplicationDTO dto, Application application) {
-		if (dto == null) return null;
-		
-		Optional<Provider> providerOpt = providerRepository.findById(dto.getIdProvider());
-		
+	public ProviderApplication convertProviderApplicationDTOToEntity(final ProviderApplicationDTO dto, final Application application) {
+		if (dto == null) {
+			return null;
+		}
+
+		final Optional<Provider> providerOpt = this.providerRepository.findById(dto.getIdProvider());
+
 		if (providerOpt.isPresent()) {
-			Application app = application != null ? application : repository.findByAppId(dto.getIdApplication());
-			
+			final Application app = application != null ? application : this.repository.findByAppId(dto.getIdApplication());
+
 			if (app != null) {
-				ProviderApplication entity = new ProviderApplication();
-				
+				final ProviderApplication entity = new ProviderApplication();
+
 				entity.setProvider(providerOpt.get());
 				entity.setApplication(app);
 				entity.setEnabled(dto.getEnabled());
 				entity.setMandatory(dto.getMandatory());
 				entity.setOrderIndex(dto.getOrderIndex());
-				
+
 				return entity;
-			} else {
-				return null;
 			}
-		} else {
-			return null;
 		}
+		return null;
+	}
+
+	@Override
+	public List<String> findOrganizationByDIR3(String dir3Code) {
+		return repository.findDistinctOrganizationsByDir3(dir3Code);
+	}
+
+	@Override
+	@Transactional
+    public int renameOrganizationByDir3Code(String dir3Code, String newOrganization) {
+        return repository.renameOrganizationByDir3Code(dir3Code, newOrganization);
+    }
+
+	@Override
+	public List<OrganizationDTO> findOrganizations() {
+		return repository.findDistinctOrganizationsDTO();
+	}
+
+	@Override
+	public List<Application> findAllApplicationsOrdered() {
+		return repository.findAllByOrderByAppNameAsc();
 	}
 }

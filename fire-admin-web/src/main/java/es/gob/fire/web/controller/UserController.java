@@ -112,8 +112,8 @@ public class UserController {
 	 * @return String that represents the navigation HTML fragment
 	 */
 	@RequestMapping(value = "menuedit")
-	public String menuEdit(@RequestParam("email") final String email, final Model model, Locale locale) {
-		 final User user = this.userService.getUserByEmail(email);
+	public String menuEdit(@RequestParam("userId") Long userId, final Model model, Locale locale) {
+		 final User user = this.userService.getUserByUserId(userId);
 		 final UserEditDTO userformedit = new UserEditDTO();
 
 		userformedit.setIdUserFireEdit(user.getUserId());
@@ -176,8 +176,8 @@ public class UserController {
 	}
 	
 	@RequestMapping(value = "menuDeleteUser")
-	public String loadConfirmDeleteUser(@RequestParam("email") final String email, Long index, final Model model, Locale locale) {
-		User user = this.userService.getUserByEmail(email);
+	public String loadConfirmDeleteUser(@RequestParam("userId") Long userId, Long index, final Model model, Locale locale) {
+		User user = this.userService.getUserByUserId(userId);
 		model.addAttribute("userDeleteForm", user);
 		model.addAttribute("tableIndexRow", index);
 		return "modal/userDelete.html";

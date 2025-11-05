@@ -315,4 +315,13 @@ public class GrayLogAlarmNotifier implements AlarmNotifier {
 		return Integer.toString(grayLogLevel);
 	}
 
+	@Override
+	public void destroy() {
+		if (this.grayLogMessageSender != null) {
+			this.grayLogMessageSender.close();
+			this.grayLogMessageSender = null;
+		}
+		this.initialized = false;
+	}
+
 }
