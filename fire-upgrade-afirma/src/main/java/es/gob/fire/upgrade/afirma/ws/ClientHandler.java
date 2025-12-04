@@ -19,9 +19,12 @@ package es.gob.fire.upgrade.afirma.ws;
 
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
+import java.io.FileInputStream;
 import java.io.IOException;
+import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
+import java.security.cert.X509Certificate;
 import java.util.Iterator;
 
 import javax.xml.soap.MessageFactory;
@@ -53,10 +56,13 @@ import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
+import es.gob.fire.upgrade.afirma.wss.SignatureAlgorithmsWSS;
+import es.gob.fire.upgrade.afirma.wss.WSSecSignatureEC;
+
 /**
  * <p>Class secures SOAP messages of @Firma requests.</p>
  * <b>Project:</b><p>Library for the integration with the services of @Firma, eVisor and TS@.</p>
- * @version 1.4, 17/03/2020.
+ * @version 1.5, 04/12/2025.
  */
 class ClientHandler extends AbstractCommonHandler {
 
@@ -125,7 +131,21 @@ class ClientHandler extends AbstractCommonHandler {
 			if (this.securityOption.equals(USERNAMEOPTION)) {
 				secMsg = this.createUserNameToken(doc);
 			} else if (this.securityOption.equals(CERTIFICATEOPTION)) {
-				secMsg = this.createBinarySecurityToken(doc);
+				
+				// Obtenemos el certificado cargardo proveniente del platform.properties
+				KeyStore ks = KeyStore.getInstance(this.getKeystoreType());
+				ks.load(new FileInputStream(this.getKeystore()), this.getKeystorePass().toCharArray());
+				X509Certificate cert = (X509Certificate) ks.getCertificate(this.getUserAlias());
+				
+				// Evaluamos si es EC
+				if (cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_EC) ||
+	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDH) || 
+	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDSA) ||
+	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECGOST)) {
+	            	secMsg = this.createBinarySecurityEC(doc, cert);
+	            } else {
+	            	secMsg = this.createBinarySecurityToken(doc);
+	            }
 			}
 
 			if (!this.securityOption.equals(NONEOPTION) && secMsg != null) {
@@ -286,6 +306,49 @@ class ClientHandler extends AbstractCommonHandler {
 		// securizado formado
 		final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
 		return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
+	}
+	
+	/**
+	 * Creates a SOAP request secured with a BinarySecurityToken using an EC (ECDSA) certificate.
+	 * <p>
+	 * This method inserts the WS-Security header and BinarySecurityToken into the SOAP envelope,
+	 * prepares the EC signature, signs the request, and returns a new {@link SOAPMessage}
+	 * representing the secured request.
+	 * </p>
+	 *
+	 * @param soapEnvelopeRequest The unsecured SOAP request as a {@link Document}.
+	 * @param cert The X.509 certificate to use for the EC (ECDSA) signature.
+	 * @return A {@link SOAPMessage} representing the secured SOAP request.
+	 * @throws Exception If any error occurs while generating the EC signature or building the secured SOAP message.
+	 */
+	private SOAPMessage createBinarySecurityEC(final Document soapEnvelopeRequest, X509Certificate cert)
+	        throws Exception {
+
+		// Insercion del tag wsse:Security y BinarySecurityToken
+		final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
+		final WSSecSignatureEC wsSecSignatureEC = new WSSecSignatureEC();
+		final Crypto crypto = getCryptoInstance();
+		
+		// Indicacion para que inserte el tag BinarySecurityToken
+	    wsSecSignatureEC.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+	    wsSecSignatureEC.configureECforBinarySecurityToken(cert, getUserAlias(), getPassword());
+	    wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
+	 	wsSecSignatureEC.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
+	    
+	 	// Modificacion y firma de la peticion
+	    final Document secSOAPReqDoc = wsSecSignatureEC.build(soapEnvelopeRequest, crypto, wsSecHeader);
+	    final Element element = secSOAPReqDoc.getDocumentElement();
+
+	    // Transformación del DOM a String
+	    final DOMSource source = new DOMSource(element);
+	    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
+	    final StreamResult streamResult = new StreamResult(baos);
+	    SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
+	    final String secSOAPReq = new String(baos.toByteArray());
+
+	    // Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP securizado formado
+	    final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
+	    return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
 	}
 
 	/**
