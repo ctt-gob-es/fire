@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade.afirma.wss;
+package es.gob.fire.upgrade.afirma.ws;
 
 /**
  * Class containing constants for various signature algorithms used in WSS.
@@ -17,21 +17,21 @@ public class SignatureAlgorithmsWSS {
 	/**
 	 * Constant attribute that identifies <code>EC</code> signature algorithm.
 	 */
-	public static final String SIGNATURE_ALGORITHM_EC = "EC";
+	public static final String SIGNATURE_ALGORITHM_EC = "EC"; //$NON-NLS-1$
 
 	/**
 	 * Constant attribute that identifies <code>ECDSA</code> signature algorithm.
 	 */
-	public static final String SIGNATURE_ALGORITHM_ECDSA = "ECDSA";
-	
-	/**
-	 * Constant attribute that identifies <code>EC</code> signature algorithm.
-	 */
-	public static final String SIGNATURE_ALGORITHM_ECDH = "ECDH";
+	public static final String SIGNATURE_ALGORITHM_ECDSA = "ECDSA"; //$NON-NLS-1$
 
 	/**
 	 * Constant attribute that identifies <code>EC</code> signature algorithm.
 	 */
-	public static final String SIGNATURE_ALGORITHM_ECGOST = "ECGOST";
-	
+	public static final String SIGNATURE_ALGORITHM_ECDH = "ECDH"; //$NON-NLS-1$
+
+	/**
+	 * Constant attribute that identifies <code>EC</code> signature algorithm.
+	 */
+	public static final String SIGNATURE_ALGORITHM_ECGOST = "ECGOST"; //$NON-NLS-1$
+
 }

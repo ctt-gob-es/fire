@@ -37,9 +37,9 @@ public class LoggingTrustManager implements X509TrustManager {
      * @param trustStore the KeyStore containing trusted certificates
      * @throws Exception if initializing the TrustManagerFactory fails
      */
-    public LoggingTrustManager(KeyStore trustStore) throws Exception {
+    public LoggingTrustManager(final KeyStore trustStore) throws Exception {
 
-        TrustManagerFactory tmf =
+        final TrustManagerFactory tmf =
                 TrustManagerFactory.getInstance(TrustManagerFactory.getDefaultAlgorithm());
         tmf.init(trustStore);
 
@@ -54,9 +54,9 @@ public class LoggingTrustManager implements X509TrustManager {
      * @throws java.security.cert.CertificateException if the certificate chain is not trusted
      */
     @Override
-    public void checkClientTrusted(X509Certificate[] chain, String authType)
+    public void checkClientTrusted(final X509Certificate[] chain, final String authType)
             throws java.security.cert.CertificateException {
-        defaultTM.checkClientTrusted(chain, authType);
+        this.defaultTM.checkClientTrusted(chain, authType);
     }
 
     /**
@@ -68,11 +68,11 @@ public class LoggingTrustManager implements X509TrustManager {
      * @throws java.security.cert.CertificateException if the server certificate chain is not trusted
      */
     @Override
-    public void checkServerTrusted(X509Certificate[] chain, String authType)
+    public void checkServerTrusted(final X509Certificate[] chain, final String authType)
             throws java.security.cert.CertificateException {
 
-        // Validación REAL usando truestore propio
-        defaultTM.checkServerTrusted(chain, authType);
+        // Validacion REAL usando truestore propio
+        this.defaultTM.checkServerTrusted(chain, authType);
     }
 
     /**
@@ -83,7 +83,7 @@ public class LoggingTrustManager implements X509TrustManager {
      */
     @Override
     public X509Certificate[] getAcceptedIssuers() {
-        return defaultTM.getAcceptedIssuers();
+        return this.defaultTM.getAcceptedIssuers();
     }
 }
 

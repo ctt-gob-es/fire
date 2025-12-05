@@ -7,7 +7,7 @@
  * Date: 08/09/2017
  * You may contact the copyright holder at: soporte.afirma@correo.gob.es
  */
-package es.gob.fire.upgrade.afirma.wss;
+package es.gob.fire.upgrade.afirma.ws;
 
 import java.security.cert.X509Certificate;
 
@@ -41,17 +41,17 @@ public class WSSecSignatureEC extends WSSecSignature {
 	 * Must be called before {@link #prepare(...)}.
 	 *
 	 * @param cert The X.509 certificate to use.
-	 * @param user The username (optional).
-	 * @param password The password (optional).
+	 * @param certUser The username (optional).
+	 * @param certPassword The password (optional).
 	 */
-    public void configureECforBinarySecurityToken(X509Certificate cert, String user, String password) {
+    public void configureECforBinarySecurityToken(final X509Certificate cert, final String certUser, final String certPassword) {
         this.userCert = cert;
         // indicate the algorithm for certificates with EC
-        super.setSignatureAlgorithm("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256");
+        super.setSignatureAlgorithm("http://www.w3.org/2001/04/xmldsig-more#ecdsa-sha256"); //$NON-NLS-1$
         // store in parent so getSigningCerts() can return it
         super.setX509Certificate(cert);
         // ensure username/password cleared when using cert-based signing
-        super.setUserInfo(user, password);
+        super.setUserInfo(certUser, certPassword);
     }
 
     /**
@@ -59,7 +59,7 @@ public class WSSecSignatureEC extends WSSecSignature {
      * (if provided) then delegate to the parent implementation.
      */
     @Override
-    public Document build(Document doc, Crypto cr, WSSecHeader secHeader) throws WSSecurityException {
+    public Document build(final Document doc, final Crypto cr, final WSSecHeader secHeader) throws WSSecurityException {
         // If userCert was set earlier via setUserCert, it's already in the parent (setX509Certificate).
         // Optionally: ensure it again (harmless).
         if (this.userCert != null) {

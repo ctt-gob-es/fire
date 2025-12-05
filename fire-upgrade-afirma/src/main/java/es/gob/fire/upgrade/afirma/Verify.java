@@ -67,8 +67,8 @@ public final class Verify {
 	/**
 	 * Verifies the status of an X.509 certificate using the Afirma web service.
 	 *
-	 * <p>This method converts the given certificate to a Base64-encoded string, 
-	 * constructs a DSS (Digital Signature Service) XML request, and sends it 
+	 * <p>This method converts the given certificate to a Base64-encoded string,
+	 * constructs a DSS (Digital Signature Service) XML request, and sends it
 	 * to the Afirma web service for verification.</p>
 	 *
 	 * @param afirmaConnector The {@link AfirmaConnector} instance used to communicate with the Afirma web service.
@@ -79,14 +79,14 @@ public final class Verify {
 	 * @throws WSServiceInvokerException If there is an issue invoking the web service.
 	 * @throws PlatformWsException If an error occurs while processing the response from the Afirma platform.
 	 */
-	public static VerifyAfirmaCertificateResponse verifyCertificate(AfirmaConnector afirmaConnector, X509Certificate x509Certificate, String afirmaAppName) throws CertificateEncodingException, WSServiceInvokerException, PlatformWsException {
-		// Convertimos el certificado a Base 64 para que vaya en la petición correctamente
-		String certificateB64 = Base64.getEncoder().encodeToString(x509Certificate.getEncoded());
-		
+	public static VerifyAfirmaCertificateResponse verifyCertificate(final AfirmaConnector afirmaConnector, final X509Certificate x509Certificate, final String afirmaAppName) throws CertificateEncodingException, WSServiceInvokerException, PlatformWsException {
+		// Convertimos el certificado a Base 64 para que vaya en la peticion correctamente
+		final String certificateB64 = Base64.getEncoder().encodeToString(x509Certificate.getEncoded());
+
 		final String inputDss = DssServicesUtils.createDssAfirmaVerifyCertificate(certificateB64, afirmaAppName);
-		
+
 		final byte[] responseBytes = afirmaConnector.verifyCertificate(inputDss);
-		
+
 		VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse;
 		try {
 			verifyAfirmaCertificateResponse = new VerifyAfirmaCertificateResponse(responseBytes);
@@ -95,7 +95,7 @@ public final class Verify {
 					"Error analizando al respuesta de la plataforma a una solicitud de validacion de firma", //$NON-NLS-1$
 					e);
 		}
-		
+
 		return verifyAfirmaCertificateResponse;
 	}
 

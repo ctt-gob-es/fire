@@ -189,54 +189,54 @@ public class WebServiceInvoker {
 
 			// Desactivamos el chunked.
 			options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE.toString().toLowerCase());
-			
+
 			if (this.config.getTruststorePath() != null) {
 			    try {
-			        KeyStore ks = KeyStore.getInstance(
-			            this.config.getTruststoreType() != null ? this.config.getTruststoreType() : "JKS"
+			        final KeyStore ks = KeyStore.getInstance(
+			            this.config.getTruststoreType() != null ? this.config.getTruststoreType() : "JKS" //$NON-NLS-1$
 			        );
 			        try (FileInputStream fis = new FileInputStream(this.config.getTruststorePath())) {
 			            ks.load(fis, this.config.getTruststorePass() != null ? this.config.getTruststorePass().toCharArray() : null);
 			        }
 
 			        // Creamos un SSLContext con el truststore
-			        TrustManager[] tms = { new LoggingTrustManager(ks) };
-			        SSLContext sslContext = SSLContext.getInstance("TLS");
+			        final TrustManager[] tms = { new LoggingTrustManager(ks) };
+			        final SSLContext sslContext = SSLContext.getInstance("TLS"); //$NON-NLS-1$
 			        sslContext.init(null, tms, new java.security.SecureRandom());
 
-			        ProtocolSocketFactory factory = new ProtocolSocketFactory() {
-			            private final SSLSocketFactory factory = sslContext.getSocketFactory();
+			        final ProtocolSocketFactory factory = new ProtocolSocketFactory() {
+			            private final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
 
 			            @Override
-			            public Socket createSocket(String host, int port) throws IOException {
-			                SSLSocket socket = (SSLSocket) factory.createSocket(host, port);
+			            public Socket createSocket(final String host, final int port) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port);
 			                socket.startHandshake(); // log certificados
 			                return socket;
 			            }
 
 			            @Override
-			            public Socket createSocket(String host, int port, InetAddress localAddress, int localPort) throws IOException {
-			                SSLSocket socket = (SSLSocket) factory.createSocket(host, port, localAddress, localPort);
+			            public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port, localAddress, localPort);
 			                socket.startHandshake();
 			                return socket;
 			            }
 
 			            @Override
-			            public Socket createSocket(String host, int port, InetAddress clientHost, int clientPort, HttpConnectionParams params) throws IOException {
-			                SSLSocket socket = (SSLSocket) factory.createSocket(host, port, clientHost, clientPort);
+			            public Socket createSocket(final String host, final int port, final InetAddress clientHost, final int clientPort, final HttpConnectionParams params) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port, clientHost, clientPort);
 			                socket.startHandshake();
 			                return socket;
 			            }
 			        };
 
-			        Protocol httpsProtocol = new Protocol("https", factory, 443);
+			        final Protocol httpsProtocol = new Protocol("https", factory, 443); //$NON-NLS-1$
 			        options.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, httpsProtocol);
 
-			    } catch (Exception e) {
-			        throw new WSServiceInvokerException("Error durante handshake SSL previo: " + e.getMessage(), e);
+			    } catch (final Exception e) {
+			        throw new WSServiceInvokerException("Error durante handshake SSL previo: " + e.getMessage(), e); //$NON-NLS-1$
 			    }
 			}
-			
+
 			// Creamos el cliente y le anadimos la configuracion anterior.
 			client = new ServiceClient();
 			client.setOptions(options);
