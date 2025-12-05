@@ -11,8 +11,8 @@ public class WebServiceInvokerConfig {
 	private static final String PROPERTY_SERVICE_VERIFY = "webservices.service.signupgrade"; //$NON-NLS-1$
 
 	private static final String PROPERTY_SERVICE_RECOVERY = "webservices.service.recoversignature"; //$NON-NLS-1$
-	
-	private static final String PROPERTY_SERVICE_VERIFYCERTIFICATE = "webservices.service.verifyCertificate";
+
+	private static final String PROPERTY_SERVICE_VERIFYCERTIFICATE = "webservices.service.verifyCertificate"; //$NON-NLS-1$
 
 	private static final String PROPERTY_TIMEOUT = "webservices.timeout"; //$NON-NLS-1$
 
@@ -74,7 +74,7 @@ public class WebServiceInvokerConfig {
 	public String getServiceRecovery() {
 		return this.config.getProperty(PROPERTY_SERVICE_RECOVERY);
 	}
-	
+
 	public String getServiceVerifyCertificate() {
 		return this.config.getProperty(PROPERTY_SERVICE_VERIFYCERTIFICATE);
 	}

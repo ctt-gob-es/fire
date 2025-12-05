@@ -18,7 +18,10 @@
 package es.gob.fire.upgrade.afirma.ws;
 
 import java.io.FileInputStream;
+import java.io.IOException;
 import java.io.InputStream;
+import java.net.InetAddress;
+import java.net.Socket;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
 import java.security.cert.X509Certificate;
@@ -26,6 +29,11 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.SSLSocket;
+import javax.net.ssl.SSLSocketFactory;
+import javax.net.ssl.TrustManager;
 
 import org.apache.axiom.om.OMAbstractFactory;
 import org.apache.axiom.om.OMElement;
@@ -40,6 +48,9 @@ import org.apache.axis2.engine.Handler;
 import org.apache.axis2.engine.Phase;
 import org.apache.axis2.phaseresolver.PhaseException;
 import org.apache.axis2.transport.http.HTTPConstants;
+import org.apache.commons.httpclient.params.HttpConnectionParams;
+import org.apache.commons.httpclient.protocol.Protocol;
+import org.apache.commons.httpclient.protocol.ProtocolSocketFactory;
 
 /**
  * <p>Class that manages the invoke of @Firma and eVisor web services.</p>
@@ -179,16 +190,51 @@ public class WebServiceInvoker {
 			// Desactivamos el chunked.
 			options.setProperty(HTTPConstants.CHUNKED, Boolean.FALSE.toString().toLowerCase());
 
-			//TODO: Buscar un modo de poder asignar el almacen de confianza exclusivamente para esta conexion
-			// y no como configuracion generar de la JVM
 			if (this.config.getTruststorePath() != null) {
-				System.setProperty("javax.net.ssl.trustStore", this.config.getTruststorePath()); //$NON-NLS-1$
-			}
-			if (this.config.getTruststorePass() != null) {
-				System.setProperty("javax.net.ssl.trustStorePassword", this.config.getTruststorePass()); //$NON-NLS-1$
-			}
-			if (this.config.getTruststoreType() != null) {
-				System.setProperty("javax.net.ssl.trustStoreType", this.config.getTruststoreType()); //$NON-NLS-1$
+			    try {
+			        final KeyStore ks = KeyStore.getInstance(
+			            this.config.getTruststoreType() != null ? this.config.getTruststoreType() : "JKS" //$NON-NLS-1$
+			        );
+			        try (FileInputStream fis = new FileInputStream(this.config.getTruststorePath())) {
+			            ks.load(fis, this.config.getTruststorePass() != null ? this.config.getTruststorePass().toCharArray() : null);
+			        }
+
+			        // Creamos un SSLContext con el truststore
+			        final TrustManager[] tms = { new LoggingTrustManager(ks) };
+			        final SSLContext sslContext = SSLContext.getInstance("TLS"); //$NON-NLS-1$
+			        sslContext.init(null, tms, new java.security.SecureRandom());
+
+			        final ProtocolSocketFactory factory = new ProtocolSocketFactory() {
+			            private final SSLSocketFactory socketFactory = sslContext.getSocketFactory();
+
+			            @Override
+			            public Socket createSocket(final String host, final int port) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port);
+			                socket.startHandshake(); // log certificados
+			                return socket;
+			            }
+
+			            @Override
+			            public Socket createSocket(final String host, final int port, final InetAddress localAddress, final int localPort) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port, localAddress, localPort);
+			                socket.startHandshake();
+			                return socket;
+			            }
+
+			            @Override
+			            public Socket createSocket(final String host, final int port, final InetAddress clientHost, final int clientPort, final HttpConnectionParams params) throws IOException {
+			                final SSLSocket socket = (SSLSocket) this.socketFactory.createSocket(host, port, clientHost, clientPort);
+			                socket.startHandshake();
+			                return socket;
+			            }
+			        };
+
+			        final Protocol httpsProtocol = new Protocol("https", factory, 443); //$NON-NLS-1$
+			        options.setProperty(HTTPConstants.CUSTOM_PROTOCOL_HANDLER, httpsProtocol);
+
+			    } catch (final Exception e) {
+			        throw new WSServiceInvokerException("Error durante handshake SSL previo: " + e.getMessage(), e); //$NON-NLS-1$
+			    }
 			}
 
 			// Creamos el cliente y le anadimos la configuracion anterior.
