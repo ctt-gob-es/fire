@@ -57,7 +57,6 @@ public class AlarmsManager {
 			if (notifiersList.isEmpty()) {
 				initOldNotifier(moduleName, notifierName);
 			}
-		}
 
 		initialized = true;
 	}
