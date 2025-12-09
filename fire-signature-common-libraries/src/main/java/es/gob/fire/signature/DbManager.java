@@ -50,7 +50,32 @@ public class DbManager {
 	public static Connection getConnection(final boolean autoCommit) throws SQLException {
 		if (dataSource == null) {
 			try {
-				initialize();
+				initialize(ConfigManager.getDatasourceJNDIName());
+			} catch (final IOException e) {
+				throw new SQLException("No se ha podido inicializar la conexion con la base de datos", e); //$NON-NLS-1$
+			}
+		}
+		final Connection conn = dataSource.getConnection();
+		conn.setAutoCommit(autoCommit);
+		return conn;
+	}
+
+
+	/**
+	 * Obtiene la conexi&oacute;n de base de datos.
+	 *
+	 * @param autoCommit Indica si se debe hacer commit autom&aacute;tico tras cada
+	 *                   operaci&oacute;n de inserci&oacute;n y borrado de entradas
+	 *                   en base de datos.
+	 * @param dataSourceJndi Nombre JNDI del origen de datos.
+	 * @return Conexi&oacute;n de base de datos o {@code null} si no se pudo
+	 *         conectar.
+	 * @throws SQLException Cuando no se puede crear la conexi&oacute;n.
+	 */
+	public static Connection getConnection(final boolean autoCommit, final String dataSourceJndi) throws SQLException {
+		if (dataSource == null) {
+			try {
+				initialize(dataSourceJndi);
 			} catch (final IOException e) {
 				throw new SQLException("No se ha podido inicializar la conexion con la base de datos", e); //$NON-NLS-1$
 			}
@@ -63,16 +88,17 @@ public class DbManager {
 	/**
 	 * Inicializa al completo el manejador de base de datos, leyendo el fichero
 	 * de configuraci&oacute;n y recuperando la conexi&oacute;n.
-	 *
+	 * @param dataSourceJndi Nombre del origen de datos JNDI para la conexi&oacute;n
+	 * 		   con base de datos.
 	 * @return Conexi&oacute;n de base de datos o {@code null} si se produce un
 	 *         error.
-	 * @throws IOException Cuando no se encuentra correctamente configurada la
-	 *                     conexi&ioacute;n.
+	 * @throws IOException Cuando no se pude configurar correctamente la
+	 *         conexi&ioacute;n.
 	 */
-	private static void initialize() throws IOException {
+	private static void initialize(final String dataSourceJndi) throws IOException {
 		try {
 			final Context context = new InitialContext();
-			dataSource = (DataSource) context.lookup(ConfigManager.getDatasourceJNDIName());
+			dataSource = (DataSource) context.lookup(dataSourceJndi);
 
 			checkConnection();
 		} catch (final Exception e) {

@@ -1,5 +1,7 @@
 package es.gob.fire.server.services.statistics;
 
+import org.apache.log4j.Logger;
+
 import es.gob.fire.signature.ConfigManager;
 
 /**
@@ -20,9 +22,15 @@ public class AuditConfig {
 	public static AuditConfig load() throws IllegalArgumentException {
 
 		final int policyId = ConfigManager.getAuditPolicy();
-		final Policy policy = Policy.valueOf(policyId);
+		Policy policy = Policy.valueOf(policyId);
 		if (policy == null) {
 			throw new IllegalArgumentException("No se ha proporcionado una politica valida para la generacion de estadisticas de auditoria"); //$NON-NLS-1$
+		}
+
+		if (policy == Policy.AUTOMATIC && !ConfigManager.isUsingDatabase()) {
+			Logger.getLogger(AuditConfig.class.getName()).warn(
+					"Se ha configurado el guardado automatico de los datos de auditoria en BD, pero no la conexion con BD"); //$NON-NLS-1$
+			policy = Policy.GENERATE;
 		}
 
 		final AuditConfig config = new AuditConfig();
