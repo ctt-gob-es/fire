@@ -1,4 +1,4 @@
--- Script de migracion desde FIRe 2.4 a 2.5
+-- Script de migracion desde FIRe 2.4 a 3.0
 
 
 -- TABLA de usuarios
