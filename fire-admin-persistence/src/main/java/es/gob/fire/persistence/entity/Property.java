@@ -1,4 +1,4 @@
-package es.gob.fire.persistence.dto;
+package es.gob.fire.persistence.entity;
 
 import javax.persistence.*;
 import java.time.LocalDateTime;

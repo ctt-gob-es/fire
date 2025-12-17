@@ -173,6 +173,19 @@ public class LoginController {
 		} catch (final WebAdminException e) {
 			model.addAttribute("errorMessage", e.getMessage());
 			return "login.html";
+		} catch (final Exception e) {
+			// La conexion con Cl@ve no es correcta. Mostramos el error, pero
+			// continuamos para que se active el modo de contingencia
+			final String errorMsg = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML020);
+			LOGGER.error(errorMsg, e);
+    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		LOGGER.error(" ====== Generamos el token de sesion (1) " + randomStringLogin);
+    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
+    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+    		model.addAttribute("errorMessage", errorMsg);
+    		model.addAttribute("accessByCertificate", true);
+			return "login.html";
 		}
 
     	// Comprobaremos si necesitamos activar el certificado de contingencia
@@ -180,6 +193,7 @@ public class LoginController {
     	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
     		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
     		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		LOGGER.error(" ====== Generamos el token de sesion (2 " + randomStringLogin);
     		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
     		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
@@ -279,6 +293,9 @@ public class LoginController {
 	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
 	        final CAdESAnalizer analizer = this.iLoginService.analizeSignWithCAdES(signBase64Bytes);
 
+
+	        LOGGER.info(" ======= El token asignado era " + this.threadInfoDataSecureDTO.getRandomStringLogin());
+
 	        // Validamos si la firma es segura
 	        this.iLoginService.validateIfSignSecure(analizer);
 
@@ -360,6 +377,7 @@ public class LoginController {
 	        }
 
     		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+    		LOGGER.error(" ====== Generamos el token de sesion (3) " + randomStringLogin);
     		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
     		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);

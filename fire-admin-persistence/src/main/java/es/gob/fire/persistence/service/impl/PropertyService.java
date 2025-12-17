@@ -9,7 +9,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import es.gob.fire.persistence.dto.GeneralConfigDTO;
-import es.gob.fire.persistence.dto.Property;
+import es.gob.fire.persistence.entity.Property;
 import es.gob.fire.persistence.repository.PropertyRepository;
 import es.gob.fire.persistence.service.IPropertyService;
 

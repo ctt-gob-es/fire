@@ -123,11 +123,10 @@ public class TransactionsDAO {
 	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
 	 * en caso contrario.
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 */
 	public static void insertTransaction(final Date date, final TransactionCube transaction,
 			final TransactionTotal total, final Connection conn)
-			throws SQLException, DBConnectionException {
+			throws SQLException {
 
 		int totalInsertReg = 0;
 		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_TRANSACTION);) {

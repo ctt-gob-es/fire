@@ -20,6 +20,10 @@ import java.util.Map;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
+import javax.naming.Context;
+import javax.naming.InitialContext;
+import javax.sql.DataSource;
+
 import es.gob.fire.signature.DBConnectionException;
 import es.gob.fire.signature.DbManager;
 import es.gob.fire.statistics.dao.SignaturesDAO;
@@ -48,7 +52,7 @@ public class LoadStatisticsRunnable implements Runnable {
 
 	private final String dataPath;
 	private final boolean processCurrentDay;
-	private final boolean executedFromCmd;
+	private final String jndiDataSource;
 	private final Map<String, String> connectionAttributes;
 
 	private LoadStatisticsResult result = null;
@@ -62,25 +66,10 @@ public class LoadStatisticsRunnable implements Runnable {
 	 *
 	 * @param dataPath Ruta de los ficheros de datos.
 	 */
-	public LoadStatisticsRunnable(final String dataPath) {
-		this(dataPath, false);
-	}
-
-	/**
-	 * Crea la tarea indicando el directorio de los ficheros de datos estadisticos y
-	 * si se desea
-	 * procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan
-	 * terminado
-	 * de generarse todos los datos.
-	 *
-	 * @param processCurrentDay Indica si se debe procesar los datos del d&iacute;a
-	 *                          actual
-	 *                          ({@code true}) o si no ({@code false}).
-	 */
 	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay) {
 		this.dataPath = dataPath;
 		this.processCurrentDay = processCurrentDay;
-		this.executedFromCmd = false;
+		this.jndiDataSource = null;
 		this.connectionAttributes = null;
 	}
 
@@ -95,10 +84,28 @@ public class LoadStatisticsRunnable implements Runnable {
 	 *                          actual
 	 *                          ({@code true}) o si no ({@code false}).
 	 */
-	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay, final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
+	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay, final String jndiDataSource) {
 		this.dataPath = dataPath;
 		this.processCurrentDay = processCurrentDay;
-		this.executedFromCmd = executedFromCmd;
+		this.jndiDataSource = jndiDataSource;
+		this.connectionAttributes = null;
+	}
+
+	/**
+	 * Crea la tarea indicando el directorio de los ficheros de datos estadisticos y
+	 * si se desea
+	 * procesar la informaci&oacute;n de hoy, ya que puede que a&uacute;n no hayan
+	 * terminado
+	 * de generarse todos los datos.
+	 *
+	 * @param processCurrentDay Indica si se debe procesar los datos del d&iacute;a
+	 *                          actual
+	 *                          ({@code true}) o si no ({@code false}).
+	 */
+	public LoadStatisticsRunnable(final String dataPath, final boolean processCurrentDay, final Map<String, String> connectionAttributes) {
+		this.dataPath = dataPath;
+		this.processCurrentDay = processCurrentDay;
+		this.jndiDataSource = null;
 		this.connectionAttributes = connectionAttributes;
 
 	}
@@ -148,12 +155,17 @@ public class LoadStatisticsRunnable implements Runnable {
 			return;
 		}
 
-		// Cargamos los ficheros en base de datos
-		try {
-			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, this.executedFromCmd, this.connectionAttributes);
-		} catch (final Exception e) {
-			LOGGER.log(Level.SEVERE, "No ha sido posible cargar todos los datos en base de datos", e); //$NON-NLS-1$
-			return;
+		// Insertamos los datos en base de datos
+		try (Connection dbConnection = getConection()) {
+			this.result = exeLoadStatistics(signatureFiles, transaccionFiles, dbConnection);
+		} catch (final DBConnectionException e) {
+			final String errorMsg = "No se pudo conectar con la base de datos"; //$NON-NLS-1$
+			LOGGER.log(Level.SEVERE, errorMsg, e);
+			this.result = new LoadStatisticsResult(false, null, null, errorMsg);
+		} catch (final SQLException e) {
+			final String errorMsg = "Ocurrio un error al cerrar la conexion con la base de datos"; //$NON-NLS-1$
+			LOGGER.log(Level.WARNING, errorMsg, e);
+			this.result = new LoadStatisticsResult(false, null, null, errorMsg);
 		}
 
 		// Registramos la fecha de los ultimos datos que se han podido cargar en base de
@@ -356,7 +368,7 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @return Resultado del proceso de carga.
 	 */
 	private static LoadStatisticsResult exeLoadStatistics(final File[] signatureFiles, final File[] transactionFiles,
-			final boolean executedFromCmd, final Map<String, String> connectionAttributes) {
+			final Connection dbConnection) {
 
 		Date lastDateProcessed = null;
 		String lastDateProcessedText = null;
@@ -385,6 +397,14 @@ public class LoadStatisticsRunnable implements Runnable {
 			if (!sameDate) {
 				final String errorMsg = "No coinciden las fechas de los ficheros"; //$NON-NLS-1$
 				LOGGER.severe(errorMsg);
+				try {
+					dbConnection.commit();
+				} catch (final SQLException ex) {
+					LOGGER.log(Level.SEVERE, "No se pudieron confirmar los datos en BD despues encontrar un error " //$NON-NLS-1$
+							+ "comparando las fechas de los ficheros del " + signatureFileDate + " y el " //$NON-NLS-1$ //$NON-NLS-2$
+							+ transactionFileDate, ex);
+					return new LoadStatisticsResult(false, null, null, "No se pudieron confirmar los datos en BD"); //$NON-NLS-1$
+				}
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
@@ -420,31 +440,29 @@ public class LoadStatisticsRunnable implements Runnable {
 			} catch (final Exception e) {
 				final String errorMsg = "Ocurrio un error al extraer los datos de los ficheros del dia " + dateText; //$NON-NLS-1$
 				LOGGER.log(Level.SEVERE, errorMsg, e);
+				try {
+					dbConnection.commit();
+				} catch (final SQLException ex) {
+					LOGGER.log(Level.SEVERE, "No se pudieron confirmar los datos en BD despues encontrar un error " //$NON-NLS-1$
+							+ "al extraer los datos del dia " + dateText, ex); //$NON-NLS-1$
+					return new LoadStatisticsResult(false, null, null, "No se pudieron confirmar los datos en BD"); //$NON-NLS-1$
+				}
 				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
 			}
 
-			// Insertamos los datos en base de datos
 			try {
-				if (!executedFromCmd) {
-					try (Connection dbConnection = getConection()) {
-						insertDataIntoDb(dbConnection, date, compactedData);
-					}
-				} else {
-					try (Connection dbConnection = getConection(connectionAttributes)) {
-						dbConnection.setAutoCommit(false);
-						insertDataIntoDb(dbConnection, date, compactedData);
-					}
+				insertDataIntoDb(dbConnection, date, compactedData);
+			} catch (final SQLException e) {
+				final String errorMsg = "Ocurrio un error al insertar en base de datos los datos del dia " + dateText; //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, errorMsg, e);
+				try {
+					dbConnection.commit();
+				} catch (final SQLException ex) {
+					LOGGER.log(Level.SEVERE, "No se pudieron confirmar los datos en BD despues encontrar un error " //$NON-NLS-1$
+							+ "al insertar los datos del dia " + dateText, ex); //$NON-NLS-1$
+					return new LoadStatisticsResult(false, null, null, "No se pudieron confirmar los datos en BD"); //$NON-NLS-1$
 				}
-
-			} catch (final DBConnectionException e) {
-				final String errorMsg = "No se pudo conectar con la base de datos. Se aborta el proceso de carga de los datos del dia " //$NON-NLS-1$
-						+ dateText;
-				LOGGER.log(Level.SEVERE, errorMsg, e);
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
-			} catch (final Exception e) {
-				final String errorMsg = "Ocurrio un error al guardar los datos del dia " + dateText; //$NON-NLS-1$
-				LOGGER.log(Level.SEVERE, errorMsg, e);
-				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText, errorMsg);
+				return new LoadStatisticsResult(false, lastDateProcessed, lastDateProcessedText);
 			}
 
 			// Actualizamos la fecha de los ultimos datos procesados
@@ -456,13 +474,29 @@ public class LoadStatisticsRunnable implements Runnable {
 	}
 
 	/**
-	 * Obtiene la conexion a base de datos a trav&eacute;s del gestor
-	 * de BD del proyecto.
+	 * Obtiene la conexion a base de datos usando la configuraci&oacute;n
+	 * cargada de fichero.
 	 * @return Conexi&oacute;n con la BD.
 	 * @throws SQLException Cuando ocurre un error al establecer la conexi&oacute;n.
 	 */
-	private static Connection getConection() throws SQLException {
-		return DbManager.getConnection(false);
+	private Connection getConection() throws DBConnectionException {
+
+		Connection dbConnection;
+		try {
+			if (this.jndiDataSource != null) {
+				dbConnection = getConnectionByJndi(this.jndiDataSource);
+			}
+			else if (this.connectionAttributes != null) {
+				dbConnection = getConnectionByAttributes(this.connectionAttributes);
+			}
+			else {
+				dbConnection = DbManager.getConnection(false);
+			}
+		}
+		catch (final Exception e) {
+			throw new DBConnectionException("No se pudo establecer la conexion con BD", e); //$NON-NLS-1$
+		}
+		return dbConnection;
 	}
 
 	/**
@@ -472,14 +506,39 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @return Conexi&oacute;n con la BD.
 	 * @throws SQLException Cuando ocurre un error al establecer la conexi&oacute;n.
 	 */
-	private static Connection getConection(final Map<String, String> connectionAttributes) throws SQLException {
+	private static Connection getConnectionByJndi(final String jndiDs) throws SQLException {
 
-		final String jdbcDriver = connectionAttributes.get(PROP_JDBC_DRIVER);
-        final String dbConnectionString = connectionAttributes.get(PROP_DB_CONN_STRING);
-        final String username = connectionAttributes.get(PROP_DB_USERNAME);
-        final String password = connectionAttributes.get(PROP_DB_PWD).trim();
+		DataSource dataSource;
+		try {
+			final Context context = new InitialContext();
+			dataSource = (DataSource) context.lookup(jndiDs);
+		} catch (final Exception e) {
+			dataSource = null;
+			throw new SQLException("No se ha podido cargar la fuente JNDI para la conexion con BD", e); //$NON-NLS-1$
+		}
 
-        //TODO: Hay que configurar el driver
+		return dataSource.getConnection();
+	}
+
+	/**
+	 * Crea una nueva conexi&oacute;n con la base de datos a partir
+	 * de las propiedades suministradas.
+	 * @param connectionAttributes Propiedades para la conexi&oacute;n.
+	 * @return Conexi&oacute;n con la BD.
+	 * @throws SQLException Cuando ocurre un error al establecer la conexi&oacute;n.
+	 */
+	private static Connection getConnectionByAttributes(final Map<String, String> attributes) throws SQLException {
+
+		final String jdbcDriver = attributes.get(PROP_JDBC_DRIVER);
+        try {
+			Class.forName(jdbcDriver).newInstance();
+		} catch (InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+			throw new SQLException("No se pudo cargar el drive de base de datos", e); //$NON-NLS-1$
+		}
+
+        final String dbConnectionString = attributes.get(PROP_DB_CONN_STRING);
+        final String username = attributes.get(PROP_DB_USERNAME);
+        final String password = attributes.get(PROP_DB_PWD).trim();
 
         return DriverManager.getConnection(dbConnectionString, username, password);
 	}
@@ -562,11 +621,9 @@ public class LoadStatisticsRunnable implements Runnable {
 	 * @param compactedData Conjunto de datos de las operaciones.
 	 * @throws SQLException          Cuando se produce un error al insertar los
 	 *                               datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n
-	 *                               con la base de datos.
 	 */
 	private static void insertDataIntoDb(final Connection conn, final Date date, final CompactedData compactedData)
-			throws SQLException, DBConnectionException {
+			throws SQLException {
 
 		// Insertamos la informacion de las firmas realizadas
 		final Map<SignatureCube, Long> signaturesCube = compactedData.getSignatureData();
@@ -578,7 +635,7 @@ public class LoadStatisticsRunnable implements Runnable {
 			final Long total = signaturesCube.get(signatureConfig);
 			try {
 				SignaturesDAO.insertSignature(date, signatureConfig, total.longValue(), conn);
-			} catch (final Exception e) {
+			} catch (final SQLException e) {
 				LOGGER.log(Level.SEVERE,
 						String.format(
 								"No se pudo insertar las firmas del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$
@@ -602,7 +659,7 @@ public class LoadStatisticsRunnable implements Runnable {
 			final TransactionTotal total = transactionsCube.get(transactionConfig);
 			try {
 				TransactionsDAO.insertTransaction(date, transactionConfig, total, conn);
-			} catch (final Exception e) {
+			} catch (final SQLException e) {
 				LOGGER.log(Level.SEVERE,
 						String.format(
 								"No se pudo insertar las transacciones del dia %1s. Se desharan las inserciones realizadas de este dia", //$NON-NLS-1$

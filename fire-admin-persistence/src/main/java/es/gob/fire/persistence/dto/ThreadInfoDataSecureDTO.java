@@ -27,6 +27,8 @@ package es.gob.fire.persistence.dto;
 import java.util.HashMap;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.stereotype.Component;
 
 /**
@@ -36,47 +38,61 @@ import org.springframework.stereotype.Component;
  * </p>
  * <b>Project:</b>
  * <p></p>
- * 
+ *
  * @version 1.0, 24/02/2025.
  */
 @Component
 public class ThreadInfoDataSecureDTO {
+
+
+	private static final Logger LOGGER = LogManager.getLogger(ThreadInfoDataSecureDTO.class);
 
 	// Thread-local variable to store session data
 	private static final ThreadLocal<Map<String, String>> userSession = ThreadLocal.withInitial(HashMap::new);
 
 	/**
 	 * Sets the random string login for the current thread.
-	 * 
+	 *
 	 * @param value
 	 *            the random string login
 	 */
-	public void setRandomStringLogin(String value) {
+	public void setRandomStringLogin(final String value) {
+
+		LOGGER.info(" --- Guardamos " + value);
+		LOGGER.info(" --- Antes de guardar: userSession.get() " + userSession.get());
+
 		userSession.get().put("randomStringLogin", value);
+
+		LOGGER.info(" --- Despues de guardar: userSession.get() " + userSession.get());
 	}
 
 	/**
 	 * Sets the limit sign generation value for the current thread.
-	 * 
+	 *
 	 * @param value
 	 *            the limit sign generation value
 	 */
-	public void setLimitSignGen(String value) {
+	public void setLimitSignGen(final String value) {
 		userSession.get().put("limitSignGen", value);
 	}
 
 	/**
 	 * Gets the random string login for the current thread.
-	 * 
+	 *
 	 * @return the random string login, or null if not set
 	 */
 	public String getRandomStringLogin() {
+
+		LOGGER.info(" --- Cargamos: userSession " + userSession);
+		LOGGER.info(" --- Cargamos: userSession.get() " + userSession.get().hashCode());
+
+
 		return userSession.get().get("randomStringLogin");
 	}
 
 	/**
 	 * Gets the limit sign generation value for the current thread.
-	 * 
+	 *
 	 * @return the limit sign generation value, or null if not set
 	 */
 	public String getLimitSignGen() {
@@ -87,6 +103,9 @@ public class ThreadInfoDataSecureDTO {
 	 * Clears the thread-local data for the current thread.
 	 */
 	public void clear() {
+
+		LOGGER.info(" ----------------- Se resetea el objeto del hilo");
+
 		userSession.remove();
 	}
 

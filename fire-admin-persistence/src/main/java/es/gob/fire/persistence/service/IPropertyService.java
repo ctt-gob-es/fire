@@ -4,7 +4,7 @@ import java.util.List;
 import java.util.Optional;
 
 import es.gob.fire.persistence.dto.GeneralConfigDTO;
-import es.gob.fire.persistence.dto.Property;
+import es.gob.fire.persistence.entity.Property;
 
 public interface IPropertyService {
     List<Property> getAllProperties();

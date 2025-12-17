@@ -386,10 +386,12 @@ public class LoginService implements ILoginService {
 	public void validateIfSignSecure(final CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException {
 		final String strSigned = new String(analizer.getContent());
 		final String token = this.threadInfoDataSecure.getRandomStringLogin();
+		LOGGER.error(" ====== El token recuperado de la sesion es " + token);
+
 		if (token == null) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML019));
 			throw new TimeoutException (Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));
-}
+		}
 		if (!strSigned.equalsIgnoreCase(token)) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML015));
 			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016));

@@ -4,13 +4,15 @@ import java.io.Serializable;
 import java.util.Objects;
 
 public class ProviderApplicationPK implements Serializable {
-    
-    private String provider;
+
+    private static final long serialVersionUID = -7144817454133941449L;
+
+	private String provider;
     private String application;
 
     public ProviderApplicationPK() {}
 
-    public ProviderApplicationPK(String provider, String application) {
+    public ProviderApplicationPK(final String provider, final String application) {
         this.provider = provider;
         this.application = application;
     }
@@ -19,7 +21,7 @@ public class ProviderApplicationPK implements Serializable {
         return this.provider;
     }
 
-    public void setProvider(String provider) {
+    public void setProvider(final String provider) {
         this.provider = provider;
     }
 
@@ -27,15 +29,19 @@ public class ProviderApplicationPK implements Serializable {
         return this.application;
     }
 
-    public void setApplication(String application) {
+    public void setApplication(final String application) {
         this.application = application;
     }
 
     @Override
-    public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        ProviderApplicationPK that = (ProviderApplicationPK) o;
+    public boolean equals(final Object o) {
+        if (this == o) {
+			return true;
+		}
+        if (o == null || getClass() != o.getClass()) {
+			return false;
+		}
+        final ProviderApplicationPK that = (ProviderApplicationPK) o;
         return Objects.equals(this.provider, that.provider) && Objects.equals(this.application, that.application);
     }
 

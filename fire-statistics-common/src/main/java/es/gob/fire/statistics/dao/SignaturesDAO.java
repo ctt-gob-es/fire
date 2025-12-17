@@ -95,11 +95,10 @@ public class SignaturesDAO {
 	 * @return {@code true} si la configuraci&oacute;n se inserto correctamente. {@code false}
 	 * en caso contrario.
 	 * @throws SQLException Cuando se produce un error al insertar los datos.
-	 * @throws DBConnectionException Cuando se produce un error de conexi&oacute;n con la base de datos.
 	 */
 	public static void insertSignature(final Date date, final SignatureCube signature, final long total,
 			 final Connection conn)
-			throws SQLException, DBConnectionException {
+			throws SQLException {
 
 		try (final PreparedStatement st = conn.prepareStatement(ST_INSERT_SIGNATURE)) {
 			st.setTimestamp (1, new java.sql.Timestamp(date.getTime()));
