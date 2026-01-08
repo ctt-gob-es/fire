@@ -69,7 +69,6 @@ import es.gob.fire.commons.utils.UtilsKeystore;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
-import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
@@ -111,9 +110,8 @@ public class LoginService implements ILoginService {
 	public static final String ROLE_ADMIN = "Administrator"; //$NON-NLS-1$
 
 	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin"; //$NON-NLS-1$
-
-	@Autowired
-	private ThreadInfoDataSecureDTO threadInfoDataSecure;
+	
+	public static final String PARAM_LIMIT_SIGN_GEN = "limitSignGen"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the service object for accessing the repository of control access.
@@ -383,9 +381,8 @@ public class LoginService implements ILoginService {
    	 * @see es.gob.fire.persistence.service#validateIfSignSecure(es.gob.fire.crypto.cades.verifier.CAdESAnalizer)
    	 */
 	@Override
-	public void validateIfSignSecure(final CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException {
+	public void validateIfSignSecure(final CAdESAnalizer analizer, final String token, final String limitSignGen) throws CertificateException, ParseException, TimeoutException {
 		final String strSigned = new String(analizer.getContent());
-		final String token = this.threadInfoDataSecure.getRandomStringLogin();
 		LOGGER.error(" ====== El token recuperado de la sesion es " + token);
 
 		if (token == null) {
@@ -399,7 +396,7 @@ public class LoginService implements ILoginService {
 
 		final SimpleDateFormat simpleDateFormat = new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD);
 
-		final Date pastDate = simpleDateFormat.parse(this.threadInfoDataSecure.getLimitSignGen());
+		final Date pastDate = simpleDateFormat.parse(limitSignGen);
 
 		final Date currentDate = new Date();
 

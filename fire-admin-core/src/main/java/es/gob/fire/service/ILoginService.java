@@ -159,9 +159,11 @@ public interface ILoginService {
 	 * doesn't match or if the time difference exceeds the allowed limit.
 	 *
 	 * @param analizer the {@link CAdESAnalizer} containing the content to be validated
+	 * @param token Random session token
+	 * @param limitSignGen limit sign generation value for the current session
 	 * @throws CertificateException if the signature is invalid or the time limit has expired
 	 * @throws ParseException if the time format cannot be parsed correctly
 	 * @throws TimeoutException if the token to init session has expired
 	 */
-	void validateIfSignSecure(CAdESAnalizer analizer) throws CertificateException, ParseException, TimeoutException;
+	void validateIfSignSecure(CAdESAnalizer analizer, String token, String limitSignGen) throws CertificateException, ParseException, TimeoutException;
 }

@@ -8,6 +8,7 @@ import java.util.stream.StreamSupport;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.servlet.http.HttpServletResponse;
+import javax.servlet.http.HttpSession;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -28,7 +29,6 @@ import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
-import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
@@ -60,9 +60,6 @@ public class ResponseClave {
 
 	@Autowired
 	private ILoginService iLoginService;
-
-	@Autowired
-	private ThreadInfoDataSecureDTO threadInfoDataSecure;
 
 	@Autowired
     private VersionProperties versionProperties;
@@ -129,8 +126,9 @@ public class ResponseClave {
 
 		}catch (final ClaveException e) {
 			final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
-			this.threadInfoDataSecure.setRandomStringLogin(randomStringLogin);
-			this.threadInfoDataSecure.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+			HttpSession session = request.getSession(true);
+			session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+			session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN, new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
 			model.addAttribute("errorMessage", e.getMessage());
 			model.addAttribute("accessByCertificate", true);

@@ -66,7 +66,6 @@ import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.crypto.cades.verifier.CAdESAnalizer;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.Language;
-import es.gob.fire.persistence.dto.ThreadInfoDataSecureDTO;
 import es.gob.fire.persistence.entity.ControlAccess;
 import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
@@ -121,12 +120,6 @@ public class LoginController {
 	@Autowired
 	private IUserService iUserService;
 
-	/**
-	 * Attribute that represents the DTO for current user session.
-	 */
-	@Autowired
-	private ThreadInfoDataSecureDTO threadInfoDataSecureDTO;
-
 	@Autowired
     private VersionProperties versionProperties;
 
@@ -180,8 +173,9 @@ public class LoginController {
 			LOGGER.error(errorMsg, e);
     		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
     		LOGGER.error(" ====== Generamos el token de sesion (1) " + randomStringLogin);
-    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
-    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		HttpSession session = request.getSession(true);
+    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
     		model.addAttribute("errorMessage", errorMsg);
     		model.addAttribute("accessByCertificate", true);
@@ -194,8 +188,9 @@ public class LoginController {
     		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
     		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
     		LOGGER.error(" ====== Generamos el token de sesion (2 " + randomStringLogin);
-    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
-    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		HttpSession session = request.getSession(true);
+    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
     		model.addAttribute("errorMessage", activateMsg);
     		model.addAttribute("accessByCertificate", true);
@@ -282,6 +277,7 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/loginWithCertificate", method = RequestMethod.POST)
 	public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64,
+									   HttpServletRequest request,
 	                                   final Model model, final HttpServletResponse response) {
 	    X509Certificate certificate = null;
 	    final AtomicReference<String> dniRef =  new AtomicReference<>("");
@@ -292,12 +288,17 @@ public class LoginController {
 
 	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
 	        final CAdESAnalizer analizer = this.iLoginService.analizeSignWithCAdES(signBase64Bytes);
-
-
-	        LOGGER.info(" ======= El token asignado era " + this.threadInfoDataSecureDTO.getRandomStringLogin());
+	        
+	        HttpSession session = request.getSession(false);
+	        String token = session != null
+	            ? (String) session.getAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN)
+	            : null;
+	        String limitSignGen = session != null
+		            ? (String) session.getAttribute(LoginService.PARAM_LIMIT_SIGN_GEN)
+		            : null;
 
 	        // Validamos si la firma es segura
-	        this.iLoginService.validateIfSignSecure(analizer);
+	        this.iLoginService.validateIfSignSecure(analizer, token, limitSignGen);
 
 	        final List<X509Certificate> certs = analizer.getSigningCertificates();
 	        certificate = certs.get(0);
@@ -350,8 +351,9 @@ public class LoginController {
 //	        cookie.setSecure(true);
 //	        response.addCookie(cookie);
 
-	        // Antes de ir al inicio limpiamos ThreadLocal para evitar memory leaks
-	        this.threadInfoDataSecureDTO.clear();
+	        // Antes de ir al inicio limpiamos la sesion para evitar memory leaks
+	        session.removeAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN);
+	        session.removeAttribute(LoginService.PARAM_LIMIT_SIGN_GEN);
 
 	        model.addAttribute("appVersion", this.versionProperties.getProjectVersion());
 	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear());
@@ -378,8 +380,9 @@ public class LoginController {
 
     		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
     		LOGGER.error(" ====== Generamos el token de sesion (3) " + randomStringLogin);
-    		this.threadInfoDataSecureDTO.setRandomStringLogin(randomStringLogin);
-    		this.threadInfoDataSecureDTO.setLimitSignGen(new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+    		HttpSession session = request.getSession(true);
+    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
     		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
 	        model.addAttribute("errorMessage", msgerror);
 	        model.addAttribute("accessByCertificate", true);
