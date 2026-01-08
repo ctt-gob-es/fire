@@ -56,7 +56,9 @@
             <basic name="surnames"><column name="apellidos" length="120" nullable="false"/></basic>
             <basic name="email"><column name="correo_elec" length="60"/></basic>
             <basic name="phone"><column name="telf_contacto" length="45"/></basic>
-            <basic name="rol"><column name="fk_rol" nullable="false"/></basic>
+            <many-to-one name="rol" fetch="EAGER" optional="false">
+			    <join-column name="FK_ROL"/>
+			</many-to-one>
             <basic name="startDate"><column name="fec_alta" nullable="false"/></basic>
             <basic name="root"><column name="usu_defecto" nullable="false"/></basic>
             <basic name="renovationCode"><column name="codigo_renovacion" length="100"/></basic>
@@ -113,36 +115,20 @@
     <!-- tb_responsable_de_aplicaciones -->
 
     <entity class="ApplicationResponsible" access="PROPERTY">
-        <table name="tb_responsable_de_aplicaciones"/>
-        <id-class class="ApplicationResponsiblePK"/>
-        <attributes>
-        	<id name="idApplication"><column name="ID_APLICACIONES"/></id>
-        	<id name="idResponsible"><column name="ID_RESPONSABLES"/></id>
-<!--        	
-        	<many-to-one name="application" optional="false">
-                <join-column name="id_aplicaciones"/>
-            </many-to-one>
-            <many-to-one name="responsible" optional="false">
-                <join-column name="id_responsables"/>
-            </many-to-one>
--->
-        </attributes>
+            <table name="tb_responsable_de_aplicaciones"/>
+		    <attributes>
+		        <embedded-id name="idApplicationResponsible"
+		                     class="ApplicationResponsiblePK"/>
+		    </attributes>
     </entity>
 
-    <!-- tb_certificados_de_aplicacion (PK compuesta via @IdClass) -->
+    <!-- tb_certificados_de_aplicacion (PK compuesta via @IdClass)-->
     <entity class="CertificatesApplication" access="PROPERTY">
-        <table name="tb_certificados_de_aplicacion"/>
-        <id-class class="CertificatesApplicationPK"/>
-        <attributes>
-            <id name="idApplication"><column name="id_aplicaciones"/></id>
-        	<id name="idCertificate"><column name="id_certificados"/></id>
-            <many-to-one name="application" optional="false">
-                <join-column name="id_aplicaciones"/>
-            </many-to-one>
-            <many-to-one name="certificate" optional="false">
-                <join-column name="id_certificados"/>
-            </many-to-one>
-        </attributes>
+            <table name="tb_certificados_de_aplicacion"/>
+		    <attributes>
+		        <embedded-id name="idCertificatesApplication"
+		                     class="CertificatesApplicationPK"/>
+		    </attributes>
     </entity>
 
     <!-- tb_audit_transacciones -->
@@ -206,7 +192,7 @@
         <basic name="secondPeriod"><column name="SEGUNDO_PERIODO"/></basic>
         <basic name="initDay"><column name="DIA_INICIO"/></basic>
         <basic name="advanceNotice"><column name="AVISO_ANTICIPADO"/></basic>
-        <many-to-one name="plannerType" fetch="LAZY" optional="false">
+        <many-to-one name="plannerType" fetch="EAGER" optional="false">
           <join-column name="ID_TIPO_PLANIFICADOR"/>
         </many-to-one>
       </attributes>
@@ -231,7 +217,9 @@
             <basic name="checkedTime"><column name="TIEMPO_COMPROBACION"/></basic>
             <basic name="advanceNotice"><column name="DIAS_PREAVISO"/></basic>
             <basic name="periodCommunication"><column name="PERIODO_COMUNICACION"/></basic>
-            <basic name="planner"><column name="ID_PLANIFICADOR" nullable="false"/></basic>
+            <many-to-one name="planner" fetch="EAGER" optional="false">
+			    <join-column name="ID_PLANIFICADOR"/>
+			</many-to-one>
             <basic name="schedulerName"><column name="NOMBRE_PROGRAMADOR" length="50" nullable="false" unique="true"/></basic>
         </attributes>
     </entity>
