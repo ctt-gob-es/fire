@@ -200,6 +200,11 @@ public interface IWebAdminGeneral {
 	 */
 	String LOG_MC017 = "MC017";
 
+	/**
+	 * Constant attribute that represents the property key <code>MC018</code> belonging to the file messages/webAdmin/general_xx_YY.properties.
+	 */
+	String LOG_MC018 = "MC018";
+
 	/***********************/
 	/** Mensajes para errores en el módulo de login **/
 	/***********************/

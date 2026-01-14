@@ -32,7 +32,6 @@ import javax.naming.NamingException;
 import javax.persistence.EntityManagerFactory;
 import javax.sql.DataSource;
 
-import org.apache.commons.codec.binary.StringUtils;
 import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.autoconfigure.domain.EntityScan;
@@ -50,8 +49,6 @@ import org.springframework.transaction.PlatformTransactionManager;
 import org.springframework.transaction.annotation.EnableTransactionManagement;
 
 import es.gob.fire.commons.utils.Constants;
-import es.gob.fire.commons.utils.FileUtilsDirectory;
-import es.gob.fire.commons.utils.UtilsServer;
 
 /**
  * <p>Class that manages the data base configuration.</p>
@@ -67,23 +64,23 @@ import es.gob.fire.commons.utils.UtilsServer;
 @EnableJpaRepositories(repositoryFactoryBeanClass = DataTablesRepositoryFactoryBean.class, basePackages = Constants.MAIN_REPOSITORY_PROJECT_PACKAGE)
 public class JpaConfig {
 
-	/**
-	 * Constant attribute that represents the file name of the configuration
-	 * properties for configure MySql strategy identity.
-	 */
-	private static final String CONF_IDENTITY_MYSQL = "mysql-orm.xml";
+//	/**
+//	 * Constant attribute that represents the file name of the configuration
+//	 * properties for configure MySql strategy identity.
+//	 */
+//	private static final String CONF_IDENTITY_MYSQL = "mysql-orm.xml";
+//
+//	/**
+//	 * Constant attribute that represents the MySql dialect.
+//	 */
+//	private static final String MYSQL_DIALECT = "org.hibernate.dialect.MySQLDialect";
 
-	/**
-	 * Constant attribute that represents the MySql dialect.
-	 */
-	private static final String MYSQL_DIALECT = "org.hibernate.dialect.MySQLDialect";
-	
 	/**
 	 * Attribute that represents the datasource JNDI name.
 	 */
 	@Value("${datasource.jndi-name}")
 	private String jndiName;
-	
+
 	/**
 	 * Attribute that represents the dialect data base.
 	 */
@@ -98,11 +95,11 @@ public class JpaConfig {
 	/**
 	 * Method that configures the data source.
 	 * @return DataSource
-	 * @throws IOException 
+	 * @throws IOException
 	 */
 	@Bean
 	public DataSource configureDataSource() {
-		JndiObjectFactoryBean bean = new JndiObjectFactoryBean();
+		final JndiObjectFactoryBean bean = new JndiObjectFactoryBean();
 		bean.setJndiName(this.jndiName);
 		bean.setProxyInterface(DataSource.class);
 		try {
@@ -125,6 +122,8 @@ public class JpaConfig {
 		entityManagerFactoryBean.setPackagesToScan(Constants.MAIN_PERSISTENCE_PROJECT_PACKAGE);
 		entityManagerFactoryBean.setJpaVendorAdapter(new HibernateJpaVendorAdapter());
 		final Properties jpaProperties = new Properties();
+
+/*
 		if (StringUtils.equals(this.dialect, MYSQL_DIALECT)) {
 			if (UtilsServer.getServerConfigDir() != null) {
 				entityManagerFactoryBean.setMappingResources("file:///"+FileUtilsDirectory.createAbsolutePath(UtilsServer.getServerConfigDir(), CONF_IDENTITY_MYSQL));
@@ -136,7 +135,9 @@ public class JpaConfig {
 			//jpaProperties.put("spring.jpa.hibernate.naming.implicit-strategy", "org.hibernate.boot.model.naming.ImplicitNamingStrategyLegacyJpaImpl");
 			//jpaProperties.put("spring.jpa.hibernate.naming.physical-strategy", "org.hibernate.boot.model.naming.PhysicalNamingStrategyStandardImpl");
 		}
+*/
 		jpaProperties.put(AvailableSettings.DIALECT, this.dialect);
+
 		jpaProperties.put(AvailableSettings.SHOW_SQL, this.showSQL);
 
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
@@ -146,7 +147,7 @@ public class JpaConfig {
 	}
 
 	/**
-	 * Method that registers a property.
+	 * Method that registers a property.cd ../fire
 	 *
 	 * @return PlatformTransactionManager
 	 */

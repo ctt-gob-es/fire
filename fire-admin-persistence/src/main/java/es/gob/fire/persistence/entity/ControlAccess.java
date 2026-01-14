@@ -30,11 +30,10 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
+import javax.persistence.TableGenerator;
 
 import es.gob.fire.commons.utils.NumberConstants;
 
@@ -57,16 +56,16 @@ public class ControlAccess implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_CONTROL_ACCESO", unique = true, nullable = false, precision = NumberConstants.NUM19)
-	@GeneratedValue(generator = "tb_control_acceso_seq")
-	@GenericGenerator(name = "tb_control_acceso_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_CONTROL_ACCESO_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_control_acceso_seq")
+	@TableGenerator( name = "tb_control_acceso_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "control_acceso_gen", allocationSize = 1 )
 	private Long idControlAccess;
-	
+
 	/**
 	 * Attribute that represents the ip of the user.
 	 */
 	@Column(name = "IP", nullable = false, length = NumberConstants.NUM45)
 	private String ip;
-	
+
 	/**
 	 * Attribute that represents the start date to control access.
 	 */
@@ -78,14 +77,14 @@ public class ControlAccess implements Serializable {
 	 * @return the value of the attribute {@link #idControlAccess}.
 	 */
 	public Long getIdControlAccess() {
-		return idControlAccess;
+		return this.idControlAccess;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idControlAccess}.
 	 * @param idControlAccess The value for the attribute {@link #idControlAccess}.
 	 */
-	public void setIdControlAccess(Long idControlAccess) {
+	public void setIdControlAccess(final Long idControlAccess) {
 		this.idControlAccess = idControlAccess;
 	}
 
@@ -94,14 +93,14 @@ public class ControlAccess implements Serializable {
 	 * @return the value of the attribute {@link #ip}.
 	 */
 	public String getIp() {
-		return ip;
+		return this.ip;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #ip}.
 	 * @param ip The value for the attribute {@link #ip}.
 	 */
-	public void setIp(String ip) {
+	public void setIp(final String ip) {
 		this.ip = ip;
 	}
 
@@ -110,15 +109,15 @@ public class ControlAccess implements Serializable {
 	 * @return the value of the attribute {@link #startDateAccess}.
 	 */
 	public Date getStartDateAccess() {
-		return startDateAccess;
+		return this.startDateAccess;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #startDateAccess}.
 	 * @param startDateAccess The value for the attribute {@link #startDateAccess}.
 	 */
-	public void setStartDateAccess(Date startDateAccess) {
+	public void setStartDateAccess(final Date startDateAccess) {
 		this.startDateAccess = startDateAccess;
 	}
-	
+
 }

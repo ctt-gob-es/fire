@@ -1,5 +1,5 @@
 -- ********************************************************
--- **************** Inserci�n datos ********************
+-- **************** Insercion datos ********************
 -- ********************************************************
 
 -- INSERTAR DATOS--------------
@@ -11,8 +11,8 @@ VALUES (1, 'admin', '1,2'),
 	   (3, 'contact', NULL);
 
 -- USUARIO POR DEFECTO --------
-INSERT INTO `tb_usuarios` (`nombre`, `apellidos`, `usu_defecto`, `fk_rol`, `dni`) 
-VALUES('default name', 'default surnames', 1, 1, 'X0000000T');
+INSERT INTO `tb_usuarios` (`id_usuario`, `nombre`, `apellidos`, `usu_defecto`, `fk_rol`, `dni`) 
+VALUES('1', 'default name', 'default surnames', 1, 1, 'X0000000T');
 
 -- Proveedores por defecto --
 INSERT INTO `tb_proveedores` (`id_proveedor`, `nombre`, `orden`)

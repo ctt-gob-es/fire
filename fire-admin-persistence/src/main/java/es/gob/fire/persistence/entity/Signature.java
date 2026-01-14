@@ -32,8 +32,8 @@ import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
 import javax.persistence.Id;
-import javax.persistence.SequenceGenerator;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 import javax.persistence.Transient;
@@ -62,7 +62,6 @@ import es.gob.fire.commons.utils.NumberConstants;
  */
 @Entity
 @Table(name = "TB_FIRMAS")
-@SequenceGenerator(name = "TB_FIRMAS_SEQ", sequenceName = "TB_FIRMAS_SEQ", initialValue = 1, allocationSize = 1)
 @JsonAutoDetect(fieldVisibility = Visibility.ANY)
 public class Signature implements Serializable {
 
@@ -125,7 +124,7 @@ public class Signature implements Serializable {
 	 * Attribute that represents the signature total.
 	 */
 	private Long total;
-	
+
 	/**
 	 * Attribute that represents the organization.
 	 */
@@ -142,7 +141,8 @@ public class Signature implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "TB_FIRMAS_SEQ")
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_firmas_seq")
+	@TableGenerator( name = "tb_firmas_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "firmas_gen", allocationSize = 1 )
 	@JsonView(DataTablesOutput.View.class)
 	public Long getSignatureId() {
 		return this.signatureId;

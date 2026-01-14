@@ -56,7 +56,7 @@ CREATE TABLE `tb_tipo_planificador` (
 
 -- Tabla PLANIFICADOR
 CREATE TABLE `tb_planificador` (
-  `id_planificador` BIGINT NOT NULL AUTO_INCREMENT,
+  `id_planificador` BIGINT NOT NULL,
   `hora_periodo` INT(3),
   `minuto_periodo` INT(3),
   `segundo_periodo` INT(3),
@@ -69,7 +69,7 @@ CREATE TABLE `tb_planificador` (
 
 -- Tabla PROGRAMADOR
 CREATE TABLE `tb_programador` (
-  `id_programador` BIGINT NOT NULL AUTO_INCREMENT,
+  `id_programador` BIGINT NOT NULL,
   `nombre_token` VARCHAR(30) NOT NULL,
   `nombre_clase` VARCHAR(255) NOT NULL,
   `esta_activo` TINYINT(1) NOT NULL,
@@ -90,7 +90,7 @@ CREATE TABLE `tb_programador` (
 
 -- Tabla CONTROL DE ACCESO
 CREATE TABLE `tb_control_acceso` (
-    `id_control_acceso` BIGINT NOT NULL AUTO_INCREMENT,
+    `id_control_acceso` BIGINT NOT NULL,
     `ip` VARCHAR(45) NOT NULL,
     `fecha_inicio_acceso` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_control_acceso`)
@@ -144,15 +144,15 @@ CREATE TABLE `tb_servidor_afirma` (
     `id_tipo_autenticacion` TINYINT NOT NULL,
     `usuario` VARCHAR(45) NULL,
     `password` TEXT NULL,
-    `truststore` LONGBLOB NULL,
+    `truststore_blob` LONGBLOB NULL,
     `truststore_password` TEXT NULL,
     `truststore_type` VARCHAR(16) NULL,
-    `keystore` LONGBLOB NULL,
+    `ks_blob` LONGBLOB NULL,
     `ks_password` TEXT NULL,
     `ks_type` VARCHAR(16) NULL,
     `ks_cert_alias` VARCHAR(255) NULL,
     `ks_cert_password` TEXT NULL,
-    `auth_truststore` LONGBLOB NULL,
+    `auth_ts_blob` LONGBLOB NULL,
     `auth_ts_password` TEXT NULL,
     `auth_ts_type` VARCHAR(16) NULL,
     `auth_cert_alias` VARCHAR(255) NULL,

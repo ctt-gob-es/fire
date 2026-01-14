@@ -29,13 +29,13 @@ import java.io.Serializable;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Size;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -90,8 +90,8 @@ public class LogServer implements Serializable {
 	 */
 	@Id
 	@Column(name = "ID_SERVIDOR", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(generator = "tb_servidores_log_seq")
-	@GenericGenerator(name = "tb_servidores_log_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_SERVIDORES_LOG_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_servidores_log_seq")
+	@TableGenerator( name = "tb_servidores_log_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "servidores_log_gen", allocationSize = 1 )
 	@JsonView(DataTablesOutput.View.class)
 	public Long getLogServerId() {
 		return this.logServerId;

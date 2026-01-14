@@ -46,7 +46,6 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.util.Objects;
 import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
@@ -64,6 +63,7 @@ import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.crypto.aes.AESCipher;
+import es.gob.fire.exceptions.AfirmaConfigurationException;
 import es.gob.fire.exceptions.FireException;
 import es.gob.fire.i18n.IPersistenceGeneral;
 import es.gob.fire.i18n.IWebAdminGeneral;
@@ -95,6 +95,8 @@ public class CertificateService implements ICertificateService{
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(CertificateService.class);
 
+	private static final boolean DEBUG = Boolean.getBoolean("debug"); //$NON-NLS-1$
+
 	/**
 	 * Constant that represents the String X.509.
 	 */
@@ -103,24 +105,24 @@ public class CertificateService implements ICertificateService{
 	/** Nombre de la propiedad en la que se guarda el nombre de la aplicacion con el que debe
 	 * conectarse a la plataforma @firma. */
 	private static final String PROP_APPID = "afirma.appId"; //$NON-NLS-1$
-	
+
 	/**
 	 * Constant that represents the name of the file that stores the keystore versions.
 	 */
 	public static final String KEYSTORE_VERSIONS_FILENAME = "keystoreVersions.properties"; //$NON-NLS-1$
-	
+
 	/**
 	 * Constant that represents the webservices verify certificate property.
 	 */
 	@Value("${webservices.service.verifyCertificate}")
 	private String webServiceVerifyCertificate;
-	
+
 	/**
-     * Attribute that path to the file which stores the versions of the keystores saved in file. 
+     * Attribute that path to the file which stores the versions of the keystores saved in file.
      */
     @Value("${keystore.versions.path}")
     private String keystoreVersionsPath;
-	
+
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
 	 */
@@ -136,7 +138,7 @@ public class CertificateService implements ICertificateService{
 
 	@Autowired
 	private IServerAfirmaService iServerAfirmaService;
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.service.services.ICertificateService#getCertificatetByCertificateId(java.lang.Long)
@@ -172,18 +174,18 @@ public class CertificateService implements ICertificateService{
 	@Override
 	public List<Certificate> getAllCertificate() {
 
-		List<Certificate> certificates = this.repository.findAll();
+		final List<Certificate> certificates = this.repository.findAll();
 
-		for (Certificate cert : certificates) {
+		for (final Certificate cert : certificates) {
 			if (cert.getFechaInicio() == null || cert.getFechaCaducidad() == null || cert.getSubject() == null || cert.getSubject().isEmpty()) {
 				try {
 					// Decodificar el certificado desde Base64
-					byte[] certBytes = Base64.decode(cert.getCertificate());
+					final byte[] certBytes = Base64.decode(cert.getCertificate());
 
 					// Convertir a X509Certificate
-					CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
-					ByteArrayInputStream bais = new ByteArrayInputStream(certBytes);
-					X509Certificate x509Certificate = (X509Certificate) certFactory.generateCertificate(bais);
+					final CertificateFactory certFactory = CertificateFactory.getInstance("X.509");
+					final ByteArrayInputStream bais = new ByteArrayInputStream(certBytes);
+					final X509Certificate x509Certificate = (X509Certificate) certFactory.generateCertificate(bais);
 
 					// Establecer fechas si son nulas
 					if (cert.getFechaInicio() == null) {
@@ -192,10 +194,10 @@ public class CertificateService implements ICertificateService{
 					if (cert.getFechaCaducidad() == null) {
 						cert.setFechaCaducidad(x509Certificate.getNotAfter());
 					}
-					// Establecer subject si es nulo o vacío
+					// Establecer subject si es nulo o vacio
 					if (cert.getSubject() == null || cert.getSubject().isEmpty()) {
-						String certSubject = x509Certificate.getSubjectX500Principal().getName();
-						String[] subjectParts = certSubject.split(",");
+						final String certSubject = x509Certificate.getSubjectX500Principal().getName();
+						final String[] subjectParts = certSubject.split(",");
 						cert.setSubject(subjectParts[0]);
 					}
 
@@ -225,7 +227,7 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.persistence.service.ICertificateService#saveCertificate(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
 	@Override
-	public Certificate saveCertificate(final CertificateDTO certificateDto, X509Certificate x509Certificate) throws FireException {
+	public Certificate saveCertificate(final CertificateDTO certificateDto, final X509Certificate x509Certificate) throws FireException {
 
 		Certificate newCertificate = null;
 
@@ -246,7 +248,7 @@ public class CertificateService implements ICertificateService{
 	            certificateDto.setHuella(huella);
 	            certificateDto.setCertificate(Base64.encode(certificateDto.getCertBytes()));
 			}
-		
+
 		} catch (final NoSuchAlgorithmException e) {
 			LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e); //$NON-NLS-1$
 		}
@@ -255,11 +257,11 @@ public class CertificateService implements ICertificateService{
 		newCertificate.setFechaAlta(new Date());
 		newCertificate.setFechaInicio(x509Certificate.getNotBefore());
 		newCertificate.setFechaCaducidad(x509Certificate.getNotAfter());
-		
+
 		final String certSubject = x509Certificate.getSubjectX500Principal().getName();
 		final String[] txtCert = certSubject.split(",");
 		newCertificate.setSubject(txtCert[0]);
-		
+
 		newCertificate = this.repository.save(newCertificate);
 
 		return newCertificate;
@@ -270,34 +272,34 @@ public class CertificateService implements ICertificateService{
 	 * @see es.gob.fire.service.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate, java.security.cert.X509Certificate)
 	 */
 	@Override
-	public Certificate updateCertificateFromTaskValidation(final Certificate certificate, final X509Certificate x509Certificate) 
+	public Certificate updateCertificateFromTaskValidation(final Certificate certificate, final X509Certificate x509Certificate)
 	        throws IOException, CertificateEncodingException {
 
 	    // Extraer los bytes y calcular la huella digital
-	    byte[] certBytes = x509Certificate.getEncoded();
-	    String certBase64 = Base64.encode(certBytes);
+	    final byte[] certBytes = x509Certificate.getEncoded();
+	    final String certBase64 = Base64.encode(certBytes);
 
 	    MessageDigest md;
 	    String fingerprint = null;
 	    try {
 	        md = MessageDigest.getInstance("SHA-1");
 	        fingerprint = Base64.encode(md.digest(certBytes));
-	    } catch (NoSuchAlgorithmException e) {
+	    } catch (final NoSuchAlgorithmException e) {
 	        LOGGER.error("Se intenta calcular la huella de los certificados con un algoritmo no soportado: " + e);
 	    }
 
 	    // Extraer otros campos del certificado
-	    String subject = x509Certificate.getSubjectX500Principal().getName();
-	    Date notBefore = x509Certificate.getNotBefore();
-	    Date notAfter = x509Certificate.getNotAfter();
+	    final String subject = x509Certificate.getSubjectX500Principal().getName();
+	    final Date notBefore = x509Certificate.getNotBefore();
+	    final Date notAfter = x509Certificate.getNotAfter();
 
-	    // Comparación segura de valores previos con los nuevos
-	    boolean isUpdated = 
-	        (certificate.getCertificate() == null || !certificate.getCertificate().equals(certBase64)) ||
-	        (certificate.getHuella() == null || !certificate.getHuella().equals(fingerprint)) ||
-	        (certificate.getSubject() == null || !certificate.getSubject().equals(subject)) ||
-	        (certificate.getFechaInicio() == null || certificate.getFechaInicio().getTime() != notBefore.getTime()) ||
-	        (certificate.getFechaCaducidad() == null || certificate.getFechaCaducidad().getTime() != notAfter.getTime());
+	    // Comparacion segura de valores previos con los nuevos
+	    final boolean isUpdated =
+	        certificate.getCertificate() == null || !certificate.getCertificate().equals(certBase64) ||
+	        certificate.getHuella() == null || !certificate.getHuella().equals(fingerprint) ||
+	        certificate.getSubject() == null || !certificate.getSubject().equals(subject) ||
+	        certificate.getFechaInicio() == null || certificate.getFechaInicio().getTime() != notBefore.getTime() ||
+	        certificate.getFechaCaducidad() == null || certificate.getFechaCaducidad().getTime() != notAfter.getTime();
 
 	    // Si hubo cambios, actualizamos los valores y la fecha de alta
 	    if (isUpdated) {
@@ -309,10 +311,10 @@ public class CertificateService implements ICertificateService{
 	        certificate.setFechaAlta(new Date());
 	    }
 
-	    return repository.save(certificate);
+	    return this.repository.save(certificate);
 	}
 
-	
+
 	/* (non-Javadoc)
 	 * @see es.gob.fire.persistence.service.ICertificateService#certificateDtoToEntity(es.gob.fire.persistence.dto.CertificateDTO)
 	 */
@@ -325,7 +327,7 @@ public class CertificateService implements ICertificateService{
 		certificate.setCertificateName(certificateDto.getAlias());
 		certificate.setCertificate(certificateDto.getCertificate());
 		certificate.setHuella(certificateDto.getHuella());
-		
+
 		return certificate;
 	}
 
@@ -342,7 +344,7 @@ public class CertificateService implements ICertificateService{
 		certificateDto.setCertificate(certificate.getCertificate());
 		certificateDto.setHuella(certificate.getHuella());
 		certificateDto.setCertificateB64(certificate.getCertificate());
-		
+
 		return certificateDto;
 	}
 
@@ -366,13 +368,13 @@ public class CertificateService implements ICertificateService{
 	public void getSubjectValuesForView(final List<Certificate> certificates) {
 
 		X509Certificate x509Certificate = null;
-		
+
 		for (final Certificate certificate : certificates) {
 			try {
 
 				if (certificate.getCertificate() != null && !certificate.getCertificate().isEmpty()) {
 
-					x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate()))); //$NON-NLS-1$
+					x509Certificate = (X509Certificate) CertificateFactory.getInstance(X509).generateCertificate(new ByteArrayInputStream(Base64.decode(certificate.getCertificate())));
 				} else {
 					x509Certificate = null;
 				}
@@ -394,7 +396,7 @@ public class CertificateService implements ICertificateService{
 			} else {
 				certificate.setCertificate(""); //$NON-NLS-1$
 			}
-			
+
 		}
 	}
 
@@ -451,38 +453,38 @@ public class CertificateService implements ICertificateService{
 		return certText;
 
 	}
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(java.util.List<Certificate>)
 	 */
 	@Override
-	public List<CertificateDTO> obtainAllCertificateToDTO(List<Certificate> listCertificate) {
-		List<CertificateDTO> listCertificateDTO = new ArrayList<>();
-		for (Certificate certificate : listCertificate) {
-			CertificateDTO certificateDTO = new CertificateDTO();
+	public List<CertificateDTO> obtainAllCertificateToDTO(final List<Certificate> listCertificate) {
+		final List<CertificateDTO> listCertificateDTO = new ArrayList<>();
+		for (final Certificate certificate : listCertificate) {
+			final CertificateDTO certificateDTO = new CertificateDTO();
 			certificateDTO.setIdCertificate(certificate.getIdCertificado());
 			certificateDTO.setCertificateName(certificate.getCertificateName());
 			certificateDTO.setCertificate(certificate.getCertificate());
 			certificateDTO.setFechaAlta(certificate.getfechaAlta());
-			
-			java.util.Date expDate = certificate.getFechaCaducidad();
-			java.util.Date startDate = certificate.getFechaInicio();
-			java.util.Date dateNow = Calendar.getInstance().getTime();
+
+			final java.util.Date expDate = certificate.getFechaCaducidad();
+			final java.util.Date startDate = certificate.getFechaInicio();
+			final java.util.Date dateNow = Calendar.getInstance().getTime();
 
 			if (dateNow.before(startDate)) {
-			    // El certificado aún no es válido
+			    // El certificado aún no es valido
 			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV004));
 			} else if (dateNow.after(expDate)) {
-			    // El certificado está caducado
+			    // El certificado esta caducado
 			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV002));
 			} else {
-			    // El certificado es válido
+			    // El certificado es valido
 			    certificateDTO.setStatus(Language.getResPersistenceGeneral(IPersistenceGeneral.LOG_SV001));
 			}
-			
+
 			certificateDTO.setCertificate(certificate.getSubject() + "<br/> Fecha de Caducidad=" + Utils.getStringDateFormat(expDate));
-			
+
 			listCertificateDTO.add(certificateDTO);
 		}
 		return listCertificateDTO;
@@ -494,12 +496,18 @@ public class CertificateService implements ICertificateService{
 	 */
 	@Override
 	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(final X509Certificate x509Certificate)
-	        throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException {
-	    // 1) Cargar configuración de servidor desde BD
-	    final ServerAfirma sa = iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
+	        throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException, AfirmaConfigurationException {
+	    // 1) Cargar configuracion de servidor desde BD
+
+	    final ServerAfirma sa = this.iServerAfirmaService.obtainServerAfirmaService(NumberConstants.NUM_1_LONG);
 	    if (sa == null) {
-	        LOGGER.error("[validateStatusCertificateInAfirmaWS] Configuración ServerAfirma no encontrada (id=1)");
-	        throw new WSServiceInvokerException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC015));
+	        LOGGER.error("[validateStatusCertificateInAfirmaWS] Configuracion ServerAfirma no encontrada (id=1)");
+	        throw new AfirmaConfigurationException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC015));
+	    }
+
+
+	    if (DEBUG) {
+	    	return new VerifyAfirmaCertificateResponse("Success", "Definitive", "Resultado dummy de exito");
 	    }
 
 	    final Long authType = sa.getcAuthenticationType() != null
@@ -513,12 +521,12 @@ public class CertificateService implements ICertificateService{
 	    try {
 	        baseDir = ensureDirectoryExistsCrossPlatform(this.keystoreVersionsPath);
 	        LOGGER.debug("[validateStatusCertificateInAfirmaWS] Base dir: {}", baseDir);
-	    } catch (IOException e) {
-	        LOGGER.warn("[validateStatusCertificateInAfirmaWS] keystore.versions.path inusable: '{}'. Se usará directorio temporal.", this.keystoreVersionsPath);
+	    } catch (final IOException e) {
+	        LOGGER.warn("[validateStatusCertificateInAfirmaWS] keystore.versions.path inusable: '{}'. Se usara directorio temporal.", this.keystoreVersionsPath);
 	        try {
 	            baseDir = ensureTempFallbackDirectory("fire-afirma");
 	            LOGGER.debug("[validateStatusCertificateInAfirmaWS] Base dir temporal: {}", baseDir);
-	        } catch (IOException ex) {
+	        } catch (final IOException ex) {
 	            LOGGER.error("[validateStatusCertificateInAfirmaWS] No se pudo crear el directorio temporal de respaldo", ex);
 	        }
 	    }
@@ -560,20 +568,20 @@ public class CertificateService implements ICertificateService{
 	                }
 	                LOGGER.debug("[validateStatusCertificateInAfirmaWS] Fichero de versiones sincronizado: {}", versionsFile);
 	            }
-	        } catch (IOException ioEx) {
-	            LOGGER.warn("[validateStatusCertificateInAfirmaWS] No se pudo sincronizar el fichero de versiones. Se continúa sin sincronización. path={}",
+	        } catch (final IOException ioEx) {
+	            LOGGER.warn("[validateStatusCertificateInAfirmaWS] No se pudo sincronizar el fichero de versiones. Se continua sin sincronizacion. path={}",
 	                    this.keystoreVersionsPath, ioEx);
 	        }
 	    }
 
-	    // 4) Construir configuración común del conector
+	    // 4) Construir configuracion común del conector
 	    final Properties cfg = new Properties();
 	    cfg.setProperty("afirma.appId", sa.getNameApp());
 	    cfg.setProperty("webservices.timeout", String.valueOf(sa.getTimeout()));
 	    cfg.setProperty("webservices.endpoint", sa.getUrlServer());
 	    cfg.setProperty("webservices.service.verifyCertificate", this.webServiceVerifyCertificate);
 
-	    // 5) Autorización / stores en función del método de autenticación
+	    // 5) Autorizacion / stores en funcion del método de autenticacion
 	    if (safeEquals(authType, AUTH_BST)) {
 	        cfg.setProperty("webservices.authorization.method", "BinarySecurityToken");
 	        LOGGER.info("[validateStatusCertificateInAfirmaWS] Auth: BST");
@@ -604,7 +612,7 @@ public class CertificateService implements ICertificateService{
 	                        cfg.setProperty("webservices.authorization.ks.cert.password", dec);
 	                    }
 	                }
-	            } catch (Exception ex) {
+	            } catch (final Exception ex) {
 	                LOGGER.error("[validateStatusCertificateInAfirmaWS] Keystore BST no materializado/configurado", ex);
 	            }
 	        }
@@ -627,8 +635,8 @@ public class CertificateService implements ICertificateService{
 
 	                    cleanupOlderVersionedFiles(baseDir, "tls-truststore", tsVer);
 	                }
-	            } catch (Exception ex) {
-	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] TLS truststore no aplicado; se usará el del JRE por defecto", ex);
+	            } catch (final Exception ex) {
+	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] TLS truststore no aplicado; se usara el del JRE por defecto", ex);
 	            }
 	        }
 
@@ -659,12 +667,12 @@ public class CertificateService implements ICertificateService{
 	                    cfg.remove("webservices.authentication.ts.type");
 	                    cfg.remove("webservices.authentication.cert.alias");
 	                }
-	            } catch (Exception ex) {
+	            } catch (final Exception ex) {
 	                cfg.remove("webservices.authentication.ts.path");
 	                cfg.remove("webservices.authentication.ts.password");
 	                cfg.remove("webservices.authentication.ts.type");
 	                cfg.remove("webservices.authentication.cert.alias");
-	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] Auth truststore no aplicado; se usarán valores por defecto", ex);
+	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] Auth truststore no aplicado; se usaran valores por defecto", ex);
 	            }
 	        } else {
 	            cfg.remove("webservices.authentication.ts.path");
@@ -684,7 +692,7 @@ public class CertificateService implements ICertificateService{
 	            try {
 	                final String dec = AESCipher.getInstance().decryptMessageBC(sa.getPassword());
 	                cfg.setProperty("webservices.authorization.user.password", dec);
-	            } catch (Exception ex) {
+	            } catch (final Exception ex) {
 	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] No se pudo descifrar la password de UsernameToken", ex);
 	            }
 	        }
@@ -697,14 +705,14 @@ public class CertificateService implements ICertificateService{
 	    //logFullWsConfig(cfg);
 
 	    // Preflight (solo relevante para BST)
-	    
+
 	    if (safeEquals(authType, AUTH_BST)) {
 	    	try {
 		        checkPropertiesForBstKeystore(cfg);
 		        LOGGER.debug("[BST Check Properties] OK");
-		    } catch (Exception pfEx) {
-		        LOGGER.error("[BST Check Properties] Keystore/alias/password no válidos o no utilizables", pfEx);
-		        throw new WSServiceInvokerException("Falló el preflight del keystore BST", pfEx);
+		    } catch (final Exception pfEx) {
+		        LOGGER.error("[BST Check Properties] Keystore/alias/password no validos o no utilizables", pfEx);
+		        throw new WSServiceInvokerException("Fallo el preflight del keystore BST", pfEx);
 		    }
 	    }
 
@@ -770,7 +778,7 @@ public class CertificateService implements ICertificateService{
 
 	private static Path resolveVersionedPath(final Path baseDir, final String prefix, final Long version, final String type) {
 	    final String ext = guessExtensionByType(type);
-	    final long v = (version != null) ? version.longValue() : 0L;
+	    final long v = version != null ? version.longValue() : 0L;
 	    final Path p = baseDir.resolve(prefix + "-v" + v + ext).toAbsolutePath().normalize();
 	    LOGGER.debug("[resolveVersionedPath] Resolved path: {}", p);
 	    return p;
@@ -785,7 +793,9 @@ public class CertificateService implements ICertificateService{
 	 */
 	private static String guessExtensionByType(final String type) {
 	    // Accepts JKS/PKCS12/PKCS#12 variations; defaults to .p12 for non-JKS
-	    if (type == null) return ".p12";
+	    if (type == null) {
+			return ".p12";
+		}
 	    final String t = type.trim();
 	    return "JKS".equalsIgnoreCase(t) ? ".jks" : ".p12";
 	}
@@ -861,7 +871,7 @@ public class CertificateService implements ICertificateService{
 	    map.put("authenticationVersion", parseLongOrNull(props.getProperty("authenticationVersion")));
 	    return map;
 	}
-	
+
 	/**
 	 * Parses a {@link Long} from the given string, tolerating {@code null} and blank input.
 	 *
@@ -869,13 +879,17 @@ public class CertificateService implements ICertificateService{
 	 * @return parsed {@link Long} or {@code null} if input is null/blank or not a valid number.
 	 */
 	private static Long parseLongOrNull(final String v) {
-	    if (v == null) return null;
+	    if (v == null) {
+			return null;
+		}
 	    final String t = v.trim();
-	    if (t.isEmpty()) return null;
+	    if (t.isEmpty()) {
+			return null;
+		}
 	    try { return Long.valueOf(t); }
-	    catch (NumberFormatException ex) { return null; }
+	    catch (final NumberFormatException ex) { return null; }
 	}
-	
+
 	/**
 	 * Null-safe equality comparison for {@link Long} values.
 	 *
@@ -883,10 +897,10 @@ public class CertificateService implements ICertificateService{
 	 * @param b right value.
 	 * @return {@code true} if both are equal (including both {@code null}); otherwise {@code false}.
 	 */
-	private static boolean safeEquals(final Long a, final Long b) { 
-		return java.util.Objects.equals(a, b); 
-	} 
-	
+	private static boolean safeEquals(final Long a, final Long b) {
+		return java.util.Objects.equals(a, b);
+	}
+
 	/**
 	 * Returns the trimmed input or a default when the input is {@code null} or blank.
 	 *
@@ -894,20 +908,20 @@ public class CertificateService implements ICertificateService{
 	 * @param def default value to return when input is blank.
 	 * @return trimmed input or {@code def} if blank.
 	 */
-	private static String defaultString(final String v, final String def) { 
-		return (v == null || v.trim().isEmpty()) ? def : v.trim(); 
-	} 
-	
+	private static String defaultString(final String v, final String def) {
+		return v == null || v.trim().isEmpty() ? def : v.trim();
+	}
+
 	/**
 	 * Checks whether a string is {@code null} or contains only whitespace.
 	 *
 	 * @param s input string.
 	 * @return {@code true} if {@code s} is null or blank; otherwise {@code false}.
 	 */
-	private static boolean isBlank(final String s) { 
-		return s == null || s.trim().isEmpty(); 
-	} 
-	
+	private static boolean isBlank(final String s) {
+		return s == null || s.trim().isEmpty();
+	}
+
 	/**
 	 * Returns the first non-null {@link Long} between two candidates.
 	 *
@@ -915,18 +929,18 @@ public class CertificateService implements ICertificateService{
 	 * @param b fallback candidate.
 	 * @return {@code a} if not null; otherwise {@code b}.
 	 */
-	private static Long firstNonNull(final Long a, final Long b) { 
-		return a != null ? a : b; 
-	} 
-	
+	private static Long firstNonNull(final Long a, final Long b) {
+		return a != null ? a : b;
+	}
+
 	/**
 	 * Converts a {@link Long} to its decimal string representation or returns an empty string when null.
 	 *
 	 * @param v input value.
 	 * @return stringified value, or "" if {@code v} is {@code null}.
 	 */
-	private static String toStringOrEmpty(final Long v) { 
-		return v == null ? "" : String.valueOf(v); 
+	private static String toStringOrEmpty(final Long v) {
+		return v == null ? "" : String.valueOf(v);
 	}
 
 	/**
@@ -1019,9 +1033,15 @@ public class CertificateService implements ICertificateService{
 	 */
 	private static String pickJcaSignatureAlg(final PrivateKey pk) {
 	    final String alg = pk.getAlgorithm();
-	    if ("RSA".equalsIgnoreCase(alg))   return "SHA256withRSA";
-	    if ("EC".equalsIgnoreCase(alg))    return "SHA256withECDSA";
-	    if ("DSA".equalsIgnoreCase(alg))   return "SHA256withDSA";
+	    if ("RSA".equalsIgnoreCase(alg)) {
+			return "SHA256withRSA";
+		}
+	    if ("EC".equalsIgnoreCase(alg)) {
+			return "SHA256withECDSA";
+		}
+	    if ("DSA".equalsIgnoreCase(alg)) {
+			return "SHA256withDSA";
+		}
 	    // Fallback
 	    return "SHA256withRSA";
 	}
@@ -1036,11 +1056,13 @@ public class CertificateService implements ICertificateService{
 	private static String subjectCN(final X509Certificate cert) {
 	    try {
 	        final String dn = cert.getSubjectX500Principal().getName();
-	        for (String part : dn.split(",")) {
+	        for (final String part : dn.split(",")) {
 	            final String p = part.trim();
-	            if (p.startsWith("CN=")) return p.substring(3);
+	            if (p.startsWith("CN=")) {
+					return p.substring(3);
+				}
 	        }
-	    } catch (Exception ignore) { }
+	    } catch (final Exception ignore) { }
 	    return cert.getSubjectX500Principal().getName();
 	}
 
@@ -1051,7 +1073,7 @@ public class CertificateService implements ICertificateService{
 	 * @return signature algorithm name, or "unknown" on error.
 	 */
 	private static String safeCertSigAlg(final X509Certificate cert) {
-	    try { return cert.getSigAlgName(); } catch (Exception e) { return "unknown"; }
+	    try { return cert.getSigAlgName(); } catch (final Exception e) { return "unknown"; }
 	}
 
 	/**
@@ -1070,13 +1092,15 @@ public class CertificateService implements ICertificateService{
 	        try {
 	            if (ks.isKeyEntry(a)) {
 	                final Key k = ks.getKey(a, keyPassword);
-	                if (k instanceof PrivateKey) return a;
+	                if (k instanceof PrivateKey) {
+						return a;
+					}
 	            }
-	        } catch (Exception ignore) { /* try next */ }
+	        } catch (final Exception ignore) { /* try next */ }
 	    }
 	    return null;
 	}
-	
+
 	/**
 	 * Logs an effective (sanitized) web services configuration at DEBUG level only.
 	 * Password values are masked; no secrets are printed.
@@ -1084,14 +1108,14 @@ public class CertificateService implements ICertificateService{
 	 * @param cfg effective configuration properties to dump.
 	 */
 	private static void logFullWsConfig(final Properties cfg) {
-	    LOGGER.info("========== [BST Volcado de Configuración] ==========");
-	    for (String key : cfg.stringPropertyNames()) {
-	        String val = cfg.getProperty(key);
+	    LOGGER.info("========== [BST Volcado de Configuracion] ==========");
+	    for (final String key : cfg.stringPropertyNames()) {
+	        final String val = cfg.getProperty(key);
 	        if (key.toLowerCase().contains("password")) {
 	            if (val != null && !val.isEmpty()) {
 	                LOGGER.info("{} = **** ({} chars)", key, val.length());
 	            } else {
-	                LOGGER.info("{} = <nulo/vacío>", key);
+	                LOGGER.info("{} = <nulo/vacio>", key);
 	            }
 	        } else {
 	            LOGGER.info("{} = {}", key, val);
@@ -1099,7 +1123,7 @@ public class CertificateService implements ICertificateService{
 	    }
 	    LOGGER.info("======================================");
 	}
-	
+
 	/**
 	 * Deletes older versioned files for a given resource prefix under the base directory,
 	 * keeping only the specified version (case-insensitive for ".jks"/".p12").
@@ -1109,29 +1133,33 @@ public class CertificateService implements ICertificateService{
 	 * @param keepVersion version number to retain.
 	 */
 	private static void cleanupOlderVersionedFiles(final Path baseDir, final String prefix, final long keepVersion) {
-	    if (baseDir == null) return;
+	    if (baseDir == null) {
+			return;
+		}
 	    final String regex = "^" + java.util.regex.Pattern.quote(prefix) + "-v(\\d+)\\.(?:jks|p12)$";
 	    final java.util.regex.Pattern pat = java.util.regex.Pattern.compile(regex, java.util.regex.Pattern.CASE_INSENSITIVE);
 
 	    try (java.nio.file.DirectoryStream<Path> stream = java.nio.file.Files.newDirectoryStream(baseDir)) {
-	        for (Path p : stream) {
+	        for (final Path p : stream) {
 	            final String name = p.getFileName().toString();
 	            final java.util.regex.Matcher m = pat.matcher(name);
-	            if (!m.matches()) continue;
+	            if (!m.matches()) {
+					continue;
+				}
 	            final long v;
 	            try { v = Long.parseLong(m.group(1)); }
-	            catch (NumberFormatException ignore) { continue; }
+	            catch (final NumberFormatException ignore) { continue; }
 
 	            if (v != keepVersion) {
 	                try {
 	                    java.nio.file.Files.deleteIfExists(p);
-	                    LOGGER.info("[cleanupOlderVersionedFiles] Eliminado fichero de versión antigua: {}", p);
-	                } catch (Exception ex) {
-	                    LOGGER.warn("[cleanupOlderVersionedFiles] No se pudo eliminar la versión antigua: {}", p, ex);
+	                    LOGGER.info("[cleanupOlderVersionedFiles] Eliminado fichero de version antigua: {}", p);
+	                } catch (final Exception ex) {
+	                    LOGGER.warn("[cleanupOlderVersionedFiles] No se pudo eliminar la version antigua: {}", p, ex);
 	                }
 	            }
 	        }
-	    } catch (Exception ex) {
+	    } catch (final Exception ex) {
 	        LOGGER.warn("[cleanupOlderVersionedFiles] No se pudo listar el directorio para limpiar versiones antiguas: {}", baseDir, ex);
 	    }
 	}

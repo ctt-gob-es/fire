@@ -31,15 +31,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
@@ -77,7 +77,7 @@ public class User implements Serializable {
 	 * Attribute that represents the name.
 	 */
 	private String name;
-	
+
 	/**
 	 * Attribute that represents the surnames.
 	 */
@@ -122,20 +122,20 @@ public class User implements Serializable {
 	 * Attribute that represents the DNI.
 	 */
 	private String dni;
-	
+
 	/**
 	 * Attribute that represents the date last access.
 	 */
 	private Date fecUltimoAcceso;
-	
+
 	/**
 	 * Gets the value of the attribute {@link #userId}.
 	 * @return the value of the attribute {@link #userId}.
 	 */
 	@Id
 	@Column(name = "ID_USUARIO", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(generator = "tb_usuarios_seq")
-	@GenericGenerator(name = "tb_usuarios_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_USUARIOS_SEQ"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_usuarios_seq")
+	@TableGenerator( name = "tb_usuarios_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "usuarios_gen", allocationSize = 1 )
 	@JsonView(DataTablesOutput.View.class)
 	public Long getUserId() {
 		return this.userId;
@@ -332,14 +332,14 @@ public class User implements Serializable {
 	 */
 	@Column(name = "DNI", nullable = true, length = NumberConstants.NUM9)
 	public String getDni() {
-		return dni;
+		return this.dni;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #dni}.
 	 * @param dni The value for the attribute {@link #dni}.
 	 */
-	public void setDni(String dni) {
+	public void setDni(final String dni) {
 		this.dni = dni;
 	}
 
@@ -350,15 +350,15 @@ public class User implements Serializable {
 	@Temporal(TemporalType.TIMESTAMP)
 	@Column(name = "FEC_ULTIMO_ACCESO", nullable = false, length = NumberConstants.NUM6)
 	public Date getFecUltimoAcceso() {
-		return fecUltimoAcceso;
+		return this.fecUltimoAcceso;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #fecUltimoAcceso}.
 	 * @param fecUltimoAcceso The value for the attribute {@link #fecUltimoAcceso}.
 	 */
-	public void setFecUltimoAcceso(Date fecUltimoAcceso) {
+	public void setFecUltimoAcceso(final Date fecUltimoAcceso) {
 		this.fecUltimoAcceso = fecUltimoAcceso;
 	}
-	
+
 }

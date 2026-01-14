@@ -32,15 +32,15 @@ import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.ManyToOne;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.format.annotation.DateTimeFormat;
 
@@ -104,18 +104,19 @@ public class Planner implements Serializable {
      */
     @Id
     @Column(name = "ID_PLANIFICADOR", unique = true, nullable = false, precision = NumberConstants.NUM19)
-    @GeneratedValue(generator = "sq_planificador")
-    @GenericGenerator(name = "sq_planificador", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "SQ_PLANIFICADOR"), @Parameter(name = "initial_value", value = "2"), @Parameter(name = "increment_size", value = "1") })
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_planificador_seq")
+    @TableGenerator( name = "tb_planificador_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "planificador_gen", allocationSize = 1 )
     @JsonView(DataTablesOutput.View.class)
+
     public Long getIdPlanner() {
-        return idPlanner;
+        return this.idPlanner;
     }
 
     /**
      * Establece el valor del atributo {@link #idPlanner}.
      * @param idPlannerParam El valor para el atributo {@link #idPlanner}.
      */
-    public void setIdPlanner(Long idPlannerParam) {
+    public void setIdPlanner(final Long idPlannerParam) {
         this.idPlanner = idPlannerParam;
     }
 
@@ -125,14 +126,14 @@ public class Planner implements Serializable {
      */
     @Column(name = "HORA_PERIODO")
     public Long getHourPeriod() {
-        return hourPeriod;
+        return this.hourPeriod;
     }
 
     /**
      * Establece el valor del atributo {@link #hourPeriod}.
      * @param hourPeriodParam El valor para el atributo {@link #hourPeriod}.
      */
-    public void setHourPeriod(Long hourPeriodParam) {
+    public void setHourPeriod(final Long hourPeriodParam) {
         this.hourPeriod = hourPeriodParam;
     }
 
@@ -144,14 +145,14 @@ public class Planner implements Serializable {
     @Column(name = "DIA_INICIO")
     @DateTimeFormat(pattern = "dd/MM/yyyy HH:mm:ss")
     public Date getInitDay() {
-        return initDay;
+        return this.initDay;
     }
 
     /**
      * Establece el valor del atributo {@link #initDay}.
      * @param initDayParam El valor para el atributo {@link #initDay}.
      */
-    public void setInitDay(Date initDayParam) {
+    public void setInitDay(final Date initDayParam) {
         this.initDay = initDayParam;
     }
 
@@ -161,14 +162,14 @@ public class Planner implements Serializable {
      */
     @Column(name = "MINUTO_PERIODO")
     public Long getMinutePeriod() {
-        return minutePeriod;
+        return this.minutePeriod;
     }
 
     /**
      * Establece el valor del atributo {@link #minutePeriod}.
      * @param minutePeriodParam El valor para el atributo {@link #minutePeriod}.
      */
-    public void setMinutePeriod(Long minutePeriodParam) {
+    public void setMinutePeriod(final Long minutePeriodParam) {
         this.minutePeriod = minutePeriodParam;
     }
 
@@ -178,14 +179,14 @@ public class Planner implements Serializable {
      */
     @Column(name = "SEGUNDO_PERIODO")
     public Long getSecondPeriod() {
-        return secondPeriod;
+        return this.secondPeriod;
     }
 
     /**
      * Establece el valor del atributo {@link #secondPeriod}.
      * @param secondPeriodParam El valor para el atributo {@link #secondPeriod}.
      */
-    public void setSecondPeriod(Long secondPeriodParam) {
+    public void setSecondPeriod(final Long secondPeriodParam) {
         this.secondPeriod = secondPeriodParam;
     }
 
@@ -196,31 +197,31 @@ public class Planner implements Serializable {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_TIPO_PLANIFICADOR", nullable = false)
     public CPlannerType getPlannerType() {
-        return plannerType;
+        return this.plannerType;
     }
 
     /**
      * Establece el valor del atributo {@link #plannerType}.
      * @param plannerTypeParam El valor para el atributo {@link #plannerType}.
      */
-    public void setPlannerType(CPlannerType plannerTypeParam) {
+    public void setPlannerType(final CPlannerType plannerTypeParam) {
         this.plannerType = plannerTypeParam;
     }
-    
+
     /**
      * Obtiene el valor del atributo {@link #advanceNotice}.
      * @return el valor del atributo {@link #advanceNotice}.
      */
     @Column(name = "AVISO_ANTICIPADO")
     public Integer getAdvanceNotice() {
-        return advanceNotice;
+        return this.advanceNotice;
     }
 
     /**
      * Establece el valor del atributo {@link #advanceNotice}.
      * @param advanceNoticeParam El valor para el atributo {@link #advanceNotice}.
      */
-    public void setAdvanceNotice(Integer advanceNoticeParam) {
+    public void setAdvanceNotice(final Integer advanceNoticeParam) {
         this.advanceNotice = advanceNoticeParam;
     }
 

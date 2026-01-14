@@ -1,7 +1,7 @@
 package es.gob.fire.web.clave.sp.utils;
 
 import java.io.File;
-import java.io.FileReader;
+import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
@@ -58,9 +58,10 @@ public class SPConfig {
     	if (configPath != null) {
     		final File f = new File(configPath, fileName);
     		if (f.isFile()) {
-    			try (FileReader fileReader = new FileReader(f, StandardCharsets.UTF_8)) {
+    			try (InputStream is = new FileInputStream(f);
+    				 InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
     				properties = new Properties();
-    				properties.load(fileReader);
+    				properties.load(isr);
     			}
     		}
     	}

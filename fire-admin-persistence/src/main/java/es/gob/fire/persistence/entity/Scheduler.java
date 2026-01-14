@@ -1,12 +1,12 @@
 /*
  * Este fichero forma parte de la plataforma de @firma.
- * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
+ * La plataforma de @firma es de libre distribuci&oacute;n cuyo c&oacute;digo fuente puede ser consultado
  * y descargado desde http://administracionelectronica.gob.es
  *
  * Copyright 2005-2019 Gobierno de España
- * Este fichero se distribuye bajo las licencias EUPL versión 1.1, según las
+ * Este fichero se distribuye bajo las licencias EUPL versi&oacute;n 1.1, seg&uacute;n las
  * condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
- * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
+ * fichero individualmente, deben incluirse aqu&iacute; las condiciones expresadas all&iacute;.
  */
 
 /**
@@ -21,21 +21,18 @@
 package es.gob.fire.persistence.entity;
 
 import java.io.Serializable;
-import java.util.Date;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.JoinColumn;
 import javax.persistence.OneToOne;
 import javax.persistence.Table;
-
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
-import org.hibernate.annotations.Type;
+import javax.persistence.TableGenerator;
 
 import es.gob.fire.commons.utils.NumberConstants;
 
@@ -50,7 +47,7 @@ import es.gob.fire.commons.utils.NumberConstants;
 public class Scheduler implements Serializable {
 
     /**
-     * Versión serial de la clase.
+     * Versi&oacute;n serial de la clase.
      */
     private static final long serialVersionUID = -6177818765623010960L;
 
@@ -60,7 +57,7 @@ public class Scheduler implements Serializable {
     private Long idScheduler;
 
     /**
-     * Atributo que representa el nombre del token con la descripción almacenada en el archivo de propiedades para internacionalización.
+     * Atributo que representa el nombre del token con la descripci&oacute;n almacenada en el archivo de propiedades para internacionalizaci&oacute;n.
      */
     private String tokenName;
 
@@ -70,7 +67,7 @@ public class Scheduler implements Serializable {
     private String className;
 
     /**
-     * Atributo que indica si el programador está activo (true) o no (false).
+     * Atributo que indica si el programador est&aacute; activo (true) o no (false).
      */
     private Boolean active;
 
@@ -80,32 +77,32 @@ public class Scheduler implements Serializable {
     private Planner planner;
 
     /**
-     * Atributo que representa el número de hilos en paralelo que se lanzarán en cada proceso, en milisegundos.
+     * Atributo que representa el n&uacute;mero de hilos en paralelo que se lanzar&aacute;n en cada proceso, en milisegundos.
      */
     private Long numThreads;
 
     /**
-     * Atributo que representa el número de procesos asincrónicos que se evaluarán por hilo, en milisegundos.
+     * Atributo que representa el n&uacute;mero de procesos asincr&oacute;nicos que se evaluar&aacute;n por hilo, en milisegundos.
      */
     private Long numProcess;
 
     /**
-     * Atributo que representa el período en el que una solicitud asincrónica se considera expirada, en milisegundos.
+     * Atributo que representa el periodo en el que una solicitud asincr&oacute;nica se considera expirada, en milisegundos.
      */
     private Long expiredPeriod;
 
     /**
-     * Atributo que representa el período en el que se considera que un nodo no está activo, en milisegundos.
+     * Atributo que representa el periodo en el que se considera que un nodo no est&aacute; activo, en milisegundos.
      */
     private Long reassingTime;
 
     /**
-     * Atributo que representa el tiempo en el cual debería haber terminado un proceso asincrónico, en milisegundos.
+     * Atributo que representa el tiempo en el cual deber&iacute;a haber terminado un proceso asincr&oacute;nico, en milisegundos.
      */
     private Long reactiveTime;
 
     /**
-     * Atributo que representa el período en el que se considera que una solicitud consultada debe ser eliminada, en milisegundos.
+     * Atributo que representa el periodo en el que se considera que una solicitud consultada debe ser eliminada, en milisegundos.
      */
     private Long checkedTime;
 
@@ -118,29 +115,29 @@ public class Scheduler implements Serializable {
 	 * Attribute that represents the day of the advance notice.
 	 */
 	private Long advanceNotice;
-	
+
 	/**
 	 * Attribute that represents the day of the period communication.
 	 */
 	private Long periodCommunication;
-	
+
     /**
      * Obtiene el valor del atributo {@link #idScheduler}.
      * @return el valor del atributo {@link #idScheduler}.
      */
     @Id
     @Column(name = "ID_PROGRAMADOR", unique = true, nullable = false, precision = NumberConstants.NUM19)
-    @GeneratedValue(generator = "tb_programador_seq")
-	@GenericGenerator(name = "tb_programador_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_PROGRAMADOR_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
+    @GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_programador_seq")
+    @TableGenerator( name = "tb_programador_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "programador_gen", allocationSize = 1 )
     public Long getIdScheduler() {
-        return idScheduler;
+        return this.idScheduler;
     }
 
     /**
      * Establece el valor del atributo {@link #idScheduler}.
      * @param idSchedulerParam El valor para el atributo {@link #idScheduler}.
      */
-    public void setIdScheduler(Long idSchedulerParam) {
+    public void setIdScheduler(final Long idSchedulerParam) {
         this.idScheduler = idSchedulerParam;
     }
 
@@ -150,14 +147,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "NOMBRE_TOKEN", nullable = false, length = NumberConstants.NUM30)
     public String getTokenName() {
-        return tokenName;
+        return this.tokenName;
     }
 
     /**
      * Establece el valor del atributo {@link #tokenName}.
      * @param tokenNameParam El valor para el atributo {@link #tokenName}.
      */
-    public void setTokenName(String tokenNameParam) {
+    public void setTokenName(final String tokenNameParam) {
         this.tokenName = tokenNameParam;
     }
 
@@ -167,14 +164,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "NOMBRE_CLASE", nullable = false, length = NumberConstants.NUM255)
     public String getClassName() {
-        return className;
+        return this.className;
     }
 
     /**
      * Establece el valor del atributo {@link #className}.
      * @param classNameParam El valor para el atributo {@link #className}.
      */
-    public void setClassName(String classNameParam) {
+    public void setClassName(final String classNameParam) {
         this.className = classNameParam;
     }
 
@@ -184,14 +181,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "ESTA_ACTIVO", nullable = false)
     public boolean isActive() {
-        return active;
+        return this.active;
     }
 
     /**
      * Establece el valor del atributo {@link #active}.
      * @param active El valor para el atributo {@link #active}.
      */
-    public void setActive(Boolean active) {
+    public void setActive(final Boolean active) {
         this.active = active;
     }
 
@@ -202,14 +199,14 @@ public class Scheduler implements Serializable {
     @OneToOne(cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_PLANIFICADOR", nullable = false)
     public Planner getPlanner() {
-        return planner;
+        return this.planner;
     }
 
     /**
      * Establece el valor del atributo {@link #planner}.
      * @param plannerParam El valor para el atributo {@link #planner}.
      */
-    public void setPlanner(Planner plannerParam) {
+    public void setPlanner(final Planner plannerParam) {
         this.planner = plannerParam;
     }
 
@@ -219,14 +216,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "NUM_HILOS", precision = NumberConstants.NUM19)
     public Long getNumThreads() {
-        return numThreads;
+        return this.numThreads;
     }
 
     /**
      * Establece el valor del atributo {@link #numThreads}.
      * @param numThreadsParam El valor para el atributo {@link #numThreads}.
      */
-    public void setNumThreads(Long numThreadsParam) {
+    public void setNumThreads(final Long numThreadsParam) {
         this.numThreads = numThreadsParam;
     }
 
@@ -236,14 +233,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "NUM_PROCESOS", precision = NumberConstants.NUM19)
     public Long getNumProcess() {
-        return numProcess;
+        return this.numProcess;
     }
 
     /**
      * Establece el valor del atributo {@link #numProcess}.
      * @param numProcessParam El valor para el atributo {@link #numProcess}.
      */
-    public void setNumProcess(Long numProcessParam) {
+    public void setNumProcess(final Long numProcessParam) {
         this.numProcess = numProcessParam;
     }
 
@@ -253,14 +250,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "PERIODO_EXPIRADO", precision = NumberConstants.NUM19)
     public Long getExpiredPeriod() {
-        return expiredPeriod;
+        return this.expiredPeriod;
     }
 
     /**
      * Establece el valor del atributo {@link #expiredPeriod}.
      * @param expiredPeriodParam El valor para el atributo {@link #expiredPeriod}.
      */
-    public void setExpiredPeriod(Long expiredPeriodParam) {
+    public void setExpiredPeriod(final Long expiredPeriodParam) {
         this.expiredPeriod = expiredPeriodParam;
     }
 
@@ -270,14 +267,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "TIEMPO_REASIGNACION", precision = NumberConstants.NUM19)
     public Long getReassingTime() {
-        return reassingTime;
+        return this.reassingTime;
     }
 
     /**
      * Establece el valor del atributo {@link #reassingTime}.
      * @param reassingTimeParam El valor para el atributo {@link #reassingTime}.
      */
-    public void setReassingTime(Long reassingTimeParam) {
+    public void setReassingTime(final Long reassingTimeParam) {
         this.reassingTime = reassingTimeParam;
     }
 
@@ -287,14 +284,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "TIEMPO_REACTIVACION", precision = NumberConstants.NUM19)
     public Long getReactiveTime() {
-        return reactiveTime;
+        return this.reactiveTime;
     }
 
     /**
      * Establece el valor del atributo {@link #reactiveTime}.
      * @param reactiveTimeParam El valor para el atributo {@link #reactiveTime}.
      */
-    public void setReactiveTime(Long reactiveTimeParam) {
+    public void setReactiveTime(final Long reactiveTimeParam) {
         this.reactiveTime = reactiveTimeParam;
     }
 
@@ -304,14 +301,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "TIEMPO_COMPROBACION", precision = NumberConstants.NUM19)
     public Long getCheckedTime() {
-        return checkedTime;
+        return this.checkedTime;
     }
 
     /**
      * Establece el valor del atributo {@link #checkedTime}.
      * @param checkedTimeParam El valor para el atributo {@link #checkedTime}.
      */
-    public void setCheckedTime(Long checkedTimeParam) {
+    public void setCheckedTime(final Long checkedTimeParam) {
         this.checkedTime = checkedTimeParam;
     }
 
@@ -321,14 +318,14 @@ public class Scheduler implements Serializable {
      */
     @Column(name = "NOMBRE_PROGRAMADOR", nullable = false, length = NumberConstants.NUM50)
     public String getSchedulerName() {
-        return schedulerName;
+        return this.schedulerName;
     }
 
     /**
      * Establece el valor del atributo {@link #schedulerName}.
      * @param schedulerNameParam El valor para el atributo {@link #schedulerName}.
      */
-    public void setSchedulerName(String schedulerNameParam) {
+    public void setSchedulerName(final String schedulerNameParam) {
         this.schedulerName = schedulerNameParam;
     }
 
@@ -338,14 +335,14 @@ public class Scheduler implements Serializable {
 	 */
 	@Column(name = "DIAS_PREAVISO", nullable = true, length = NumberConstants.NUM19)
 	public Long getAdvanceNotice() {
-		return advanceNotice;
+		return this.advanceNotice;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #advanceNotice}.
 	 * @param taskParam The value for the attribute {@link #advanceNotice}.
 	 */
-	public void setAdvanceNotice(Long advanceNotice) {
+	public void setAdvanceNotice(final Long advanceNotice) {
 		this.advanceNotice = advanceNotice;
 	}
 
@@ -355,15 +352,15 @@ public class Scheduler implements Serializable {
 	 */
 	@Column(name = "PERIODO_COMUNICACION", nullable = true, length = NumberConstants.NUM19)
 	public Long getPeriodCommunication() {
-		return periodCommunication;
+		return this.periodCommunication;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #periodCommunication}.
 	 * @param periodCommunication The value for the attribute {@link #periodCommunication}.
 	 */
-	public void setPeriodCommunication(Long periodCommunication) {
+	public void setPeriodCommunication(final Long periodCommunication) {
 		this.periodCommunication = periodCommunication;
 	}
-	
+
 }

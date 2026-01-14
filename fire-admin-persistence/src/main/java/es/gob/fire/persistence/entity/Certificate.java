@@ -30,11 +30,11 @@ import java.util.Date;
 import javax.persistence.Column;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
+import javax.persistence.GenerationType;
 import javax.persistence.Id;
 import javax.persistence.Table;
+import javax.persistence.TableGenerator;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -81,12 +81,12 @@ public class Certificate implements Serializable {
 	 * Attribute that represents the huellaPrincipal.
 	 */
 	private String huella;
-	
+
 	/**
 	 * Attribute that represents the init date.
 	 */
 	private Date fechaInicio;
-	
+
 	/**
 	 * Attribute that represents the date expired.
 	 */
@@ -96,20 +96,22 @@ public class Certificate implements Serializable {
 	 * Attribute that represents the subject.
 	 */
 	private String subject;
-	
+
 	/**
 	 * Attribute that represents the date of the last period communication.
-	 */	
+	 */
     private Date dateLastCommunication;
-    
+
 	/**
 	 * Gets the value of the attribute {@link #idKeystore}.
 	 * @return the value of the attribute {@link #idKeystore}.
 	 */
 	@Id
 	@Column(name = "ID_CERTIFICADO", unique = true, nullable = false, precision = NumberConstants.NUM19)
-	@GeneratedValue(generator = "tb_certificados_seq")
-	@GenericGenerator(name = "tb_certificados_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_CERTIFICADOS_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
+//	@GeneratedValue(generator = "tb_certificados_seq")
+//	@GenericGenerator(name = "tb_certificados_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_CERTIFICADOS_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
+	@GeneratedValue(strategy = GenerationType.TABLE, generator = "tb_certificados_seq")
+	@TableGenerator( name = "tb_certificados_seq", table = "hibernate_sequences", pkColumnName = "sequence_name", valueColumnName = "next_val", pkColumnValue = "certificados_gen", allocationSize = 1 )
 	@JsonView(DataTablesOutput.View.class)
 	public Long getIdCertificado() {
 		return this.idCertificado;
@@ -215,7 +217,7 @@ public class Certificate implements Serializable {
 	public void setFechaInicio(final Date fechaInicioParam) {
 		this.fechaInicio = fechaInicioParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #fecha_fechaCaducidadalta}.
 	 * @return the value of the attribute {@link #fechaCaducidad}.
@@ -233,7 +235,7 @@ public class Certificate implements Serializable {
 	public void setFechaCaducidad(final Date fechaCaducidadParam) {
 		this.fechaCaducidad = fechaCaducidadParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #name}.
 	 * @return the value of the attribute {@link #name}.
@@ -250,21 +252,21 @@ public class Certificate implements Serializable {
 	public void setSubject(final String subjectParam) {
 		this.subject = subjectParam;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #dateLastCommunication}.
 	 * @return the value of the attribute {@link #dateLastCommunication}.
 	 */
 	@Column(name = "FECHA_ULTIMA_COMUNICACION", nullable = true)
 	public Date getDateLastCommunication() {
-		return dateLastCommunication;
+		return this.dateLastCommunication;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #dateLastCommunication}.
 	 * @param dateLastCommunication The value for the attribute {@link #dateLastCommunication}.
 	 */
-	public void setDateLastCommunication(Date dateLastCommunication) {
+	public void setDateLastCommunication(final Date dateLastCommunication) {
 		this.dateLastCommunication = dateLastCommunication;
 	}
 }

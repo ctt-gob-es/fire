@@ -3,7 +3,7 @@
 -- ********************************************************
 SET character_set_client = UTF8MB4 ;
 CREATE TABLE `tb_certificados` (
-  `id_certificado` INT(11) AUTO_INCREMENT,
+  `id_certificado` INT(11),
   `nombre_cert` VARCHAR(45) NOT NULL,
   `fec_alta` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
   `certificado` VARCHAR(5000) DEFAULT NULL,
@@ -13,7 +13,7 @@ CREATE TABLE `tb_certificados` (
   `subject` VARCHAR(4000) NULL,
   `fecha_ultima_comunicacion` DATETIME NULL,
   PRIMARY KEY (`id_certificado`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE `tb_aplicaciones` (
@@ -33,7 +33,7 @@ CREATE TABLE `tb_aplicaciones` (
 
 
 CREATE TABLE `tb_usuarios` (
-  `id_usuario` INT(11) NOT NULL AUTO_INCREMENT,
+  `id_usuario` INT(11) NOT NULL,
   `nombre` VARCHAR(45) NOT NULL COMMENT 'Nombre completo del usuario',
   `apellidos` VARCHAR(120) NOT NULL COMMENT 'Apellidos del usuario',
   `correo_elec` VARCHAR(60) DEFAULT NULL COMMENT 'Correo electrónico',
@@ -49,11 +49,11 @@ CREATE TABLE `tb_usuarios` (
   PRIMARY KEY (`id_usuario`),
   UNIQUE KEY `dni_UNIQUE` (`dni`),
   UNIQUE KEY `codigo_renovacion_UNIQUE` (`codigo_renovacion`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE `tb_servidores_log` (
-  `id_servidor` INT(11) NOT NULL AUTO_INCREMENT,
+  `id_servidor` INT(11) NOT NULL,
   `nombre` VARCHAR(45) NOT NULL,
   `url_servicio_log` VARCHAR(500) NOT NULL,
   `clave` VARCHAR(45) NOT NULL,
@@ -61,7 +61,7 @@ CREATE TABLE `tb_servidores_log` (
   PRIMARY KEY (`id_servidor`),
   UNIQUE KEY `nombre_UNIQUE` (`nombre`),
   UNIQUE KEY `url_servicio_log_UNIQUE` (`url_servicio_log`)
-) ENGINE=InnoDB AUTO_INCREMENT=1 DEFAULT CHARSET=UTF8MB4;
+) ENGINE=InnoDB DEFAULT CHARSET=UTF8MB4;
 
 
 CREATE TABLE `tb_firmas` (
@@ -170,7 +170,7 @@ CREATE TABLE `tb_tipo_planificador` (
 
 -- Tabla PLANIFICADOR
 CREATE TABLE `tb_planificador` (
-  `id_planificador` BIGINT NOT NULL AUTO_INCREMENT,
+  `id_planificador` BIGINT NOT NULL,
   `hora_periodo` INT(3),
   `minuto_periodo` INT(3),
   `segundo_periodo` INT(3),
@@ -183,7 +183,7 @@ CREATE TABLE `tb_planificador` (
 
 -- Tabla PROGRAMADOR
 CREATE TABLE `tb_programador` (
-  `id_programador` BIGINT NOT NULL AUTO_INCREMENT,
+  `id_programador` BIGINT NOT NULL,
   `nombre_token` VARCHAR(30) NOT NULL,
   `nombre_clase` VARCHAR(255) NOT NULL,
   `esta_activo` TINYINT(1) NOT NULL,
@@ -204,7 +204,7 @@ CREATE TABLE `tb_programador` (
 
 -- Tabla CONTROL DE ACCESO
 CREATE TABLE `tb_control_acceso` (
-    `id_control_acceso` BIGINT NOT NULL AUTO_INCREMENT,
+    `id_control_acceso` BIGINT NOT NULL,
     `ip` VARCHAR(45) NOT NULL,
     `fecha_inicio_acceso` DATETIME NOT NULL DEFAULT CURRENT_TIMESTAMP,
     PRIMARY KEY (`id_control_acceso`)
@@ -258,15 +258,15 @@ CREATE TABLE `tb_servidor_afirma` (
     `id_tipo_autenticacion` TINYINT NOT NULL,
     `usuario` VARCHAR(45) NULL,
     `password` TEXT NULL,
-    `truststore` LONGBLOB NULL,
+    `truststore_blob` LONGBLOB NULL,
     `truststore_password` TEXT NULL,
     `truststore_type` VARCHAR(16) NULL,
-    `keystore` LONGBLOB NULL,
+    `ks_blob` LONGBLOB NULL,
     `ks_password` TEXT NULL,
     `ks_type` VARCHAR(16) NULL,
     `ks_cert_alias` VARCHAR(255) NULL,
     `ks_cert_password` TEXT NULL,
-    `auth_truststore` LONGBLOB NULL,
+    `auth_ts_blob` LONGBLOB NULL,
     `auth_ts_password` TEXT NULL,
     `auth_ts_type` VARCHAR(16) NULL,
     `auth_cert_alias` VARCHAR(255) NULL,

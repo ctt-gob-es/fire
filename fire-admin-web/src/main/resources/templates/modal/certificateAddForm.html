@@ -195,7 +195,7 @@ function addNewCert() {
  				      });
  				    });
  				  } else {
- 					 var messageResponse = /*[[#{message.error.cert.add}]]*/;
+ 					 var messageResponse = /*[[#{message.error.certificate.add}]]*/;
  				    $('#resultAddCert')
  				      .text(messageResponse)
  				      .addClass('alert alert-danger');
@@ -212,7 +212,7 @@ function addNewCert() {
  				  } else {
  				    console.error("Error al realizar la peticion");
  				  }
- 				  var messageResponse = /*[[#{message.error.cert.add}]]*/;
+ 				  var messageResponse = /*[[#{message.error.certificate.add}]]*/;
  				  $('#resultAddCert').removeClass('alert-success')
  				                     .addClass('alert alert-danger')
  				                     .html(messageResponse);
