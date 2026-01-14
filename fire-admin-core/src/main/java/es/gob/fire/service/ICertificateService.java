@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.service.ICertificateService.java.</p>
  * <b>Description:</b><p> .</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems.</p>
@@ -34,6 +34,7 @@ import java.util.List;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 
+import es.gob.fire.exceptions.AfirmaConfigurationException;
 import es.gob.fire.exceptions.FireException;
 import es.gob.fire.persistence.dto.CertificateDTO;
 import es.gob.fire.persistence.entity.Certificate;
@@ -49,79 +50,79 @@ public interface ICertificateService {
 	 * @return {@link User}
 	 */
 	Certificate getCertificateByCertificateId(Long idCertificado);
-	
+
 	/**
 	 * Method that obtains an user by its user name.
 	 * @param userName The Certificate login.
 	 * @return {@link Certificate}
 	 */
 	Certificate getCertificateByCertificateName(String nombre_cert);
-	
-	
+
+
 	/**
 	 * Method that stores a certificate in the persistence.
 	 * @param user a {@link Certificate} with the information of the certificate.
 	 * @return {@link Certificate} The certificate.
 	 */
 	Certificate saveCertificate(Certificate certificate);
-	
+
 	/** Method that stores a certificate in the persistence from Certificate DTO object.
 	 * @param userDto a {@link CertificateDTO} with the information of the certificate.
 	 * @return {@link Certificate} The Certificate.
 	 */
 	Certificate saveCertificate(CertificateDTO certificateDto, X509Certificate x509Certificate) throws FireException;
-					
+
 	/**
 	 * Method that deletes a certificate in the persistence.
 	 * @param userId {@link Integer} that represents the certificate identifier to delete.
 	 */
 	void deleteCertificate(Long idCertificado);
-	
+
 	/**
 	 * Method that gets all the certificate from the persistence.
 	 * @return a {@link Iterable<Certificate>} with the information of all certificate.
 	 */
 	List<Certificate> getAllCertificate();
-		
+
 	/**
 	 * @param input
 	 * @return
 	 */
 	List<Certificate> getAllCertificate(List input);
-	
+
 	/**
 	 * Method that maos the values of CertificateDTO to Certificate.
 	 * @param certificateDto Object that represents the values of a certificate taken from the view.
 	 * @return Object thtat represetns a Certificate entity with the values of the CertificateDTO.
 	 */
 	Certificate certificateDtoToEntity(CertificateDTO certificateDto);
-	
+
 	/**
 	 * Method that maos the values of CertificateDTO to Certificate.
 	 * @param certificat Object that represents the mapping entity for Certificate.
 	 * @return Object that represents a Certificate DTO.
 	 */
 	CertificateDTO certificateEntityToDto(Certificate certificate);
-	
+
 	/**
 	 * Method that gets the list for the given {@link DataTablesInput}.
 	 * @param input the {@link DataTablesInput} mapped from the Ajax request.
 	 * @return {@link DataTablesOutput}
 	 */
 	DataTablesOutput<Certificate> certificatesDataTable(DataTablesInput input);
-	
+
 	/**
 	 * Method that replaces the Base64 contents of each certificate of the list of Certificate to a String that represents the CN and expiration date.
 	 * @param certificates List<Certificate> that contains all certificates of Fire.
 	 */
 	void getSubjectValuesForView(List<Certificate> certificates);
-	
+
 	/**
 	 * @param certIs
 	 * @return
 	 */
 	String getFormatCertText(InputStream certIs) throws CertificateException;
-	
+
 	/**
 	 * @param certificate
 	 * @return
@@ -130,7 +131,7 @@ public interface ICertificateService {
 
 	/**
 	 * Converts a list of {@code Certificate} objects to a list of {@code CertificateDTO} objects.
-	 * 
+	 *
 	 * <p>This method maps each {@code Certificate} object to a {@code CertificateDTO} and enriches the DTO
 	 * with additional information such as the certificate's validity status and formatted expiration date.
 	 * The validity of the certificate is determined using its X.509 structure.</p>
@@ -146,7 +147,7 @@ public interface ICertificateService {
 	/**
 	 * Validates the status of an X.509 certificate using the Afirma web service.
 	 *
-	 * <p>This method establishes a connection with AfirmaWS, initializes the necessary 
+	 * <p>This method establishes a connection with AfirmaWS, initializes the necessary
 	 * configuration properties, and invokes the certificate verification service.</p>
 	 *
 	 * @param x509Certificate The X.509 certificate to be validated.
@@ -154,14 +155,16 @@ public interface ICertificateService {
 	 * @throws CertificateEncodingException If there is an issue encoding the certificate.
 	 * @throws PlatformWsException If there is an error with the platform web service.
 	 * @throws WSServiceInvokerException If there is an issue invoking the web service.
+	 * @throws AfirmaConfigurationException If Afirma server is not configured.
 	 */
-	VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate) throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException;
+	VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(X509Certificate x509Certificate)
+			throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException, AfirmaConfigurationException;
 
 	/**
 	 * Updates a Certificate entity with the latest information from an X509Certificate.
 	 * This includes encoding the certificate, generating its fingerprint, and extracting
 	 * relevant metadata such as the subject and validity dates.
-	 * 
+	 *
 	 * @param certificate      The Certificate entity to be updated.
 	 * @param x509Certificate  The X509Certificate containing the latest data.
 	 * @return The updated Certificate entity after being saved in the repository.

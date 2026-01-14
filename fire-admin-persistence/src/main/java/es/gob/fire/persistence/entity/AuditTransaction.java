@@ -4,24 +4,18 @@ import java.util.Date;
 
 import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
 import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
 import javax.persistence.Table;
 import javax.persistence.Temporal;
 import javax.persistence.TemporalType;
 
-import org.hibernate.annotations.GenericGenerator;
-import org.hibernate.annotations.Parameter;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.format.annotation.DateTimeFormat;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
+import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonView;
-import com.fasterxml.jackson.annotation.JsonAutoDetect.Visibility;
 
 import es.gob.fire.commons.utils.NumberConstants;
 
@@ -49,57 +43,57 @@ public class AuditTransaction {
 	 * Attribute that represents the value of the identifier of the app.
 	 */
 	private String idApp;
-	
+
 	/**
 	 * Attribute that represents the value of the name of the app.
 	 */
 	private String nameApp;
-	
+
 	/**
 	 * Attribute that represents the value of the transaction identificator of the petition.
 	 */
 	private String idTransaction;
-	
+
 	/**
 	 * Attribute that represents the type of operation made by the petition.
 	 */
 	private String operation;
-	
+
 	/**
 	 * Attribute that represents the cryptographic type of operation made by the petition.
 	 */
 	private String cryptoOperation;
-	
+
 	/**
 	 * Attribute that represents the algorithm used for the signature.
 	 */
 	private String algorithm;
-	
+
 	/**
 	 * Attribute that represents the value of the format of the signature.
 	 */
 	private String format;
-	
+
 	/**
 	 * Attribute that represents the value of the format of the signature.
 	 */
 	private String updateFormat;
-	
+
 	/**
 	 * Attribute that represents the value of the provider of the signature.
 	 */
 	private String provider;
-	
+
 	/**
 	 * Attribute that represents if the value of the provider of the signature was asked to the user.
 	 */
 	private Boolean forcedProvider;
-	
+
 	/**
 	 * Attribute that represents the value of the browser used.
 	 */
 	private String browser;
-	
+
 	/**
 	 * Attribute that represents the value of the size of the petition.
 	 */
@@ -109,12 +103,12 @@ public class AuditTransaction {
 	 * Attribute that represents the result of the petition.
 	 */
 	private Boolean result;
-	
+
 	/**
 	 * Attribute that represents the value of the detail of the error of the petition.
 	 */
 	private String errorDetail;
-	
+
 	/**
 	 * Attribute that represents the value of the last node to process the petition.
 	 */
@@ -126,18 +120,16 @@ public class AuditTransaction {
 	 */
 	@Id
 	@Column(name = "ID", unique = true, nullable = false, precision = NumberConstants.NUM11)
-	@GeneratedValue(generator = "tb_peticiones_seq")
-    @GenericGenerator(name = "tb_peticiones_seq", strategy = "org.hibernate.id.enhanced.SequenceStyleGenerator", parameters = { @Parameter(name = "sequence_name", value = "TB_PETICIONES_SEQ"), @Parameter(name = "initial_value", value = "1"), @Parameter(name = "increment_size", value = "1") })
 	@JsonView(DataTablesOutput.View.class)
 	public Integer getIdAuditTransaction() {
-		return idAuditTransaction;
+		return this.idAuditTransaction;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idAuditTransaction}.
 	 * @param idAuditTransaction The value for the attribute {@link #idAuditTransaction}.
 	 */
-	public void setIdAuditTransaction(Integer idAuditTransaction) {
+	public void setIdAuditTransaction(final Integer idAuditTransaction) {
 		this.idAuditTransaction = idAuditTransaction;
 	}
 
@@ -151,14 +143,14 @@ public class AuditTransaction {
 	@JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss", timezone = "Europe/Paris")
 	@JsonView(DataTablesOutput.View.class)
 	public Date getDate() {
-		return date;
+		return this.date;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #date}.
 	 * @param date The value for the attribute {@link #date}.
 	 */
-	public void setDate(Date date) {
+	public void setDate(final Date date) {
 		this.date = date;
 	}
 
@@ -169,17 +161,17 @@ public class AuditTransaction {
 	@Column(name = "ID_APLICACION", nullable = false, length = NumberConstants.NUM48)
 	@JsonView(DataTablesOutput.View.class)
 	public String getIdApp() {
-		return idApp;
+		return this.idApp;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idApp}.
 	 * @param idApp The value for the attribute {@link #idApp}.
 	 */
-	public void setIdApp(String idApp) {
+	public void setIdApp(final String idApp) {
 		this.idApp = idApp;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #nameApp}.
 	 * @return the value of the attribute {@link #nameApp}.
@@ -187,17 +179,17 @@ public class AuditTransaction {
 	@Column(name = "NOMBRE_APLICACION", nullable = false, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getNameApp() {
-		return nameApp;
+		return this.nameApp;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #nameApp}.
 	 * @param nameApp The value for the attribute {@link #nameApp}.
 	 */
-	public void setNameApp(String nameApp) {
+	public void setNameApp(final String nameApp) {
 		this.nameApp = nameApp;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #idTransaction}.
 	 * @return the value of the attribute {@link #idTransaction}.
@@ -205,14 +197,14 @@ public class AuditTransaction {
 	@Column(name = "ID_TRANSACCION", nullable = false, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getIdTransaction() {
-		return idTransaction;
+		return this.idTransaction;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idTransaction}.
 	 * @param idTransaction The value for the attribute {@link #idTransaction}.
 	 */
-	public void setIdTransaction(String idTransaction) {
+	public void setIdTransaction(final String idTransaction) {
 		this.idTransaction = idTransaction;
 	}
 
@@ -223,14 +215,14 @@ public class AuditTransaction {
 	@Column(name = "OPERACION", nullable = false, length = NumberConstants.NUM10)
 	@JsonView(DataTablesOutput.View.class)
 	public String getOperation() {
-		return operation;
+		return this.operation;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #operation}.
 	 * @param operation The value for the attribute {@link #operation}.
 	 */
-	public void setOperation(String operation) {
+	public void setOperation(final String operation) {
 		this.operation = operation;
 	}
 
@@ -241,14 +233,14 @@ public class AuditTransaction {
 	@Column(name = "OPERACION_CRIPTOGRAFICA", nullable = false, length = NumberConstants.NUM10)
 	@JsonView(DataTablesOutput.View.class)
 	public String getCryptoOperation() {
-		return cryptoOperation;
+		return this.cryptoOperation;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #cryptoOperation}.
 	 * @param cryptoOperation The value for the attribute {@link #cryptoOperation}.
 	 */
-	public void setCryptoOperation(String cryptoOperation) {
+	public void setCryptoOperation(final String cryptoOperation) {
 		this.cryptoOperation = cryptoOperation;
 	}
 
@@ -259,14 +251,14 @@ public class AuditTransaction {
 	@Column(name = "ALGORITMO", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getAlgorithm() {
-		return algorithm;
+		return this.algorithm;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #algorithm}.
 	 * @param algorithm The value for the attribute {@link #algorithm}.
 	 */
-	public void setAlgorithm(String algorithm) {
+	public void setAlgorithm(final String algorithm) {
 		this.algorithm = algorithm;
 	}
 
@@ -277,14 +269,14 @@ public class AuditTransaction {
 	@Column(name = "FORMATO", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getFormat() {
-		return format;
+		return this.format;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #format}.
 	 * @param format The value for the attribute {@link #format}.
 	 */
-	public void setFormat(String format) {
+	public void setFormat(final String format) {
 		this.format = format;
 	}
 
@@ -295,14 +287,14 @@ public class AuditTransaction {
 	@Column(name = "FORMATO_ACTUALIZADO", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getUpdateFormat() {
-		return updateFormat;
+		return this.updateFormat;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #updateFormat}.
 	 * @param updateFormat The value for the attribute {@link #updateFormat}.
 	 */
-	public void setUpdateFormat(String updateFormat) {
+	public void setUpdateFormat(final String updateFormat) {
 		this.updateFormat = updateFormat;
 	}
 
@@ -313,14 +305,14 @@ public class AuditTransaction {
 	@Column(name = "PROVEEDOR", nullable = false, length = NumberConstants.NUM45)
 	@JsonView(DataTablesOutput.View.class)
 	public String getProvider() {
-		return provider;
+		return this.provider;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #provider}.
 	 * @param provider The value for the attribute {@link #provider}.
 	 */
-	public void setProvider(String provider) {
+	public void setProvider(final String provider) {
 		this.provider = provider;
 	}
 
@@ -331,14 +323,14 @@ public class AuditTransaction {
 	@Column(name = "PROVEEDOR_FORZADO", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getForcedProvider() {
-		return forcedProvider;
+		return this.forcedProvider;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #forcedProvider}.
 	 * @param forcedProvider The value for the attribute {@link #forcedProvider}.
 	 */
-	public void setForcedProvider(Boolean forcedProvider) {
+	public void setForcedProvider(final Boolean forcedProvider) {
 		this.forcedProvider = forcedProvider;
 	}
 
@@ -349,17 +341,17 @@ public class AuditTransaction {
 	@Column(name = "NAVEGADOR", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getBrowser() {
-		return browser;
+		return this.browser;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #browser}.
 	 * @param browser The value for the attribute {@link #browser}.
 	 */
-	public void setBrowser(String browser) {
+	public void setBrowser(final String browser) {
 		this.browser = browser;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #size}.
 	 * @return the value of the attribute {@link #size}.
@@ -367,14 +359,14 @@ public class AuditTransaction {
 	@Column(name = "TAMANNO", nullable = false, length = NumberConstants.NUM19)
 	@JsonView(DataTablesOutput.View.class)
 	public Integer getSize() {
-		return size;
+		return this.size;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #size}.
 	 * @param size The value for the attribute {@link #size}.
 	 */
-	public void setSize(Integer size) {
+	public void setSize(final Integer size) {
 		this.size = size;
 	}
 
@@ -385,17 +377,17 @@ public class AuditTransaction {
 	@Column(name = "RESULTADO", nullable = false)
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getResult() {
-		return result;
+		return this.result;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #result}.
 	 * @param result The value for the attribute {@link #result}.
 	 */
-	public void setResult(Boolean result) {
+	public void setResult(final Boolean result) {
 		this.result = result;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #errorDetail}.
 	 * @return the value of the attribute {@link #errorDetail}.
@@ -403,17 +395,17 @@ public class AuditTransaction {
 	@Column(name = "ERROR_DETALLE", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getErrorDetail() {
-		return errorDetail;
+		return this.errorDetail;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #errorDetail}.
 	 * @param errorType The value for the attribute {@link #errorDetail}.
 	 */
-	public void setErrorDetail(String errorType) {
+	public void setErrorDetail(final String errorType) {
 		this.errorDetail = errorType;
 	}
-	
+
 	/**
 	 * Gets the value of the attribute {@link #node}.
 	 * @return the value of the attribute {@link #node}.
@@ -421,14 +413,14 @@ public class AuditTransaction {
 	@Column(name = "NODO", nullable = false, length = NumberConstants.NUM20)
 	@JsonView(DataTablesOutput.View.class)
 	public String getNode() {
-		return node;
+		return this.node;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #node}.
 	 * @param node The value for the attribute {@link #node}.
 	 */
-	public void setNode(String node) {
+	public void setNode(final String node) {
 		this.node = node;
 	}
 }

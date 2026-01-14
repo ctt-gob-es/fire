@@ -77,19 +77,19 @@
 					
 					<!-- Si HAY exactamente 1 nombre y el code NO es __UNDEFINED__, mostramos ' (Nombre)' -->
 					<span class="name"
-					      th:if="${org.dir3Code != '__UNDEFINED__' and #lists.size(organizationsNamesListByDir3[org.dir3Code]) == 1}"
+					      th:if="${org.dir3Code != '__UNDEFINED__' and organizationsNamesListByDir3[org.dir3Code] != null and #lists.size(organizationsNamesListByDir3[org.dir3Code]) == 1}"
 					      th:title="${organizationsNamesByDir3[org.dir3Code]}"
 					      th:text="${' (' + org.organization + ')'}"></span>
 					
-					<!-- Si el code ES __UNDEFINED__, mostramos SOLO el nombre, sin code ni paréntesis -->
+					<!-- Si el code ES __UNDEFINED__, mostramos SOLO el nombre, sin code ni parï¿½ntesis -->
 					<span class="name"
 					      th:if="${org.dir3Code == '__UNDEFINED__'}"
 					      th:text="${org.organization}"></span>
 					
-					<!-- Botón de alias solo si hay más de 1 nombre -->
+					<!-- Boton de alias solo si hay mas de 1 nombre -->
 					<button type="button"
 					        class="btn btn-sm btn-link alias-toggle p-0 m-0 ms-auto"
-					        th:if="${#lists.size(organizationsNamesListByDir3[org.dir3Code]) > 1}"
+					        th:if="${organizationsNamesListByDir3[org.dir3Code] != null and #lists.size(organizationsNamesListByDir3[org.dir3Code]) > 1}"
 					        th:data-dir3="${org.dir3Code}"
 					        onclick="toggleAliasPanel(event, this)"
 					        title="Ver todos los nombres">
@@ -166,7 +166,7 @@
 	  color: #fff;
 	}
 	
-	/* Badge del botón alias en item activo */
+	/* Badge del botï¿½n alias en item activo */
 	#organizationList .list-group-item.active .alias-toggle .badge {
 	  background: rgba(255,255,255,0.25);
 	  color: #fff;

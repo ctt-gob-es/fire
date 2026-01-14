@@ -1,7 +1,11 @@
 package es.gob.fire.persistence.entity;
 
-import javax.persistence.*;
 import java.time.LocalDateTime;
+
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "TB_PROPIEDADES")

@@ -20,17 +20,17 @@ import es.gob.fire.upgrade.afirma.ws.SecureXmlBuilder;
 public class VerifyAfirmaCertificateResponse {
 
 	private static final String RESULT_MINOR_DEFINITIVE = "Definitive"; //$NON-NLS-1$
-	private static final String RESULT_MINOR_BADCERTIFICATEFORMAT = "BadCertificateFormat";
-	private static final String RESULT_MINOR_TEMPORAL = "Temporal";
-	private static final String RESULT_MINOR_ONHOLD = "OnHold";
-	private static final String RESULT_MINOR_REVOKED = "Revoked";
-	private static final String RESULT_MINOR_EXPIRED = "Expired";
-	private static final String RESULT_MINOR_NOTYEDVALID = "NotYetValid";
-	private static final String RESULT_MINOR_PATHVALIDATIONFAILS = "PathValidationFails";
-	private static final String RESULT_MINOR_BADCERTIFICATESIGNATURE = "BadCertificateSignature";
-	private static final String RESULT_MINOR_REVOKEDWITHOUTTST = "RevokedWithoutTST";
-	private static final String RESULT_MAJOR_SUCCESS = "Success";
-	
+	private static final String RESULT_MINOR_BADCERTIFICATEFORMAT = "BadCertificateFormat"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_TEMPORAL = "Temporal"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_ONHOLD = "OnHold"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_REVOKED = "Revoked"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_EXPIRED = "Expired"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_NOTYEDVALID = "NotYetValid"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_PATHVALIDATIONFAILS = "PathValidationFails"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_BADCERTIFICATESIGNATURE = "BadCertificateSignature"; //$NON-NLS-1$
+	private static final String RESULT_MINOR_REVOKEDWITHOUTTST = "RevokedWithoutTST"; //$NON-NLS-1$
+	private static final String RESULT_MAJOR_SUCCESS = "Success"; //$NON-NLS-1$
+
 	private final boolean definitive;
 	private final boolean badCertificateFormat;
 	private final boolean temporal;
@@ -82,6 +82,31 @@ public class VerifyAfirmaCertificateResponse {
         this.success = RESULT_MAJOR_SUCCESS.equals(this.majorCode);
 	}
 
+	/**
+	 * Construye el objeto de respuesta en base a los valores principal y sencudario de resultado.
+	 * @param majorCode C&oacute;digo de resultado principal.
+	 * @param minorCode C&oacute;digo de resultado secundario.
+	 * @param description Descripci&oacute;n del resultado.
+	 */
+	public VerifyAfirmaCertificateResponse(final String majorCode, final String minorCode, final String description) {
+
+		this.majorCode = majorCode;
+		this.minorCode = minorCode;
+		this.description = description;
+
+        this.definitive = RESULT_MINOR_DEFINITIVE.equals(this.minorCode);
+        this.badCertificateFormat = RESULT_MINOR_BADCERTIFICATEFORMAT.equals(this.minorCode);
+        this.temporal = RESULT_MINOR_TEMPORAL.equals(this.minorCode);
+        this.onHold = RESULT_MINOR_ONHOLD.equals(this.minorCode);
+        this.revoked = RESULT_MINOR_REVOKED.equals(this.minorCode);
+        this.expired = RESULT_MINOR_EXPIRED.equals(this.minorCode);
+        this.notYetValid = RESULT_MINOR_NOTYEDVALID.equals(this.minorCode);
+        this.pathValidationFails = RESULT_MINOR_PATHVALIDATIONFAILS.equals(this.minorCode);
+        this.badCertificateSignature = RESULT_MINOR_BADCERTIFICATESIGNATURE.equals(this.minorCode);
+        this.revokedWithoutTST = RESULT_MINOR_REVOKEDWITHOUTTST.equals(this.minorCode);
+        this.success = RESULT_MAJOR_SUCCESS.equals(this.majorCode);
+	}
+
 	public String getMajorCode() {
 		return this.majorCode;
 	}
@@ -111,43 +136,43 @@ public class VerifyAfirmaCertificateResponse {
 	}
 
 	public boolean isBadCertificateFormat() {
-		return badCertificateFormat;
+		return this.badCertificateFormat;
 	}
 
 	public boolean isTemporal() {
-		return temporal;
+		return this.temporal;
 	}
 
 	public boolean isOnHold() {
-		return onHold;
+		return this.onHold;
 	}
 
 	public boolean isRevoked() {
-		return revoked;
+		return this.revoked;
 	}
 
 	public boolean isExpired() {
-		return expired;
+		return this.expired;
 	}
 
 	public boolean isNotYetValid() {
-		return notYetValid;
+		return this.notYetValid;
 	}
 
 	public boolean isPathValidationFails() {
-		return pathValidationFails;
+		return this.pathValidationFails;
 	}
 
 	public boolean isBadCertificateSignature() {
-		return badCertificateSignature;
+		return this.badCertificateSignature;
 	}
 
 	public boolean isRevokedWithoutTST() {
-		return revokedWithoutTST;
+		return this.revokedWithoutTST;
 	}
-	
+
 	public boolean isSuccess() {
-		return success;
+		return this.success;
 	}
 
 	/**

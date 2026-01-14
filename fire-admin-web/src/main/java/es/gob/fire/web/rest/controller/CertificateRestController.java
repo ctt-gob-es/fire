@@ -60,6 +60,7 @@ import com.fasterxml.jackson.annotation.JsonView;
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
+import es.gob.fire.exceptions.AfirmaConfigurationException;
 import es.gob.fire.exceptions.FireException;
 import es.gob.fire.i18n.IWebAdminGeneral;
 import es.gob.fire.i18n.IWebLogMessages;
@@ -253,15 +254,15 @@ public class CertificateRestController {
 	        			throw e;
 	        		}
 				}
-				
+
 				try {
 					// Validaremos si el certificado esta caducado o bien si su fecha de validez aun no ha entrado en vigor
 					cert1.checkValidity();
 
 					// Validaremos otros estados del certificado haciendo una peticion SOAP
-					VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
+					final VerifyAfirmaCertificateResponse verifyAfirmaCertificateResponse = this.certificateService.validateStatusCertificateInAfirmaWS(cert1);
 
-					LOGGER.info(verifyAfirmaCertificateResponse.getDescription());
+					LOGGER.info("Descripcion del resultado de @firma: " + verifyAfirmaCertificateResponse.getDescription());
 
 					// Si el certificado es valido almacenaremos el certificado en la BD
 					if(verifyAfirmaCertificateResponse.isDefinitive()) {
@@ -323,25 +324,31 @@ public class CertificateRestController {
 					}
 				} catch (final CertificateExpiredException e) {
 					// El certificado está caducado
-				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-				    String expirationDate = dateFormat.format(cert1.getNotAfter());
+				    final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    final String expirationDate = dateFormat.format(cert1.getNotAfter());
 				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC001, new Object[]{certFile.getOriginalFilename(), expirationDate});
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				} catch (final CertificateNotYetValidException e) {
 					 // El certificado aún no es válido
-				    SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-				    String notBeforeDate = dateFormat.format(cert1.getNotBefore());
+				    final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+				    final String notBeforeDate = dateFormat.format(cert1.getNotBefore());
 				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
-				} catch (PlatformWsException e) {
+				} catch (final AfirmaConfigurationException e) {
+					// No se ha establecido la configuracion de conexion con @firma
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC018);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
+				} catch (final PlatformWsException e) {
 					// Se ha producido un fallo en la peticion o respuesta del SOAP
 					LOGGER.error(e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
-				} catch (WSServiceInvokerException e) {
+				} catch (final WSServiceInvokerException e) {
 					// Se ha producido un fallo en la peticion o respuesta del SOAP
 					LOGGER.error(e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC016);
@@ -353,7 +360,7 @@ public class CertificateRestController {
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
-			} catch (FireException e) {
+			} catch (final FireException e) {
 				LOGGER.error(Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{e.getMessage()}), e);
 				msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC017);
 				json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
@@ -525,6 +532,12 @@ public class CertificateRestController {
 				    msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC002, new Object[]{certFile.getOriginalFilename(), notBeforeDate});
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
+				} catch (final AfirmaConfigurationException e) {
+					// No se ha establecido la configuracion de conexion con @firma
+					LOGGER.error(e);
+					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC018);
+					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+					dtOutput.setError(json.toString());
 				} catch (final PlatformWsException e) {
 					// Se ha producido un fallo en la peticion o respuesta del SOAP
 					LOGGER.error(e);
@@ -543,8 +556,8 @@ public class CertificateRestController {
 				listNewCertificate = StreamSupport.stream(this.certificateService.getAllCertificate().spliterator(), false).collect(Collectors.toList());
 				json.put(KEY_JS_ERROR_SAVE_CERT, Language.getFormatResWebFire(IWebLogMessages.ERRORWEB030, new Object[]{msgerror}));
 				dtOutput.setError(json.toString());
-			} catch (FireException e) {
-				
+			} catch (final FireException e) {
+
 			}
 		}
 
