@@ -22,9 +22,6 @@ import java.util.logging.Logger;
  */
 class ConfigFileLoader {
 
-	/** Variable de entorno que determina el directorio en el que buscar el fichero de configuraci&oacute;n. */
-	private static final String ENVIRONMENT_VAR_CONFIG_DIR = "fire.config.path"; //$NON-NLS-1$
-
 	private static final Logger LOGGER = Logger.getLogger(ConfigFileLoader.class.getName());
 
 	/**
@@ -50,8 +47,7 @@ class ConfigFileLoader {
 				}
 				else {
 					LOGGER.warning(
-							"El fichero " + configFilePath + " no existe o no pudo leerse del directorio configurado en la variable " + //$NON-NLS-1$ //$NON-NLS-2$
-									ENVIRONMENT_VAR_CONFIG_DIR + "'.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$
+							"El fichero " + configFilePath + " no existe o no pudo leerse.\nSe buscara en el CLASSPATH."); //$NON-NLS-1$ //$NON-NLS-2$
 				}
 
 			// Cargamos el fichero desde el classpath si no se cargo de otro sitio

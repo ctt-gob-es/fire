@@ -28,9 +28,6 @@ public class ConfigManager {
 
 	private static final String PROP_DB_PASSWORD = "bbdd.password"; //$NON-NLS-1$
 
-	/** Configuraci&oacute;n de la pol&iacute;tica de volcado de datos estad&iacute;sticos*/
-	private static final String PROP_STATISTICS_POLICY ="statistics.policy"; //$NON-NLS-1$
-
 	/** Configuraci&oacute;n del directorio de volcado de datosestad&iacute;sticos. */
 	private static final String PROP_STATISTICS_DIR = "statistics.dir"; //$NON-NLS-1$
 
@@ -118,22 +115,6 @@ public class ConfigManager {
 	public static String getDataBasePassword() {
 		final String value = getProperty(PROP_DB_PASSWORD);
 		return value != null && !value.isEmpty() ? value : null;
-	}
-
-	/**
-	 * Devuelve el identificador num&eacute;rico de la pol&iacute;tica de firma configurada.
-	 * En caso de error, devuelve -1.
-	 * @return Dato num&eacute;rico.
-	 */
-	public static int getStatisticsPolicy() {
-		int policy;
-		try {
-			policy = Integer.parseInt(getProperty(PROP_STATISTICS_POLICY));
-		}
-		catch (final NumberFormatException e) {
-			policy = -1;
-		}
-		return policy;
 	}
 
 	/**

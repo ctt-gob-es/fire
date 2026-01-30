@@ -272,9 +272,9 @@ public class StatisticsDBLoader {
 		System.out.println("Uso:"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -jar %1s [Opciones]\n", JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las opciones proporcionadas.\n"); //$NON-NLS-1$
-		System.out.println(String.format("\tjava -Dfire.config.path=\"DIRECTORIO_CONFIGURACION\" -jar %1s \n", JAR_NAME)); //$NON-NLS-1$
-		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero config.properties que se\n" //$NON-NLS-1$
-				+ "\t\tencuentra en el directorio que establecemos en la propia llamada.\n"); //$NON-NLS-1$
+		System.out.println(String.format("\tjava -jar %1s -configFilePath \"[Ruta fichero]\"\n", JAR_NAME)); //$NON-NLS-1$
+		System.out.println("\t\tCarga los datos usando las propiedades definidas en el fichero con la\n" //$NON-NLS-1$
+				+ "\t\truta absoluta \"[Ruta fichero]\".\n"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -cp \"Ruta_JDBC%1s%2s\" es.gob.fire.statistics.cmd.StatisticsDBLoader [Opciones]\n", File.pathSeparator, JAR_NAME)); //$NON-NLS-1$
 		System.out.println("\t\tCarga los datos usando las opciones proporcionadas y agregando al classpath ficheros JAR\n" //$NON-NLS-1$
 				+ "\t\tadicionales, entre los que se puede encontrar el del controlador de base de datos.\n"); //$NON-NLS-1$
@@ -308,7 +308,30 @@ public class StatisticsDBLoader {
 		System.out.println("\t\tEl proceso de carga incluira los datos de hoy (por defecto, no se hace). Esto provoca que despues \n" //$NON-NLS-1$
 				+ "\t\tno se puedan registrar los datos generados el resto del dia.\n"); //$NON-NLS-1$
 
-		System.out.println("Ejemplos:"); //$NON-NLS-1$
+		System.out.println("Propiedades del fichero de configuracion:"); //$NON-NLS-1$
+
+		System.out.println("\tEn el fichero deben aparecer una serie de lineas compuestas por el nombre de\n" //$NON-NLS-1$
+				+ "\tuna propiedad el signo igual ('=') y el valor asignado. A continuacion se\n" //$NON-NLS-1$
+				+ "\tlistan las propiedades que pueden configurarse.\n"); //$NON-NLS-1$
+
+		System.out.println("\tbbdd.driver"); //$NON-NLS-1$
+		System.out.println("\t\tClase controladora JDBC para el acceso a la base de datos.\n"); //$NON-NLS-1$
+
+		System.out.println("\tbbdd.conn"); //$NON-NLS-1$
+		System.out.println("\t\tCadena de conexion con la base de datos.\n"); //$NON-NLS-1$
+
+		System.out.println("\tbbdd.username"); //$NON-NLS-1$
+		System.out.println("\t\tUsuario de base de datos (en caso de que no se indique en la cadena de\n" //$NON-NLS-1$
+				+ "\t\tde conexion).\n"); //$NON-NLS-1$
+
+		System.out.println("\tbbdd.password"); //$NON-NLS-1$
+		System.out.println("\t\tContrasena de base de datos (en caso de que no se indique en la cadena\n" //$NON-NLS-1$
+				+ "\t\tde conexion).\n"); //$NON-NLS-1$
+
+		System.out.println("\tstatistics.dir"); //$NON-NLS-1$
+		System.out.println("\t\tRuta absoluta del directorio con los ficheros de datos estadisticos.\n"); //$NON-NLS-1$
+
+		System.out.println("Ejemplos de comandos:"); //$NON-NLS-1$
 		System.out.println(String.format("\tjava -jar %1s %2s \"/usr/fire/statistics\" " //$NON-NLS-1$
 				+ "%3s oracle.jdbc.driver.OracleDriver %4s " //$NON-NLS-1$
 				+ "jdbc:oracle:thin:Fire/1111@XXX.XXX.XXX.XXX:1521:FIRE_DB\n", //$NON-NLS-1$
@@ -319,5 +342,10 @@ public class StatisticsDBLoader {
 
 		System.out.println(String.format("\tjava -jar %1s -configFilePath \"/usr/fire/config/stats_cmd_config.properties\" ", //$NON-NLS-1$
 				JAR_NAME));
+
+		System.out.println("Ejemplo de fichero de configuracion:"); //$NON-NLS-1$
+		System.out.println("\tstatistics.dir = /usr/fire/statistics"); //$NON-NLS-1$
+		System.out.println("\tbbdd.driver = oracle.jdbc.driver.OracleDriver"); //$NON-NLS-1$
+		System.out.println("\tbbdd.conn = jdbc:oracle:thin:Fire/1111@12.34.56.78:1521:FIRE_DB"); //$NON-NLS-1$
 	}
 }
