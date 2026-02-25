@@ -10,7 +10,7 @@
 	<parent>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-artifacts</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>3.0</version>
 	</parent>
 	<name>fire-admin-web Maven Webapp</name>
 	<url>http://maven.apache.org</url>
@@ -18,18 +18,22 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-core</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-i18n</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-upgrade</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-upgrade-afirma</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
@@ -98,7 +102,7 @@
 		<dependency>
 			<groupId>org.json</groupId>
 			<artifactId>json</artifactId>
-			<version>20180130</version>
+			<version>20230227</version>
 		</dependency>
 
 		<!-- Driver de base de datos -->

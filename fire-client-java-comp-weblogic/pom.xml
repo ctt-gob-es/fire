@@ -3,7 +3,6 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
 
 	<modelVersion>4.0.0</modelVersion>
-	<groupId>es.gob.fire</groupId>
 	<artifactId>fire-client-weblogic</artifactId>
 	<name>fire-client-weblogic</name>
 		
@@ -22,6 +21,7 @@
 		<dependency>
 		    <groupId>es.gob.fire</groupId>
 		    <artifactId>fire-client</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<!-- Esta dependencia no existe en ningun repositorio publico. Es el

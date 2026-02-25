@@ -9,7 +9,7 @@
 	<parent>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-artifacts</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>3.0</version>
 	</parent>
 
 	<properties>

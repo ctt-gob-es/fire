@@ -8,25 +8,29 @@
 	<parent>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-artifacts</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>3.0</version>
 	</parent>
 
 	<dependencies>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-i18n</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-commons-util</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-persistence</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-mail</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>org.modelmapper</groupId>

@@ -5,7 +5,7 @@
   <parent>
     <groupId>es.gob.fire</groupId>
     <artifactId>fire-artifacts</artifactId>
-    <version>3.0-SNAPSHOT</version>
+    <version>3.0</version>
   </parent>
   <artifactId>fire-admin-commons-util</artifactId>
   <name>fire-admin-commons-util</name>
@@ -15,13 +15,9 @@
   </properties>
   <dependencies>
     <dependency>
-      <groupId>junit</groupId>
-      <artifactId>junit</artifactId>
-      <scope>test</scope>
-    </dependency>
-    <dependency>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-admin-i18n</artifactId>
+			<version>${project.version}</version>
 	</dependency>
 	<dependency>
 	   	<groupId>commons-codec</groupId>
@@ -36,5 +32,10 @@
 		<groupId>org.bouncycastle</groupId>
 		<artifactId>bcmail-jdk18on</artifactId>
 	</dependency>
+	<dependency>
+      <groupId>junit</groupId>
+      <artifactId>junit</artifactId>
+      <scope>test</scope>
+    </dependency>
   </dependencies>
 </project>

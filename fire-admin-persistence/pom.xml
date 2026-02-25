@@ -8,7 +8,7 @@
 	<parent>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-artifacts</artifactId>
-		<version>3.0-SNAPSHOT</version>
+		<version>3.0</version>
 	</parent>
 
 	<properties>
@@ -19,14 +19,17 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-admin-commons-util</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.logconsumer</groupId>
 			<artifactId>log-consumer-api</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-upgrade-afirma</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 		<!-- Licencia Apache 2.0 -->
 		<dependency>

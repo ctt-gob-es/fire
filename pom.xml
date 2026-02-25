@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
-	<version>3.0-SNAPSHOT</version>
+	<version>3.0</version>
 	<artifactId>fire-artifacts</artifactId>
 	<packaging>pom</packaging>
 	<name>fire-artifacts</name>
@@ -21,7 +21,7 @@
 
 		<jdk.version>1.8</jdk.version>
 
-		<fire.version>3.0-SNAPSHOT</fire.version>
+		<fire.version>3.0</fire.version>
 		<clienteafirma.version>1.9</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
@@ -35,7 +35,7 @@
 		<mockito.version>3.12.4</mockito.version>
 		<junit.version>4.13.1</junit.version>
 		<maven-compiler-plugin.version>3.8.0</maven-compiler-plugin.version>
-		<hibernate.version>5.2.13.Final</hibernate.version>
+		<hibernate.version>5.3.20.Final</hibernate.version>
 		<sonar.host.url>http://localhost:9002/</sonar.host.url>
 		<sonar.login>92cd52099ab8a69edd44ec6b04939f079b84f21d</sonar.login>
 		<!-- JaCoCo Properties -->
@@ -140,6 +140,7 @@
 
 	<dependencyManagement>
 		<dependencies>
+<!--
 			<dependency>
 				<groupId>es.gob.fire</groupId>
 				<artifactId>fire-admin-persistence</artifactId>
@@ -250,7 +251,7 @@
 				<artifactId>fire-log-handlers</artifactId>
 				<version>${fire.version}</version>
 			</dependency>
-			
+-->			
 			<!-- Cliente afirma -->
 			<dependency>
 				<groupId>es.gob.afirma</groupId>
