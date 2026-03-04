@@ -21,6 +21,7 @@
 		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-signature-connector</artifactId>
+			<version>${project.version}</version>
 		</dependency>
 
 		<dependency>

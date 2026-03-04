@@ -1,6 +1,6 @@
 package es.gob.fire.server.services.statistics;
 
-import org.apache.log4j.Logger;
+import java.util.logging.Logger;
 
 import es.gob.fire.signature.ConfigManager;
 
@@ -28,7 +28,7 @@ public class AuditConfig {
 		}
 
 		if (policy == Policy.AUTOMATIC && !ConfigManager.isUsingDatabase()) {
-			Logger.getLogger(AuditConfig.class.getName()).warn(
+			Logger.getLogger(AuditConfig.class.getName()).warning(
 					"Se ha configurado el guardado automatico de los datos de auditoria en BD, pero no la conexion con BD"); //$NON-NLS-1$
 			policy = Policy.GENERATE;
 		}

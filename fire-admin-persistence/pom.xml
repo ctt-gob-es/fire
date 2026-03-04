@@ -22,14 +22,13 @@
 			<version>${project.version}</version>
 		</dependency>
 		<dependency>
-			<groupId>es.gob.logconsumer</groupId>
-			<artifactId>log-consumer-api</artifactId>
-			<version>${project.version}</version>
-		</dependency>
-		<dependency>
 			<groupId>es.gob.fire</groupId>
 			<artifactId>fire-upgrade-afirma</artifactId>
 			<version>${project.version}</version>
+		</dependency>
+		<dependency>
+			<groupId>es.gob.logconsumer</groupId>
+			<artifactId>log-consumer-api</artifactId>
 		</dependency>
 		<!-- Licencia Apache 2.0 -->
 		<dependency>

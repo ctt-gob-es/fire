@@ -39,7 +39,7 @@ public class SPConfig {
     		return null;
     	}
 
-    	return UtilsServer.createAbsolutePath(UtilsServer.getServerConfigDir(), UtilsServer.CLAVE_DIRECTORY) + File.separator;
+    	return UtilsServer.createAbsolutePath(configDir, UtilsServer.CLAVE_DIRECTORY) + File.separator;
     }
 
     /**

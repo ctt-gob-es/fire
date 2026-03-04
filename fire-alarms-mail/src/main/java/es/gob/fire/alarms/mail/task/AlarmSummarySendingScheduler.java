@@ -50,7 +50,7 @@ public class AlarmSummarySendingScheduler {
     		this.scheduler.shutdownNow();
     	}
     	catch (final Exception e) {
-    		Logger.getLogger(AlarmSummarySendingScheduler.class.getName()).warning("No se pudo finalizar la tarea de envio de alaramas por correo: " + e); //$NON-NLS-1$
+    		Logger.getLogger(AlarmSummarySendingScheduler.class.getName()).warning("No se pudo finalizar la tarea de envio de alarmas por correo: " + e); //$NON-NLS-1$
 		}
     }
 

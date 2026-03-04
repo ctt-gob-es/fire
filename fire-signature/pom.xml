@@ -156,6 +156,7 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-signature-connector-clavefirma</artifactId>
+					<version>${project.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -199,6 +200,7 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-upgrade-afirma</artifactId>
+					<version>${project.version}</version>
 					<exclusions>
 						<exclusion>
 							<groupId>javax.servlet</groupId>
@@ -221,6 +223,7 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-alarms-graylog</artifactId>
+					<version>${project.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -237,6 +240,7 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-alarms-eventmanager</artifactId>
+					<version>${project.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
@@ -253,6 +257,7 @@
 				<dependency>
 					<groupId>es.gob.fire</groupId>
 					<artifactId>fire-alarms-mail</artifactId>
+					<version>${project.version}</version>
 				</dependency>
 			</dependencies>
 		</profile>
