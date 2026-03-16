@@ -33,7 +33,7 @@ import org.bouncycastle.util.Selector;
 * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
 * @version 1.0, 17/05/2023.
 */
-final class CertHolderBySignerIdSelector implements Selector {
+final class CertHolderBySignerIdSelector implements Selector<X509CertificateHolder> {
 
 	private final SignerId signerId;
 	CertHolderBySignerIdSelector(final SignerId sid) {
@@ -45,7 +45,7 @@ final class CertHolderBySignerIdSelector implements Selector {
 
 	/** {@inheritDoc} */
 	@Override
-	public boolean match(final Object o) {
+	public boolean match(final X509CertificateHolder o) {
 		return CertHolderBySignerIdSelector.this.signerId.getSerialNumber()
 				.equals(((X509CertificateHolder) o).getSerialNumber());
 	}

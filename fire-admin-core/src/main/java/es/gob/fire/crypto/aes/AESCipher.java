@@ -14,21 +14,13 @@ import javax.crypto.NoSuchPaddingException;
 import javax.crypto.spec.IvParameterSpec;
 import javax.crypto.spec.SecretKeySpec;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.crypto.exceptions.CipherException;
 import es.gob.fire.i18n.ICoreMessages;
 import es.gob.fire.i18n.Language;
 
 public class AESCipher implements Serializable {
 
-	/**
-	 * Constant that represents the parameter log.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(AESCipher.class);
-
-	/**
-	 *
-	 */
+	/** Serial Id. */
 	private static final long serialVersionUID = -5111831850889412988L;
 
 	/**

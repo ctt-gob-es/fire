@@ -1101,28 +1101,28 @@ public class CertificateService implements ICertificateService{
 	    return null;
 	}
 
-	/**
-	 * Logs an effective (sanitized) web services configuration at DEBUG level only.
-	 * Password values are masked; no secrets are printed.
-	 *
-	 * @param cfg effective configuration properties to dump.
-	 */
-	private static void logFullWsConfig(final Properties cfg) {
-	    LOGGER.info("========== [BST Volcado de Configuracion] ==========");
-	    for (final String key : cfg.stringPropertyNames()) {
-	        final String val = cfg.getProperty(key);
-	        if (key.toLowerCase().contains("password")) {
-	            if (val != null && !val.isEmpty()) {
-	                LOGGER.info("{} = **** ({} chars)", key, val.length());
-	            } else {
-	                LOGGER.info("{} = <nulo/vacio>", key);
-	            }
-	        } else {
-	            LOGGER.info("{} = {}", key, val);
-	        }
-	    }
-	    LOGGER.info("======================================");
-	}
+//	/**
+//	 * Logs an effective (sanitized) web services configuration at DEBUG level only.
+//	 * Password values are masked; no secrets are printed.
+//	 *
+//	 * @param cfg effective configuration properties to dump.
+//	 */
+//	private static void logFullWsConfig(final Properties cfg) {
+//	    LOGGER.info("========== [BST Volcado de Configuracion] ==========");
+//	    for (final String key : cfg.stringPropertyNames()) {
+//	        final String val = cfg.getProperty(key);
+//	        if (key.toLowerCase().contains("password")) {
+//	            if (val != null && !val.isEmpty()) {
+//	                LOGGER.info("{} = **** ({} chars)", key, val.length());
+//	            } else {
+//	                LOGGER.info("{} = <nulo/vacio>", key);
+//	            }
+//	        } else {
+//	            LOGGER.info("{} = {}", key, val);
+//	        }
+//	    }
+//	    LOGGER.info("======================================");
+//	}
 
 	/**
 	 * Deletes older versioned files for a given resource prefix under the base directory,

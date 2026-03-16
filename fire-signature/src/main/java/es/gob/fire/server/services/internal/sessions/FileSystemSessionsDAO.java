@@ -80,13 +80,28 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 	@Override
 	public boolean existsSession(final String id) {
-		return Files.exists(new File(this.dir, id).toPath());
+		File sessionFile;
+		try {
+			sessionFile = FileSystemUtils.checkFile(this.dir, id);
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Con se pudo verificar la ruta de carga del fichero de sesion", e); //$NON-NLS-1$
+			return false;
+		}
+		return Files.exists(sessionFile.toPath());
 	}
 
 	@Override
 	public FireSession recoverSession(final String id, final HttpSession session) {
 
-		final File sessionFile = new File(this.dir, id);
+		File sessionFile;
+		try {
+			sessionFile = FileSystemUtils.checkFile(this.dir, id);
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Con se pudo verificar la ruta de carga del fichero de sesion", e); //$NON-NLS-1$
+			return null;
+		}
 
 		return loadSessionFromFile(id, sessionFile);
 	}
@@ -137,7 +152,16 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 
 	@Override
 	public void saveSession(final FireSession session, final boolean firstSave) {
-		try (final FileOutputStream fos = new FileOutputStream(new File(this.dir, session.getTransactionId()));) {
+		File sessionFile;
+		try {
+			sessionFile = FileSystemUtils.checkFile(this.dir, session.getTransactionId());
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Con se pudo verificar la ruta de carga del fichero de sesion", e); //$NON-NLS-1$
+			return;
+		}
+		
+		try (final FileOutputStream fos = new FileOutputStream(sessionFile);) {
 			try (ObjectOutputStream oos = new ObjectOutputStream(fos)) {
 				oos.writeObject(session.getAttributtes());
 			}
@@ -150,9 +174,18 @@ public class FileSystemSessionsDAO implements SessionsDAO {
 	@Override
 	public boolean deleteSession(final String id) {
 
+		File sessionFile;
+		try {
+			sessionFile = FileSystemUtils.checkFile(this.dir, id);
+		}
+		catch (Exception e) {
+			LOGGER.log(Level.WARNING, "Con se pudo verificar la ruta de carga del fichero de sesion", e); //$NON-NLS-1$
+			return false;
+		}
+		
 		boolean deleted = false;
 		try {
-			Files.delete(new File(this.dir, id).toPath());
+			Files.delete(sessionFile.toPath());
 			deleted = true;
 		} catch (final NoSuchFileException e) {
 			// No hacemos nada

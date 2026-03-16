@@ -10,7 +10,6 @@ import java.util.Map;
 import org.apache.poi.hssf.usermodel.HSSFCell;
 import org.apache.poi.hssf.usermodel.HSSFCellStyle;
 import org.apache.poi.hssf.usermodel.HSSFFont;
-import org.apache.poi.hssf.usermodel.HSSFPalette;
 import org.apache.poi.hssf.usermodel.HSSFRow;
 import org.apache.poi.hssf.usermodel.HSSFSheet;
 import org.apache.poi.hssf.usermodel.HSSFWorkbook;
@@ -23,8 +22,8 @@ import org.apache.poi.ss.util.CellRangeAddress;
 
 import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.NumberConstants;
-import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.persistence.entity.AuditSignature;
+import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.report.common.Report;
 
 public class AuditReport extends Report implements IAuditReport{
@@ -43,10 +42,10 @@ public class AuditReport extends Report implements IAuditReport{
 	 */
 	private short columnStandardWidth = NumberConstants.NUM30;
 	
-	/**
-	 * Attribute that represents the width of the first column.
-	 */
-	private short columnWideWidth = NumberConstants.NUM40;
+//	/**
+//	 * Attribute that represents the width of the first column.
+//	 */
+//	private short columnWideWidth = NumberConstants.NUM40;
 	
 	/**
 	 * Attribute that represents the width of the first column.
@@ -132,7 +131,7 @@ public class AuditReport extends Report implements IAuditReport{
 		HSSFSheet sheet = workbook.createSheet("Transacciones");
 		
 		//Create custom color palette
-		HSSFPalette palette = createPalette(workbook);
+//		HSSFPalette palette = createPalette(workbook);
 		
 		//Create custom font
 		Map<String, HSSFFont> fonts = createFonts(workbook);
@@ -159,61 +158,61 @@ public class AuditReport extends Report implements IAuditReport{
 		}
 	}
 
-	private HSSFPalette createPalette(HSSFWorkbook workbook) {
-		
-		HSSFPalette palette = workbook.getCustomPalette();
-		
-		//Title Background Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.BRIGHT_GREEN.getIndex(),
-		        (byte) 255,  //RGB red (0-255)
-		        (byte) 255,    //RGB green
-		        (byte) 255     //RGB blue
-		);
-		
-		//Title Font Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.CORAL.getIndex(),
-		        (byte) 0,  //RGB red (0-255)
-		        (byte) 0,    //RGB green
-		        (byte) 0     //RGB blue
-		);
-		
-		//Header Background Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.BLUE.getIndex(),
-		        (byte) 0,  //RGB red (0-255)
-		        (byte) 102,    //RGB green
-		        (byte) 204     //RGB blue
-		);
-		
-		//Header Font Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.WHITE.getIndex(),
-				(byte) 255,  //RGB red (0-255)
-		        (byte) 255,    //RGB green
-		        (byte) 255     //RGB blue
-		);
-		
-		//Data Uneven Background Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.ROSE.getIndex(),
-		        (byte) 234,  //RGB red (0-255)
-		        (byte) 234,    //RGB green
-		        (byte) 234     //RGB blue
-		);
-		
-		//Data Even Background Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.AQUA.getIndex(),
-		        (byte) 255,  //RGB red (0-255)
-		        (byte) 255,    //RGB green
-		        (byte) 255     //RGB blue
-		);
-		
-		//Data Font Color
-		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.CORNFLOWER_BLUE.getIndex(),
-		        (byte) 0,  //RGB red (0-255)
-		        (byte) 0,    //RGB green
-		        (byte) 0     //RGB blue
-		);
-		
-		return palette;
-	}
+//	private HSSFPalette createPalette(HSSFWorkbook workbook) {
+//		
+//		HSSFPalette palette = workbook.getCustomPalette();
+//		
+//		//Title Background Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.BRIGHT_GREEN.getIndex(),
+//		        (byte) 255,  //RGB red (0-255)
+//		        (byte) 255,    //RGB green
+//		        (byte) 255     //RGB blue
+//		);
+//		
+//		//Title Font Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.CORAL.getIndex(),
+//		        (byte) 0,  //RGB red (0-255)
+//		        (byte) 0,    //RGB green
+//		        (byte) 0     //RGB blue
+//		);
+//		
+//		//Header Background Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.BLUE.getIndex(),
+//		        (byte) 0,  //RGB red (0-255)
+//		        (byte) 102,    //RGB green
+//		        (byte) 204     //RGB blue
+//		);
+//		
+//		//Header Font Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.WHITE.getIndex(),
+//				(byte) 255,  //RGB red (0-255)
+//		        (byte) 255,    //RGB green
+//		        (byte) 255     //RGB blue
+//		);
+//		
+//		//Data Uneven Background Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.ROSE.getIndex(),
+//		        (byte) 234,  //RGB red (0-255)
+//		        (byte) 234,    //RGB green
+//		        (byte) 234     //RGB blue
+//		);
+//		
+//		//Data Even Background Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.AQUA.getIndex(),
+//		        (byte) 255,  //RGB red (0-255)
+//		        (byte) 255,    //RGB green
+//		        (byte) 255     //RGB blue
+//		);
+//		
+//		//Data Font Color
+//		palette.setColorAtIndex(HSSFColor.HSSFColorPredefined.CORNFLOWER_BLUE.getIndex(),
+//		        (byte) 0,  //RGB red (0-255)
+//		        (byte) 0,    //RGB green
+//		        (byte) 0     //RGB blue
+//		);
+//		
+//		return palette;
+//	}
 	
 	private Map<String, HSSFFont> createFonts(HSSFWorkbook workbook) {
 		Map<String, HSSFFont> fonts = new HashMap<String, HSSFFont>();

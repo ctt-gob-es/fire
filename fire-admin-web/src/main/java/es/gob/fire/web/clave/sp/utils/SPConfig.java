@@ -5,7 +5,6 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.InputStreamReader;
-import java.io.Reader;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
@@ -13,6 +12,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
 import es.gob.fire.commons.utils.UtilsServer;
+
 /**
  * Utility class for Service Provider configurations.
  */
@@ -34,9 +34,18 @@ public class SPConfig {
      * @return The configuration file path or {@code null} if it's not defined.
      */
     public static String getConfigFilePath() {
-    	final String configDir = UtilsServer.getServerConfigDir();
-    	if (configDir == null) {
-    		return null;
+    	String configDir = UtilsServer.getServerConfigDir();
+    	
+    	// Si no existe la ruta o el directorio de Clave en ella, se intenta buscar en la ruta del ejecutable
+    	if (configDir == null || !new File(configDir, UtilsServer.CLAVE_DIRECTORY).isDirectory()) {
+			try {
+				String alternativeDir = SPConfig.class.getProtectionDomain().getCodeSource().getLocation().toURI().getPath();
+				if (new File(alternativeDir, UtilsServer.CLAVE_DIRECTORY).isDirectory()) {
+					configDir = alternativeDir;
+				}
+			} catch (Exception e) {
+				LOG.warn("No se pudo buscar la configuracion de Clave en el directorio del proyecto", e); //$NON-NLS-1$
+			}
     	}
 
     	return UtilsServer.createAbsolutePath(configDir, UtilsServer.CLAVE_DIRECTORY) + File.separator;
@@ -51,7 +60,7 @@ public class SPConfig {
      */
     private static Properties loadConfigs(final String fileName) throws IOException {
 
-    	Properties properties = null;
+    	Properties properties = new Properties();
 
     	// Tratamos de cargar el fichero de configuracion del directorio de configuracion
     	final String configPath = SPConfig.getConfigFilePath();
@@ -60,21 +69,7 @@ public class SPConfig {
     		if (f.isFile()) {
     			try (InputStream is = new FileInputStream(f);
     				 InputStreamReader isr = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-    				properties = new Properties();
     				properties.load(isr);
-    			}
-    		}
-    	}
-
-    	// Si no se declaro el directorio o no se encontro el fichero, intentamos cargarlo
-    	// desde el classpath
-    	if (properties == null) {
-    		properties = new Properties();
-    		try (final InputStream is = SPConfig.class.getResourceAsStream('/' + fileName);) {
-    			if (is != null) {
-    				try (final Reader reader = new InputStreamReader(is, StandardCharsets.UTF_8)) {
-    					properties.load(reader);
-    				}
     			}
     		}
     	}

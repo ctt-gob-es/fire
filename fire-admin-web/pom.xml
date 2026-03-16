@@ -109,14 +109,12 @@
 		<dependency>
 			<groupId>mysql</groupId>
 			<artifactId>mysql-connector-java</artifactId>
-			<version>8.0.28</version>
 			<scope>provided</scope>
 		</dependency>
 
 		<dependency>
 			<groupId>org.springframework.boot</groupId>
 			<artifactId>spring-boot-starter-test</artifactId>
-			<version>2.2.6.RELEASE</version>
 			<scope>test</scope>
 		</dependency>
 
@@ -172,8 +170,25 @@
 				<artifactId>activation</artifactId>
 				<version>1.1.1</version>
 			</dependency>
+			
+			<!-- Forzamos el uso de versiones seguras de las siguientes dependencias -->
+			<dependency>
+				<groupId>com.google.code.gson</groupId>
+				<artifactId>gson</artifactId>
+				<version>2.13.2</version>
+			</dependency>
+			<!--
+			<dependency>
+    			<groupId>net.minidev</groupId>
+    			<artifactId>json-smart</artifactId>
+    			<version>2.6.0</version>
+			</dependency>
+			-->
 			<!-- <dependency> <groupId>org.apache.logging.log4j</groupId> <artifactId>log4j-to-slf4j</artifactId> 
 				<version>2.17.0</version> </dependency> -->
+				
+				
+				
 		</dependencies>
 	</dependencyManagement>
 

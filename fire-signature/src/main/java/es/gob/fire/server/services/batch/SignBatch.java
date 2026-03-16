@@ -328,12 +328,6 @@ public abstract class SignBatch {
 		return this.id;
 	}
 
-	void setId(final String i) {
-		if (i != null) {
-			this.id = i;
-		}
-	}
-
 	/**
 	 * Obtiene el algoritmo de huella que se usar&aacute; en la firma.
 	 * @return Algoritmo de huella digital.

@@ -181,7 +181,7 @@ public class CAdESAnalizer {
 
 		final List<SignerInfo> signersList = new ArrayList<>();
 
-		final Store store = signedData.getCertificates();
+		final Store<X509CertificateHolder> store = signedData.getCertificates();
 
 		for (final Object si : signedData.getSignerInfos().getSigners()) {
 
@@ -204,10 +204,10 @@ public class CAdESAnalizer {
 	 * @throws CertificateException Cuando no se puede codificar un certificado.
 	 * @throws IOException Cuando no se puede recuperar un certificado.
 	 */
-	private X509Certificate getCertificateFromSigner(final Store store, final SignerInformation signer)
+	private X509Certificate getCertificateFromSigner(final Store<X509CertificateHolder> store, final SignerInformation signer)
 			throws CertificateException, IOException {
 
-		final Iterator<?> certIt = store.getMatches(new CertHolderBySignerIdSelector(signer.getSID())).iterator();
+		final Iterator<X509CertificateHolder> certIt = store.getMatches(new CertHolderBySignerIdSelector(signer.getSID())).iterator();
         final X509Certificate cert = (X509Certificate) this.certFactory.generateCertificate(
     		new ByteArrayInputStream(
 				((X509CertificateHolder) certIt.next()).getEncoded()

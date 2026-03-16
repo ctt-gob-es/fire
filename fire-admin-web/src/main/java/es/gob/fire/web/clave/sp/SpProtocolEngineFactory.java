@@ -6,6 +6,7 @@ import javax.annotation.Nullable;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 
+import es.gob.fire.web.clave.sp.utils.Constants;
 import eu.eidas.auth.engine.ProtocolEngineFactoryNoMetadata;
 import eu.eidas.auth.engine.ProtocolEngineNoMetadataI;
 import eu.eidas.auth.engine.configuration.ProtocolConfigurationAccessorNoMetadata;
@@ -51,7 +52,7 @@ public final class SpProtocolEngineFactory extends ProtocolEngineFactoryNoMetada
             SpProtocolEngineFactory defaultProtocolEngineFactory = null;
             try {
                 ProtocolEngineConfigurationFactoryNoMetadata protocolEngineConfigurationFactory = 
-                		new ProtocolEngineConfigurationFactoryNoMetadata("SPSamlEngine.xml", null,
+                		new ProtocolEngineConfigurationFactoryNoMetadata(Constants.SP_SAMLENGINE_FILE, null,
                 				configPath);
                 defaultProtocolEngineFactory =
                         new SpProtocolEngineFactory(protocolEngineConfigurationFactory);

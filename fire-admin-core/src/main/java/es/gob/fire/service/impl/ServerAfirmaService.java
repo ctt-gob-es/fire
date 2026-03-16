@@ -25,14 +25,10 @@
 package es.gob.fire.service.impl;
 
 import java.io.ByteArrayInputStream;
-import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.KeyStoreException;
-import java.security.NoSuchAlgorithmException;
-import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
-import java.util.Base64;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -43,9 +39,6 @@ import org.springframework.stereotype.Service;
 
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsCertificate;
-import es.gob.fire.commons.utils.UtilsKeystore;
-import es.gob.fire.crypto.aes.AESCipher;
-import es.gob.fire.crypto.exceptions.CipherException;
 import es.gob.fire.persistence.dto.ServerAfirmaDTO;
 import es.gob.fire.persistence.entity.ServerAfirma;
 import es.gob.fire.persistence.repository.ServerAfirmaRepository;
@@ -204,16 +197,16 @@ public class ServerAfirmaService implements IServerAfirmaService {
 		serverAfirmaRepository.save(serverAfirma);
 	}
 
-	/**
-	 * Null-safe equality check for {@link Long} values.
-	 *
-	 * @param a first value (nullable).
-	 * @param b second value (nullable).
-	 * @return {@code true} if both are equal (including both {@code null}); otherwise {@code false}.
-	 */
-	private static boolean safeEquals(final Long a, final Long b) {
-	    return java.util.Objects.equals(a, b);
-	}
+//	/**
+//	 * Null-safe equality check for {@link Long} values.
+//	 *
+//	 * @param a first value (nullable).
+//	 * @param b second value (nullable).
+//	 * @return {@code true} if both are equal (including both {@code null}); otherwise {@code false}.
+//	 */
+//	private static boolean safeEquals(final Long a, final Long b) {
+//	    return java.util.Objects.equals(a, b);
+//	}
 
 	/**
 	 * Returns the provided string if non-null and non-empty, otherwise returns the given default.

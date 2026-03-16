@@ -5,6 +5,7 @@ import static org.quartz.TriggerBuilder.newTrigger;
 import java.util.Date;
 import java.util.Iterator;
 import java.util.List;
+import java.util.Properties;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;

@@ -26,11 +26,13 @@
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
 		<slf4j.version>1.7.36</slf4j.version>
-		<log4j.version>2.20.0</log4j.version>
-		<quartz.version>2.3.2</quartz.version>
+		<log4j.version>2.25.3</log4j.version>
+		<quartz.version>2.4.1</quartz.version> <!-- La 2.4.1 es la ultima version de Quartz compatible Java 8 -->
 		<javaMail.version>1.6.2</javaMail.version>
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
 		<javax.json-api.version>1.1.3</javax.json-api.version>
+		<commons-fileupload.version>1.6.0</commons-fileupload.version>
+		<httpclient.version>4.5.14</httpclient.version>
 		<org.glassfish-javax.json.version>1.1.3</org.glassfish-javax.json.version>
 		<mockito.version>3.12.4</mockito.version>
 		<junit.version>4.13.1</junit.version>
@@ -140,118 +142,6 @@
 
 	<dependencyManagement>
 		<dependencies>
-<!--
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-admin-persistence</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-admin-core</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-admin-web</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-admin-i18n</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-admin-commons-util</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-client</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-common-libraries</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-connector</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-connector-clavefirma</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-connector-clavefirma-test</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-document</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-decipher</artifactId>
-				<version>${fire.version}</version>
-			</dependency>			
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-signature-i18n</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-upgrade</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-upgrade-afirma</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-alarms</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-alarms-graylog</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-alarms-eventmanager</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-alarms-mail</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-mail</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-statistics-common</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
-			<dependency>
-				<groupId>es.gob.fire</groupId>
-				<artifactId>fire-log-handlers</artifactId>
-				<version>${fire.version}</version>
-			</dependency>
--->			
 			<!-- Cliente afirma -->
 			<dependency>
 				<groupId>es.gob.afirma</groupId>
@@ -310,7 +200,6 @@
 				<artifactId>javax.json-api</artifactId>
 				<version>${javax.json-api.version}</version>
 			</dependency>
-
 			<dependency>
 				<groupId>org.glassfish</groupId>
 				<artifactId>javax.json</artifactId>
@@ -343,7 +232,7 @@
 			<dependency>
 				<groupId>commons-beanutils</groupId>
 				<artifactId>commons-beanutils</artifactId>
-				<version>1.9.4</version>
+				<version>1.11.0</version>
 			</dependency>
 			<dependency>
 				<groupId>org.apache.commons</groupId>
@@ -354,6 +243,26 @@
 				<groupId>commons-codec</groupId>
 				<artifactId>commons-codec</artifactId>
 				<version>1.14</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-fileupload</groupId>
+				<artifactId>commons-fileupload</artifactId>
+				<version>${commons-fileupload.version}</version>
+			</dependency>
+			<dependency>
+				<groupId>commons-io</groupId>
+				<artifactId>commons-io</artifactId>
+				<version>2.21.0</version>
+			</dependency>
+			<dependency>
+    			<groupId>org.apache.james</groupId>
+				<artifactId>apache-mime4j-core</artifactId>
+				<version>0.8.13</version>
+			</dependency>
+			<dependency>
+				<groupId>org.apache.httpcomponents</groupId>
+				<artifactId>httpclient</artifactId>
+				<version>${httpclient.version}</version>
 			</dependency>
 			<!-- BouncyCastle -->
 			<dependency>
@@ -370,17 +279,12 @@
 			<dependency>
 				<groupId>com.fasterxml.jackson.jaxrs</groupId>
 				<artifactId>jackson-jaxrs-json-provider</artifactId>
-				<version>2.9.4</version>
+				<version>2.21.1</version>
 			</dependency>
 			<dependency>
 				<groupId>com.fasterxml.jackson.core</groupId>
 				<artifactId>jackson-annotations</artifactId>
-				<version>2.9.4</version>
-			</dependency>
-			<dependency>
-				<groupId>org.eclipse</groupId>
-				<artifactId>yasson</artifactId>
-				<version>1.0.2</version>
+				<version>2.21</version>
 			</dependency>
 
 			<!-- JUnit -->

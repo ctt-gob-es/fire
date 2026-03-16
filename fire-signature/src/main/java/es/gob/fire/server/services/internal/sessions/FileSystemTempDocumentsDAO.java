@@ -78,7 +78,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
 
 	@Override
 	public boolean existDocument(final String filename) throws IOException {
-		return checkFile(filename).isFile();
+		return FileSystemUtils.checkFile(TMPDIR, cleanFileName(filename)).isFile();
 	}
 
 
@@ -104,7 +104,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
         }
 
         final File f = filename != null
-        	? checkFile(filename)
+        	? FileSystemUtils.checkFile(TMPDIR, cleanFileName(filename))
         	: File.createTempFile(DEFAULT_PREFIX, null, TMPDIR);
 
         try (final OutputStream fos = new FileOutputStream(f);
@@ -125,7 +125,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
     @Override
 	public byte[] retrieveDocument(final String filename) throws IOException {
 
-        final File dataFile = checkFile(filename);
+        final File dataFile = FileSystemUtils.checkFile(TMPDIR, cleanFileName(filename));
         return readFile(dataFile);
     }
 
@@ -149,7 +149,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
     @Override
     public void deleteDocument(final String filename) throws IOException {
 
-    	final File f = checkFile(filename);
+    	final File f = FileSystemUtils.checkFile(TMPDIR, cleanFileName(filename));
 
     	Files.deleteIfExists(f.toPath());
     }
@@ -164,7 +164,7 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
      */
     @Override
 	public byte[] retrieveAndDeleteDocument(final String filename) throws IOException {
-    	final File dataFile = checkFile(filename);
+    	final File dataFile = FileSystemUtils.checkFile(TMPDIR, cleanFileName(filename));
     	final byte[] ret = readFile(dataFile);
     	Files.delete(dataFile.toPath());
 
@@ -189,32 +189,6 @@ public class FileSystemTempDocumentsDAO implements TempDocumentsDAO {
     					": " + e); //$NON-NLS-1$
     		}
     	}
-    }
-
-    /**
-     * Comprueba que el nombre de fichero indicado sea v&aacute;lido.
-     * @param filename Nombre de fichero.
-     * @return Fichero v&aacute;lidado.
-     * @throws IOException Cuando no se ha indicado un nombre de fichero v&aacute;lido
-     * o si no se ha podido validar.
-     */
-    private static File checkFile(final String filename) throws IOException {
-    	if (filename == null || filename.isEmpty()) {
-            throw new IOException(
-                    "El nombre del fichero a recuperar no puede ser nulo" //$NON-NLS-1$
-            );
-        }
-        final File f = new File(TMPDIR, cleanFileName(filename));
-        try {
-        	if (!f.getCanonicalPath().startsWith(TMPDIR.getCanonicalPath())) {
-        		throw new IOException("Se ha intentado acceder a una ruta fuera del directorio de logs: " + f.getAbsolutePath()); //$NON-NLS-1$
-        	}
-        }
-        catch (final Exception e) {
-        	throw new IOException("No se ha podido validar la ruta del fichero: " + f.getAbsolutePath(), e); //$NON-NLS-1$
-        }
-
-        return f;
     }
 
     /**
