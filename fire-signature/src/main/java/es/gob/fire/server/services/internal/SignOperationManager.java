@@ -56,9 +56,9 @@ public class SignOperationManager {
         final String algorithm      = params.getParameter(ServiceParams.HTTP_PARAM_ALGORITHM);
         final String cop			= params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION);
         final String format         = params.getParameter(ServiceParams.HTTP_PARAM_FORMAT);
-        final String improvedFormat = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
         final String dataB64        = params.getParameter(ServiceParams.HTTP_PARAM_DATA);
         final String extraParamsB64 = params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM);
+
 
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
@@ -178,7 +178,6 @@ public class SignOperationManager {
         session.setAttribute(ServiceParams.SESSION_PARAM_EXTRA_PARAM, extraParams);
         session.setAttribute(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION, cop);
         session.setAttribute(ServiceParams.SESSION_PARAM_FORMAT, format);
-        session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, improvedFormat);
         session.setAttribute(ServiceParams.SESSION_PARAM_PROVIDERS, provs);
         session.setAttribute(ServiceParams.SESSION_PARAM_SKIP_CERT_SELECTION, Boolean.toString(skipSelection));
     	session.setAttribute(ServiceParams.SESSION_PARAM_TRANSACTION_TYPE, TransactionType.SIGN);
@@ -186,7 +185,7 @@ public class SignOperationManager {
     	if (appInfo.getDir3Code() != null && !appInfo.getDir3Code().isEmpty()) {
     		session.setAttribute(ServiceParams.SESSION_PARAM_DIR3_CODE, appInfo.getDir3Code());
     	}
-    	
+
         if (appInfo.getOrganization() != null && !appInfo.getOrganization().isEmpty()) {
     		session.setAttribute(ServiceParams.SESSION_PARAM_APPLICATION_ORGANIZATION, appInfo.getOrganization());
     	}

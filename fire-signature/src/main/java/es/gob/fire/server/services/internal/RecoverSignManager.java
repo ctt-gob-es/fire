@@ -72,6 +72,9 @@ public class RecoverSignManager {
 	private static final AuditTransactionRecorder AUDITTRANSLOGGER = AuditTransactionRecorder.getInstance();
 	private static final AuditSignatureRecorder AUDITSIGNLOGGER = AuditSignatureRecorder.getInstance();
 
+	/** Tama&ntilde;o m&aacute;ximo del identificador de formato de firma longevo. */
+	private static final int MAX_UPGRADE_FORMAT_LENGTH = 20;
+
 	/**
 	 * Finaliza un proceso de firma y devuelve el resultado del mismo.
 	 * @param params Par&aacute;metros extra&iacute;dos de la petici&oacute;n.
@@ -86,8 +89,8 @@ public class RecoverSignManager {
 		final String appId = params.getParameter(ServiceParams.HTTP_PARAM_APPLICATION_ID);
 		final String transactionId = params.getParameter(ServiceParams.HTTP_PARAM_TRANSACTION_ID);
 		final String subjectId = params.getParameter(ServiceParams.HTTP_PARAM_SUBJECT_ID);
-		final String upgrade = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 		final String configB64 = params.getParameter(ServiceParams.HTTP_PARAM_CONFIG);
+		String upgradeFormat = params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE);
 
 		final LogTransactionFormatter logF = trAux.getLogFormatter();
 
@@ -103,6 +106,17 @@ public class RecoverSignManager {
         	LOGGER.warning(logF.f("No se ha proporcionado el identificador de usuario")); //$NON-NLS-1$
         	Responser.sendError(response, FIReError.PARAMETER_USER_ID_NEEDED);
             return;
+        }
+
+        // Si se indico un formato de actualizacion, comprobamos que cumpla los requisitos
+        if (upgradeFormat != null) {
+        	try {
+        		checkUpgradeFormat(upgradeFormat);
+        	}
+        	catch (final Exception e) {
+        		LOGGER.log(Level.WARNING, logF.f("Se indico un formato de actualizacion de firma no valido y se ignorara"), e); //$NON-NLS-1$
+        		upgradeFormat = null;
+        	}
         }
 
 		// Cargamos la configuracion de la operacion
@@ -147,6 +161,11 @@ public class RecoverSignManager {
         	LOGGER.warning("El usuario no selecciono proveedor de firma o no ha quedado registrado"); //$NON-NLS-1$
         	sendError(response, session, FIReError.EXTERNAL_SERVICE_ERROR_TO_SIGN, trAux);
         	return;
+        }
+
+        // Registramos el formato de firma longevo si se indico y es valido
+        if (upgradeFormat != null) {
+            session.setAttribute(ServiceParams.SESSION_PARAM_UPGRADE, upgradeFormat);
         }
 
         // Extraemos la configuracion de firma
@@ -287,7 +306,7 @@ public class RecoverSignManager {
 
 		// Se actualiza o valida la firma si se ha solicitado
     	String finalUpgradeFormat = null;
-    	if (upgrade != null && !upgrade.isEmpty()) {
+    	if (upgradeFormat != null && !upgradeFormat.isEmpty()) {
 
     		// Comprobamos si es necesaria la validacion de la firma
         	final boolean signValidationNeeded = needValidation(
@@ -295,7 +314,7 @@ public class RecoverSignManager {
 
         	final PostProcessResult postProcessResult;
     		try {
-    			postProcessResult = postProcessSignature(partialResult, upgrade,
+    			postProcessResult = postProcessSignature(partialResult, upgradeFormat,
     					upgraterConfig, signValidationNeeded, logF);
     		}
     		catch (final InvalidSignatureException e) {
@@ -355,7 +374,7 @@ public class RecoverSignManager {
         	if (docManager instanceof FireDocumentManagerBase) {
         		partialResult = ((FireDocumentManagerBase) docManager).storeDocument(
         				docId, transactionId, appId, partialResult, signingCert, format,
-        				upgrade, extraParams);
+        				upgradeFormat, extraParams);
         	} else {
         		partialResult = docManager.storeDocument(docId, appId, partialResult,
         				signingCert, format, extraParams);
@@ -389,6 +408,13 @@ public class RecoverSignManager {
 
     	// Enviamos el resultado de la operacion y los datos de la misma, aunque no la propia firma generada
         Responser.sendResult(response, buildResult(providerName, signingCert, finalUpgradeFormat, trAux));
+	}
+
+	private static void checkUpgradeFormat(final String upgradeFormat) {
+
+		if (upgradeFormat.length() > MAX_UPGRADE_FORMAT_LENGTH) {
+			throw new IllegalArgumentException("El formato de actualizacion de firma excede el tamano prefijado: " + MAX_UPGRADE_FORMAT_LENGTH); //$NON-NLS-1$
+		}
 	}
 
 	private static FireSession loadSession(final String transactionId, final String subjectId, final TransactionAuxParams trAux) {
@@ -545,8 +571,7 @@ public class RecoverSignManager {
 		// Obtenemos el conector con el backend ya configurado
 		final FIReConnector connector = ProviderManager.getProviderConnector(providerName, trConfig.getProperties(), logF);
 
-		final Map<String, byte[]> ret;
-		ret = connector.sign(remoteTrId);
+		final Map<String, byte[]> ret = connector.sign(remoteTrId);
 
 		// Notificamos al conector que ha terminado la operacion para que libere recursos y
 		// cierre la transaccion
