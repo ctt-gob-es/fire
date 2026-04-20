@@ -11,9 +11,9 @@ package es.gob.fire.upgrade.afirma;
 
 import java.io.ByteArrayInputStream;
 import java.io.UnsupportedEncodingException;
+import java.util.Base64;
 import java.util.logging.Logger;
 
-import org.apache.ws.security.util.Base64;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 
@@ -60,7 +60,7 @@ final class DssServicesUtils {
         String firmaNode;
         if (isBinary) {
             LOGGER.fine("La firma es binaria"); //$NON-NLS-1$
-            firmaNode = "<dss:Base64Signature>" + Base64.encode(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
+            firmaNode = "<dss:Base64Signature>" + Base64.getEncoder().encodeToString(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
         } else if (firmaXml != null && isEnveloping(firmaXml)) {
             LOGGER.fine("La firma es XML enveloping"); //$NON-NLS-1$
             // Quitamos la cabecera XML
@@ -75,7 +75,7 @@ final class DssServicesUtils {
             firmaNode = removeXmlHeader(firmaNode);
         } else {
             LOGGER.fine("La firma es XML enveloped o detached"); //$NON-NLS-1$
-            firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
+            firmaNode = "<dss:Base64XML>" + Base64.getEncoder().encodeToString(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         // Creamos la peticion segun el tipo de firma que se actualiza
@@ -211,7 +211,7 @@ final class DssServicesUtils {
         String firmaNode;
         if (isBinary) {
             LOGGER.fine("La firma es binaria"); //$NON-NLS-1$
-            firmaNode = "<dss:Base64Signature>" + Base64.encode(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
+            firmaNode = "<dss:Base64Signature>" + Base64.getEncoder().encodeToString(firma) + "</dss:Base64Signature>"; //$NON-NLS-1$ //$NON-NLS-2$
         } else if (firmaXml != null && isEnveloping(firmaXml)) {
             LOGGER.fine("La firma es XML enveloping"); //$NON-NLS-1$
             // Quitamos la cabecera XML
@@ -226,7 +226,7 @@ final class DssServicesUtils {
             firmaNode = removeXmlHeader(firmaNode);
         } else {
             LOGGER.fine("La firma es XML enveloped o detached"); //$NON-NLS-1$
-            firmaNode = "<dss:Base64XML>" + Base64.encode(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
+            firmaNode = "<dss:Base64XML>" + Base64.getEncoder().encodeToString(firma) + "</dss:Base64XML>"; //$NON-NLS-1$ //$NON-NLS-2$
         }
 
         // Creamos la peticion segun el tipo de firma que se actualiza

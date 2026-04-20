@@ -6,48 +6,48 @@ public class GeneralConfigDTO {
 	private Long maxSizeDoc;
 	private Long maxSizePetition;
 	private Long maxAmountDocs;
-	
+
 	private Long maxEntitiesBeforeGrouping;
-	
+
 	private List<ProviderDTO> providers;
 
 	public Long getMaxSizeDoc() {
-		return maxSizeDoc;
+		return this.maxSizeDoc;
 	}
 
-	public void setMaxSizeDoc(Long maxSizeDoc) {
+	public void setMaxSizeDoc(final Long maxSizeDoc) {
 		this.maxSizeDoc = maxSizeDoc;
 	}
 
 	public Long getMaxSizePetition() {
-		return maxSizePetition;
+		return this.maxSizePetition;
 	}
 
-	public void setMaxSizePetition(Long maxSizePetition) {
+	public void setMaxSizePetition(final Long maxSizePetition) {
 		this.maxSizePetition = maxSizePetition;
 	}
 
 	public Long getMaxAmountDocs() {
-		return maxAmountDocs;
+		return this.maxAmountDocs;
 	}
 
-	public void setMaxAmountDocs(Long maxAmountDocs) {
+	public void setMaxAmountDocs(final Long maxAmountDocs) {
 		this.maxAmountDocs = maxAmountDocs;
 	}
 
 	public List<ProviderDTO> getProviders() {
-		return providers;
+		return this.providers;
 	}
 
-	public void setProviders(List<ProviderDTO> providers) {
+	public void setProviders(final List<ProviderDTO> providers) {
 		this.providers = providers;
 	}
 
 	public Long getMaxEntitiesBeforeGrouping() {
-		return maxEntitiesBeforeGrouping;
+		return this.maxEntitiesBeforeGrouping;
 	}
 
-	public void setMaxEntitiesBeforeGrouping(Long maxEntitiesBeforeGrouping) {
+	public void setMaxEntitiesBeforeGrouping(final Long maxEntitiesBeforeGrouping) {
 		this.maxEntitiesBeforeGrouping = maxEntitiesBeforeGrouping;
 	}
 }

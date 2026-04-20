@@ -28,10 +28,18 @@ public final class AfirmaConnector {
     public static final String RECOVERSIGN_OPERATION_ASYNC_RECOVER = "getProcessResponse"; //$NON-NLS-1$
     public static final String VERIFYCERTIFICATE_OPERATION_VERIFY = "verify"; //$NON-NLS-1$
 
+    private static final String TRUSTSTORE_PATH_PROPERTY = "javax.net.ssl.trustStore";
+    private static final String TRUSTSTORE_PASS_PROPERTY = "javax.net.ssl.trustStorePassword";
+    private static final String TRUSTSTORE_TYPE_PROPERTY = "javax.net.ssl.trustStoreType";
+    
     private String signUpgradeService;
     private String recoverSignatureService;
     private String dssAfirmaVerifyCertificate;
-
+    private String trustStorePath;
+    private String trustStorePass;
+    private String trustStoreType;
+    
+    
     private WebServiceInvoker wsInvoker;
 
     /**
@@ -48,6 +56,13 @@ public final class AfirmaConnector {
         this.signUpgradeService = wsConfig.getServiceVerify();
         this.recoverSignatureService = wsConfig.getServiceRecovery();
         this.dssAfirmaVerifyCertificate = wsConfig.getServiceVerifyCertificate();
+        
+        this.trustStorePath = wsConfig.getTruststorePath();
+        if (this.trustStorePath != null && this.trustStorePath.trim().isEmpty()) {
+        	this.trustStorePath = null;
+        }
+        this.trustStorePass = wsConfig.getTruststorePass();
+        this.trustStoreType = wsConfig.getTruststoreType();
     }
 
     /**
@@ -64,6 +79,9 @@ public final class AfirmaConnector {
     byte[] doPlatformCall(final String inputDss, final String serviceName, final String operation)
             throws WSServiceInvokerException {
 
+    	// Configuramos el almacen de confianza SSL
+    	configSslTruststore();
+    	
     	final Object response = this.wsInvoker.performCall(inputDss, serviceName, operation);
 
     	byte[] res;
@@ -80,6 +98,19 @@ public final class AfirmaConnector {
         return res;
     }
 
+    /**
+     * Method that updates the system properties used to define the truststore for the secure connections.
+     * @param truststorePath Parameter that represents the path to the truststore.
+     * @param truststorePass Parameter that represents the password of the truststore.
+     */
+    private void configSslTruststore() {
+    	if (this.trustStorePath != null && !this.trustStorePath.equals(System.getProperty(TRUSTSTORE_PATH_PROPERTY))) {
+    		System.setProperty(TRUSTSTORE_PATH_PROPERTY, this.trustStorePath);
+    		System.setProperty(TRUSTSTORE_PASS_PROPERTY, this.trustStorePass);
+    		System.setProperty(TRUSTSTORE_TYPE_PROPERTY, this.trustStoreType);
+    	}
+    }
+    
     /**
      * Realiza una petici&oacute;n de actualizaci&oacute;n de firma a la Plataforma @firma.
      * @param inputDss Mensaje a enviar.

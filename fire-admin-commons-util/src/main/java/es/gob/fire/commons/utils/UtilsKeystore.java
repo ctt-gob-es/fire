@@ -1,15 +1,15 @@
-/* 
-* Este fichero forma parte de la plataforma de @firma. 
+/*
+* Este fichero forma parte de la plataforma de @firma.
 * La plataforma de @firma es de libre distribución cuyo código fuente puede ser consultado
 * y descargado desde http://administracionelectronica.gob.es
 *
 * Copyright 2005-2019 Gobierno de España
 * Este fichero se distribuye bajo las licencias EUPL versión 1.1 según las
-* condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este 
+* condiciones que figuran en el fichero 'LICENSE.txt' que se acompaña.  Si se   distribuyera este
 * fichero individualmente, deben incluirse aquí las condiciones expresadas allí.
 */
 
-/** 
+/**
  * <b>File:</b><p>es.gob.afirma.utilidades.UtilsKeystore.java.</p>
  * <b>Description:</b><p>Class that manages operations related with the management of keystores.</p>
  * <b>Project:</b><p></p>
@@ -36,7 +36,7 @@ import java.util.ArrayList;
 import java.util.Enumeration;
 import java.util.List;
 
-/** 
+/**
  * <p>Class that manages operations related with the management of keystores.</p>
  * <b>Project:</b><p></p>
  * @version 1.4, 04/03/2025.
@@ -46,37 +46,37 @@ public final class UtilsKeystore {
 	/**
 	 * Attribute that represents the PKCS#12 keystore type.
 	 */
-	public static final String PKCS12 = "PKCS12";
+	public static final String PKCS12 = "PKCS12"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the JCEKS keystore type.
 	 */
-	public static final String JCEKS = "JCEKS";
+	public static final String JCEKS = "JCEKS"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the Java Key Store keystore type.
 	 */
-	public static final String JKS = "JKS";
+	public static final String JKS = "JKS"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the PKCS#11 keystore type.
 	 */
-	public static final String PKCS11 = "PKCS11";
+	public static final String PKCS11 = "PKCS11"; //$NON-NLS-1$
 
 	/**
 	 * Constant attribute that represents the X.509 certificate type.
 	 */
-	public static final String X509_CERTIFICATE_TYPE = "X.509";
+	public static final String X509_CERTIFICATE_TYPE = "X.509"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents a p12 key store file extension.
 	 */
-	public static final String P12_KEYSTORE_EXTENSION = "p12";
+	public static final String P12_KEYSTORE_EXTENSION = "p12"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents a pfx key store file extension.
 	 */
-	public static final String PFX_KEYSTORE_EXTENSION = "pfx";
+	public static final String PFX_KEYSTORE_EXTENSION = "pfx"; //$NON-NLS-1$
 
 	/**
 	 * Constructor method for the class KeystoreUtils.java.
@@ -84,7 +84,7 @@ public final class UtilsKeystore {
 	private UtilsKeystore() {
 
 	}
-	
+
 	/**
 	 * Loads a trust store from a specified file.
 	 *
@@ -98,7 +98,7 @@ public final class UtilsKeystore {
 	 * @throws NoSuchAlgorithmException if the algorithm used to check integrity is not available
 	 * @throws CertificateException     if there is an issue loading the certificates
 	 */
-	public static KeyStore loadTrustStore(String pathKeystore, String typeKeystore, String passTrustStore) throws FileNotFoundException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
+	public static KeyStore loadTrustStore(final String pathKeystore, final String typeKeystore, final String passTrustStore) throws FileNotFoundException, IOException, KeyStoreException, NoSuchAlgorithmException, CertificateException {
 		KeyStore trustStoreUsers;
 		try (FileInputStream keyStoreFile = new FileInputStream(pathKeystore)) {
 		    trustStoreUsers = KeyStore.getInstance(typeKeystore);
@@ -115,25 +115,25 @@ public final class UtilsKeystore {
 	 * @return the X509Certificate of the issuer if found, otherwise null
 	 * @throws KeyStoreException if an error occurs while accessing the keystore
 	 */
-	public static X509Certificate isIssuer(String issuerDN, KeyStore trustStoreUsers) throws KeyStoreException {
+	public static X509Certificate isIssuer(final String issuerDN, final KeyStore trustStoreUsers) throws KeyStoreException {
 		X509Certificate issuerCert = null;
-		
-		Enumeration<String> aliases = trustStoreUsers.aliases();
+
+		final Enumeration<String> aliases = trustStoreUsers.aliases();
 		while (aliases.hasMoreElements()) {
-		    String alias = aliases.nextElement();
-		    Certificate cert = trustStoreUsers.getCertificate(alias);
+		    final String alias = aliases.nextElement();
+		    final Certificate cert = trustStoreUsers.getCertificate(alias);
 		    if (cert instanceof X509Certificate) {
-		        X509Certificate x509Cert = (X509Certificate) cert;
+		        final X509Certificate x509Cert = (X509Certificate) cert;
 		        if (x509Cert.getSubjectX500Principal().getName().equals(issuerDN)) {
 		            issuerCert = x509Cert;
 		            break;
 		        }
 		    }
 		}
-		
+
 		return issuerCert;
 	}
-	
+
 	/**
 	 * Verifies that a given certificate is signed by the specified issuer certificate.
 	 *
@@ -145,18 +145,18 @@ public final class UtilsKeystore {
 	 * @throws NoSuchProviderException  if the security provider is not available
 	 * @throws SignatureException       if the certificate signature does not match the issuer's public key
 	 */
-	public static void verify(X509Certificate certificate, X509Certificate issuerCert) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
+	public static void verify(final X509Certificate certificate, final X509Certificate issuerCert) throws InvalidKeyException, CertificateException, NoSuchAlgorithmException, NoSuchProviderException, SignatureException {
 		certificate.verify(issuerCert.getPublicKey());
 	}
-	
-	public static KeyStore loadKsPKCS12(byte[] certificate, String password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
-		KeyStore keyStore = KeyStore.getInstance(PKCS12);
+
+	public static KeyStore loadKsPKCS12(final byte[] certificate, final String password) throws KeyStoreException, NoSuchAlgorithmException, CertificateException, IOException {
+		final KeyStore keyStore = KeyStore.getInstance(PKCS12);
         try (ByteArrayInputStream bais = new ByteArrayInputStream(certificate)) {
             keyStore.load(bais, password.toCharArray());
         }
 		return keyStore;
 	}
-	
+
 	/**
 	 * Retrieves a list of all subject names from the certificates stored in the given KeyStore.
 	 *
@@ -168,20 +168,20 @@ public final class UtilsKeystore {
 	 * @return a list of subject distinguished names (DNs) of all certificates in the KeyStore.
 	 * @throws KeyStoreException if an error occurs while accessing the KeyStore.
 	 */
-	public static List<String> listAllSubjects(KeyStore keyStore) throws KeyStoreException {
-		List<String> listAllSubjects = new ArrayList<String>();
-		Enumeration<String> aliases = keyStore.aliases();
+	public static List<String> listAllSubjects(final KeyStore keyStore) throws KeyStoreException {
+		final List<String> listAllSubjects = new ArrayList<>();
+		final Enumeration<String> aliases = keyStore.aliases();
         while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
+            final String alias = aliases.nextElement();
 
-            X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+            final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             if (cert != null) {
             	listAllSubjects.add(cert.getSubjectX500Principal().getName());
             }
         }
 		return listAllSubjects;
 	}
-	
+
 	/**
 	 * Retrieves a list of all {@link X509Certificate} instances from the given {@link KeyStore}.
 	 *
@@ -192,13 +192,13 @@ public final class UtilsKeystore {
 	 * @return a list of all {@link X509Certificate} instances found in the KeyStore.
 	 * @throws KeyStoreException if an error occurs while accessing the KeyStore.
 	 */
-	public static List<X509Certificate> listAllX509Certificate(KeyStore keyStore) throws KeyStoreException {
-		List<X509Certificate> listAllX509Certificate = new ArrayList<X509Certificate>();
-		Enumeration<String> aliases = keyStore.aliases();
+	public static List<X509Certificate> listAllX509Certificate(final KeyStore keyStore) throws KeyStoreException {
+		final List<X509Certificate> listAllX509Certificate = new ArrayList<>();
+		final Enumeration<String> aliases = keyStore.aliases();
         while (aliases.hasMoreElements()) {
-            String alias = aliases.nextElement();
+            final String alias = aliases.nextElement();
 
-            X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
+            final X509Certificate cert = (X509Certificate) keyStore.getCertificate(alias);
             if (cert != null) {
             	listAllX509Certificate.add(cert);
             }

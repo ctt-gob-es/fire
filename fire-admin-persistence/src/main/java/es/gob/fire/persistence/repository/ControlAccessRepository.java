@@ -7,12 +7,5 @@ import es.gob.fire.persistence.entity.ControlAccess;
 
 @Repository
 public interface ControlAccessRepository extends JpaRepository<ControlAccess, Long>{
-	
-	/**
-	 * Deletes all control access records associated with the specified IP address.
-	 *
-	 * @param ipUser the IP address for which control access records should be deleted
-	 */
-	void deleteAllByIp(String ipUser);
 
 }

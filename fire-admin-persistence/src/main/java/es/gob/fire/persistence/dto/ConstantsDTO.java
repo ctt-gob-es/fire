@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de España
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.dto.ConstantsDTO.java.</p>
  * <b>Description:</b><p>Class that represents a constant in clients view.</p>
   * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
@@ -26,7 +26,7 @@ package es.gob.fire.persistence.dto;
 
 import java.io.Serializable;
 
-/** 
+/**
  * <p>Class that represents a constant in clients view.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature..</p>
  * @version 1.0, 15/05/2020.
@@ -34,7 +34,7 @@ import java.io.Serializable;
 public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 
 	/**
-	 * Attribute that represents the serial version UID. 
+	 * Attribute that represents the serial version UID.
 	 */
 	private static final long serialVersionUID = -6468608122931567487L;
 
@@ -48,24 +48,24 @@ public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 	 */
 	private String value;
 
-	
+
 	/**
 	 * Gets the value of the attribute {@link #idConstant}.
 	 * @return the value of the attribute {@link #idConstant}.
 	 */
-	
+
 	public Long getIdConstant() {
-		return idConstant;
+		return this.idConstant;
 	}
 
-		
+
 	/**
 	 * Gets the value of the attribute {@link #value}.
 	 * @return the value of the attribute {@link #value}.
 	 */
-	
+
 	public String getValue() {
-		return value;
+		return this.value;
 	}
 
 	/**
@@ -73,14 +73,14 @@ public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 	 * @param idConstantParam Constant id from db;
 	 * @param valueParam  Constant value
 	 */
-	public ConstantsDTO(Long idConstantParam, String valueParam) {
+	public ConstantsDTO(final Long idConstantParam, final String valueParam) {
 		this.idConstant = idConstantParam;
 		this.value = valueParam;
 	}
 
 
 	/**
-	 * Constructor method for the class ConstantsForm.java. 
+	 * Constructor method for the class ConstantsForm.java.
 	 */
 	public ConstantsDTO() {
 		super();
@@ -92,9 +92,9 @@ public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 	 * @see java.lang.Comparable#compareTo(java.lang.Object)
 	 */
 	@Override
-	public int compareTo(ConstantsDTO c) {
-		if (!idConstant.equals(c.getIdConstant())){
-			return value.compareTo(c.getValue());
+	public int compareTo(final ConstantsDTO c) {
+		if (!this.idConstant.equals(c.getIdConstant())){
+			return this.value.compareTo(c.getValue());
 		}
 		return 0;
 	}
@@ -104,10 +104,10 @@ public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 	 */
 	// CHECKSTYLE:OFF -- Managed Beans can´t have final methods.
 	@Override
-	public boolean equals(Object obj) {
+	public boolean equals(final Object obj) {
 		// CHECKSTYLE:ON
 		if (obj instanceof ConstantsDTO) {
-			return ((ConstantsDTO) obj).getIdConstant().equals(idConstant);
+			return ((ConstantsDTO) obj).getIdConstant().equals(this.idConstant);
 		}
 		return false;
 	}
@@ -120,7 +120,7 @@ public class ConstantsDTO implements Serializable, Comparable<ConstantsDTO> {
 	@Override
 	public String toString() {
 		// CHECKSTYLE:OFF -- Managed Beans can´t have final methods.
-		return value;
+		return this.value;
 	}
-	
+
 }

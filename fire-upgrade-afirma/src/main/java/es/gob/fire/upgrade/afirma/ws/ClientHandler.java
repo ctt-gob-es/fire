@@ -25,6 +25,7 @@ import java.io.InputStream;
 import java.security.KeyStore;
 import java.security.Provider;
 import java.security.Security;
+import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
 
@@ -47,12 +48,12 @@ import org.apache.axis2.saaj.SOAPElementImpl;
 import org.apache.axis2.saaj.SOAPHeaderElementImpl;
 import org.apache.axis2.saaj.TextImplEx;
 import org.apache.axis2.saaj.util.SAAJUtil;
-import org.apache.ws.security.WSConstants;
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.components.crypto.Crypto;
-import org.apache.ws.security.message.WSSecHeader;
-import org.apache.ws.security.message.WSSecSignature;
-import org.apache.ws.security.message.WSSecUsernameToken;
+import org.apache.wss4j.common.crypto.Crypto;
+import org.apache.wss4j.common.ext.WSSecurityException;
+import org.apache.wss4j.dom.WSConstants;
+import org.apache.wss4j.dom.message.WSSecHeader;
+import org.apache.wss4j.dom.message.WSSecSignature;
+import org.apache.wss4j.dom.message.WSSecUsernameToken;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
@@ -126,9 +127,9 @@ class ClientHandler extends AbstractCommonHandler {
 			doc = SAAJUtil.getDocumentFromSOAPEnvelope(msgContext.getEnvelope());
 			// Securizacion de la peticion SOAP segun la opcion de seguridad
 			// configurada
-			if (this.securityOption.equals(USERNAMEOPTION)) {
-				secMsg = this.createUserNameToken(doc);
-			} else if (this.securityOption.equals(CERTIFICATEOPTION)) {
+			if (this.securityOption.equalsIgnoreCase(USERNAMEOPTION)) {
+				secMsg = createUserNameToken(doc);
+			} else if (this.securityOption.equalsIgnoreCase(CERTIFICATEOPTION)) {
 
 				// Obtenemos el certificado cargardo proveniente del platform.properties
 				final KeyStore ks = KeyStore.getInstance(this.getKeystoreType());
@@ -136,16 +137,7 @@ class ClientHandler extends AbstractCommonHandler {
 					ks.load(ksIs, this.getKeystorePass().toCharArray());
 				}
 				final X509Certificate cert = (X509Certificate) ks.getCertificate(this.getUserAlias());
-
-				// Evaluamos si es EC
-				if (cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_EC) ||
-	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDH) ||
-	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDSA) ||
-	            		cert.getPublicKey().getAlgorithm().equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECGOST)) {
-	            	secMsg = this.createBinarySecurityEC(doc, cert);
-	            } else {
-	            	secMsg = this.createBinarySecurityToken(doc);
-	            }
+            	secMsg = this.createBinarySecurityToken(doc, cert);
 			}
 
 			if (!this.securityOption.equals(NONEOPTION) && secMsg != null) {
@@ -169,6 +161,14 @@ class ClientHandler extends AbstractCommonHandler {
 		return InvocationResponse.CONTINUE;
 	}
 
+	private static boolean isElipticCurveCert(Certificate cert) {
+		String algorithm = cert.getPublicKey().getAlgorithm();
+		return algorithm.equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_EC) ||
+				algorithm.equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDH) ||
+				algorithm.equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECDSA) ||
+				algorithm.equalsIgnoreCase(SignatureAlgorithmsWSS.SIGNATURE_ALGORITHM_ECGOST);
+	}
+	
 	/**
 	 * Method that transforms a SOAPHeader into a OMElement.
 	 *
@@ -230,17 +230,17 @@ class ClientHandler extends AbstractCommonHandler {
 
 		try {
 			// Insercion del tag wsse:Security y userNameToken
-			wsSecHeader = new WSSecHeader(null, false);
-			wsSecUsernameToken = new WSSecUsernameToken();
+			wsSecHeader = new WSSecHeader(null, false, soapEnvelopeRequest);
+			wsSecUsernameToken = new WSSecUsernameToken(wsSecHeader);
 			wsSecUsernameToken.setPasswordType(getPasswordType());
 			wsSecUsernameToken.setUserInfo(getUserAlias(), getPassword());
-			wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
-			wsSecUsernameToken.prepare(soapEnvelopeRequest);
+			wsSecHeader.insertSecurityHeader();
+			wsSecUsernameToken.prepare();
 			// Anadimos una marca de tiempo indicando la fecha de creacion del tag
 			wsSecUsernameToken.addCreated();
 			wsSecUsernameToken.addNonce();
 			// Modificacion de la peticion
-			secSOAPReqDoc = wsSecUsernameToken.build(soapEnvelopeRequest, wsSecHeader);
+			secSOAPReqDoc = wsSecUsernameToken.build();
 			element = secSOAPReqDoc.getDocumentElement();
 
 			// Transformacion del elemento DOM a String
@@ -278,21 +278,29 @@ class ClientHandler extends AbstractCommonHandler {
 	 * @throws SOAPException May be thrown if the message is invalid.
 	 * @throws WSSecurityException If the method fails.
 	 */
-	private SOAPMessage createBinarySecurityToken(final Document soapEnvelopeRequest) throws TransformerException, IOException, SOAPException, WSSecurityException {
+	private SOAPMessage createBinarySecurityToken(final Document soapEnvelopeRequest, final X509Certificate cert) throws TransformerException, IOException, SOAPException, WSSecurityException {
 
 		// Insercion del tag wsse:Security y BinarySecurityToken
-		final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
-		final WSSecSignature wsSecSignature = new WSSecSignature();
+		final WSSecHeader wsSecHeader = new WSSecHeader(null, false, soapEnvelopeRequest);
+	    wsSecHeader.insertSecurityHeader();
+				
+		final WSSecSignature wsSecSignature = new WSSecSignature(wsSecHeader);
 		final Crypto crypto = getCryptoInstance();
 
 		// Indicacion para que inserte el tag BinarySecurityToken
-		wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-		wsSecSignature.setUserInfo(getUserAlias(), getPassword());
-		wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
-		wsSecSignature.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
+	    wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
+	    
+	    wsSecSignature.setSignatureAlgorithm(isElipticCurveCert(cert)
+	    		? WSConstants.ECDSA_SHA256
+	    		: WSConstants.RSA_SHA256);
+	    
+	    wsSecSignature.setX509Certificate(cert);
+	    wsSecSignature.setUserInfo(getUserAlias(), getPassword());	    
+
+	    wsSecSignature.prepare(crypto);
 
 		// Modificacion y firma de la peticion
-		final Document secSOAPReqDoc = wsSecSignature.build(soapEnvelopeRequest, crypto, wsSecHeader);
+		final Document secSOAPReqDoc = wsSecSignature.build(crypto);
 		final Element element = secSOAPReqDoc.getDocumentElement();
 
 		// Transformacion del elemento DOM a String
@@ -306,49 +314,6 @@ class ClientHandler extends AbstractCommonHandler {
 		// securizado formado
 		final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
 		return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
-	}
-
-	/**
-	 * Creates a SOAP request secured with a BinarySecurityToken using an EC (ECDSA) certificate.
-	 * <p>
-	 * This method inserts the WS-Security header and BinarySecurityToken into the SOAP envelope,
-	 * prepares the EC signature, signs the request, and returns a new {@link SOAPMessage}
-	 * representing the secured request.
-	 * </p>
-	 *
-	 * @param soapEnvelopeRequest The unsecured SOAP request as a {@link Document}.
-	 * @param cert The X.509 certificate to use for the EC (ECDSA) signature.
-	 * @return A {@link SOAPMessage} representing the secured SOAP request.
-	 * @throws Exception If any error occurs while generating the EC signature or building the secured SOAP message.
-	 */
-	private SOAPMessage createBinarySecurityEC(final Document soapEnvelopeRequest, final X509Certificate cert)
-	        throws Exception {
-
-		// Insercion del tag wsse:Security y BinarySecurityToken
-		final WSSecHeader wsSecHeader = new WSSecHeader(null, false);
-		final WSSecSignatureEC wsSecSignatureEC = new WSSecSignatureEC();
-		final Crypto crypto = getCryptoInstance();
-
-		// Indicacion para que inserte el tag BinarySecurityToken
-	    wsSecSignatureEC.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-	    wsSecSignatureEC.configureECforBinarySecurityToken(cert, getUserAlias(), getPassword());
-	    wsSecHeader.insertSecurityHeader(soapEnvelopeRequest);
-	 	wsSecSignatureEC.prepare(soapEnvelopeRequest, crypto, wsSecHeader);
-
-	 	// Modificacion y firma de la peticion
-	    final Document secSOAPReqDoc = wsSecSignatureEC.build(soapEnvelopeRequest, crypto, wsSecHeader);
-	    final Element element = secSOAPReqDoc.getDocumentElement();
-
-	    // Transformacion del DOM a String
-	    final DOMSource source = new DOMSource(element);
-	    final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-	    final StreamResult streamResult = new StreamResult(baos);
-	    SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
-	    final String secSOAPReq = new String(baos.toByteArray());
-
-	    // Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP securizado formado
-	    final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
-	    return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
 	}
 
 	/**

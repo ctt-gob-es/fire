@@ -36,7 +36,6 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.persistence.dto.UserDTO;
 import es.gob.fire.persistence.dto.UserEditDTO;
 import es.gob.fire.persistence.entity.Rol;
@@ -54,24 +53,6 @@ import es.gob.fire.persistence.service.IUserService;
 @Service
 @Scope(value = ConfigurableBeanFactory.SCOPE_SINGLETON)
 public class UserService implements IUserService {
-
-	/** The Constant LOG. */
-	private static final Logger LOGGER = Logger.getLogger(UserService.class);
-
-	/**
-	 * Attribute that represents the default charset.
-	 */
-	private static final String DEFAULT_CHARSET = "utf-8"; //$NON-NLS-1$
-
-	/**
-	 * Attribute that represents the md algorithm.
-	 */
-	private static final String MD_ALGORITHM = "SHA-256"; //$NON-NLS-1$
-
-	/**
-	 * Constant attribute that represents the value of the administrator permission.
-	 */
-	private static final String ROLE_ADMIN_PERMISSON = "1"; //$NON-NLS-1$
 
 	/**
 	 * Attribute that represents the injected interface that proves CRUD operations for the persistence.
@@ -136,7 +117,7 @@ public class UserService implements IUserService {
 		user.setStartDate(new Date());
 		user.setRenovationDate(new Date());
 		user.setDni(userDto.getDniAdd());
-		
+
 		//TODO Rellenar los campos que faltan
 		return this.repository.save(user);
 	}
@@ -162,13 +143,13 @@ public class UserService implements IUserService {
 		if (user.getRoot() != Boolean.TRUE) {
 			user.setRol(this.rolRepository.findByRolId(userDto.getRolId()));
 		}
-		
+
 		user.setName(userDto.getNameEdit());
 		user.setSurnames(userDto.getSurnamesEdit());
 		user.setEmail(userDto.getEmailEdit());
 		user.setPhone(userDto.getTelfEdit());
 		user.setDni(userDto.getDniEdit());
-		
+
 		return this.repository.save(user);
 	}
 
@@ -235,9 +216,9 @@ public class UserService implements IUserService {
 	public User getUserByEmail(final String email) {
 		return this.repository.findByEmail(email);
 	}
-	
+
 	@Override
-	public List<User> getAllUserByEmail(String email) {
+	public List<User> getAllUserByEmail(final String email) {
 		return this.repository.findAllByEmail(email);
 	}
 
@@ -245,7 +226,8 @@ public class UserService implements IUserService {
 	 * {@inheritDoc}
 	 * @see es.gob.fire.persistence.services.IUserService#getUserByDni(java.lang.String)
 	 */
-	public User getUserByDni(String dni) {
+	@Override
+	public User getUserByDni(final String dni) {
 		return this.repository.findAllByDni(dni);
 	}
 }

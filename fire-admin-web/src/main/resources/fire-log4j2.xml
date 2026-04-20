@@ -18,10 +18,10 @@
     </Appenders>
     <Loggers>
         <Logger name="es.gob.fire" level="debug" additivity="false">
-            <appender-ref ref="FIRE-WEB" level="debug" />
+            <AppenderRef ref="FIRE-WEB" level="debug" />
         </Logger>
 		<Root level="error" additivity="false">
-            <appender-ref ref="STDOUT" />
+            <AppenderRef ref="STDOUT" />
         </Root>
     </Loggers>
 </Configuration>

@@ -39,7 +39,8 @@ import javax.servlet.http.HttpServletResponse;
 import javax.servlet.http.HttpSession;
 import javax.validation.constraints.NotEmpty;
 
-import es.gob.fire.commons.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
@@ -83,10 +84,8 @@ import es.gob.fire.persistence.service.ILogServerService;
 @RestController
 public class LogServerRestController {
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(LogServerRestController.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(LogServerRestController.class);
 
 	/**
 	 * Attribute that represents the span text.
@@ -139,9 +138,7 @@ public class LogServerRestController {
 		final List<RowLogFileDTO> filesList = new ArrayList<>();
 		try {
 			final LogFilesDTO logFiles = this.logConsumerService.getLogFiles();
-			for (final RowLogFileDTO logFile: logFiles.getFileList()) {
-				filesList.add(logFile);
-			}
+			filesList.addAll(logFiles.getFileList());
 			dtOutput.setRecordsTotal(logFiles.getFileList().size());
 		} catch (final Exception e) {
 			LOGGER.warn("Error al llamar al servicio de listado de ficheros de log", e);
@@ -255,7 +252,7 @@ public class LogServerRestController {
 	@RequestMapping(value = "checklogserver", method = RequestMethod.POST)
 	public Boolean checkConnectionLogServer(@RequestParam("urlTex") final String logServerUrlTex, @RequestParam("verifySsl") final boolean verifySsl) {
 		final boolean checked = this.logConsumerService.echo(logServerUrlTex, verifySsl);
-		return new Boolean(checked);
+		return Boolean.valueOf(checked);
 	}
 
 	/**

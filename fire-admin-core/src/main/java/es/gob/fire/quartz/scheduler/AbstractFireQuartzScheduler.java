@@ -27,11 +27,12 @@ package es.gob.fire.quartz.scheduler;
 import java.util.Date;
 import java.util.Map;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.quartz.Job;
 import org.quartz.JobDataMap;
 import org.quartz.SchedulerException;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.exceptions.IFireException;
 import es.gob.fire.i18n.IQuartzGeneralMessages;
 import es.gob.fire.i18n.Language;
@@ -44,13 +45,11 @@ import es.gob.fire.quartz.planner.IPlanner;
  * @version 1.1, 14/03/2023.
  */
 public abstract class AbstractFireQuartzScheduler extends AbstractQuartzScheduler {
-	
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(AbstractFireQuartzScheduler.class);
 
-	
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(AbstractFireQuartzScheduler.class);
+
+
 	/**
 	 * Constant attribute that represents a dummy time in milliseconds for the period of
 	 * execution of a task. It constant must be asigned when the period in the planner
@@ -73,11 +72,11 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 
 		if (planner != null) {
 
-			Date nextExecutionDate = planner.getNextExecutionDate();
+			final Date nextExecutionDate = planner.getNextExecutionDate();
 
 			if (nextExecutionDate == null) {
 
-				LOGGER.warn(Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ01, new Object[ ] { taskNameParam }));
+				LOGGER.warn(Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ01, taskNameParam));
 
 			} else {
 
@@ -99,8 +98,8 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 
 				try {
 					result = addOrReplaceJobTrigger(nextExecutionDate, periodInMillis, numberOfReps, taskNameParam, planner.getIdentifier(), taskClass, jobDataMap);
-				} catch (SchedulerException e) {
-					String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ02, new Object[ ] { taskNameParam, getSchedulerGroup() });
+				} catch (final SchedulerException e) {
+					final String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ02, taskNameParam, getSchedulerGroup());
 					throw new FireSchedulerException(IFireException.COD_184, errorMsg, e);
 				}
 
@@ -122,8 +121,8 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 
 		try {
 			return removeJob(taskName);
-		} catch (SchedulerException e) {
-			String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ03, new Object[ ] { taskName, getSchedulerGroup() });
+		} catch (final SchedulerException e) {
+			final String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ03, taskName, getSchedulerGroup());
 			throw new FireSchedulerException(IFireException.COD_184, errorMsg, e);
 		}
 
@@ -140,8 +139,8 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 
 		try {
 			return removeTrigger(taskName, plannerId);
-		} catch (SchedulerException e) {
-			String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ04, new Object[ ] { taskName, getSchedulerGroup() });
+		} catch (final SchedulerException e) {
+			final String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ04, taskName, getSchedulerGroup());
 			throw new FireSchedulerException(IFireException.COD_184, errorMsg, e);
 		}
 
@@ -167,7 +166,7 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 	 */
 	public final boolean stopAllTheTasksAndBlockScheduler(final String taskManagerName) {
 
-		boolean result = stopAllTheTasks(taskManagerName);
+		final boolean result = stopAllTheTasks(taskManagerName);
 		if (result) {
 			blockStartAndStopOperations();
 		}
@@ -198,8 +197,8 @@ public abstract class AbstractFireQuartzScheduler extends AbstractQuartzSchedule
 
 		try {
 			return checkIfExistJob(taskName);
-		} catch (SchedulerException e) {
-			String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ05, new Object[ ] { taskName, getSchedulerGroup() });
+		} catch (final SchedulerException e) {
+			final String errorMsg = Language.getFormatResQuartzGeneral(IQuartzGeneralMessages.LOGMQ05, taskName, getSchedulerGroup());
 			throw new FireSchedulerException(IFireException.COD_185, errorMsg, e);
 		}
 

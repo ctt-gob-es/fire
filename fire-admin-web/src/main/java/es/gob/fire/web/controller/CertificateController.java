@@ -33,7 +33,6 @@ import java.security.cert.CertificateException;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.context.MessageSource;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -74,23 +73,6 @@ public class CertificateController {
 	 * Constant that represents the parameter log.
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(CertificateController.class);
-	
-	/**
-	 * Attribute that represents the identifier of the html input text field for the SSL alias certificate.
-	 */
-	private static final String FIELD_NAME_CERT = "NombreCert"; //$NON-NLS-1$
-
-	/**
-	 * Attribute that represents the service object for accessing the repository.
-	 */
-	@Autowired
-	private ICertificateService CertService;
-
-	/**
-	 * Attribute that represents the identifier of the html input file field for the certificate file.
-	 */
-	private static final String FIELD_FILE = "file"; //$NON-NLS-1$
-
 
 	/**
 	 * Attribute that represents the service object for accessing the
@@ -98,12 +80,6 @@ public class CertificateController {
 	 */
 	@Autowired
 	private ICertificateService certificateService;
-
-	/**
-	 * Attribute that represents the view message wource.
-	 */
-	@Autowired
-	private MessageSource messageSource;
 
 	/**
 	 * Method that load the list of certificates .

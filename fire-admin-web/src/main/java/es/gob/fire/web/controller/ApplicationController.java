@@ -12,7 +12,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import es.gob.fire.persistence.dto.ApplicationDTO;
@@ -34,7 +33,7 @@ import es.gob.fire.service.ICertificateService;
  * </p>
  * <b>Project:</b>
  * <p>
- * 
+ *
  * </p>
  *
  * @version 1.5, 24/02/2025.
@@ -48,13 +47,6 @@ public class ApplicationController {
 	 * Constant that represents the parameter 'appId'.
 	 */
 	private static final String FIELD_ID_APPLICATION = "appId"; //$NON-NLS-1$
-
-
-	/**
-	 * Constant that represents the parameter log.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ApplicationController.class);
-
 
 	/**
 	 * Attribute that represents the service object for accessing the
@@ -102,12 +94,12 @@ public class ApplicationController {
 
 		final List<CertificateDTO> listCertificateDTO = this.certificateService.obtainAllCertificateToDTO(this.certificateService.getAllCertificate());
 		final List<CertificateDTO> selectedCertificatesDTO = new ArrayList<>();
-		
+
 		final List<UserDTO> selectedUsers = new ArrayList<>();
 		final List<UserDTO> availableUsers = new ArrayList<>();
 
 		for (final User userApp : StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList())) {
-			UserDTO userDTO = new UserDTO();
+			final UserDTO userDTO = new UserDTO();
 			userDTO.setUserId(userApp.getUserId());
 			userDTO.setNameAndSurname(userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames()));
 			availableUsers.add(userDTO);
@@ -117,7 +109,7 @@ public class ApplicationController {
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
 		model.addAttribute("availableCertficates", listCertificateDTO);
 		model.addAttribute("selectedCertificates", selectedCertificatesDTO);
-		
+
 		model.addAttribute("appAddForm", appDto); //$NON-NLS-1$
 
 		return "modal/applicationAddForm.html"; //$NON-NLS-1$
@@ -138,7 +130,7 @@ public class ApplicationController {
 		final List<UserDTO> selectedUsers = new ArrayList<>();
 
 		for (final ApplicationResponsible appResp : this.applicationService.getApplicationResponsibleByApprId(appId)) {
-			UserDTO userDTO = new UserDTO();
+			final UserDTO userDTO = new UserDTO();
 			userDTO.setUserId(appResp.getResponsible().getUserId());
 			userDTO.setNameAndSurname(appResp.getResponsible().getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(appResp.getResponsible().getSurnames()));
 			selectedUsers.add(userDTO);
@@ -146,25 +138,25 @@ public class ApplicationController {
 
 		final List<UserDTO> availableUsers = new ArrayList<>();
 		for (final User userApp : StreamSupport.stream(this.userService.getAllUser().spliterator(), false).collect(Collectors.toList())) {
-			UserDTO userDTO = new UserDTO();
+			final UserDTO userDTO = new UserDTO();
 			userDTO.setUserId(userApp.getUserId());
 			userDTO.setNameAndSurname(userApp.getName().concat(UtilsStringChar.SPECIAL_BLANK_SPACE_STRING).concat(userApp.getSurnames()));
 			availableUsers.add(userDTO);
 		}
-		
+
 		final List<Certificate> selectedCertificates = new ArrayList<>();
-		
+
 		final List<CertificatesApplication> listCertificatesApplication = this.applicationService.getCertificatesApplicationByAppId(appId);
-		
-		for (CertificatesApplication certificatesApplication : listCertificatesApplication) {
+
+		for (final CertificatesApplication certificatesApplication : listCertificatesApplication) {
 			selectedCertificates.add(certificatesApplication.getCertificate());
 		}
-		
+
 		final List<CertificateDTO> availableCertficatesDTO = this.certificateService.obtainAllCertificateToDTO(this.certificateService.getAllCertificate());
 		final List<CertificateDTO> selectedCertificatesDTO = this.certificateService.obtainAllCertificateToDTO(selectedCertificates);
-		
+
 		availableCertficatesDTO.removeAll(selectedCertificatesDTO);
-		
+
 		model.addAttribute("selectedUsers", selectedUsers); //$NON-NLS-1$
 		model.addAttribute("availableUsers", availableUsers); //$NON-NLS-1$
 		model.addAttribute("availableCertficates", availableCertficatesDTO);
@@ -200,15 +192,15 @@ public class ApplicationController {
 	@RequestMapping(value = "/viewapplication", method = RequestMethod.POST)
 	public String appView(@RequestParam("appId") final String appId, final Model model) {
 		final ApplicationCertDTO appViewForm = this.applicationService.getViewApplication(appId);
-		
+
 		final List<CertificatesApplication> listCertificatesApplication = this.applicationService.getCertificatesApplicationByAppId(appId);
 
-		applicationService.obtainZipWithCertificatesApp(appViewForm, listCertificatesApplication);
-		
+		this.applicationService.obtainZipWithCertificatesApp(appViewForm, listCertificatesApplication);
+
 		model.addAttribute("appViewForm", appViewForm); //$NON-NLS-1$
 		return "modal/applicationViewForm.html"; //$NON-NLS-1$
 	}
-	
+
 	/**
 	 * Method that maps the request for opening the application enable confirmation modal
 	 * @param appId Long that represents the application id
@@ -220,10 +212,10 @@ public class ApplicationController {
 		final Application app = this.applicationService.getAppByAppId(appId);
 
 		final ApplicationDTO appDto = this.applicationService.applicationEntityToDto(app);
-		
+
 		model.addAttribute("application", appDto);
 		model.addAttribute("enabled", appDto.getHabilitado());
-		
+
 		return "modal/applicationConfirmEnable.html";
 	}
 }

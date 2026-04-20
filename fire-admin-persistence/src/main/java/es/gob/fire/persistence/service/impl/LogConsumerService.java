@@ -28,6 +28,8 @@ import java.nio.file.Files;
 import java.security.KeyStore;
 import java.util.Collections;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -36,7 +38,6 @@ import com.google.gson.Gson;
 import com.google.gson.JsonSyntaxException;
 
 import es.gob.fire.commons.log.LogErrors;
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.i18n.IWebLogMessages;
 import es.gob.fire.i18n.Language;
 import es.gob.fire.persistence.dto.DownloadedLogFileDTO;
@@ -62,8 +63,8 @@ import es.gob.log.consumer.client.LogResult;
 @Service
 public class LogConsumerService implements ILogConsumerService {
 
-	/** Logger. */
-	private static final Logger LOGGER = Logger.getLogger(LogConsumerService.class);
+	/** Attribute that represents the object that manages the log of the class. */
+	private static final Logger LOGGER = LogManager.getLogger(LogConsumerService.class);
 
 	/**
 	 * Attribute that represents the injected interface that provides operation

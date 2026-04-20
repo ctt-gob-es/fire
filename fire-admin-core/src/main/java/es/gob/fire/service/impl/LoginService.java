@@ -93,11 +93,11 @@ public class LoginService implements ILoginService {
 	 */
 	private static final Logger LOGGER = LogManager.getLogger(LoginService.class);
 
-	@Value("${conf.cert.path.truststore}")
-	private String confCertPathTruststore;
+	@Value("${contingency.truststore.path}")
+	private String contingencyTruststorePath;
 
-	@Value("${conf.cert.path.truststore.password}")
-	private String confCertPathTruststorePassword;
+	@Value("${contingency.truststore.password}")
+	private String contingencyTruststorePassword;
 
 	/**
 	 * Attribute that represents the url to service pasarela.
@@ -110,7 +110,7 @@ public class LoginService implements ILoginService {
 	public static final String ROLE_ADMIN = "Administrator"; //$NON-NLS-1$
 
 	public static final String PARAM_RANDOM_STRING_LOGIN = "randomStringLogin"; //$NON-NLS-1$
-	
+
 	public static final String PARAM_LIMIT_SIGN_GEN = "limitSignGen"; //$NON-NLS-1$
 
 	/**
@@ -229,7 +229,7 @@ public class LoginService implements ILoginService {
     	KeyStore trustStoreUsers = null;
     	try {
     		// Cargamos el TrustStore
-			trustStoreUsers = UtilsKeystore.loadTrustStore(this.confCertPathTruststore, UtilsKeystore.JKS, this.confCertPathTruststorePassword);
+			trustStoreUsers = UtilsKeystore.loadTrustStore(this.contingencyTruststorePath, UtilsKeystore.JKS, this.contingencyTruststorePassword);
 		} catch (CertificateException | NoSuchAlgorithmException | IOException | KeyStoreException e) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
 		    throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
@@ -253,11 +253,10 @@ public class LoginService implements ILoginService {
     		// Evaluamos si el certificado elegido tiene como emisor alguno de los certificados de nuestro almacen de confianza
     		issuerCert = UtilsKeystore.isIssuer(issuerDN, trustStoreUsers);
 
-    		if(issuerCert != null) {
-    			LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML011, new Object[]{issuerDN}));
-    		} else {
+    		if(issuerCert == null) {
     			throw new CertificateException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML010));
     		}
+			LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_ML011, new Object[]{issuerDN}));
     	} catch (final KeyStoreException e) {
     		LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008), e);
     		throw new KeyStoreException(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML008));
@@ -383,7 +382,6 @@ public class LoginService implements ILoginService {
 	@Override
 	public void validateIfSignSecure(final CAdESAnalizer analizer, final String token, final String limitSignGen) throws CertificateException, ParseException, TimeoutException {
 		final String strSigned = new String(analizer.getContent());
-		LOGGER.error(" ====== El token recuperado de la sesion es " + token);
 
 		if (token == null) {
 			LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML019));

@@ -36,6 +36,8 @@ import java.util.stream.StreamSupport;
 import javax.servlet.ServletContext;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -55,7 +57,6 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Utils;
 import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.i18n.IWebLogMessages;
@@ -82,16 +83,14 @@ import es.gob.fire.persistence.service.IUserService;
  * <p>
  * Application for signing documents of @firma suite systems.
  * </p>
- * 
+ *
  * @version 1.8, 24/02/2025.
  */
 @RestController
 public class UserRestController {
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(UserRestController.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(UserRestController.class);
 
 	/**
 	 * Attribute that represents the span text.
@@ -144,39 +143,39 @@ public class UserRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/usersdatatable", method = RequestMethod.GET)
-	public DataTablesOutput<UserTableDTO> users(@NotEmpty final DataTablesInput input, Locale locale) {
+	public DataTablesOutput<UserTableDTO> users(@NotEmpty final DataTablesInput input, final Locale locale) {
 	    // Obtener la lista completa de usuarios desde el servicio
-	    Iterable<User> users = this.userService.getAllUser();
+	    final Iterable<User> users = this.userService.getAllUser();
 
 	    // Convertir la lista de usuarios en una lista de DTOs
 	    List<UserTableDTO> dtoList = StreamSupport.stream(users.spliterator(), false).map(user -> {
-	        String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
-	        UserTableDTO userTable = new UserTableDTO(user);
+	        final String rolProperty = this.messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+	        final UserTableDTO userTable = new UserTableDTO(user);
 	        userTable.setRolName(rolProperty);
 	        return userTable;
 	    }).collect(Collectors.toList());
 
 	    // 1. Aplicar la busqueda global con manejo de valores nulos
-	    String searchValue = input.getSearch().getValue(); // Valor de busqueda global
+	    final String searchValue = input.getSearch().getValue(); // Valor de busqueda global
 	    if (searchValue != null && !searchValue.isEmpty()) {
 	        dtoList = dtoList.stream()
-	            .filter(dto -> 
-	                (dto.getEmail() != null && dto.getEmail().toLowerCase().contains(searchValue.toLowerCase())) ||
-	                (dto.getName() != null && dto.getName().toLowerCase().contains(searchValue.toLowerCase())) ||
-	                (dto.getSurnames() != null && dto.getSurnames().toLowerCase().contains(searchValue.toLowerCase())) ||
-	                (dto.getPhone() != null && dto.getPhone().toLowerCase().contains(searchValue.toLowerCase())) ||
-	                (dto.getRolName() != null && dto.getRolName().toLowerCase().contains(searchValue.toLowerCase()) ||
-	                (dto.getDni() != null && dto.getDni().toLowerCase().contains(searchValue.toLowerCase())))
+	            .filter(dto ->
+	                dto.getEmail() != null && dto.getEmail().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                dto.getName() != null && dto.getName().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                dto.getSurnames() != null && dto.getSurnames().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                dto.getPhone() != null && dto.getPhone().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                dto.getRolName() != null && dto.getRolName().toLowerCase().contains(searchValue.toLowerCase()) ||
+	                dto.getDni() != null && dto.getDni().toLowerCase().contains(searchValue.toLowerCase())
 	            )
 	            .collect(Collectors.toList());
 	    }
 
 	    // 2. Aplicar la ordenacion con manejo de valores nulos usando expresiones lambda
-	    List<Order> orders = input.getOrder();
+	    final List<Order> orders = input.getOrder();
 	    if (!orders.isEmpty()) {
-	        Order order = orders.get(0); // Obtener la primera ordenacion (solo manejamos una por ahora)
-	        int columnIndex = order.getColumn(); // Indice de la columna a ordenar
-	        String sortDirection = order.getDir(); // Direccion ('asc' o 'desc')
+	        final Order order = orders.get(0); // Obtener la primera ordenacion (solo manejamos una por ahora)
+	        final int columnIndex = order.getColumn(); // Indice de la columna a ordenar
+	        final String sortDirection = order.getDir(); // Direccion ('asc' o 'desc')
 
 	        Comparator<UserTableDTO> comparator = null;
 
@@ -184,64 +183,92 @@ public class UserRestController {
 	        switch (input.getColumns().get(columnIndex).getData()) {
 	            case "email":
 	                comparator = (dto1, dto2) -> {
-	                    String email1 = dto1.getEmail();
-	                    String email2 = dto2.getEmail();
-	                    if (email1 == null) return 1;
-	                    if (email2 == null) return -1;
+	                    final String email1 = dto1.getEmail();
+	                    final String email2 = dto2.getEmail();
+	                    if (email1 == null) {
+							return 1;
+						}
+	                    if (email2 == null) {
+							return -1;
+						}
 	                    return email1.compareTo(email2);
 	                };
 	                break;
 	            case "name":
 	                comparator = (dto1, dto2) -> {
-	                    String name1 = dto1.getName();
-	                    String name2 = dto2.getName();
-	                    if (name1 == null) return 1;
-	                    if (name2 == null) return -1;
+	                    final String name1 = dto1.getName();
+	                    final String name2 = dto2.getName();
+	                    if (name1 == null) {
+							return 1;
+						}
+	                    if (name2 == null) {
+							return -1;
+						}
 	                    return name1.compareTo(name2);
 	                };
 	                break;
 	            case "surnames":
 	                comparator = (dto1, dto2) -> {
-	                    String surnames1 = dto1.getSurnames();
-	                    String surnames2 = dto2.getSurnames();
-	                    if (surnames1 == null) return 1;
-	                    if (surnames2 == null) return -1;
+	                    final String surnames1 = dto1.getSurnames();
+	                    final String surnames2 = dto2.getSurnames();
+	                    if (surnames1 == null) {
+							return 1;
+						}
+	                    if (surnames2 == null) {
+							return -1;
+						}
 	                    return surnames1.compareTo(surnames2);
 	                };
 	                break;
 	            case "phone":
 	                comparator = (dto1, dto2) -> {
-	                    String phone1 = dto1.getPhone();
-	                    String phone2 = dto2.getPhone();
-	                    if (phone1 == null) return 1;
-	                    if (phone2 == null) return -1;
+	                    final String phone1 = dto1.getPhone();
+	                    final String phone2 = dto2.getPhone();
+	                    if (phone1 == null) {
+							return 1;
+						}
+	                    if (phone2 == null) {
+							return -1;
+						}
 	                    return phone1.compareTo(phone2);
 	                };
 	                break;
 	            case "rolName":
 	                comparator = (dto1, dto2) -> {
-	                    String rolName1 = dto1.getRolName();
-	                    String rolName2 = dto2.getRolName();
-	                    if (rolName1 == null) return 1;
-	                    if (rolName2 == null) return -1;
+	                    final String rolName1 = dto1.getRolName();
+	                    final String rolName2 = dto2.getRolName();
+	                    if (rolName1 == null) {
+							return 1;
+						}
+	                    if (rolName2 == null) {
+							return -1;
+						}
 	                    return rolName1.compareTo(rolName2);
 	                };
 	                break;
 	            case "dni":
 	            	comparator = (dto1, dto2) -> {
-	            		String dni1 = dto1.getDni();
-	            		String dni2 = dto2.getDni();
-	            		if (dni1 == null) return 1;
-	            		if (dni2 == null) return -1;
+	            		final String dni1 = dto1.getDni();
+	            		final String dni2 = dto2.getDni();
+	            		if (dni1 == null) {
+							return 1;
+						}
+	            		if (dni2 == null) {
+							return -1;
+						}
 	            		return dni1.compareTo(dni2);
 	            	};
 	            	break;
 	            default:
 	            	comparator = (dto1, dto2) -> {
-	                    String name1 = dto1.getName();
-	                    String name2 = dto2.getName();
-	                    if (name1 == null) return 1;
-	                    if (name2 == null) return -1;
+	                    final String name1 = dto1.getName();
+	                    final String name2 = dto2.getName();
+	                    if (name1 == null) {
+							return 1;
+						}
+	                    if (name2 == null) {
+							return -1;
+						}
 	                    return name1.compareTo(name2);
 	                };
 	        }
@@ -256,12 +283,12 @@ public class UserRestController {
 	    }
 
 	    // 3. Paginacion
-	    int start = input.getStart(); // Indice de inicio de los resultados
-	    int length = input.getLength(); // Cantidad de resultados por pagina
-	    List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
+	    final int start = input.getStart(); // Indice de inicio de los resultados
+	    final int length = input.getLength(); // Cantidad de resultados por pagina
+	    final List<UserTableDTO> paginatedList = dtoList.stream().skip(start).limit(length).collect(Collectors.toList());
 
 	    // 4. Configurar el resultado para DataTables
-	    DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
+	    final DataTablesOutput<UserTableDTO> dtoOutput = new DataTablesOutput<>();
 	    dtoOutput.setDraw(input.getDraw()); // Configurar el valor de "draw"
 	    dtoOutput.setRecordsTotal(dtoList.size()); // Total de registros antes de la paginacion
 	    dtoOutput.setRecordsFiltered(dtoList.size()); // Registros filtrados despues de la busqueda
@@ -317,7 +344,7 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	public @ResponseBody DataTablesOutput<UserTableDTO> save(
 			@Validated(OrderedValidation.class) @RequestBody final UserDTO userForm,
-			final BindingResult bindingResult, Locale locale) {
+			final BindingResult bindingResult, final Locale locale) {
 		final DataTablesOutput<UserTableDTO> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
@@ -345,7 +372,7 @@ public class UserRestController {
 			error = true;
 			json.put("emailAdd" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
-		
+
 		if(hasAccessPermission) {
 			if(!UtilsStringChar.isNullOrEmpty(userForm.getDniAdd())) {
 				// Validaremos el formato del dni/nif
@@ -357,15 +384,15 @@ public class UserRestController {
 				} else {
 					nif = userForm.getDniAdd();
 				}
-				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
-				Matcher m = nifPattern.matcher(nif);
+				final Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
+				final Matcher m = nifPattern.matcher(nif);
 				if (m.matches()) {
-					String letra = m.group(2);
+					final String letra = m.group(2);
 					// Extraer letra del NIF
-					String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+					final String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
 					int dni = Integer.parseInt(m.group(1));
 					dni = dni % 23;
-					String reference = letras.substring(dni, dni + 1);
+					final String reference = letras.substring(dni, dni + 1);
 
 					if (!reference.equalsIgnoreCase(letra)) {
 						error = true;
@@ -375,7 +402,7 @@ public class UserRestController {
 					error = true;
 					json.put("dniAdd" + SPAN, "El DNI debe tener un formato correcto.");
 				}
-				
+
 				// Validaremos que el dni/nif no este repetido
 				if (this.userService.getUserByDni(userForm.getDniAdd())!=null) {
 					error = true;
@@ -386,7 +413,7 @@ public class UserRestController {
 				json.put("dniAdd" + SPAN, "El campo dni es obligatorio.");
 			}
 		}
-		
+
 		if (!error) {
 			try {
 
@@ -408,9 +435,9 @@ public class UserRestController {
 
 
 		// Convertir la lista de usuarios en una lista de DTOs
-		List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
-			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
-			UserTableDTO userTable = new UserTableDTO(user);
+		final List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
+			final String rolProperty = this.messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+			final UserTableDTO userTable = new UserTableDTO(user);
 			userTable.setRolName(rolProperty);
 			return userTable;
 		}).collect(Collectors.toList());
@@ -426,7 +453,7 @@ public class UserRestController {
 
 	/**
 	 * Method that updates a user.
-	 * 
+	 *
 	 * @param userForm
 	 *            UserForm
 	 * @param bindingResult
@@ -437,7 +464,7 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	public @ResponseBody DataTablesOutput<UserTableDTO> saveEdit(
 			@Validated(OrderedValidation.class) @RequestBody final UserEditDTO userForm,
-			final BindingResult bindingResult, Locale locale) {
+			final BindingResult bindingResult, final Locale locale) {
 		final DataTablesOutput<UserTableDTO> dtOutput = new DataTablesOutput<>();
 		List<User> listNewUser = new ArrayList<>();
 		final JSONObject json = new JSONObject();
@@ -457,7 +484,7 @@ public class UserRestController {
 		// comprobamos que se hayan establecido correctamente las contrasenas
 		final Rol rol = this.userService.getRol(userForm.getRolId());
 		final boolean hasAccessPermission = PermissionsChecker.hasPermission(rol, Permissions.ACCESS);
-		
+
 		if (userForm.getEmailEdit() != null && !userForm.getEmailEdit().isEmpty()
 				&& !Utils.isValidEmail(userForm.getEmailEdit())) {
 			error = true;
@@ -465,7 +492,7 @@ public class UserRestController {
 		}
 
 		if (!userForm.getEmailEdit().equals(userBeforeUpdate.getEmail())
-				&& (this.userService.getAllUserByEmail(userForm.getEmailEdit())!=null && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty())) {
+				&& this.userService.getAllUserByEmail(userForm.getEmailEdit())!=null && !this.userService.getAllUserByEmail(userForm.getEmailEdit()).isEmpty()) {
 			error = true;
 			json.put("emailEdit" + SPAN, "Ya existe un usuario con el correo seleccionado.");
 		}
@@ -480,16 +507,16 @@ public class UserRestController {
 				} else {
 					nif = userForm.getDniEdit();
 				}
-					 
-				Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
-				Matcher m = nifPattern.matcher(nif);
+
+				final Pattern nifPattern = Pattern.compile("(\\d{1,8})([TRWAGMYFPDXBNJZSQVHLCKEtrwagmyfpdxbnjzsqvhlcke])");
+				final Matcher m = nifPattern.matcher(nif);
 				if (m.matches()) {
-					String letra = m.group(2);
+					final String letra = m.group(2);
 					// Extraer letra del NIF
-					String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
+					final String letras = "TRWAGMYFPDXBNJZSQVHLCKE";
 					int dni = Integer.parseInt(m.group(1));
 					dni = dni % 23;
-					String reference = letras.substring(dni, dni + 1);
+					final String reference = letras.substring(dni, dni + 1);
 
 					if (!reference.equalsIgnoreCase(letra)) {
 						error = true;
@@ -499,7 +526,7 @@ public class UserRestController {
 					error = true;
 					json.put("dniEdit" + SPAN, "El DNI debe tener un formato correcto.");
 				}
-				
+
 				// Validaremos que el dni/nif no exista
 				if (!userForm.getDniEdit().equals(userBeforeUpdate.getDni())
 						&& this.userService.getUserByDni(userForm.getDniEdit())!=null) {
@@ -511,7 +538,7 @@ public class UserRestController {
 				json.put("dniEdit" + SPAN, "El campo dni es obligatorio.");
 			}
 		}
-		
+
 		if (!error) {
 			try {
 
@@ -532,9 +559,9 @@ public class UserRestController {
 		}
 
 		// Convertir la lista de usuarios en una lista de DTOs
-		List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
-			String rolProperty = messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
-			UserTableDTO userTable = new UserTableDTO(user);
+		final List<UserTableDTO> dtoList = StreamSupport.stream(listNewUser.spliterator(), false).map(user -> {
+			final String rolProperty = this.messageSource.getMessage("form.user.rol." + user.getRol().getRolName(), null, locale);
+			final UserTableDTO userTable = new UserTableDTO(user);
 			userTable.setRolName(rolProperty);
 			return userTable;
 		}).collect(Collectors.toList());
@@ -550,7 +577,7 @@ public class UserRestController {
 
 	/**
 	 * Method that edits the user.
-	 * 
+	 *
 	 * @param userForm
 	 *            UserFormEdit
 	 * @param bindingResult
@@ -586,7 +613,7 @@ public class UserRestController {
 
 	/**
 	 * Get userService.
-	 * 
+	 *
 	 * @return userService
 	 */
 	public IUserService getUserService() {
@@ -595,7 +622,7 @@ public class UserRestController {
 
 	/**
 	 * Set userService.
-	 * 
+	 *
 	 * @param userServiceP
 	 *            set userService
 	 */
@@ -605,7 +632,7 @@ public class UserRestController {
 
 	/**
 	 * Get context.
-	 * 
+	 *
 	 * @return context
 	 */
 	public ServletContext getContext() {
@@ -614,14 +641,14 @@ public class UserRestController {
 
 	/**
 	 * Set context.
-	 * 
+	 *
 	 * @param contextP
 	 *            set context
 	 */
 	public void setContext(final ServletContext contextP) {
 		this.context = contextP;
 	}
-	
+
 	/**
 	 * Retrieves a paginated list of certified applications associated with a specific user for DataTables.
 	 *
@@ -632,11 +659,9 @@ public class UserRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/userappdatatable", method = RequestMethod.POST)
 	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam("idUser") final Long idUser) {
-		
-		final User user = this.userService.getUserByUserId(idUser);
-		
-		final DataTablesOutput<ApplicationCertDTO> certApplications = this.appService.getApplicationsUser(input, user.getUserId());
 
-		return certApplications;
+		final User user = this.userService.getUserByUserId(idUser);
+
+		return this.appService.getApplicationsUser(input, user.getUserId());
 	}
 }

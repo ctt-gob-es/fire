@@ -29,13 +29,12 @@ import java.net.URI;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Properties;
 
 import org.quartz.Scheduler;
 
 import es.gob.fire.commons.utils.UtilsServer;
 
-/** 
+/**
  * <p>Class that represents an abstract non clustered quartz scheduler for FIRe.</p>
  * <b>Project:</b><p>Horizontal platform of validation services of multiPKI certificates and electronic signature.</p>
  * @version 1.0, 20/10/2021.
@@ -47,12 +46,12 @@ public abstract class AbstractFireNonClusteredQuartzScheduler extends AbstractFi
 	 * properties to define the cluster in a quartz scheduler.
 	 */
 	private static final String NOCLUSTERQTZ_FILE = "nonClustered-quartz.properties";
-	
+
 	/**
 	 * Service class directory name.
 	 */
 	private static final String CLASSES_DIR_NAME = "classes";
-	
+
 
 	/**
 	 * Attribute that represents the singleton non clustered scheduler.
@@ -74,37 +73,32 @@ public abstract class AbstractFireNonClusteredQuartzScheduler extends AbstractFi
 	 */
 	@Override
 	protected final String getPathPropertiesFile() {
-		
+
 		String configDir = UtilsServer.getServerConfigDir();
-    	
+
     	// Si no existe la ruta o el directorio de Clave en ella, se intenta buscar en la ruta del ejecutable
     	if (configDir == null || !new File(configDir, NOCLUSTERQTZ_FILE).isFile()) {
 			try {
 				// Dado que este no es el modulo principal, accedemos a la ruta del padre
-				URI uri = AbstractFireNonClusteredQuartzScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI();
-				Path jarPath = Paths.get(uri);
-				System.out.println(" ==== Ruta del ejecutable: " + jarPath);
-				Path libPath = jarPath.getParent();
-				System.out.println(" ==== LibPath: " + libPath);
+				final URI uri = AbstractFireNonClusteredQuartzScheduler.class.getProtectionDomain().getCodeSource().getLocation().toURI();
+				final Path jarPath = Paths.get(uri);
+				final Path libPath = jarPath.getParent();
 				if (libPath != null) {
-					Path servicePath = libPath.getParent();
-					System.out.println(" ==== ServicePath: " + servicePath);
+					final Path servicePath = libPath.getParent();
 					if (servicePath != null && Files.exists(servicePath.resolve(CLASSES_DIR_NAME))
 							&& Files.exists(servicePath.resolve(CLASSES_DIR_NAME).resolve(NOCLUSTERQTZ_FILE))) {
 						configDir = servicePath.resolve(CLASSES_DIR_NAME).toString();
-					} else {
-						if (servicePath != null && Files.exists(servicePath.resolve(NOCLUSTERQTZ_FILE))) {
-							configDir = servicePath.toString();
-						} else if (Files.exists(libPath.resolve(NOCLUSTERQTZ_FILE))) {
-							configDir = libPath.toString();
-						}
+					} else if (servicePath != null && Files.exists(servicePath.resolve(NOCLUSTERQTZ_FILE))) {
+						configDir = servicePath.toString();
+					} else if (Files.exists(libPath.resolve(NOCLUSTERQTZ_FILE))) {
+						configDir = libPath.toString();
 					}
 				}
-			} catch (Exception e) {
+			} catch (final Exception e) {
 				// No se encontro el fichero en el directorio alternativo, asi que se usara el configurado
 			}
     	}
-		
+
 		return UtilsServer.createAbsolutePath(configDir, NOCLUSTERQTZ_FILE);
 	}
 

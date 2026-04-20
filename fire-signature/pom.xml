@@ -12,7 +12,7 @@
 	<parent>
 		<groupId>es.gob.fire</groupId>
 		<artifactId>fire-artifacts</artifactId>
-		<version>3.0</version>
+		<version>3.1-SNAPSHOT</version>
 	</parent>
 
 	<!-- Perfiles con los distintos grupos de dependencias -->
@@ -120,13 +120,6 @@
     				<groupId>org.slf4j</groupId>
     				<artifactId>slf4j-jdk14</artifactId>
 				</dependency>
-		
-				<!-- Dependencia para la compatibilidad con firmas XML de curva eliptica -->
-				<dependency>
-					<groupId>org.apache.santuario</groupId>
-					<artifactId>xmlsec</artifactId>
-					<version>3.0.6</version>
-				</dependency>
 				
 				<!--  Dependencia servlets -->
 				<dependency>
@@ -230,12 +223,15 @@
 		
 		<!-- Perfil que agrega el modulo para el envio de notificaciones a EventManager -->
 		<profile>
-			<id>eventmanager</id>	
+			<id>eventmanager</id>
+			 <!-- Se activa siempre que se indique esta propiedad -->
+<!--
 			<activation>
 				<property>
-					<name>all</name> <!-- Se activa siempre que se indique esta propiedad -->
+					<name>all</name>
 				</property>
 			</activation>
+-->
 			<dependencies>
 				<dependency>
 					<groupId>es.gob.fire</groupId>
@@ -262,6 +258,16 @@
 			</dependencies>
 		</profile>
 	</profiles>
+
+	<dependencyManagement>
+		<dependencies>
+			<dependency>
+	    		<groupId>org.apache.pdfbox</groupId>
+	    		<artifactId>pdfbox</artifactId>
+	    		<version>2.0.36</version>
+			</dependency>
+		</dependencies>
+	</dependencyManagement>
 	
 	
 	<build>

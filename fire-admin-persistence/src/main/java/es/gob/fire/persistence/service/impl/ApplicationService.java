@@ -46,8 +46,8 @@ import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 import javax.transaction.Transactional;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
@@ -88,10 +88,8 @@ import es.gob.fire.persistence.service.IApplicationService;
 @Service
 public class ApplicationService implements IApplicationService{
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = LoggerFactory.getLogger(ApplicationService.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(ApplicationService.class);
 
 	/**
 	 *
@@ -284,7 +282,7 @@ public class ApplicationService implements IApplicationService{
 		//Guardar los proveedores
 		if (savedApp.isCustomProvider()) {
 			for (final ProviderApplicationDTO dto : customProviders) {
-				ProviderApplication provApp = convertProviderApplicationDTOToEntity(dto, savedApp);
+				final ProviderApplication provApp = convertProviderApplicationDTOToEntity(dto, savedApp);
 				this.providerApplicationRepository.save(provApp);
 			}
 		} else {
@@ -292,18 +290,18 @@ public class ApplicationService implements IApplicationService{
 				this.providerApplicationRepository.delete(pa);
 			}
 		}
-		
+
 		return savedApp;
 	}
 
-	private static Long convertBytesToMegabytes(Long bytes) {
+	private static Long convertBytesToMegabytes(final Long bytes) {
 		return Long.valueOf(bytes == null ? 0 : bytes.longValue() / (1024 * 1024));
 	}
-	
-	private static Long convertMegabytesToBytes(Long mb) {
+
+	private static Long convertMegabytesToBytes(final Long mb) {
 		return Long.valueOf(mb == null ? 0 : mb.longValue() * 1024 * 1024);
 	}
-	
+
 	/**
 	 * Genera un nuevo identificador de aplicaci&oacute;n.
 	 * @return Identificador de aplicaci&oacute;n.
@@ -378,7 +376,7 @@ public class ApplicationService implements IApplicationService{
 		}
 
 		app.setFechaAltaApp(applicationDto.getFechaAltaApp());
-		app.setHabilitado(Boolean.TRUE);
+		app.setHabilitado(true);
 
 		app.setOrganization(applicationDto.getOrganization());
 		app.setDir3Code(applicationDto.getDir3Code());
@@ -600,8 +598,7 @@ public class ApplicationService implements IApplicationService{
 
 	@Override
 	public Application saveApplication(final Application application) {
-		final Application savedApp = this.repository.save(application);
-		return savedApp;
+		return this.repository.save(application);
 	}
 
 	@Override
@@ -646,7 +643,6 @@ public class ApplicationService implements IApplicationService{
 	@Override
 	public ProviderApplication convertDTOToEntity(final ProviderApplicationDTO dto) {
 		if (dto == null) {
-			return null;
 		}
 
 		//TODO: terminar implementacion
@@ -718,23 +714,23 @@ public class ApplicationService implements IApplicationService{
 	}
 
 	@Override
-	public List<String> findOrganizationByDIR3(String dir3Code) {
-		return repository.findDistinctOrganizationsByDir3(dir3Code);
+	public List<String> findOrganizationByDIR3(final String dir3Code) {
+		return this.repository.findDistinctOrganizationsByDir3(dir3Code);
 	}
 
 	@Override
 	@Transactional
-    public int renameOrganizationByDir3Code(String dir3Code, String newOrganization) {
-        return repository.renameOrganizationByDir3Code(dir3Code, newOrganization);
+    public int renameOrganizationByDir3Code(final String dir3Code, final String newOrganization) {
+        return this.repository.renameOrganizationByDir3Code(dir3Code, newOrganization);
     }
 
 	@Override
 	public List<OrganizationDTO> findOrganizations() {
-		return repository.findDistinctOrganizationsDTO();
+		return this.repository.findDistinctOrganizationsDTO();
 	}
 
 	@Override
 	public List<Application> findAllApplicationsOrdered() {
-		return repository.findAllByOrderByAppNameAsc();
+		return this.repository.findAllByOrderByAppNameAsc();
 	}
 }

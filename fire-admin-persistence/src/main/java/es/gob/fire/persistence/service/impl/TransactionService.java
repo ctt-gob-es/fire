@@ -43,7 +43,6 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
 import es.gob.fire.persistence.dto.OrganizationDTO;
-import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
 import es.gob.fire.persistence.entity.Transaction;
 import es.gob.fire.persistence.repository.TransactionRepository;
@@ -78,34 +77,34 @@ public class TransactionService implements ITransactionService {
 
 	@Override
 	public Transaction getTransactionByTransactionId(final Long transactionId) {
-		return repository.findByTransactionId(transactionId);
+		return this.repository.findByTransactionId(transactionId);
 	}
 
 	@Override
 	public Transaction saveTransaction(final Transaction transaction) {
-		return repository.save(transaction);
+		return this.repository.save(transaction);
 	}
 
 	@Override
 	public void deleteTransactionById(final Long transactionId) {
-		repository.deleteById(transactionId);
+		this.repository.deleteById(transactionId);
 	}
 
 	@Override
 	public Iterable<Transaction> getAllTransaction() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	@Override
 	public DataTablesOutput<Transaction> getAllTransaction(final DataTablesInput input) {
-		return dtRepository.findAll(input);
+		return this.dtRepository.findAll(input);
 	}
 
 	// --------------------- MÉTODOS COMUNES Y GENÉRICOS ---------------------
 
 	/**
 	 * Ejecuta cualquier consulta estadística construida dinámicamente.
-	 * 
+	 *
 	 * @param selectColumns columnas de SELECT
 	 * @param groupByColumns columnas de GROUP BY
 	 * @param startMonth  mes inicio o mes único
@@ -116,11 +115,11 @@ public class TransactionService implements ITransactionService {
 	 * @param orgs filtro de organizaciones
 	 * @param mapper función que mapea cada fila a DTO
 	 */
-	private <T> List<T> executeStatisticsQuery(String[] selectColumns, String[] groupByColumns, Integer startMonth,
-			Integer startYear, Integer endMonth, Integer endYear, List<String> apps, List<String> orgs,
-			Function<Object[], T> mapper) {
+	private <T> List<T> executeStatisticsQuery(final String[] selectColumns, final String[] groupByColumns, final Integer startMonth,
+			final Integer startYear, final Integer endMonth, final Integer endYear, final List<String> apps, final List<String> orgs,
+			final Function<Object[], T> mapper) {
 
-		String sql = new StringBuilder()
+		final String sql = new StringBuilder()
 				.append("SELECT ").append(String.join(", ", selectColumns))
 				.append(" FROM tb_transacciones t")
 				.append(" WHERE ").append(dateCondition(startMonth, startYear, endMonth, endYear))
@@ -128,7 +127,7 @@ public class TransactionService implements ITransactionService {
 				.append(" GROUP BY ").append(String.join(", ", groupByColumns))
 				.toString();
 
-		Map<String, Object> params = buildParameters(startMonth, startYear, endMonth, endYear, apps, orgs);
+		final Map<String, Object> params = buildParameters(startMonth, startYear, endMonth, endYear, apps, orgs);
 		return executeQueryNamed(sql, mapper, params);
 	}
 
@@ -136,7 +135,7 @@ public class TransactionService implements ITransactionService {
 	 * Condición de fecha: mes/año o rango YYYYMM entre startBoundary y
 	 * endBoundary.
 	 */
-	private String dateCondition(Integer sm, Integer sy, Integer em, Integer ey) {
+	private String dateCondition(final Integer sm, final Integer sy, final Integer em, final Integer ey) {
 		if (em == null || ey == null) {
 			return "EXTRACT(MONTH FROM t.fecha) = :month AND EXTRACT(YEAR FROM t.fecha) = :year";
 		}
@@ -147,8 +146,8 @@ public class TransactionService implements ITransactionService {
 	/**
 	 * Construye el mapa de parámetros para la consulta.
 	 */
-	private Map<String, Object> buildParameters(Integer sm, Integer sy, Integer em, Integer ey, List<String> apps, List<String> orgs) {
-		Map<String, Object> params = new HashMap<>();
+	private Map<String, Object> buildParameters(final Integer sm, final Integer sy, final Integer em, final Integer ey, final List<String> apps, final List<String> orgs) {
+		final Map<String, Object> params = new HashMap<>();
 
 		if (em == null || ey == null) {
 			params.put("month", sm);
@@ -164,9 +163,9 @@ public class TransactionService implements ITransactionService {
 
 		// Agregar parámetro "organizations" solo si hay valores distintos de "__UNDEFINED__"
 		if (orgs != null && !orgs.isEmpty()) {
-			boolean containsOnlyUndefined = orgs.stream().allMatch(o -> "__UNDEFINED__".equals(o));
+			final boolean containsOnlyUndefined = orgs.stream().allMatch("__UNDEFINED__"::equals);
 			if (!containsOnlyUndefined) {
-				List<String> definedOrgs = orgs.stream()
+				final List<String> definedOrgs = orgs.stream()
 					.filter(o -> !"__UNDEFINED__".equals(o))
 					.collect(Collectors.toList());
 				params.put("organizations", definedOrgs);
@@ -180,13 +179,14 @@ public class TransactionService implements ITransactionService {
 	 * Método auxiliar para ejecutar queries nativas usando parámetros
 	 * nombrados.
 	 */
-	private <T> List<T> executeQueryNamed(String queryString, java.util.function.Function<Object[], T> mapper,
-			Map<String, Object> params) {
-		Query query = entityManager.createNativeQuery(queryString);
-		for (Map.Entry<String, Object> entry : params.entrySet()) {
+	private <T> List<T> executeQueryNamed(final String queryString, final java.util.function.Function<Object[], T> mapper,
+			final Map<String, Object> params) {
+		final Query query = this.entityManager.createNativeQuery(queryString);
+		for (final Map.Entry<String, Object> entry : params.entrySet()) {
 			query.setParameter(entry.getKey(), entry.getValue());
 		}
 		@SuppressWarnings("unchecked")
+		final
 		List<Object[]> results = query.getResultList();
 		return results.stream().map(mapper).collect(Collectors.toList());
 	}
@@ -195,10 +195,10 @@ public class TransactionService implements ITransactionService {
 	 * Método que construye la parte opcional de filtrado por t.aplicacion y
 	 * t.organization.
 	 */
-	private String buildFilterClause(List<String> applications, List<String> organizations) {
-		StringBuilder filter = new StringBuilder();
+	private String buildFilterClause(final List<String> applications, final List<String> organizations) {
+		final StringBuilder filter = new StringBuilder();
 
-		if ((applications != null && !applications.isEmpty()) || (organizations != null && !organizations.isEmpty())) {
+		if (applications != null && !applications.isEmpty() || organizations != null && !organizations.isEmpty()) {
 			filter.append(" AND (");
 			boolean added = false;
 
@@ -212,9 +212,9 @@ public class TransactionService implements ITransactionService {
 					filter.append(" OR ");
 				}
 
-				boolean includeUndefined = organizations.contains("__UNDEFINED__");
-				List<String> definedOrganizations = new ArrayList<>();
-				for (String org : organizations) {
+				final boolean includeUndefined = organizations.contains("__UNDEFINED__");
+				final List<String> definedOrganizations = new ArrayList<>();
+				for (final String org : organizations) {
 					if (!"__UNDEFINED__".equals(org)) {
 						definedOrganizations.add(org);
 					}
@@ -242,35 +242,36 @@ public class TransactionService implements ITransactionService {
 	}
 
 	// Versión con filtros opcionales por t.aplicacion y t.dir3_code
-	public List<TransactionDTO> getTransactionsByApplication(Integer month, Integer year, List<String> apps,
-			List<String> orgs) {
-		String[] selectColumns = { 
+	@Override
+	public List<TransactionDTO> getTransactionsByApplication(final Integer month, final Integer year, final List<String> apps,
+			final List<String> orgs) {
+		final String[] selectColumns = {
 				"t.aplicacion",
 		        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
-				"SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects", 
-				"t.dir3_code" 
+				"SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
+				"t.dir3_code"
 				};
-		
-		String[] groupByColumns = { 
-				"t.aplicacion", 
-				"t.dir3_code" 
+
+		final String[] groupByColumns = {
+				"t.aplicacion",
+				"t.dir3_code"
 				};
-		
-		List<TransactionDTO> raw = executeStatisticsQuery(
-				selectColumns, groupByColumns, 
-				month, year, null, null, 
+
+		final List<TransactionDTO> raw = executeStatisticsQuery(
+				selectColumns, groupByColumns,
+				month, year, null, null,
 				apps, orgs,
 				row -> {
-					String app = row[0] != null ? (String) row[0] : "No definido";
-					int corr = ((BigDecimal) row[1]).intValue();
-					int inc = ((BigDecimal) row[2]).intValue();
-					String dir3Code = row[3] != null ? (String) row[3] : "No definido";
+					final String app = row[0] != null ? (String) row[0] : "No definido";
+					final int corr = ((BigDecimal) row[1]).intValue();
+					final int inc = ((BigDecimal) row[2]).intValue();
+					final String dir3Code = row[3] != null ? (String) row[3] : "No definido";
 			return new TransactionDTO(app, corr, inc, corr + inc, app, dir3Code);
 		});
-		
-		List<TransactionDTO> result = new ArrayList<>();
+
+		final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -283,32 +284,33 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByProvider(month, year, (List<String>) null, (List<String>) null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByProvider(final Integer month, final Integer year,
 			final List<String> apps, final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.proveedor",
 	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
-    	String[] groupByColumns = {
+    	final String[] groupByColumns = {
 	        "t.proveedor",
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
-		
-		List<TransactionDTO> raw = executeStatisticsQuery(
-			selectColumns, groupByColumns, 
-			month, year, null, null, 
+
+		final List<TransactionDTO> raw = executeStatisticsQuery(
+			selectColumns, groupByColumns,
+			month, year, null, null,
 			apps, orgs,
 			row -> {
 				if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
-					String provider   = row[0] != null ? (String)row[0] : "No definido";
-		            int corrects      = ((BigDecimal)row[1]).intValue();
-		            int incorrects    = ((BigDecimal)row[2]).intValue();
-		            String application= row[3] != null ? (String)row[3] : "No definido";
-		            String organization = row[4] != null ? (String)row[4] : "No definido";
+					final String provider   = row[0] != null ? (String)row[0] : "No definido";
+		            final int corrects      = ((BigDecimal)row[1]).intValue();
+		            final int incorrects    = ((BigDecimal)row[2]).intValue();
+		            final String application= row[3] != null ? (String)row[3] : "No definido";
+		            final String organization = row[4] != null ? (String)row[4] : "No definido";
 		            return new TransactionDTO(
 		                provider,
 		                corrects,
@@ -317,14 +319,13 @@ public class TransactionService implements ITransactionService {
 		                application,
 		                organization
 		            );
-				} else {
-					return null;
 				}
+				return null;
 		});
-		
-		List<TransactionDTO> result = new ArrayList<>();
+
+		final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -337,27 +338,28 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByDatesSizeApp(month, year, (List<String>) null, (List<String>) null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer month, final Integer year,
 			final List<String> apps, final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.aplicacion",
 	        "SUM(t.tamanno) AS sizeBytes",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             month, year, null, null,
             apps, orgs,
             row -> {
-                String application   = row[0] != null ? (String)row[0] : "No definido";
-                double sizeMb        = Math.floor(((BigDecimal)row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-                String organization  = row[2] != null ? (String)row[2] : "No definido";
+                final String application   = row[0] != null ? (String)row[0] : "No definido";
+                final double sizeMb        = Math.floor(((BigDecimal)row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
+                final String organization  = row[2] != null ? (String)row[2] : "No definido";
                 return new TransactionDTO(
                     application,
                     sizeMb,
@@ -366,10 +368,10 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -382,9 +384,10 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByOperation(month, year, (List<String>) null, (List<String>) null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByOperation(final Integer month, final Integer year,
 			final List<String> apps, final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.aplicacion",
 	        "SUM(CASE WHEN t.operacion = 'SIGN' AND t.correcta = 1 THEN t.total ELSE 0 END) AS correctSimpleSignatures",
 	        "SUM(CASE WHEN t.operacion = 'SIGN' AND t.correcta = 0 THEN t.total ELSE 0 END) AS incorrectSimpleSignatures",
@@ -394,25 +397,25 @@ public class TransactionService implements ITransactionService {
 	        "SUM(CASE WHEN t.operacion = 'BATCH' THEN t.total ELSE 0 END) AS totalBatch",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             month, year, null, null,
             apps, orgs,
             row -> {
-                String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
-                Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
-                Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
-                Integer totalSimple             = ((BigDecimal) row[3]).intValue();
-                Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
-                Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
-                Integer totalBatch              = ((BigDecimal) row[6]).intValue();
-                String organizacion             = row[7] != null ? (String) row[7] : "No definido";
+                final String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
+                final Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
+                final Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
+                final Integer totalSimple             = ((BigDecimal) row[3]).intValue();
+                final Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
+                final Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
+                final Integer totalBatch              = ((BigDecimal) row[6]).intValue();
+                final String organizacion             = row[7] != null ? (String) row[7] : "No definido";
 
                 return new TransactionDTO(
                     aplicacion,
@@ -427,10 +430,10 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -448,30 +451,31 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByApplication(startMonth, startYear, endMonth, endYear, null, null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByApplication(final Integer startMonth, final Integer startYear,
 			final Integer endMonth, final Integer endYear, final List<String> apps,
 			final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.aplicacion",
 	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
-                String application    = row[0] != null ? (String) row[0] : "No definido";
-                int corrects          = ((BigDecimal) row[1]).intValue();
-                int incorrects        = ((BigDecimal) row[2]).intValue();
-                String organization   = row[3] != null ? (String) row[3] : "No definido";
+                final String application    = row[0] != null ? (String) row[0] : "No definido";
+                final int corrects          = ((BigDecimal) row[1]).intValue();
+                final int incorrects        = ((BigDecimal) row[2]).intValue();
+                final String organization   = row[3] != null ? (String) row[3] : "No definido";
                 return new TransactionDTO(
                     application,
                     corrects,
@@ -482,10 +486,10 @@ public class TransactionService implements ITransactionService {
                 );
             }
         );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -499,34 +503,35 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByProvider(startMonth, startYear, endMonth, endYear, null, null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByProvider(final Integer startMonth, final Integer startYear,
 			final Integer endMonth, final Integer endYear, final List<String> apps,
 			final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.proveedor",
 	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects",
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.proveedor",
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
             selectColumns, groupByColumns,
             startMonth, startYear, endMonth, endYear,
             apps, orgs,
             row -> {
             	if (row[0] != null && !((String) row[0]).equalsIgnoreCase("indefinido")) {
-            		String proveedor    = row[0] != null ? (String) row[0] : "No definido";
-                    int corrects        = ((BigDecimal) row[1]).intValue();
-                    int incorrects      = ((BigDecimal) row[2]).intValue();
-                    String aplicacion   = row[3] != null ? (String) row[3] : "No definido";
-                    String dir3 		= row[4] != null ? (String) row[4] : "No definido";
+            		final String proveedor    = row[0] != null ? (String) row[0] : "No definido";
+                    final int corrects        = ((BigDecimal) row[1]).intValue();
+                    final int incorrects      = ((BigDecimal) row[2]).intValue();
+                    final String aplicacion   = row[3] != null ? (String) row[3] : "No definido";
+                    final String dir3 		= row[4] != null ? (String) row[4] : "No definido";
                     return new TransactionDTO(
                         proveedor,
                         corrects,
@@ -535,15 +540,14 @@ public class TransactionService implements ITransactionService {
                         aplicacion,
                         dir3
                     );
-            	} else {
-            		return null;
             	}
+				return null;
             }
         );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -557,28 +561,29 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByDatesSizeApp(startMonth, startYear, endMonth, endYear, null, null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByDatesSizeApp(final Integer startMonth, final Integer startYear,
 			final Integer endMonth, final Integer endYear, final List<String> apps,
 			final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.aplicacion",
 	        "SUM(t.tamanno) AS sizeBytes",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String aplicacion   = row[0] != null ? (String) row[0] : "No definido";
-	            double sizeMb       = Math.floor(((BigDecimal) row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
-	            String dir3 		= row[2] != null ? (String) row[2] : "No definido";
+	            final String aplicacion   = row[0] != null ? (String) row[0] : "No definido";
+	            final double sizeMb       = Math.floor(((BigDecimal) row[1]).intValue() / (1024 * 1024.0) * 100) / 100;
+	            final String dir3 		= row[2] != null ? (String) row[2] : "No definido";
 	            return new TransactionDTO(
 	                aplicacion,
 	                sizeMb,
@@ -587,10 +592,10 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -604,10 +609,11 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByOperation(startMonth, startYear, endMonth, endYear, null, null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByOperation(final Integer startMonth, final Integer startYear,
 			final Integer endMonth, final Integer endYear, final List<String> apps,
 			final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.aplicacion",
 	        "SUM(CASE WHEN t.operacion = 'SIGN' AND t.correcta = 1 THEN t.total ELSE 0 END) AS correctSimpleSignatures",
 	        "SUM(CASE WHEN t.operacion = 'SIGN' AND t.correcta = 0 THEN t.total ELSE 0 END) AS incorrectSimpleSignatures",
@@ -617,25 +623,25 @@ public class TransactionService implements ITransactionService {
 	        "SUM(CASE WHEN t.operacion = 'BATCH' THEN t.total ELSE 0 END) AS totalBatch",
 	        "t.dir3_code"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.aplicacion",
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
-	            Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
-	            Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
-	            Integer totalSimple             = ((BigDecimal) row[3]).intValue();
-	            Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
-	            Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
-	            Integer totalBatch              = ((BigDecimal) row[6]).intValue();
-	            String dir3             		= row[7] != null ? (String) row[7] : "No definido";
+	            final String aplicacion               = row[0] != null ? (String) row[0] : "No definido";
+	            final Integer correctSimpleSignatures = ((BigDecimal) row[1]).intValue();
+	            final Integer incorrectSimpleSignatures = ((BigDecimal) row[2]).intValue();
+	            final Integer totalSimple             = ((BigDecimal) row[3]).intValue();
+	            final Integer correctBatchSignatures  = ((BigDecimal) row[4]).intValue();
+	            final Integer incorrectBatchSignatures = ((BigDecimal) row[5]).intValue();
+	            final Integer totalBatch              = ((BigDecimal) row[6]).intValue();
+	            final String dir3             		= row[7] != null ? (String) row[7] : "No definido";
 
 	            return new TransactionDTO(
 	                aplicacion,
@@ -650,10 +656,10 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -666,26 +672,27 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByOrganism(month, year, (List<String>) null, (List<String>) null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByOrganism(final Integer month, final Integer year,
 			final List<String> apps, final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.dir3_code",
 	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects"
 	    };
-		
-	    String[] groupByColumns = {
+
+	    final String[] groupByColumns = {
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw = executeStatisticsQuery(
+	    final List<TransactionDTO> raw = executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        month, year, null, null,
 	        apps, orgs,
 	        row -> {
-	            String dir3         = row[0] != null ? (String) row[0] : "No definido";
-	            int corrects        = ((BigDecimal) row[1]).intValue();
-	            int incorrects      = ((BigDecimal) row[2]).intValue();
+	            final String dir3         = row[0] != null ? (String) row[0] : "No definido";
+	            final int corrects        = ((BigDecimal) row[1]).intValue();
+	            final int incorrects      = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(
 	            	dir3,
 	                corrects,
@@ -696,10 +703,10 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -713,26 +720,27 @@ public class TransactionService implements ITransactionService {
 		return getTransactionsByOrganism(startMonth, startYear, endMonth, endYear, null, null);
 	}
 
+	@Override
 	public List<TransactionDTO> getTransactionsByOrganism(final Integer startMonth, final Integer startYear,
 			final Integer endMonth, final Integer endYear, final List<String> apps,
 			final List<String> orgs) {
-		String[] selectColumns = {
+		final String[] selectColumns = {
 	        "t.dir3_code",
 	        "SUM(CASE WHEN t.correcta = 1 THEN t.total ELSE 0 END) AS corrects",
 	        "SUM(CASE WHEN t.correcta = 0 THEN 1 ELSE 0 END) AS incorrects"
 	    };
-	    String[] groupByColumns = {
+	    final String[] groupByColumns = {
 	        "t.dir3_code"
 	    };
 
-	    List<TransactionDTO> raw =executeStatisticsQuery(
+	    final List<TransactionDTO> raw =executeStatisticsQuery(
 	        selectColumns, groupByColumns,
 	        startMonth, startYear, endMonth, endYear,
 	        apps, orgs,
 	        row -> {
-	            String dir3       = row[0] != null ? (String) row[0] : "No definido";
-	            int corrects      = ((BigDecimal) row[1]).intValue();
-	            int incorrects    = ((BigDecimal) row[2]).intValue();
+	            final String dir3       = row[0] != null ? (String) row[0] : "No definido";
+	            final int corrects      = ((BigDecimal) row[1]).intValue();
+	            final int incorrects    = ((BigDecimal) row[2]).intValue();
 	            return new TransactionDTO(
 	                dir3,
 	                corrects,
@@ -743,10 +751,10 @@ public class TransactionService implements ITransactionService {
 	            );
 	        }
 	    );
-	    
-	    List<TransactionDTO> result = new ArrayList<>();
+
+	    final List<TransactionDTO> result = new ArrayList<>();
         for (int i = 0; i < raw.size(); i++) {
-        	TransactionDTO dto = raw.get(i);
+        	final TransactionDTO dto = raw.get(i);
             if (dto != null) {
                 result.add(dto);
             }
@@ -756,11 +764,11 @@ public class TransactionService implements ITransactionService {
 
 	@Override
 	public List<String> getDifferentApplications() {
-		return repository.findDistinctApplications();
+		return this.repository.findDistinctApplications();
 	}
 
 	@Override
 	public List<OrganizationDTO> getDifferentOrganizations() {
-		return repository.findOrganizations();
+		return this.repository.findOrganizations();
 	}
 }

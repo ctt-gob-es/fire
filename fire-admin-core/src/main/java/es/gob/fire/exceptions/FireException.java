@@ -25,7 +25,9 @@
  */
 package es.gob.fire.exceptions;
 
-import es.gob.fire.commons.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+
 import es.gob.fire.i18n.ICommonsUtilLogMessages;
 import es.gob.fire.i18n.Language;
 
@@ -36,17 +38,15 @@ import es.gob.fire.i18n.Language;
  * @version 1.1, 14/03/2023.
  */
 public class FireException extends Exception {
-	
+
 	/**
 	 * Attribute that represents the serial version of the class .
 	 */
 	private static final long serialVersionUID = 2247747911833885326L;
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(FireException.class);
-	
+	/** Attribute that represents the object that manages the log of the class. */
+	private static final Logger LOGGER = LogManager.getLogger(FireException.class);
+
 	/**
 	 * Attribute that represents the error code.
 	 */
@@ -60,7 +60,7 @@ public class FireException extends Exception {
 	 * Attribute that represents a java exception associated to the error. It is optional.
 	 */
 	private Exception exception;
-	
+
 	/**
 	 * Constructor method for the class FireException.java.
 	 */
@@ -70,10 +70,10 @@ public class FireException extends Exception {
 
 	public FireException(final Exception exceptionParam) {
 		super();
-		exception = exceptionParam;
+		this.exception = exceptionParam;
 		LOGGER.debug(Language.getResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_001), this);
 	}
-	
+
 	/**
 	 * Constructor method for the class AfirmaException.java.
 	 * @param errorCodeParam Error code.
@@ -81,7 +81,7 @@ public class FireException extends Exception {
 	 */
 	public FireException(final String errorDescParam) {
 		super(Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_005, new Object[ ] { errorDescParam }));
-		errorDesc = errorDescParam;
+		this.errorDesc = errorDescParam;
 		// Solamente en trace escribimos el mensaje y la excepción, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
@@ -89,7 +89,7 @@ public class FireException extends Exception {
 		// desarrollo.
 		LOGGER.debug(Language.getResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_001), this);
 	}
-	
+
 	/**
 	 * Constructor method for the class AfirmaException.java.
 	 * @param errorCodeParam Error code.
@@ -97,8 +97,8 @@ public class FireException extends Exception {
 	 */
 	public FireException(final String errorCodeParam, final String errorDescParam) {
 		super(Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_000, new Object[ ] { errorCodeParam, errorDescParam }));
-		errorCode = errorCodeParam;
-		errorDesc = errorDescParam;
+		this.errorCode = errorCodeParam;
+		this.errorDesc = errorDescParam;
 		// Solamente en trace escribimos el mensaje y la excepción, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
@@ -116,9 +116,9 @@ public class FireException extends Exception {
 	 */
 	public FireException(final String errorCodeParam, final String errorDescParam, final Exception exceptionParam) {
 		super(Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_000, new Object[ ] { errorCodeParam, errorDescParam }));
-		errorCode = errorCodeParam;
-		errorDesc = errorDescParam;
-		exception = exceptionParam;
+		this.errorCode = errorCodeParam;
+		this.errorDesc = errorDescParam;
+		this.exception = exceptionParam;
 		// Solamente en trace escribimos el mensaje y la excepción, por si es
 		// controlada
 		// posteriormente para ocultarla pero es necesario tenerla en cuenta
@@ -133,7 +133,7 @@ public class FireException extends Exception {
 	 * @return the value of the attribute {@link #errorCode}.
 	 */
 	public String getErrorCode() {
-		return errorCode;
+		return this.errorCode;
 	}
 
 
@@ -141,7 +141,7 @@ public class FireException extends Exception {
 	 * Sets the value of the attribute {@link #errorCode}.
 	 * @param errorCodeParam The value for the attribute {@link #errorCode}.
 	 */
-	public void setErrorCode(String errorCodeParam) {
+	public void setErrorCode(final String errorCodeParam) {
 		this.errorCode = errorCodeParam;
 	}
 
@@ -151,7 +151,7 @@ public class FireException extends Exception {
 	 * @return the value of the attribute {@link #errorDesc}.
 	 */
 	public String getErrorDesc() {
-		return errorDesc;
+		return this.errorDesc;
 	}
 
 
@@ -159,7 +159,7 @@ public class FireException extends Exception {
 	 * Sets the value of the attribute {@link #errorDesc}.
 	 * @param errorDescParam The value for the attribute {@link #errorDesc}.
 	 */
-	public void setErrorDesc(String errorDescParam) {
+	public void setErrorDesc(final String errorDescParam) {
 		this.errorDesc = errorDescParam;
 	}
 
@@ -169,7 +169,7 @@ public class FireException extends Exception {
 	 * @return the value of the attribute {@link #exception}.
 	 */
 	public Exception getException() {
-		return exception;
+		return this.exception;
 	}
 
 
@@ -177,22 +177,22 @@ public class FireException extends Exception {
 	 * Sets the value of the attribute {@link #exception}.
 	 * @param exceptionParam The value for the attribute {@link #exception}.
 	 */
-	public void setException(Exception exceptionParam) {
+	public void setException(final Exception exceptionParam) {
 		this.exception = exceptionParam;
 	}
 
 	/**
-	 * 
+	 *
 	 * {@inheritDoc}
 	 * @see java.lang.Throwable#toString()
 	 */
+	@Override
 	public final String toString() {
 
-		if (exception == null) {
-			return Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_002, new Object[ ] { errorCode, errorDesc });
-		} else {
-			return Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_003, new Object[ ] { errorCode, errorDesc, exception.toString() });
+		if (this.exception == null) {
+			return Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_002, new Object[ ] { this.errorCode, this.errorDesc });
 		}
+		return Language.getFormatResCommonsUtilsFire(ICommonsUtilLogMessages.EXCEPTION_003, new Object[ ] { this.errorCode, this.errorDesc, this.exception.toString() });
 
 	}
 

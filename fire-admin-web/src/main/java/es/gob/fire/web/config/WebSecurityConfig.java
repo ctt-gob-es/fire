@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.valet.spring.config.WebSecurityConfig.java.</p>
  * <b>Description:</b><p> Class that enables and configures the security of the FIRe application.</p>
   * <b>Project:</b><p></p>
@@ -33,7 +33,7 @@ import org.springframework.security.web.session.HttpSessionEventPublisher;
 
 import es.gob.fire.commons.utils.Constants;
 
-/** 
+/**
  * <p>Class that enables and configures the security of the FIRe application. </p>
  * <b>Project:</b><p></p>
  * @version 1.3, 24/02/2025.
@@ -41,22 +41,22 @@ import es.gob.fire.commons.utils.Constants;
 @Configuration
 @EnableWebSecurity
 public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
-	
+
 	/**
-	 * Constant that represents the name of the cookie for session tracking. 
+	 * Constant that represents the name of the cookie for session tracking.
 	 */
 	public static final String SESSION_TRACKING_COOKIE_NAME = "JSESSIONID";
-	
+
 	/**
 	 * {@inheritDoc}
 	 * @see org.springframework.security.config.annotation.web.configuration.WebSecurityConfigurerAdapter#configure(org.springframework.security.config.annotation.web.builders.HttpSecurity)
 	 */
 	@Override
-    protected void configure(HttpSecurity http) throws Exception {  
+    protected void configure(final HttpSecurity http) throws Exception {
       http
       	.authorizeRequests()
       		// Recursos estáticos y rutas de login público
-      		.antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/chartist/**", "/loginClave", "/ResponseClave", "/loginWithCertificate")
+      		.antMatchers("/css/**", "/images/**", "/js/**", "/fonts/**", "/fonts/icons/themify/**", "/fonts/fontawesome/**", "/less/**", "/loginClave", "/ResponseClave", "/loginWithCertificate")
       		.permitAll()
 		.and()
 			.authorizeRequests()
@@ -88,7 +88,7 @@ public class WebSecurityConfig extends WebSecurityConfigurerAdapter{
 		    	.maxSessionsPreventsLogin(false)
 		    	.expiredUrl("/login.html");
     }
-	
+
 	/**
 	 * Method that creates a new HttpSessionEventPublisher instance.
 	 * @return new HttpSessionEventPublisher instance

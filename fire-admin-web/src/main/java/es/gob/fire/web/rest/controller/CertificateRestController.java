@@ -41,6 +41,8 @@ import java.util.stream.StreamSupport;
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.json.JSONObject;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.MessageSource;
@@ -57,7 +59,6 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Base64;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.exceptions.AfirmaConfigurationException;
@@ -133,10 +134,8 @@ public class CertificateRestController {
 	 */
 	private static final String PARAM_CER_PRINCIPAL = "certFile";
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(CertificateRestController.class);
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(CertificateRestController.class);
 
 	/**
 	 * Attribute that represents the view message wource.
@@ -311,16 +310,14 @@ public class CertificateRestController {
 						msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
 						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 						dtOutput.setError(json.toString());
+					} else if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
+						msgerror = verifyAfirmaCertificateResponse.getDescription();
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
 					} else {
-						if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
-							msgerror = verifyAfirmaCertificateResponse.getDescription();
-							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-							dtOutput.setError(json.toString());
-						} else {
-							msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
-							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-							dtOutput.setError(json.toString());
-						}
+						msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
+						json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+						dtOutput.setError(json.toString());
 					}
 				} catch (final CertificateExpiredException e) {
 					// El certificado está caducado
@@ -502,16 +499,14 @@ public class CertificateRestController {
 							msgerror = Language.getFormatResWebAdminGeneral(IWebAdminGeneral.LOG_MC013, new Object[] {certFile.getOriginalFilename()});
 							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 							dtOutput.setError(json.toString());
+						} else if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
+							msgerror = verifyAfirmaCertificateResponse.getDescription();
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
 						} else {
-							if (verifyAfirmaCertificateResponse.getMajorCode().equalsIgnoreCase("RequesterError")) {
-								msgerror = verifyAfirmaCertificateResponse.getDescription();
-								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-								dtOutput.setError(json.toString());
-							} else {
-								msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
-								json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
-								dtOutput.setError(json.toString());
-							}
+							msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
+							json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
+							dtOutput.setError(json.toString());
 						}
 					} else {
 						msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC014);
@@ -611,14 +606,8 @@ public class CertificateRestController {
 
 		boolean result = false;
 
-		if (alias == null) {
+		if ((alias == null) || alias.isEmpty()) {
 			result = true;
-		} else {
-
-			if (alias.isEmpty()) {
-				result = true;
-			}
-
 		}
 
 		return result;
@@ -680,8 +669,6 @@ public class CertificateRestController {
 	@RequestMapping(path = "/certappdatatable", method = RequestMethod.POST)
 	public DataTablesOutput<ApplicationCertDTO> certApplications(@NotEmpty final DataTablesInput input, @RequestParam(FIELD_ID_CERTIFICATE) final Long idCertificate) {
 
-		final DataTablesOutput<ApplicationCertDTO> certApplications = this.appService.getApplicationsCert(input, idCertificate);
-
-		return certApplications;
+		return this.appService.getApplicationsCert(input, idCertificate);
 	}
 }

@@ -11,12 +11,11 @@ package es.gob.fire.upgrade.afirma;
 
 import java.io.ByteArrayInputStream;
 import java.io.IOException;
+import java.util.Base64;
 
 import javax.xml.parsers.ParserConfigurationException;
 import javax.xml.parsers.SAXParser;
 
-import org.apache.ws.security.WSSecurityException;
-import org.apache.ws.security.util.Base64;
 import org.xml.sax.Attributes;
 import org.xml.sax.InputSource;
 import org.xml.sax.SAXException;
@@ -67,7 +66,7 @@ class UpgradeAfirmaResponse {
 
             // Condicion especifica para firmas XAdES Enveloping/Detached
             if (updatedSigNode.endsWith(DssServicesUtils.XML_SIGNATURE_TAG + ">")) { //$NON-NLS-1$
-                setSignature(Base64.encode(updatedSigNode.getBytes()));
+                setSignature(Base64.getEncoder().encodeToString(updatedSigNode.getBytes()));
             }
         }
 
@@ -107,8 +106,8 @@ class UpgradeAfirmaResponse {
      */
     byte[] getUpgradedSignature() throws IOException {
         try {
-			return Base64.decode(this.signature);
-		} catch (final WSSecurityException e) {
+			return Base64.getDecoder().decode(this.signature);
+		} catch (final IllegalArgumentException e) {
 			throw new IOException(e);
 		}
     }

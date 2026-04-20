@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.core.dto.MailInfoDTO.java.</p>
  * <b>Description:</b><p>Class that represents the transfer object and backing form for a send email.</p>
   * <b>Project:</b><p>Application for monitoring the services of FIRe suite systems</p>
@@ -26,10 +26,9 @@ package es.gob.fire.persistence.dto;
 
 import java.util.Date;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Utils;
 
-/** 
+/**
  * <p>Class that represents the transfer object and backing form for a send email.</p>
  * <b>Project:</b><p>Application for monitoring services of FIRe suite systems.</p>
  * @version 1.0, 12/02/2025.
@@ -37,15 +36,10 @@ import es.gob.fire.commons.utils.Utils;
 public class MailInfoDTO {
 
 	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(MailInfoDTO.class);
-
-	/**
 	 * Attribute that represents the value of the input email responsible of the email in the form.
 	 */
 	private String emailResponsible;
-	
+
 	/**
 	 * Attribute that represents the value of the input subject certificate of the email in the form.
 	 */
@@ -66,7 +60,7 @@ public class MailInfoDTO {
 	 */
 	private Long idCertificado;
 
-	public MailInfoDTO(String emailResponsible, Long idCertificado, Date fechaInicio, Date fechaCaducidad, String subject) {
+	public MailInfoDTO(final String emailResponsible, final Long idCertificado, final Date fechaInicio, final Date fechaCaducidad, final String subject) {
 		this.emailResponsible = emailResponsible;
 		this.idCertificado = idCertificado;
 		this.subjectCertificate = subject;
@@ -79,14 +73,14 @@ public class MailInfoDTO {
 	 * @return the value of the attribute {@link #emailResponsible}.
 	 */
 	public String getEmailResponsible() {
-		return emailResponsible;
+		return this.emailResponsible;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #emailResponsible}.
 	 * @param emailResponsible the value for the attribute {@link #emailResponsible} to set.
 	 */
-	public void setEmailResponsible(String emailResponsible) {
+	public void setEmailResponsible(final String emailResponsible) {
 		this.emailResponsible = emailResponsible;
 	}
 
@@ -95,14 +89,14 @@ public class MailInfoDTO {
 	 * @return the value of the attribute {@link #subjectCertificate}.
 	 */
 	public String getSubjectCertificate() {
-		return subjectCertificate;
+		return this.subjectCertificate;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #subjectCertificate}.
 	 * @param subjectCertificate the value for the attribute {@link #subjectCertificate} to set.
 	 */
-	public void setSubjectCertificate(String subjectCertificate) {
+	public void setSubjectCertificate(final String subjectCertificate) {
 		this.subjectCertificate = subjectCertificate;
 	}
 
@@ -111,14 +105,14 @@ public class MailInfoDTO {
 	 * @return the value of the attribute {@link #dateCertInit}.
 	 */
 	public String getDateCertInit() {
-		return dateCertInit;
+		return this.dateCertInit;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #dateCertInit}.
 	 * @param dateCertInit the value for the attribute {@link #dateCertInit} to set.
 	 */
-	public void setDateCertInit(String dateCertInit) {
+	public void setDateCertInit(final String dateCertInit) {
 		this.dateCertInit = dateCertInit;
 	}
 
@@ -127,14 +121,14 @@ public class MailInfoDTO {
 	 * @return the value of the attribute {@link #dateCertExpired}.
 	 */
 	public String getDateCertExpired() {
-		return dateCertExpired;
+		return this.dateCertExpired;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #dateCertExpired}.
 	 * @param dateCertExpired the value for the attribute {@link #dateCertExpired} to set.
 	 */
-	public void setDateCertExpired(String dateCertExpired) {
+	public void setDateCertExpired(final String dateCertExpired) {
 		this.dateCertExpired = dateCertExpired;
 	}
 
@@ -143,14 +137,14 @@ public class MailInfoDTO {
 	 * @return the value of the attribute {@link #idCertificado}.
 	 */
 	public Long getIdCertificado() {
-		return idCertificado;
+		return this.idCertificado;
 	}
 
 	/**
 	 * Sets the value of the attribute {@link #idCertificado}.
 	 * @param idCertificado the value for the attribute {@link #idCertificado} to set.
 	 */
-	public void setIdCertificado(Long idCertificado) {
+	public void setIdCertificado(final Long idCertificado) {
 		this.idCertificado = idCertificado;
 	}
 

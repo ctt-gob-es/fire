@@ -4,7 +4,7 @@
 
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>es.gob.fire</groupId>
-	<version>3.0</version>
+	<version>3.1-SNAPSHOT</version>
 	<artifactId>fire-artifacts</artifactId>
 	<packaging>pom</packaging>
 	<name>fire-artifacts</name>
@@ -21,12 +21,12 @@
 
 		<jdk.version>1.8</jdk.version>
 
-		<fire.version>3.0</fire.version>
+		<fire.version>3.1-SNAPSHOT</fire.version>
 		<clienteafirma.version>1.9</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
 		<slf4j.version>1.7.36</slf4j.version>
-		<log4j.version>2.25.3</log4j.version>
+		<log4j.version>2.25.4</log4j.version>
 		<quartz.version>2.4.1</quartz.version> <!-- La 2.4.1 es la ultima version de Quartz compatible Java 8 -->
 		<javaMail.version>1.6.2</javaMail.version>
 		<biz.paluch.logging.version>1.14.1</biz.paluch.logging.version>
@@ -152,6 +152,13 @@
 				<groupId>es.gob.afirma</groupId>
 				<artifactId>afirma-server-triphase-signer-core</artifactId>
 				<version>${clienteafirma.version}</version>
+			</dependency>
+
+			<!-- Dependencia para la compatibilidad con firmas XML de curva eliptica -->
+			<dependency>
+				<groupId>org.apache.santuario</groupId>
+				<artifactId>xmlsec</artifactId>
+				<version>3.0.6</version>
 			</dependency>
 			
 			<!-- Hibernate 5 -->

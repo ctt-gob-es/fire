@@ -27,9 +27,6 @@ package es.gob.fire.web.controller;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
-import org.apache.log4j.spi.LoggerFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -54,7 +51,6 @@ import es.gob.fire.service.ICAuthenticationTypeService;
 import es.gob.fire.service.IPlannerService;
 import es.gob.fire.service.ISchedulerService;
 import es.gob.fire.service.IServerAfirmaService;
-import es.gob.fire.web.rest.controller.ApplicationRestController;
 
 /** 
  * <p>Class that manages the requests related to the configuration interface.</p>
@@ -220,8 +216,6 @@ public class ConfigurationController {
 		return "fragments/configGeneral.html";
 	}
 
-	private Logger LOGGER = LogManager.getLogger(ConfigurationController.class);
-	
 	/**
 	 * Handles GET requests for the WS Afirma configuration page.
 	 *

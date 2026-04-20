@@ -9,9 +9,8 @@ import org.springframework.data.jpa.datatables.mapping.DataTablesInput;
 import org.springframework.data.jpa.datatables.mapping.DataTablesOutput;
 import org.springframework.stereotype.Service;
 
-import es.gob.fire.commons.log.Logger;
-import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.persistence.entity.AuditSignature;
+import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.persistence.repository.AuditSignatureRepository;
 import es.gob.fire.persistence.repository.AuditTransactionRepository;
 import es.gob.fire.persistence.repository.datatable.AuditSignatureDataTablesRepository;
@@ -20,116 +19,116 @@ import es.gob.fire.persistence.service.IAuditTransactionService;
 
 @Service
 public class AuditTransactionService implements IAuditTransactionService{
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */
 	@Autowired
 	private AuditTransactionRepository repository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */
 	@Autowired
 	private AuditSignatureRepository signatureRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */
 	@Autowired
 	private AuditTransactionDataTablesRepository dtRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */
 	@Autowired
 	private AuditSignatureDataTablesRepository dtBatchSignatureRepository;
-	
+
 	/**
 	 * Attribute that represents the injected interface that provides CRUD
 	 * operations for the persistence.
 	 */
 
 	@Override
-	public AuditTransaction getAuditTransactionByAuditTransactionId(Integer idAuditTransaction) {
-		return repository.findByIdAuditTransaction(idAuditTransaction);
+	public AuditTransaction getAuditTransactionByAuditTransactionId(final Integer idAuditTransaction) {
+		return this.repository.findByIdAuditTransaction(idAuditTransaction);
 	}
 
 	@Override
 	public List<AuditTransaction> getAllAuditTransactions() {
-		return repository.findAll();
+		return this.repository.findAll();
 	}
 
 	@Override
-	public DataTablesOutput<AuditTransaction> getAllAuditTransactions(DataTablesInput input) {
-		return dtRepository.findAll(input);
+	public DataTablesOutput<AuditTransaction> getAllAuditTransactions(final DataTablesInput input) {
+		return this.dtRepository.findAll(input);
 	}
 
 	@Override
-	public DataTablesOutput<AuditTransaction> getAuditTransactionsWithDateFilter(DataTablesInput input, Date fromDate, Date toDate) {
-		
-		DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<AuditTransaction>();
-		
-		int compareMode = (fromDate != null && toDate != null) ? 1 : (fromDate != null ? 2 : (toDate != null ? 3 : 4)); 
-		
-		List<AuditTransaction> listPetitions = new ArrayList<AuditTransaction>();
-		
+	public DataTablesOutput<AuditTransaction> getAuditTransactionsWithDateFilter(final DataTablesInput input, final Date fromDate, final Date toDate) {
+
+		final DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<>();
+
+		final int compareMode = fromDate != null && toDate != null ? 1 : fromDate != null ? 2 : toDate != null ? 3 : 4;
+
+		List<AuditTransaction> listPetitions = new ArrayList<>();
+
 		switch (compareMode) {
 		case 1:
-			listPetitions = repository.findByDateBetween(fromDate, toDate);
+			listPetitions = this.repository.findByDateBetween(fromDate, toDate);
 			break;
 		case 2:
-			listPetitions = repository.findByDateAfter(fromDate);
+			listPetitions = this.repository.findByDateAfter(fromDate);
 			break;
 		case 3:
-			listPetitions = repository.findByDateBefore(toDate);
+			listPetitions = this.repository.findByDateBefore(toDate);
 			break;
 		default:
-			listPetitions = repository.findAll();
+			listPetitions = this.repository.findAll();
 			break;
 		}
-		
+
 		dtOutput.setData(listPetitions);
-		
+
 		return dtOutput;
 	}
 
 	@Override
-	public DataTablesOutput<AuditSignature> getAllAuditSignaturesOfTransaction(DataTablesInput input,
-			AuditTransaction auditTransaction) {
-		DataTablesOutput<AuditSignature> dtOutput = new DataTablesOutput<AuditSignature>();
-		
-		String idTransaction = auditTransaction.getIdTransaction();
-		
-		List<AuditSignature> listBatchSignatures = signatureRepository.findByIdTransaction(idTransaction);
-		
+	public DataTablesOutput<AuditSignature> getAllAuditSignaturesOfTransaction(final DataTablesInput input,
+			final AuditTransaction auditTransaction) {
+		final DataTablesOutput<AuditSignature> dtOutput = new DataTablesOutput<>();
+
+		final String idTransaction = auditTransaction.getIdTransaction();
+
+		final List<AuditSignature> listBatchSignatures = this.signatureRepository.findByIdTransaction(idTransaction);
+
 		dtOutput.setData(listBatchSignatures);
-		
+
 		return dtOutput;
 	}
 
 	@Override
-	public List<AuditTransaction> getAuditTransactionsWithDateFilter(Date fromDate, Date toDate) {
-		int compareMode = (fromDate != null && toDate != null) ? 1 : (fromDate != null ? 2 : (toDate != null ? 3 : 4)); 
-		
-		List<AuditTransaction> listPetitions = new ArrayList<AuditTransaction>();
-		
+	public List<AuditTransaction> getAuditTransactionsWithDateFilter(final Date fromDate, final Date toDate) {
+		final int compareMode = fromDate != null && toDate != null ? 1 : fromDate != null ? 2 : toDate != null ? 3 : 4;
+
+		List<AuditTransaction> listPetitions = new ArrayList<>();
+
 		switch (compareMode) {
 		case 1:
-			listPetitions = repository.findByDateBetween(fromDate, toDate);
+			listPetitions = this.repository.findByDateBetween(fromDate, toDate);
 			break;
 		case 2:
-			listPetitions = repository.findByDateAfter(fromDate);
+			listPetitions = this.repository.findByDateAfter(fromDate);
 			break;
 		case 3:
-			listPetitions = repository.findByDateBefore(toDate);
+			listPetitions = this.repository.findByDateBefore(toDate);
 			break;
 		default:
-			listPetitions = repository.findAll();
+			listPetitions = this.repository.findAll();
 			break;
 		}
 		return listPetitions;
@@ -137,48 +136,47 @@ public class AuditTransactionService implements IAuditTransactionService{
 
 	@Override
 	public List<AuditSignature> getAllAuditSignature() {
-		return signatureRepository.findAll();
+		return this.signatureRepository.findAll();
 	}
 
 	@Override
-	public DataTablesOutput<AuditTransaction> getAuditTransactionsWithDateFilter(DataTablesInput input, Date fromDate, Date toDate,
-			String app) {
-		DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<AuditTransaction>();
-		
-		List<AuditTransaction> listPetitions = repository.findByDateRangeAndApplication(fromDate, toDate, app);
-		
+	public DataTablesOutput<AuditTransaction> getAuditTransactionsWithDateFilter(final DataTablesInput input, final Date fromDate, final Date toDate,
+			final String app) {
+		final DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<>();
+
+		final List<AuditTransaction> listPetitions = this.repository.findByDateRangeAndApplication(fromDate, toDate, app);
+
 		dtOutput.setData(listPetitions);
-		
+
 		return dtOutput;
 	}
 
 	@Override
-	public DataTablesOutput<AuditTransaction> getAuditTransactionsFirstQuery(DataTablesInput input, Integer minutes) {
-		DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<AuditTransaction>();
-		
-		List<AuditTransaction> listPetitions = repository.findByDateAfter(new Date(System.currentTimeMillis() - minutes * 60 * 1000));
-				
+	public DataTablesOutput<AuditTransaction> getAuditTransactionsFirstQuery(final DataTablesInput input, final Integer minutes) {
+		final DataTablesOutput<AuditTransaction> dtOutput = new DataTablesOutput<>();
+
+		final List<AuditTransaction> listPetitions = this.repository.findByDateAfter(new Date(System.currentTimeMillis() - minutes * 60 * 1000));
+
 		dtOutput.setData(listPetitions);
-		
+
 		return dtOutput;
 	}
 
 	@Override
 	public List<String> getApplicationsDropdown() {
-		return repository.findDistinctApp();
+		return this.repository.findDistinctApp();
 	}
 
 	@Override
-	public List<AuditSignature> getAllAuditSignaturesOfTransaction(AuditTransaction transaction) {
-		
-		String idTransaction = transaction.getIdTransaction();
-		
+	public List<AuditSignature> getAllAuditSignaturesOfTransaction(final AuditTransaction transaction) {
+
+		final String idTransaction = transaction.getIdTransaction();
+
 		if (idTransaction != null && !idTransaction.isEmpty()) {
-			return signatureRepository.findByIdTransaction(idTransaction);
-		} else {
-			return new ArrayList<AuditSignature>();
+			return this.signatureRepository.findByIdTransaction(idTransaction);
 		}
-		
+		return new ArrayList<>();
+
 	}
 
 }

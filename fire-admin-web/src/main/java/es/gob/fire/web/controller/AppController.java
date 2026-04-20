@@ -24,16 +24,11 @@
  */
 package es.gob.fire.web.controller;
 
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.GetMapping;
 
-import es.gob.fire.i18n.IWebAdminGeneral;
-import es.gob.fire.i18n.Language;
-import es.gob.fire.persistence.dto.UserLoggedDTO;
 import es.gob.fire.web.config.VersionProperties;
 
 /** 
@@ -43,23 +38,20 @@ import es.gob.fire.web.config.VersionProperties;
  */
 @Controller
 public class AppController {
-
-	/** The Constant LOG. */
-	private static final Logger LOGGER = LoggerFactory.getLogger(AppController.class);
 	
 	@Autowired
     private VersionProperties versionProperties;
 	
 	@GetMapping({"/"})
 	public String index(final Model model) {
-		return "login.html";
+		return "login";
 	}
-
+	
 	@GetMapping("/inicio")
 	public String inicio(final Model model) {
 		model.addAttribute("appVersion", versionProperties.getProjectVersion());
         model.addAttribute("copyrightYear", versionProperties.getCopyrightYear());
-		return "inicio.html";
+		return "inicio";
 	}
 	@GetMapping("/user-form")
 	public String user() {

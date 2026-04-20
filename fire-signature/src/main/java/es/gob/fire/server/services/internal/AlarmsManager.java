@@ -137,16 +137,13 @@ public class AlarmsManager {
 		if (notifiersList != null && !notifiersList.isEmpty()) {
 			for (final AlarmNotifier notifier : notifiersList) {
 				try {
-
-					LOGGER.log(Level.INFO, " ====++++==== Enviamos al notificador " + notifier + " la alarma " + alarm); //$NON-NLS-1$
-
 					notifier.notify(alarm.getDefaultLevel(), alarm, resource);
-			} catch (final IOException e) {
+				} catch (final IOException e) {
 					LOGGER.log(Level.WARNING, "No se ha podido enviar el error al gestor de notificaciones", e); //$NON-NLS-1$
+				}
 			}
 		}
-			}
-		}
+	}
 
 	public static void destroy() {
 

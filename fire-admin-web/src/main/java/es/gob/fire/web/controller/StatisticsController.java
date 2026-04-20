@@ -26,7 +26,6 @@ package es.gob.fire.web.controller;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -34,7 +33,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-import java.util.TreeMap;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
@@ -46,7 +44,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import es.gob.fire.commons.log.Logger;
 import es.gob.fire.commons.utils.Constants;
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.QueryEnum;
@@ -54,7 +51,6 @@ import es.gob.fire.commons.utils.UtilsStringChar;
 import es.gob.fire.persistence.dto.OrganizationDTO;
 import es.gob.fire.persistence.dto.SignatureDTO;
 import es.gob.fire.persistence.dto.TransactionDTO;
-import es.gob.fire.persistence.entity.Application;
 import es.gob.fire.persistence.entity.Property;
 import es.gob.fire.persistence.service.IApplicationService;
 import es.gob.fire.persistence.service.IPropertyService;
@@ -81,24 +77,19 @@ public class StatisticsController {
 	 */
 	@Autowired
 	private ISignatureService signatureService;
-	
+
 	/**
 	 * Attribute that represents the application service.
 	 */
 	@Autowired
 	private IApplicationService applicationService;
-	
+
 	/**
 	 * Attribute that represents the property service.
 	 */
 	@Autowired
 	private IPropertyService propertyService;
-	
-	/**
-	 * Constant that represents the parameter log.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(StatisticsController.class);
-	
+
 	private static final String UNDEFINED_CODE = "__UNDEFINED__";
 	private static final String UNDEFINED_NAME = "No Definido";
 
@@ -110,13 +101,13 @@ public class StatisticsController {
 	 */
 	@RequestMapping(value = "statistics", method = RequestMethod.GET)
     public String loadStatisticsAdmin(final Model model){
-		Long maxEntitiesBeforeGrouping = getMaxEntitiesBeforeGrouping();
-		
+		final Long maxEntitiesBeforeGrouping = getMaxEntitiesBeforeGrouping();
+
 		model.addAttribute("maxEntitiesBeforeGrouping", maxEntitiesBeforeGrouping);
-		
+
         return "fragments/statistics.html";
     }
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of platforms
 	 * to the view.
@@ -129,67 +120,62 @@ public class StatisticsController {
 		List<QueryEnum> queries = new ArrayList<>();
 
 		queries = StreamSupport.stream(EnumSet.allOf(QueryEnum.class).spliterator(), false).collect(Collectors.toList());
-		
-		Set<String> allApplications = new HashSet<>();
-		allApplications.addAll(transactionService.getDifferentApplications());
-		allApplications.addAll(signatureService.getDifferentApplications());
-		
-		List<String> applications = new ArrayList<>(allApplications);
+
+		final Set<String> allApplications = new HashSet<>(this.transactionService.getDifferentApplications());
+		allApplications.addAll(this.signatureService.getDifferentApplications());
+
+		final List<String> applications = new ArrayList<>(allApplications);
 		Collections.sort(applications);
-		
-		final String UNDEFINED_CODE = "__UNDEFINED__";
-        final String UNDEFINED_NAME = "No Definido";
 
      // --- Organizations: group by DIR3, keep all names, expose one line per DIR3 ---
-        java.util.Set<OrganizationDTO> rawOrganizations = new java.util.HashSet<OrganizationDTO>();
-        rawOrganizations.addAll(transactionService.getDifferentOrganizations());
-        rawOrganizations.addAll(signatureService.getDifferentOrganizations());
+        final java.util.Set<OrganizationDTO> rawOrganizations = new java.util.HashSet<>(this.transactionService.getDifferentOrganizations());
+        rawOrganizations.addAll(this.signatureService.getDifferentOrganizations());
 
         // Map DIR3 -> names (LinkedHashSet preserves insertion order)
-        java.util.Map<String, java.util.LinkedHashSet<String>> dir3ToNames =
-                new java.util.TreeMap<String, java.util.LinkedHashSet<String>>(String.CASE_INSENSITIVE_ORDER);
+        final java.util.Map<String, java.util.LinkedHashSet<String>> dir3ToNames =
+                new java.util.TreeMap<>(String.CASE_INSENSITIVE_ORDER);
 
-        for (OrganizationDTO o : rawOrganizations) {
-            String code = (o != null && org.springframework.util.StringUtils.hasText(o.getDir3Code()))
+        for (final OrganizationDTO o : rawOrganizations) {
+            final String code = o != null && org.springframework.util.StringUtils.hasText(o.getDir3Code())
                     ? o.getDir3Code().trim()
                     : UNDEFINED_CODE;
-            String name = (o != null && org.springframework.util.StringUtils.hasText(o.getOrganization()))
+            final String name = o != null && org.springframework.util.StringUtils.hasText(o.getOrganization())
                     ? o.getOrganization().trim()
                     : UNDEFINED_NAME;
 
             java.util.LinkedHashSet<String> names = dir3ToNames.get(code);
             if (names == null) {
-                names = new java.util.LinkedHashSet<String>();
+                names = new java.util.LinkedHashSet<>();
                 dir3ToNames.put(code, names);
             }
             names.add(name);
         }
 
         // One DTO per DIR3; use a compact representative name
-        java.util.List<OrganizationDTO> organizations = new java.util.ArrayList<OrganizationDTO>();
-        for (java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
-            String code = e.getKey();
-            String displayName = choosePrimaryName(e.getValue());
+        final java.util.List<OrganizationDTO> organizations = new java.util.ArrayList<>();
+        for (final java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
+            final String code = e.getKey();
+            final String displayName = choosePrimaryName(e.getValue());
             organizations.add(new OrganizationDTO(displayName, code));
         }
 
         // Ensure undefined first
-        java.util.List<OrganizationDTO> orderedOrganizations = new java.util.ArrayList<OrganizationDTO>(organizations.size() + 1);
+        final java.util.List<OrganizationDTO> orderedOrganizations = new java.util.ArrayList<>(organizations.size() + 1);
         orderedOrganizations.add(new OrganizationDTO(UNDEFINED_NAME, UNDEFINED_CODE));
-        for (OrganizationDTO o : organizations) {
+        for (final OrganizationDTO o : organizations) {
             if (!UNDEFINED_CODE.equals(o.getDir3Code())) {
                 orderedOrganizations.add(o);
             }
         }
 
         // Expose alias maps
-        java.util.Map<String, java.util.List<String>> organizationsNamesListByDir3 = new java.util.HashMap<String, java.util.List<String>>(dir3ToNames.size());
-        java.util.Map<String, String> organizationsNamesByDir3 = new java.util.HashMap<String, String>(dir3ToNames.size());
-        for (java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
-            organizationsNamesListByDir3.put(e.getKey(), new java.util.ArrayList<String>(e.getValue()));
+        final java.util.Map<String, java.util.List<String>> organizationsNamesListByDir3 = new java.util.HashMap<>(dir3ToNames.size());
+        final java.util.Map<String, String> organizationsNamesByDir3 = new java.util.HashMap<>(dir3ToNames.size());
+        for (final java.util.Map.Entry<String, java.util.LinkedHashSet<String>> e : dir3ToNames.entrySet()) {
+            organizationsNamesListByDir3.put(e.getKey(), new java.util.ArrayList<>(e.getValue()));
             organizationsNamesByDir3.put(e.getKey(), joinAllNames(e.getValue()));
         }
-				
+
 		model.addAttribute("queries", queries);
 		model.addAttribute("applications", applications);
 		model.addAttribute("organizations", orderedOrganizations);
@@ -210,7 +196,7 @@ public class StatisticsController {
     public String statisticsResult(final Model model, final @RequestParam("query") String query, final @RequestParam("monthDate") String monthDate, final @RequestParam("endMonthDate") String endMonthDate) {
 		List<TransactionDTO> transactions = null;
 		List<SignatureDTO> signatures = null;
-		
+
 		if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate) && StringUtils.isEmpty(endMonthDate)) {
 			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
 			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
@@ -267,7 +253,7 @@ public class StatisticsController {
 				model.addAttribute("enableBarChart", Boolean.TRUE);
 				model.addAttribute("enableBarTimeChart", Boolean.FALSE);
 			}
-			
+
 			// Consulta de firmas
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year).spliterator(), false).collect(Collectors.toList());
@@ -323,28 +309,28 @@ public class StatisticsController {
 		} else if (!StringUtils.isEmpty(query) && !StringUtils.isEmpty(monthDate) && !StringUtils.isEmpty(endMonthDate)) {
 			final Integer month = Integer.valueOf(monthDate.substring(0, NumberConstants.NUM2));
 			final Integer year = Integer.valueOf(monthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
-			
+
 			final Integer endMonth = Integer.valueOf(endMonthDate.substring(0, NumberConstants.NUM2));
 			final Integer endYear = Integer.valueOf(endMonthDate.substring(NumberConstants.NUM3, NumberConstants.NUM7));
-			
+
 			Integer currentMonth = month;
 			Integer currentYear = year;
-			
+
 			// Consultas de transacciones
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_APP.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByApplication(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
 
-				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
-				
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByApplication(currentMonth, currentYear);
+				final Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByApplication(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    transactionsByMonth.put(key, transactionsOfMonth);
-					
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -365,18 +351,18 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_PROVIDER.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByProvider(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByProvider(currentMonth, currentYear);
-				    
+				final Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByProvider(currentMonth, currentYear);
+
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    transactionsByMonth.put(key, transactionsOfMonth);
-					
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -384,7 +370,7 @@ public class StatisticsController {
 				        currentYear++;
 				    }
 				}
-				
+
 				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
 				model.addAttribute("isQueryByAppOrProvider", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
@@ -398,17 +384,17 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_DATES_SIZE_APP.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByDatesSizeApp(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
 
-				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+				final Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByDatesSizeApp(currentMonth, currentYear);
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByDatesSizeApp(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    transactionsByMonth.put(key, transactionsOfMonth);
-					
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -416,7 +402,7 @@ public class StatisticsController {
 				        currentYear++;
 				    }
 				}
-				
+
 				model.addAttribute("queryStatisticsByMonth", transactionsByMonth);
 				model.addAttribute("isQueryByDatesSize", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", transactions);
@@ -428,17 +414,17 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_BY_TYPE_TRANSACTION.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOperation(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
 
-				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+				final Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByOperation(currentMonth, currentYear);
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByOperation(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    transactionsByMonth.put(key, transactionsOfMonth);
-					
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -458,17 +444,17 @@ public class StatisticsController {
 			if (query.equalsIgnoreCase(QueryEnum.TRANSACTIONS_ENDED_BY_ORGANISM.getName())) {
 				transactions = StreamSupport.stream(this.transactionService.getTransactionsByOrganism(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
 
-				Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
-				
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByOrganism(currentMonth, currentYear);
+				final Map<String, List<TransactionDTO>> transactionsByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<TransactionDTO> transactionsOfMonth = this.transactionService.getTransactionsByOrganism(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    transactionsByMonth.put(key, transactionsOfMonth);
-					
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -487,23 +473,23 @@ public class StatisticsController {
 				model.addAttribute("enableBarChart", Boolean.TRUE);
 				model.addAttribute("enableBarTimeChart", Boolean.TRUE);
 			}
-			
+
 			// Consulta de firmas
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_APP.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByApplication(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+				final Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
 				    // Obtener la lista de firmas para el mes y año actual
-				    List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByApplication(currentMonth, currentYear);
-				    
+				    final List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByApplication(currentMonth, currentYear);
+
 				    // Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    signaturesByMonth.put(key, signaturesOfMonth);
-				    
+
 				    // Incrementar el mes y, si es necesario, el año
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -522,18 +508,18 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_PROVIDER.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByProvider(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
-				
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByProvider(currentMonth, currentYear);
-					
+
+				final Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByProvider(currentMonth, currentYear);
+
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    signaturesByMonth.put(key, signaturesOfMonth);
-				    
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -541,7 +527,7 @@ public class StatisticsController {
 				        currentYear++;
 				    }
 				}
-				
+
 				model.addAttribute("queryStatisticsByMonth", signaturesByMonth);
 				model.addAttribute("isSignatureQuery", Boolean.TRUE);
 				model.addAttribute("queryStatisticsResult", signatures);
@@ -552,18 +538,18 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByFormat(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByFormat(currentMonth, currentYear);
+				final Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByFormat(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    signaturesByMonth.put(key, signaturesOfMonth);
-				    
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -582,18 +568,18 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_USED_IN_SIGNATURE_FORMAT.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByImprovedFormat(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
-					List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByImprovedFormat(currentMonth, currentYear);
+				final Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
+					final List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByImprovedFormat(currentMonth, currentYear);
 
 					// Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    signaturesByMonth.put(key, signaturesOfMonth);
-				    
+
 				    // Incrementamos el mes
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -612,19 +598,19 @@ public class StatisticsController {
 			}
 			if (query.equalsIgnoreCase(QueryEnum.DOCUMENTS_SIGNED_BY_ORGANISM.getName())) {
 				signatures = StreamSupport.stream(this.signatureService.getSignaturesByOrganism(month, year, endMonth, endYear).spliterator(), false).collect(Collectors.toList());
-				
-				Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
 
-				while (currentYear.intValue() < endYear.intValue() || (currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue())) {
+				final Map<String, List<SignatureDTO>> signaturesByMonth = new HashMap<>();
+
+				while (currentYear.intValue() < endYear.intValue() || currentYear.intValue() == endYear.intValue() && currentMonth.intValue() <= endMonth.intValue()) {
 				    // Obtener la lista de firmas para el mes y año actual
-				    List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByOrganism(currentMonth, currentYear);
-				    
+				    final List<SignatureDTO> signaturesOfMonth = this.signatureService.getSignaturesByOrganism(currentMonth, currentYear);
+
 				    // Formatear la clave en formato MM/YYYY
-				    String key = String.format("%02d/%04d", currentMonth, currentYear);
-				    
+				    final String key = String.format("%02d/%04d", currentMonth, currentYear);
+
 				    // Agregar la lista al Map con la clave correspondiente
 				    signaturesByMonth.put(key, signaturesOfMonth);
-				    
+
 				    // Incrementar el mes y, si es necesario, el año
 				    currentMonth++;
 				    if (currentMonth > 12) {
@@ -646,30 +632,34 @@ public class StatisticsController {
 		}
         return "fragments/querystatisticstable.html";
     }
-	
+
 	private Long getMaxEntitiesBeforeGrouping() {
 		//Devolvemos como valor por defecto 10
 		Long maxEntitiesBeforeGrouping = 10L;
 
-		Optional<Property> opt = propertyService.getPropertyByKey(PropertyService.PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING);
+		final Optional<Property> opt = this.propertyService.getPropertyByKey(PropertyService.PROPERTY_NAME_MAX_ENTITIES_BEFORE_GROUPING);
 
 		if (opt.isPresent()) {
-			Property res = opt.get();
-			
+			final Property res = opt.get();
+
 			maxEntitiesBeforeGrouping = res.getNumericValue() != null ? res.getNumericValue() : 10L;
 		}
-		
+
 		return maxEntitiesBeforeGrouping;
 	}
-	
+
 	private String choosePrimaryName(final java.util.Collection<String> names) {
 	    String best = UNDEFINED_NAME;
-	    for (String n : names) {
-	        if (n == null) continue;
-	        String t = n.trim();
-	        if (t.isEmpty()) continue;
+	    for (final String n : names) {
+	        if (n == null) {
+				continue;
+			}
+	        final String t = n.trim();
+	        if (t.isEmpty()) {
+				continue;
+			}
 	        if (UNDEFINED_NAME.equals(best)) { best = t; continue; }
-	        if (t.length() < best.length() || (t.length() == best.length() && t.compareToIgnoreCase(best) < 0)) {
+	        if (t.length() < best.length() || t.length() == best.length() && t.compareToIgnoreCase(best) < 0) {
 	            best = t;
 	        }
 	    }

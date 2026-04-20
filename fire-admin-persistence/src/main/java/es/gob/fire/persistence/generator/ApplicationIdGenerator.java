@@ -1,4 +1,4 @@
-/* 
+/*
 /*******************************************************************************
  * Copyright (C) 2018 MINHAFP, Gobierno de Espa&ntilde;a
  * This program is licensed and may be used, modified and redistributed under the  terms
@@ -14,7 +14,7 @@
  * http:joinup.ec.europa.eu/software/page/eupl/licence-eupl
  ******************************************************************************/
 
-/** 
+/**
  * <b>File:</b><p>es.gob.fire.persistence.generator.ApplicationIdGenerator.java.</p>
  * <b>Description:</b><p>Class that manages the generation of the identifier dor the table <i>TB_APLICACIONES</i>.</p>
   * <b>Project:</b><p>Application for signing documents of @firma suite systems</p>
@@ -31,7 +31,8 @@ import javax.crypto.KeyGenerator;
 import javax.crypto.Mac;
 import javax.crypto.SecretKey;
 
-import es.gob.fire.commons.log.Logger;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.hibernate.HibernateException;
 import org.hibernate.engine.spi.SharedSessionContractImplementor;
 import org.hibernate.id.IdentifierGenerator;
@@ -44,19 +45,17 @@ import es.gob.fire.commons.utils.Hexify;
  * @version 1.1, 02/02/2022.
  */
 public class ApplicationIdGenerator implements IdentifierGenerator {
-	
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(ApplicationIdGenerator.class);
-    
+
+	/** Attribute that represents the object that manages the log of the class. */
+	private static final Logger LOGGER = LogManager.getLogger(ApplicationIdGenerator.class);
+
     private static final String HMAC_ALGORITHM = "HmacMD5"; //$NON-NLS-1$
 
     @Override
-    public Serializable generate(SharedSessionContractImplementor session, Object obj) throws HibernateException {
+    public Serializable generate(final SharedSessionContractImplementor session, final Object obj) throws HibernateException {
 		return generateId();
-    }    
-    
+    }
+
     /**
 	 * Genera un nuevo identificador de aplicaci&oacute;n.
 	 * @return Identificador de aplicaci&oacute;n.

@@ -2,7 +2,6 @@ package es.gob.fire.web.rest.controller;
 
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
-import java.util.ArrayList;
 import java.util.Base64;
 import java.util.Date;
 import java.util.HashMap;
@@ -12,6 +11,8 @@ import java.util.Map;
 import javax.servlet.http.HttpServletResponse;
 import javax.validation.constraints.NotEmpty;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.MessageSource;
@@ -24,73 +25,70 @@ import org.springframework.web.bind.annotation.RestController;
 
 import com.fasterxml.jackson.annotation.JsonView;
 
-import es.gob.fire.commons.log.Logger;
-import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.persistence.entity.AuditSignature;
+import es.gob.fire.persistence.entity.AuditTransaction;
 import es.gob.fire.persistence.service.IAuditTransactionService;
 import es.gob.fire.report.common.Report;
 import es.gob.fire.report.common.ReportGenerator;
 
 @RestController
 public class AuditRestController {
-	
+
+    /** Logger for this class. */
+    private static final Logger LOGGER = LogManager.getLogger(AuditRestController.class);
+
 	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
-	private static final Logger LOGGER = Logger.getLogger(AuditRestController.class);
-	
-	/**
-	 * Constant attribute that represents the default file name for the petitions report. 
+	 * Constant attribute that represents the default file name for the petitions report.
 	 */
 	private static final String CONTENT_DISPOSITION_DOWNLOAD_REPORT = "Content-disposition";
-	
+
 	/**
-	 * Attribute that represents the header to download petitions report. 
+	 * Attribute that represents the header to download petitions report.
 	 */
 	public static final String HEADER_DOWNLOAD_REPORT = "attachment; filename=";
-	
+
 	/**
-	 * Attribute that represents the content disposition to download report. 
+	 * Attribute that represents the content disposition to download report.
 	 */
 	public static final String CONTENT_TYPE_DOWNLOAD_REPORT = "application/vnd.ms-excel;base64";
-	
+
 	/**
 	 * Constant attribute that represents the date format <code>yyyyMMddHHmmss</code>.
 	 */
 	public static final String REPORT_FILENAME_DATE_FORMAT = "yyyyMMddHHmmss";
-	
+
 	/**
 	 * Constant attribute that represents the date format <code>yyyyMMddHHmmss</code>.
 	 */
 	public static final String REPORT_DEFAULT_FILENAME = "AuditReport";
-	
+
 	/**
 	 * Constant that defines the report extension.
 	 */
 	public static final String REPORT_EXTENSION = ".xls";
-	
+
 	/**
 	 * Constant that defines the time expression for no end date in the filter.
 	 */
 	public static final String TIME_EXPRESSION_SEPARATOR = " - ";
-	
+
 	/**
 	 * Constant that defines the time expression for no end date in the filter.
 	 */
 	public static final String TIME_EXPRESSION_NO_START_DATE = "INICIO";
-	
+
 	/**
 	 * Constant that defines the time expression for no end date in the filter.
 	 */
 	public static final String TIME_EXPRESSION_NO_END_DATE = "AHORA";
-	
+
 	/**
 	 * Attribute that represents the mail hot.
 	 */
 	@Value("${audit.time.default}")
 	private String auditTimeProperty;
 
-	public void setAuditTimeProperty(String auditTimeProperty) {
+	public void setAuditTimeProperty(final String auditTimeProperty) {
 		this.auditTimeProperty = auditTimeProperty;
 	}
 
@@ -100,13 +98,13 @@ public class AuditRestController {
 	 */
 	@Autowired
 	private IAuditTransactionService auditTransactionService;
-	
+
 	/**
 	 * Attribute that represents the view message wource.
 	 */
 	@Autowired
 	private MessageSource messageSource;
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of audit transactions to the view.
 	 *
@@ -116,9 +114,9 @@ public class AuditRestController {
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/auditTransactionDatatable", method = RequestMethod.GET)
 	public DataTablesOutput<AuditTransaction> getPetitionsDatatable(@NotEmpty final DataTablesInput input) {
-		return auditTransactionService.getAllAuditTransactions(input);
+		return this.auditTransactionService.getAllAuditTransactions(input);
 	}
-	
+
 	/**
 	 * Method that maps the list users web requests to the controller and forwards the list of audit transactions to the view.
 	 *
@@ -127,141 +125,139 @@ public class AuditRestController {
 	 */
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/auditTransactionDatatableWithFilter", method = RequestMethod.GET)
-	public DataTablesOutput<AuditTransaction> getPetitionsDatatableWithFilter(@NotEmpty final DataTablesInput input, @RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("app") String app) {
+	public DataTablesOutput<AuditTransaction> getPetitionsDatatableWithFilter(@NotEmpty final DataTablesInput input, @RequestParam("from") final String from, @RequestParam("to") final String to, @RequestParam("app") final String app) {
 		Date fromDate = null;
 		Date toDate = null;
 		String appFilter = null;
-		
+
 		try {
 			if (from != null && !from.isEmpty()){
 				fromDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(from);
 			}
-			
+
 			if (to != null && !to.isEmpty()){
 				toDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(to);
 			}
-			
+
 			if (app != null && !app.isEmpty()){
 				appFilter = app;
 			}
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			LOGGER.error("Error parsing date parameters");
-		}  
-		
-		DataTablesOutput dtOutput = auditTransactionService.getAuditTransactionsWithDateFilter(input, fromDate, toDate, appFilter);
-		
-		return dtOutput;
+		}
+
+		return this.auditTransactionService.getAuditTransactionsWithDateFilter(input, fromDate, toDate, appFilter);
 	}
-	
+
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/getAuditSignaturesOfTransaction", method = RequestMethod.GET)
-	public DataTablesOutput<AuditSignature> getAuditSignaturesOfTransaction(@NotEmpty final DataTablesInput input, @RequestParam("idAuditTransaction") Integer idAuditTransaction){
-		DataTablesOutput<AuditSignature> dtOutput = new DataTablesOutput<AuditSignature>();
-		
-		AuditTransaction auditTransaction = auditTransactionService.getAuditTransactionByAuditTransactionId(idAuditTransaction);
-		
-		return auditTransactionService.getAllAuditSignaturesOfTransaction(input, auditTransaction);
+	public DataTablesOutput<AuditSignature> getAuditSignaturesOfTransaction(@NotEmpty final DataTablesInput input, @RequestParam("idAuditTransaction") final Integer idAuditTransaction){
+		final DataTablesOutput<AuditSignature> dtOutput = new DataTablesOutput<>();
+
+		final AuditTransaction auditTransaction = this.auditTransactionService.getAuditTransactionByAuditTransactionId(idAuditTransaction);
+
+		return this.auditTransactionService.getAllAuditSignaturesOfTransaction(input, auditTransaction);
 	}
 
 	@RequestMapping(value = "/exportAudit", method= RequestMethod.GET)
-	public void generatePetitionsReport(@RequestParam("from") String from, @RequestParam("to") String to, HttpServletResponse response){
-		
+	public void generatePetitionsReport(@RequestParam("from") final String from, @RequestParam("to") final String to, final HttpServletResponse response){
+
 		Date fromDate = null;
 		Date toDate = null;
-		
+
 		try {
 			if (from != null && !from.isEmpty()){
 				fromDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(from);
 			}
-			
+
 			if (to != null && !to.isEmpty()){
 				toDate = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss").parse(to);
 			}
-		} catch (ParseException e) {
+		} catch (final ParseException e) {
 			LOGGER.error("Error");
 		}
-		
-		List<AuditTransaction> listTransactions = auditTransactionService.getAuditTransactionsWithDateFilter(fromDate, toDate);
-		
-		List<AuditSignature> listSignatures = auditTransactionService.getAllAuditSignature();
-		
-		Map<Object, Object> params = new HashMap<Object, Object>();
-		
+
+		final List<AuditTransaction> listTransactions = this.auditTransactionService.getAuditTransactionsWithDateFilter(fromDate, toDate);
+
+		final List<AuditSignature> listSignatures = this.auditTransactionService.getAllAuditSignature();
+
+		final Map<Object, Object> params = new HashMap<>();
+
 		if (listTransactions != null){
 			params.put("listTransactions", listTransactions);
 		}
 		if (listSignatures != null){
 			params.put("listSignatures", listSignatures);
 		}
-		
-		Report report = ReportGenerator.getReport("AUDIT", params);
-		
+
+		final Report report = ReportGenerator.getReport("AUDIT", params);
+
 		try {
-			byte[] reportBytes = report.getReport();
-			
-			String encodedBase64 = new String(Base64.getEncoder().encode(reportBytes));
-			
-			String fileName = new SimpleDateFormat(REPORT_FILENAME_DATE_FORMAT).format(new Date()) + "_" + REPORT_DEFAULT_FILENAME + REPORT_EXTENSION;
-			
+			final byte[] reportBytes = report.getReport();
+
+			final String encodedBase64 = new String(Base64.getEncoder().encode(reportBytes));
+
+			final String fileName = new SimpleDateFormat(REPORT_FILENAME_DATE_FORMAT).format(new Date()) + "_" + REPORT_DEFAULT_FILENAME + REPORT_EXTENSION;
+
 			response.setHeader(CONTENT_DISPOSITION_DOWNLOAD_REPORT, HEADER_DOWNLOAD_REPORT.concat(fileName));
 			response.setContentType(CONTENT_TYPE_DOWNLOAD_REPORT);
 			response.getOutputStream().write(encodedBase64.getBytes());
-		} catch (Exception e) {
+		} catch (final Exception e) {
 			LOGGER.error("Error");
 		}
 	}
-	
+
 	@JsonView(DataTablesOutput.View.class)
 	@RequestMapping(path = "/getAuditTransactionsFirstLoad", method = RequestMethod.GET)
 	public DataTablesOutput<AuditTransaction> getPetitionsFirstLoad(@NotEmpty final DataTablesInput input){
-		DataTablesOutput<AuditTransaction> dtOuput = new DataTablesOutput<AuditTransaction>();
-		
-		Integer auditTimeDefault = Integer.parseInt(auditTimeProperty);
-		
+		DataTablesOutput<AuditTransaction> dtOuput = new DataTablesOutput<>();
+
+		final Integer auditTimeDefault = Integer.parseInt(this.auditTimeProperty);
+
 		if (auditTimeDefault != null){
-			dtOuput = auditTransactionService.getAuditTransactionsFirstQuery(input, auditTimeDefault);
+			dtOuput = this.auditTransactionService.getAuditTransactionsFirstQuery(input, auditTimeDefault);
 		}
-		
+
 		return dtOuput;
 	}
-	
+
 	@RequestMapping(path = "/getAuditTransactionsFirstLoadFromDate", method = RequestMethod.GET)
 	public String getAuditFirstLoadFromDate() {
 		String loadDateString = "";
-		
-		Integer auditTimeDefault = Integer.parseInt(auditTimeProperty); 
-		
-		Date firstLoadDate = new Date(System.currentTimeMillis() - auditTimeDefault * 60 * 1000); 
-		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		
+
+		final Integer auditTimeDefault = Integer.parseInt(this.auditTimeProperty);
+
+		final Date firstLoadDate = new Date(System.currentTimeMillis() - auditTimeDefault * 60 * 1000);
+
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
 		loadDateString += dateFormat.format(firstLoadDate);
-		
+
 		return loadDateString;
 	}
-	
+
 	@RequestMapping(path = "/getAuditTransactionsFirstLoadToDate", method = RequestMethod.GET)
 	public String getAuditFirstLoadToDate() {
 		String loadDateString = "";
-		
-		Date firstLoadDate = new Date(); 
-		
-		SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
-		
+
+		final Date firstLoadDate = new Date();
+
+		final SimpleDateFormat dateFormat = new SimpleDateFormat("dd/MM/yyyy HH:mm:ss");
+
 		loadDateString += dateFormat.format(firstLoadDate);
-		
+
 		return loadDateString;
 	}
-	
+
 	@RequestMapping(path = "/getAuditTransactionsFilterLoadDate", method = RequestMethod.GET)
-	public String getAuditFilterLoadDate(@RequestParam("from") String from, @RequestParam("to") String to, @RequestParam("app") String app) {
+	public String getAuditFilterLoadDate(@RequestParam("from") final String from, @RequestParam("to") final String to, @RequestParam("app") final String app) {
 		String loadDateString = "";
-		
-		boolean fromIsNotNull = from != null && !from.isEmpty();
-		boolean toIsNotNull = to != null && !to.isEmpty();
-		
-		int compareMode = (fromIsNotNull && toIsNotNull) ? 1 : (fromIsNotNull ? 2 : (toIsNotNull ? 3 : 4)); 
-		
+
+		final boolean fromIsNotNull = from != null && !from.isEmpty();
+		final boolean toIsNotNull = to != null && !to.isEmpty();
+
+		final int compareMode = fromIsNotNull && toIsNotNull ? 1 : fromIsNotNull ? 2 : toIsNotNull ? 3 : 4;
+
 		switch (compareMode) {
 		case 1:
 			loadDateString += from + TIME_EXPRESSION_SEPARATOR + to;
@@ -276,7 +272,7 @@ public class AuditRestController {
 			loadDateString += TIME_EXPRESSION_NO_START_DATE + TIME_EXPRESSION_SEPARATOR + TIME_EXPRESSION_NO_END_DATE;
 			break;
 		}
-		
+
 		return loadDateString;
 	}
 }

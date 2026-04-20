@@ -30,6 +30,7 @@ import java.security.cert.CertificateException;
 import java.security.cert.X509Certificate;
 import java.text.SimpleDateFormat;
 import java.util.Base64;
+import java.util.Calendar;
 import java.util.Comparator;
 import java.util.Date;
 import java.util.List;
@@ -44,6 +45,7 @@ import javax.servlet.http.HttpSession;
 
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.opensaml.core.config.InitializationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -58,8 +60,6 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
 
-import com.ibm.icu.util.Calendar;
-
 import es.gob.fire.commons.utils.NumberConstants;
 import es.gob.fire.commons.utils.UtilsDate;
 import es.gob.fire.commons.utils.UtilsStringChar;
@@ -71,9 +71,10 @@ import es.gob.fire.persistence.entity.User;
 import es.gob.fire.persistence.service.IUserService;
 import es.gob.fire.service.ILoginService;
 import es.gob.fire.service.impl.LoginService;
-import es.gob.fire.web.clave.sp.request.RequestClave;
+import es.gob.fire.web.clave3.sp.ClaveConfig;
+import es.gob.fire.web.clave3.sp.RequestBuilder;
+import es.gob.fire.web.clave3.sp.RequestSAML;
 import es.gob.fire.web.config.VersionProperties;
-import es.gob.fire.web.exception.WebAdminException;
 
 /**
  * <p>
@@ -89,24 +90,33 @@ import es.gob.fire.web.exception.WebAdminException;
 @Controller
 public class LoginController {
 
-	private static final String PARAM_SIGNATUREB64 = "signatureBase64";
+	private static final String PARAM_SIGNATUREB64 = "signatureBase64"; //$NON-NLS-1$
 
-	/**
-	 * Attribute that represents the object that manages the log of the class.
-	 */
+	/** Attribute that represents the object that manages the log of the class. */
 	private static final Logger LOGGER = LogManager.getLogger(LoginController.class);
 
 	/**
 	 * Attribute that represent a property configure in admin_config.properties
 	 */
-	@Value("${conf.cert.number.attemps}")
-	private Long confCertNumberAttemps;
+	@Value("${contingency.attemps}")
+	private Long contingencyAttemps;
 
 	/**
 	 * Attribute that represent a property configure in admin_config.properties
 	 */
-	@Value("${conf.cert.interval.contingency}")
-	private Long confCertIntervalContingency;
+	@Value("${contingency.interval}")
+	private Long contingencyInterval;
+
+	/**
+	 * Attribute that represent a property configure in admin_config.properties
+	 */
+	@Value("${contingency.duration}")
+	private Long contingencyDuration;
+
+	/** Indica si el modo de contingencia esta actualmente habilitado debido a varios intentos de acceso err&oacute;neos. */
+	private boolean contingencyModeEnabled = false;
+	/** Marca el instante de tiempo en el que se inici&oacute; el modo de contingencia. */
+	private long contingencyModeStartTime = -1;
 
 	/**
 	 * Attribute that represents the service object for accessing the repository.
@@ -132,7 +142,7 @@ public class LoginController {
 	 *
 	 * @param request the HttpServletRequest object containing the client request
 	 * @param model the Model object to add attributes to be rendered in the view
-	 * @return a string representing the view name to render, in this case, the login page ("login.html")
+	 * @return a string representing the view name to render, in this case, the login page ("login")
 	 */
 	@GetMapping("/login-error")
     public String login(final HttpServletRequest request, final Model model) {
@@ -145,8 +155,8 @@ public class LoginController {
                 errorMessage = ex.getMessage();
             }
         }
-        model.addAttribute("errorMessage", errorMessage);
-        return "login.html";
+        model.addAttribute("errorMessage", errorMessage); //$NON-NLS-1$
+        return "login"; //$NON-NLS-1$
     }
 
 	/**
@@ -156,45 +166,61 @@ public class LoginController {
     @RequestMapping(value = "/loginClave", method = RequestMethod.POST)
     public String loginWithClave(final Model model, final HttpServletRequest request) {
     	LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG011));
-    	String samlRequestB64;
-    	final Date currentDate = Calendar.getInstance().getTime(); // Obtenemos la fecha actual
-    	final String ipUser = request.getRemoteAddr(); // Obtenemos la ip del cliente que realiza la peticion
 
+    	// Se inicializa la configuracion de OpenSaml
     	try {
-    		// Construimos la peticion SAML en codificada en B64
-			samlRequestB64 = RequestClave.constructRequestSAML();
-		} catch (final WebAdminException e) {
-			model.addAttribute("errorMessage", e.getMessage());
-			return "login.html";
-		} catch (final Exception e) {
-			// La conexion con Cl@ve no es correcta. Mostramos el error, pero
-			// continuamos para que se active el modo de contingencia
-			final String errorMsg = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML020);
-			LOGGER.error(errorMsg, e);
-    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
-    		LOGGER.error(" ====== Generamos el token de sesion (1) " + randomStringLogin);
-    		HttpSession session = request.getSession(true);
-    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
-    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-    		model.addAttribute("errorMessage", errorMsg);
-    		model.addAttribute("accessByCertificate", true);
-			return "login.html";
-		}
+    		InitializationService.initialize();
+    	} catch (final Exception e) {
+    		// Error en la inicializacion de bibliotecas para la conexion con Clave.
+    		// Mostramos el error y continuamos para que se active el modo de contingencia
+    		LOGGER.error(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML021), e);
+
+    		// De cara a los usuarios, fallo la conexion con Clave
+    		final String errMsg = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML020);
+
+	        // Activamos el modo de contingencia
+	        configContingencyMode(request, model, errMsg);
+
+    		return "login"; //$NON-NLS-1$
+    	}
+
+    	// Cargamos la configuracion de la conexion con Clave
+    	final ClaveConfig config = ClaveConfig.loadConfigFromFile();
+
+    	RequestSAML requestSaml;
+    	try {
+    		requestSaml = RequestBuilder.buildLoginRequest(config);
+    	} catch (final Exception e) {
+    		// La conexion con Cl@ve no es correcta. Mostramos el error, pero
+    		// continuamos para que se active el modo de contingencia
+    		final String errorMsg = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML020);
+    		LOGGER.error(errorMsg, e);
+
+	        // Activamos el modo de contingencia
+	        configContingencyMode(request, model, errorMsg);
+
+    		return "login"; //$NON-NLS-1$
+    	}
+
+    	// Obtenemos la fecha actual y la IP de origen de la peticion para registrar cualquier error que se
+    	// produzca en el acceso a Clave
+    	final Date currentDate = Calendar.getInstance().getTime();
+    	final String ipUser = request.getRemoteAddr();
+
+    	// Se obtiene el identificador RelayState que permitira su validacion
+    	// en la respuesta desde Pasarela
+    	final String relayState = requestSaml.getRelayState();
 
     	// Comprobaremos si necesitamos activar el certificado de contingencia
     	final StringBuilder activateMsg = new StringBuilder();
-    	if(activateCertificateContingency(model, currentDate, ipUser, activateMsg)) {
+
+    	if (checkContingencyMode(model, currentDate, ipUser, activateMsg)) {
     		LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG012));
-    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
-    		LOGGER.error(" ====== Generamos el token de sesion (2 " + randomStringLogin);
-    		HttpSession session = request.getSession(true);
-    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
-    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-    		model.addAttribute("errorMessage", activateMsg);
-    		model.addAttribute("accessByCertificate", true);
-			return "login.html";
+
+	        // Activamos el modo de contingencia
+	        configContingencyMode(request, model, activateMsg.toString());
+
+			return "login"; //$NON-NLS-1$
     	}
 
     	// Registraremos la peticion en la tabla de control de acceso
@@ -203,16 +229,17 @@ public class LoginController {
     	controlAccess.setStartDateAccess(currentDate);
     	this.iLoginService.saveControlAccess(controlAccess);
 
-    	model.addAttribute("samlRequest", samlRequestB64);
-    	model.addAttribute("relayState", RequestClave.relayState);
-    	model.addAttribute("nodeServiceUrl", RequestClave.nodeServiceUrl);
+    	model.addAttribute("samlRequest", requestSaml.getSAMLRequest()); //$NON-NLS-1$
+    	model.addAttribute("relayState", relayState); //$NON-NLS-1$
+    	model.addAttribute("nodeServiceUrl", config.getServiceUrl()); //$NON-NLS-1$
 
-        return "loginClave.html";
+        return "loginClave"; //$NON-NLS-1$
     }
 
+
+
     /**
-     * Activates the certificate contingency if the platform is unavailable or if the user has made
-     * too many access attempts within a short time.
+     * Check if certificate contingency mode is enabled or if it needs to be enabled.
      *
      * @param model the Model to add attributes for the view
      * @param currentDate the current date for time comparison
@@ -221,7 +248,18 @@ public class LoginController {
      *
      * @return true if contingency is activated, false otherwise
      */
-	private boolean activateCertificateContingency(final Model model, final Date currentDate, final String ipUser, final StringBuilder activateMsg) {
+	private boolean checkContingencyMode(final Model model, final Date currentDate, final String ipUser, final StringBuilder activateMsg) {
+
+		if (this.contingencyModeEnabled) {
+			if ((currentDate.getTime() - this.contingencyModeStartTime) / 1000  < this.contingencyDuration.longValue()) {
+				LOGGER.warn(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
+				// Si es asi activamos el login con certificado por contigencia
+				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG018));
+				return true;
+			}
+			this.contingencyModeEnabled = false;
+			this.contingencyModeStartTime = -1;
+		}
 
 		// Obtenemos todos los controles de accesos ordenados por fecha mas antigua
     	final List<ControlAccess> listControlAccess = this.iLoginService
@@ -232,21 +270,36 @@ public class LoginController {
     	        .collect(Collectors.toList());
 
 		// 1.- Comprobaremos si la plataforma de clave esta disponible
-    	if(!this.iLoginService.isPasarelaAvailable()) {
+    	if (!this.iLoginService.isPasarelaAvailable()) {
     		activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
     		return true;
     	}
 
     	// 2.- Evaluaremos si para esta ip el usuario a intentando entrar mas de X veces en menos de X segundos
-    	if(listControlAccess != null && !listControlAccess.isEmpty()) {
-    		if(null != this.confCertNumberAttemps ) {
-    			if(null != this.confCertIntervalContingency) {
-    				if(listControlAccess.size() >= this.confCertNumberAttemps) {
-            			final ControlAccess controlAccess = listControlAccess.get(NumberConstants.NUM0);
-            			// Obtenemos a partir de la fecha actual y la fecha mas antigua para esta ip, la diferencia en milisegundos convertidos a segundos
+    	if (listControlAccess != null && !listControlAccess.isEmpty()) {
+    		if (this.contingencyAttemps != null) {
+    			if (this.contingencyInterval != null) {
+    				// Identificamos si se han realizado al menos el numero de intentos fallido minimos exigidos
+    				// antes de habilitar el modo de contigencia
+    				if (listControlAccess.size() >= this.contingencyAttemps.intValue()) {
+
+    					// Identificamos a partir del numero de accesos minimos cual es el primer acceso del grupo
+    					// que cumple la condicion de activacion
+            			final ControlAccess controlAccess = listControlAccess.get(listControlAccess.size() - this.contingencyAttemps.intValue());
+
+            			// Obtenemos a partir de la fecha actual y la fecha de aquel acceso la diferencia en segundos
             			final long secondsDifference  = (currentDate.getTime() - controlAccess.getStartDateAccess().getTime()) / NumberConstants.NUM1000;
-            			// Evaluamos si supera el intervalo de X segundos de contingencia
-            			if(secondsDifference >= this.confCertIntervalContingency) {
+
+            			// Comprobamos si el numero de intentos fallidos se realizo dentro del intervalo de tiempo configurado
+            			// y, en caso afirmativo, activamos el modo de contingencia
+            			if (secondsDifference <= this.contingencyInterval.intValue()) {
+
+            				// Habilitamos el modo de contingencia y registramos el momento en el que se hace.
+            				// Este modo de contingencia solo se habilitara durante un periodo de tiempo
+            				// en este caso, cuando se han intentado varios intentos fallidos
+            				this.contingencyModeEnabled = true;
+            				this.contingencyModeStartTime = currentDate.getTime();
+
             				LOGGER.warn(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML007));
             				// Si es asi activamos el login con certificado por contigencia
             				activateMsg.append(Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG009));
@@ -277,10 +330,9 @@ public class LoginController {
 	 */
 	@RequestMapping(value = "/loginWithCertificate", method = RequestMethod.POST)
 	public String loginWithCertificate(@RequestParam(PARAM_SIGNATUREB64) final String signatureBase64,
-									   HttpServletRequest request,
+									   final HttpServletRequest request,
 	                                   final Model model, final HttpServletResponse response) {
-	    X509Certificate certificate = null;
-	    final AtomicReference<String> dniRef =  new AtomicReference<>("");
+	    final AtomicReference<String> dniRef =  new AtomicReference<>(""); //$NON-NLS-1$
 	    try {
 	    	LOGGER.info(Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML014));
 	        // Decodificamos la firma en Base64
@@ -288,12 +340,12 @@ public class LoginController {
 
 	        // Analizamos la firma con CAdESAnalizer y obtenemos el certificado del usuario
 	        final CAdESAnalizer analizer = this.iLoginService.analizeSignWithCAdES(signBase64Bytes);
-	        
-	        HttpSession session = request.getSession(false);
-	        String token = session != null
+
+	        final HttpSession session = request.getSession(false);
+	        final String token = session != null
 	            ? (String) session.getAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN)
 	            : null;
-	        String limitSignGen = session != null
+	        final String limitSignGen = session != null
 		            ? (String) session.getAttribute(LoginService.PARAM_LIMIT_SIGN_GEN)
 		            : null;
 
@@ -301,7 +353,7 @@ public class LoginController {
 	        this.iLoginService.validateIfSignSecure(analizer, token, limitSignGen);
 
 	        final List<X509Certificate> certs = analizer.getSigningCertificates();
-	        certificate = certs.get(0);
+	        final X509Certificate certificate = certs.get(0);
 
 	        // Verificamos vigencia del certificado
 	        this.iLoginService.validatePeriodToCertUser(certificate);
@@ -352,42 +404,47 @@ public class LoginController {
 //	        response.addCookie(cookie);
 
 	        // Antes de ir al inicio limpiamos la sesion para evitar memory leaks
-	        session.removeAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN);
-	        session.removeAttribute(LoginService.PARAM_LIMIT_SIGN_GEN);
+	        if (session != null) {
+	        	session.removeAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN);
+		        session.removeAttribute(LoginService.PARAM_LIMIT_SIGN_GEN);
+	        }
 
-	        model.addAttribute("appVersion", this.versionProperties.getProjectVersion());
-	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear());
+	        model.addAttribute("appVersion", this.versionProperties.getProjectVersion()); //$NON-NLS-1$
+	        model.addAttribute("copyrightYear", this.versionProperties.getCopyrightYear()); //$NON-NLS-1$
 
 	        LOGGER.info(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG007, new Object[] {user.getName(), user.getDni(), Language.getResWebAdminGeneral(IWebAdminGeneral.UD_LOG016)}));
-	        return "redirect:/inicio";
+	        return "redirect:/inicio"; //$NON-NLS-1$
 
 	    } catch (final Exception e) {
-	        String msgerror;
 
-	        if (e instanceof CertificateException) {
-	        	msgerror = e.getMessage();
-	        } else if (e instanceof KeyStoreException) {
-	        	msgerror = e.getMessage();
-	        } else if (e instanceof TimeoutException) {
+	    	LOGGER.error("Fallo el acceso con certificado de contingencia: " + e); //$NON-NLS-1$
+            String msgerror;
+
+	        if (e instanceof CertificateException || e instanceof KeyStoreException || e instanceof TimeoutException) {
 	        	msgerror = e.getMessage();
 	        } else if (e instanceof BadCredentialsException) {
 	        	LOGGER.error(Language.getFormatResWebAdminGeneral(IWebAdminGeneral.UD_LOG008, new Object[] {dniRef.get()}));
 	        	msgerror = e.getMessage();
 	        } else {
-	        	LOGGER.error("Error en la autenticacion con certificado; " + e);
+	        	LOGGER.error("Error en la autenticacion con certificado; " + e); //$NON-NLS-1$
 	            msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_ML016);
 	        }
+	        // Activamos el modo de contingencia
+	        configContingencyMode(request, model, msgerror);
 
-    		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
-    		LOGGER.error(" ====== Generamos el token de sesion (3) " + randomStringLogin);
-    		HttpSession session = request.getSession(true);
-    		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-    		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
-    		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
-	        model.addAttribute("errorMessage", msgerror);
-	        model.addAttribute("accessByCertificate", true);
-	        return "login.html";
+	        return "login"; //$NON-NLS-1$
 	    }
+	}
+
+	private static void configContingencyMode(final HttpServletRequest request, final Model model, final String errorMessage) {
+
+		final String randomStringLogin = UtilsStringChar.getRandomStringToLogin();
+		final HttpSession session = request.getSession(true);
+		session.setAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+		session.setAttribute(LoginService.PARAM_LIMIT_SIGN_GEN,  new SimpleDateFormat(UtilsDate.FORMAT_DATE_TIME_STANDARD).format(Calendar.getInstance().getTime()));
+		model.addAttribute(LoginService.PARAM_RANDOM_STRING_LOGIN, randomStringLogin);
+        model.addAttribute("errorMessage", errorMessage); //$NON-NLS-1$
+        model.addAttribute("accessByCertificate", Boolean.TRUE); //$NON-NLS-1$
 	}
 
 }
