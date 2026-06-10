@@ -28,9 +28,31 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Tu seguridad social</title>
-<link href="./TestAuth_files/IdP.css" media="screen" rel="stylesheet">
+<link href="./css/IdP.css" media="screen" rel="stylesheet">
+<script src="./js/jquery-4.0.0.min.js"></script>
 
 <script type="text/javascript">
+
+	function showCancelar() {											
+		$('#pasarela-content').hide();						
+		$('#confirmCancel').attr('class', 'modalOn');							
+		$('#page-overlay').show();						
+		$('#tablaCentrada').hide();					
+	}
+	
+	function closeCancelar() {
+	    $('#confirmCancel').attr('class', 'modalOff');
+	    $('#page-overlay').hide();
+	    $('#pasarela-content').show();
+	    $('#tablaCentrada').show();
+	    if ($("#pin").length > 0) {
+	        $('#pin').focus()
+	    } else {
+	        if ($("#sfdaValue0").length > 0) {
+	            $('#sfdaValue0').focus()
+	        }
+	    }
+	}
 
 	function cancelar() {
 		var formulario = document.getElementById("pinAndSFDA");
@@ -155,7 +177,7 @@
 	 </p>
 	 
 	 <div align="left" id="botonera">
-	<button type="submit">Continuar</button>&nbsp;&nbsp;								<button onclick="cancelar();" id="confirmCancel_CancelarSub" type="button">Cancelar</button>
+	<button type="submit">Continuar</button>&nbsp;&nbsp;								<button onclick="showCancelar();" id="confirmCancel_CancelarSub" type="button">Cancelar</button>
 	</div>
 
  </fieldset>

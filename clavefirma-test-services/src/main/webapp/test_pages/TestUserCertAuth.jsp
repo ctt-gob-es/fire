@@ -9,9 +9,31 @@
 <head>
 <meta http-equiv="Content-Type" content="text/html; charset=ISO-8859-1">
 <title>Tu seguridad social</title>
-<link href="./test_pages/TestAuth_files/IdP.css" media="screen" rel="stylesheet">
+<link href="./test_pages/css/IdP.css" media="screen" rel="stylesheet">
+<script src="./test_pages/js/jquery-4.0.0.min.js"></script>
 
 <script type="text/javascript">
+
+	function showCancelar() {											
+		$('#pasarela-content').hide();						
+		$('#confirmCancel').attr('class', 'modalOn');							
+		$('#page-overlay').show();						
+		$('#tablaCentrada').hide();					
+	}
+	
+	function closeCancelar() {
+	    $('#confirmCancel').attr('class', 'modalOff');
+	    $('#page-overlay').hide();
+	    $('#pasarela-content').show();
+	    $('#tablaCentrada').show();
+	    if ($("#pin").length > 0) {
+	        $('#pin').focus()
+	    } else {
+	        if ($("#sfdaValue0").length > 0) {
+	            $('#sfdaValue0').focus()
+	        }
+	    }
+	}
 
 	function cancelar() {
 		var formulario = document.getElementById("pinAndSFDA");
@@ -35,6 +57,18 @@
 </div>
 </div>
 <div class="modalOff" id="confirmCancel">
+<div class="confirmCancel">
+<p class="titulo_popup_peq">¿Deseas cancelar la firma de documentos?</p>
+<p>
+<span class="grisoscuro" id="errorMsg">Si realmente deseas cancelar la firma de documentos pulsa el botón 'SI'. En el caso de querer continuar con la transacción de firma pulsa el botón 'NO'.</span>
+</p>
+<br>
+<div id="botoneraModal">
+<button onclick="cancelar();" id="confirmCancel_CancelBtn" type="button">SI</button>					
+&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;					
+<button onclick="closeCancelar();" id="confirmCancel_VolverBtn" type="button">NO</button>
+</div>
+</div>
 </div>
 <div id="pasarela-content" class="contenedorSolicitud">
 <div class="modalOff" id="errorServer">
@@ -71,7 +105,7 @@
 
 	 
 	 <div align="left" id="botonera">
-	<button type="submit">Continuar</button>&nbsp;&nbsp;								<button onclick="cancelar();" id="confirmCancel_CancelarSub" type="button">Cancelar</button>
+	<button type="submit">Continuar</button>&nbsp;&nbsp;								<button onclick="showCancelar();" id="confirmCancel_CancelarSub" type="button">Cancelar</button>
 	</div>
 
  </fieldset>
@@ -87,7 +121,7 @@
 </div>
 <div class="footer_bottom wrapper">
 <div class="comp_left">
-<p>@ 2021 Cl@ve · Identidad Electrónica para las Administraciones · Gobierno de España</p>
+<p>@ 2026 Cl@ve · Identidad Electrónica para las Administraciones · Gobierno de España</p>
 </div>
 <div class="clr"></div>
 </div>

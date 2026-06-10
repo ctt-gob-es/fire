@@ -13,8 +13,8 @@
 	<base href=".">
 	<title>Tu Seguridad Social</title>
 	<link media="screen" rel="stylesheet" href="">
-	<link href="./TestCert_files/IdP.css" media="screen" rel="stylesheet">
-	<script src="./TestCert_files/jquery-1.9.1.min.js"></script><script language="javascript">
+	<link href="./css/IdP.css" media="screen" rel="stylesheet">
+	<script src="./js/jquery-4.0.0.min.js"></script><script language="javascript">
 		var mbMovilBrowser = false;
 		var msIdFocus = null;
 		var marSubmit = false;
@@ -48,7 +48,7 @@
 			formulario.submit();
 		}
 	</script>
-	<link href="./TestCert_files/faviconQ3E1TZ34.ico" rel="icon">
+	<link href="./img/faviconQ3E1TZ34.ico" rel="icon">
 </head>
 <body id="decision-body">
 <div class="container_cabecera">

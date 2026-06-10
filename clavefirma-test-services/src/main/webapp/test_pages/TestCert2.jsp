@@ -8,7 +8,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <meta name="description" content="RA">
         <meta name="author" content="SIA">
-        <link rel="shortcut icon" href="./TestCert2_files/favicon.png">
+        <link rel="shortcut icon" href="./img/favicon.png">
 
         <title>Gesti&oacute;n de Contrase&ntilde;a Cl@ve</title>
         <style type="text/css" media="screen">
@@ -16,10 +16,10 @@
             display: none;
           }
         </style>
-        <link href="./TestCert2_files/bootstrap.css" rel="stylesheet">
-        <link href="./TestCert2_files/main.css" rel="stylesheet">
-        <link href="./TestCert2_files/animations.css" rel="stylesheet">
-        <link href="./TestCert2_files/angular-busy.css" rel="stylesheet">
+        <link href="./css/bootstrap.css" rel="stylesheet">
+        <link href="./css/main.css" rel="stylesheet">
+        <link href="./css/animations.css" rel="stylesheet">
+        <link href="./css/angular-busy.css" rel="stylesheet">
 
       <script>
       
@@ -37,7 +37,7 @@
     <body style="">
         <div class="container">
             <div class="image-sub-header">
-                <img class="img-responsive" id="banner" src="./TestCert2_files/imagenCorporativa.png">
+                <img class="img-responsive" id="banner" src="./img/imagenCorporativa.png">
             </div>
             <div ng-controller="InitCtrl" class="ng-scope">
                 <div id="alertsIeContainer"></div>
@@ -213,15 +213,15 @@
             <div class="footer text-center"></div>
         </div>
 
-        <script src="./TestCert2_files/jquery-1.10.1.min.js"></script>
-        <script src="./TestCert2_files/bootstrap.min.js"></script>
-        <script src="./TestCert2_files/main.js"></script>
+        <script src="./test_pages/js/jquery-4.0.0.min.js"></script>
+        <script src="./test_pages/js/bootstrap.min.js"></script>
+        <script src="./test_pages/js/main.js"></script>
 
-        <script src="./TestCert2_files/sha.js"></script>
-        <script src="./TestCert2_files/base64.js"></script>
+        <script src="./test_pages/js/sha.js"></script>
+        <script src="./test_pages/js/base64.js"></script>
         
-        <script src="./TestCert2_files/es_ES.js"></script>
-        <script src="./TestCert2_files/en_EN.js"></script>
+        <script src="./test_pages/js/es_ES.js"></script>
+        <script src="./test_pages/js/en_EN.js"></script>
         <script>
   			document.getElementById("pass1").focus();
   		</script>
