@@ -40,6 +40,11 @@ public class ExternalErrorService extends HttpServlet {
 	private static final String EXT_ERR_SIGNING_ERROR = "11"; //$NON-NLS-1$
 	private static final String EXT_ERR_INVALID_OPERATION = "12"; //$NON-NLS-1$
 	private static final String EXT_ERR_UNSUPPORTED_ALGORITHM = "13"; //$NON-NLS-1$
+	
+	@Override
+	protected void doPost(final HttpServletRequest request, final HttpServletResponse response) {
+	    doGet(request, response);
+	}
 
 	@Override
 	protected void doGet(final HttpServletRequest request, final HttpServletResponse response) {

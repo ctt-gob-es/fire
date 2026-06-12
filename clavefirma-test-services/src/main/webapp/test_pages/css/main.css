@@ -187,7 +187,7 @@ header {
 /* ////////////////////////////////////// */
 
 input,button {
-  background: url(./ParqFondoInput.gif) repeat-x 0 0!important;
+  background: url(../img/ParqFondoInput.gif) repeat-x 0 0!important;
 }
 
 input, label, select, textarea, .datosSalidaInline dt, .datosSalida dt {
