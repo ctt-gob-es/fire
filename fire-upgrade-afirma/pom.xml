@@ -28,6 +28,28 @@
 			<groupId>org.apache.axis2</groupId>
 			<artifactId>axis2-kernel</artifactId>
 			<version>${axis2.version}</version>
+		    <exclusions>
+		        <exclusion>
+		            <groupId>com.fasterxml.woodstox</groupId>
+		            <artifactId>woodstox-core</artifactId>
+		        </exclusion>
+		        <exclusion>
+		            <groupId>org.apache.neethi</groupId>
+		            <artifactId>neethi</artifactId>
+		        </exclusion>
+		    </exclusions>
+		</dependency>
+		
+		<dependency>
+		    <groupId>com.fasterxml.woodstox</groupId>
+		    <artifactId>woodstox-core</artifactId>
+		    <version>6.4.0</version>
+		</dependency>
+		
+		<dependency>
+		    <groupId>org.apache.neethi</groupId>
+		    <artifactId>neethi</artifactId>
+		    <version>3.2.2</version>
 		</dependency>
 		
 		<dependency>

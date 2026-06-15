@@ -16,10 +16,11 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.AOException;
+import es.gob.afirma.core.ErrorCode;
 import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
-import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException;
+import es.gob.afirma.core.SignaturePolicyIncompatibilityException;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.fire.server.services.FIReTriHelper;
@@ -76,7 +77,7 @@ final class SingleSignPreProcessor {
 		try {
 			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getFormat().name());
 		}
-		catch (final IncompatiblePolicyException e) {
+		catch (final SignaturePolicyIncompatibilityException e) {
 			LOGGER.log(
 					Level.WARNING, "Se han indicado una politica de firma y un formato incompatibles: " + e); //$NON-NLS-1$
 			extraParams = sSign.getExtraParams();
@@ -138,7 +139,7 @@ final class SingleSignPreProcessor {
 		try {
 			FIReTriHelper.addVerificationCodes(td, certChain[0]);
 		} catch (final Exception e) {
-			throw new AOException("No se pudo agregar el codigo de verificacion de firmas", e); //$NON-NLS-1$
+			throw new AOException("No se pudo agregar el codigo de verificacion de firmas", e, ErrorCode.Internal.ENCODING_SIGNING_CERTIFICATE); //$NON-NLS-1$
 		}
 
 		return td;

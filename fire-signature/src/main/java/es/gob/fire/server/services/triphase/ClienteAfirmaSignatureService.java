@@ -41,6 +41,7 @@ import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.SignOperation;
+import es.gob.fire.server.services.TriServiceErrorCode;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
 import es.gob.fire.server.services.triphase.document.FIReLocalDocumentManager;
@@ -326,7 +327,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					);
 					break;
 				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation); //$NON-NLS-1$
+					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation, TriServiceErrorCode.Request.CRYPTO_OPERATION_NOT_FOUND); //$NON-NLS-1$
 				}
 
 				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
@@ -439,7 +440,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 							);
 					break;
 				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation); //$NON-NLS-1$
+					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation, TriServiceErrorCode.Request.CRYPTO_OPERATION_NOT_FOUND); //$NON-NLS-1$
 				}
 			}
 			catch (final RuntimeConfigNeededException e) {

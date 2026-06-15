@@ -140,7 +140,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 
         	// Actualizamos el resultado del lote con el resultado reportado por el Cliente @firma
         	try {
-        		updateBatchResult(batchResult, afirmaBatchResultB64, stopOnError, session);
+        		updateBatchResult(batchResult, afirmaBatchResultB64, stopOnError);
         	} catch (final AOException e) {
         		LOGGER.log(Level.WARNING, logF.f("Fallo alguna de las firmas del lote y se aborta la operacion como se habia solicitado"), e); //$NON-NLS-1$
         		ErrorManager.setErrorToSession(session, FIReError.BATCH_SIGNING, true, trAux);
@@ -191,15 +191,13 @@ public class MiniAppletSuccessService extends HttpServlet {
 	 * 		  del lote.
 	 * @param stopOnError {@code true} si se debe abortar la ejecuci&oacute;n en caso de error,
 	 * 		  {@code false} en caso contrario.
-	 * @param session Sesi&oacute;n de la transacci&oacute;n de firma para el registro de
-	 * 		  estad&iacute;sticas.
 	 * @throws AOException Cuando se aborta la operaci&oacute;n al encontrar errores cuando estos
 	 * 		  no se permiten.
 	 * @throws IOException Cuando ocurre alg&uacute;n error al procesar el resultado devuelto por
 	 * 		   el Cliente @firma.
 	 */
 	private static void updateBatchResult(final BatchResult batchResult, final String afirmaBatchResultB64,
-			final boolean stopOnError, final FireSession session) throws AOException, IOException {
+			final boolean stopOnError) throws AOException, IOException {
 
 		final byte[] afirmaResultJSON = Base64.decode(afirmaBatchResultB64);
 
@@ -221,7 +219,7 @@ public class MiniAppletSuccessService extends HttpServlet {
 					batchResult.setSuccessResult(docId);
 				}
 				else if (stopOnError) {
-					throw new AOException("Error en una de las operaciones del lote: " + asr.getError()); //$NON-NLS-1$
+					throw new AOException("Error en una de las operaciones del lote: " + asr.getError(), null); //$NON-NLS-1$
 				}
 				else {
 					batchResult.setErrorResult(docId, translateAfirmaError(asr.getError()));

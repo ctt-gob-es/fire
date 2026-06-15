@@ -18,9 +18,10 @@ import java.util.logging.Level;
 import java.util.logging.Logger;
 
 import es.gob.afirma.core.AOException;
+import es.gob.afirma.core.ErrorCode;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
-import es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException;
+import es.gob.afirma.core.SignaturePolicyIncompatibilityException;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
@@ -75,10 +76,10 @@ final class SingleSignPostProcessor {
 			FIReTriHelper.checkSignaturesIntegrity(td, certChain[0], null);
 		}
 		catch (final SecurityException e) {
-			throw new AOException("Error de integridad al validar las firmas PKCS#1 recibidas", e); //$NON-NLS-1$
+			throw new AOException("Error de integridad al validar las firmas PKCS#1 recibidas", e, ErrorCode.Internal.INVALID_PKCS1_VALUE); //$NON-NLS-1$
 		}
 		catch (final Exception e) {
-			throw new AOException("Error en la verificacion de los PKCS#1 de las firmas recibidas", e); //$NON-NLS-1$
+			throw new AOException("Error en la verificacion de los PKCS#1 de las firmas recibidas", e, ErrorCode.Internal.INVALID_PKCS1_VALUE); //$NON-NLS-1$
 		}
 
 		// Instanciamos el preprocesador adecuado
@@ -88,7 +89,7 @@ final class SingleSignPostProcessor {
 		try {
 			extraParams = ExtraParamsProcessor.expandProperties(sSign.getExtraParams(), null, sSign.getFormat().name());
 		}
-		catch (final IncompatiblePolicyException e) {
+		catch (final SignaturePolicyIncompatibilityException e) {
 			LOGGER.log(
 					Level.WARNING, "Se han indicado una politica de firma y un formato incompatibles: " + e); //$NON-NLS-1$
 			extraParams = sSign.getExtraParams();

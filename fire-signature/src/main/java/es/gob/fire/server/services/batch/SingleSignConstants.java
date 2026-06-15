@@ -11,7 +11,7 @@ package es.gob.fire.server.services.batch;
 
 import java.security.Key;
 
-import es.gob.afirma.core.AOInvalidFormatException;
+import es.gob.afirma.core.AOUnsupportedSignAlgorithmException;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
 import es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor;
@@ -240,7 +240,7 @@ public final class SingleSignConstants {
 		}
 	}
 
-	static TriPhasePreProcessor getTriPhasePreProcessor(final SingleSign sSign) throws AOInvalidFormatException {
+	static TriPhasePreProcessor getTriPhasePreProcessor(final SingleSign sSign) throws AOUnsupportedSignAlgorithmException {
 		if (sSign == null) {
 			throw new IllegalArgumentException("La firma no puede ser nula"); //$NON-NLS-1$
 		}
@@ -260,7 +260,7 @@ public final class SingleSignConstants {
 			case PKCS1:
 				return new Pkcs1TriPhasePreProcessor();
 			default:
-				throw new AOInvalidFormatException("Formato de firma no soportado: " + sSign.getFormat()); //$NON-NLS-1$
+				throw new AOUnsupportedSignAlgorithmException("Formato de firma no soportado: " + sSign.getFormat()); //$NON-NLS-1$
 		}
 	}
 }

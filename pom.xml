@@ -22,7 +22,7 @@
 		<jdk.version>1.8</jdk.version>
 
 		<fire.version>3.1-SNAPSHOT</fire.version>
-		<clienteafirma.version>1.9</clienteafirma.version>
+		<clienteafirma.version>1.10</clienteafirma.version>
 		<fnmt.version>2.0</fnmt.version>
 		<log-consumer.version>1.3</log-consumer.version>
 		<slf4j.version>1.7.36</slf4j.version>
@@ -275,12 +275,12 @@
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcprov-jdk18on</artifactId>
-				<version>1.77</version>
+				<version>1.84</version>
 			</dependency>
 			<dependency>
 				<groupId>org.bouncycastle</groupId>
 				<artifactId>bcmail-jdk18on</artifactId>
-				<version>1.77</version>
+				<version>1.84</version>
 			</dependency>
 			<!-- Jackson -->
 			<dependency>
@@ -357,6 +357,12 @@
 			    <groupId>org.yaml</groupId>
 			    <artifactId>snakeyaml</artifactId>
 			    <version>2.0</version>
+			</dependency>
+			
+			<dependency>
+		    	<groupId>com.google.guava</groupId>
+		    	<artifactId>guava</artifactId>
+		    	<version>33.5.0-jre</version>
 			</dependency>
 
 		</dependencies>
