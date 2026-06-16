@@ -213,15 +213,15 @@
             <div class="footer text-center"></div>
         </div>
 
-        <script src="./test_pages/js/jquery-4.0.0.min.js"></script>
-        <script src="./test_pages/js/bootstrap.min.js"></script>
-        <script src="./test_pages/js/main.js"></script>
+        <script src="./js/jquery-4.0.0.min.js"></script>
+        <script src="./js/bootstrap.min.js"></script>
+        <script src="./js/main.js"></script>
 
-        <script src="./test_pages/js/sha.js"></script>
-        <script src="./test_pages/js/base64.js"></script>
+        <script src="./js/sha.js"></script>
+        <script src="./js/base64.js"></script>
         
-        <script src="./test_pages/js/es_ES.js"></script>
-        <script src="./test_pages/js/en_EN.js"></script>
+        <script src="./js/es_ES.js"></script>
+        <script src="./js/en_EN.js"></script>
         <script>
   			document.getElementById("pass1").focus();
   		</script>
