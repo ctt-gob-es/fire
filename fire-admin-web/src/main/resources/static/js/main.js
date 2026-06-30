@@ -184,7 +184,7 @@ function loadIntoAjax(formTarget, url, idTarget, type, funcion, doLoad) {
 			if (xhr.status === 401 || xhr.status === 403) {
                 window.location.reload();
             } else {
-                console.error("Error al realizar la peticion: " + error);
+                console.error("Error al realizar la peticion: " + thrownError);
             }
 			//showGlobalError("Error en la petici\u00f3n de " + url + "\nidPanel=" + idTarget + "TE: " + thrownError);
 		}
