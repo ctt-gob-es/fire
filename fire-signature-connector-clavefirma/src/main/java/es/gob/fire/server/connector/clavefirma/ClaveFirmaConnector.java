@@ -143,7 +143,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
             if (isSignCertificateBlocked(gatewayApi, ownerId)) {
             	throw new CertificateBlockedException("El certificado de firma esta bloqueado"); //$NON-NLS-1$
             }
-            else if (isUserWeakRegistry(gatewayApi, ownerId)) {
+			if (isUserWeakRegistry(gatewayApi, ownerId)) {
             	throw new WeakRegistryException("El usuario realizo un registro debil y no puede tener certificados de firma"); //$NON-NLS-1$
             }
             return new X509Certificate[0];
@@ -452,7 +452,7 @@ public final class ClaveFirmaConnector extends FIReConnector {
 				catch (final Exception e) {
 					throw new FIReCertificateException("No se pudo decodificar un certificado del usuario: e", e); //$NON-NLS-1$
 				}
-				if (cert.getKeyUsage()[1] == true) {
+				if (cert.getKeyUsage()[1]) {
 					return true;
 				}
 			}
@@ -491,6 +491,8 @@ public final class ClaveFirmaConnector extends FIReConnector {
 			intermediateResult = gatewayApi.startOpTransaction(ownerId, opInfo, paramsList);
 		} catch (final SafeCertGateWayException e) {
 			if (ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY.equals(e.getCode())) {
+				LOGGER.warning("Error de registro debil devuelto por la pasarela de firma: " + //$NON-NLS-1$
+						ClaveFirmaErrorManager.ERROR_CODE_WEAK_REGISTRY);
 				return true;
 			}
 			if (ClaveFirmaErrorManager.ERROR_CODE_GCC_WEAK_REGISTRY.equals(e.getCode())) {
