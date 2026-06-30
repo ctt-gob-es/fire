@@ -13,6 +13,8 @@ import java.io.IOException;
 import java.io.Serializable;
 import java.util.Properties;
 
+import es.gob.fire.server.services.SignOperation;
+
 /**
  * Configuraci&oacute;n de firma particular para un documento de un lote.
  * @author Carlos Gamuci
@@ -22,7 +24,7 @@ public class SignBatchConfig implements Serializable {
 	/** Serial Id. */
 	private static final long serialVersionUID = 8594180356291997801L;
 
-	private String cryptoOperation;
+	private SignOperation signOperation;
 
 	private String format;
 
@@ -33,21 +35,21 @@ public class SignBatchConfig implements Serializable {
 	private Properties upgradeConfig;
 
 	/**
-	 * Recupera el identificador de la operaci&oacute;n criptogr&aacute;fica
+	 * Recupera el identificador de la operaci&oacute;n de firma
 	 * configurada (firma, cofirma,...).
 	 * @return Identificador de operacion criptogr&aacute;fica (sign, cosign o countersign).
 	 */
-	public String getCryptoOperation() {
-		return this.cryptoOperation;
+	public SignOperation getSignOperation() {
+		return this.signOperation;
 	}
 
 	/**
-	 * Establece la operaci&oacute;n criptogr&aacute;fica a realizar (firma, cofirma,...).
-	 * @param cryptoOperation Identificador de operacion criptogr&aacute;fica (sign,
+	 * Establece la operaci&oacute;n de firma a realizar (firma, cofirma,...).
+	 * @param signOperation Identificador de operacion criptogr&aacute;fica (sign,
 	 * cosign o countersign).
 	 */
-	public void setCryptoOperation(final String cryptoOperation) {
-		this.cryptoOperation = cryptoOperation;
+	public void setSignOperation(final SignOperation signOperation) {
+		this.signOperation = signOperation;
 	}
 
 	/**

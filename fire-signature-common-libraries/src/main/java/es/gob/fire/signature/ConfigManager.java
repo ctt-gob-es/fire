@@ -14,12 +14,12 @@ import java.io.File;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.Base64;
 import java.util.List;
 import java.util.Properties;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 
-import es.gob.afirma.core.misc.Base64;
 import es.gob.fire.server.decipher.PropertyDecipher;
 
 /**
@@ -265,20 +265,18 @@ public class ConfigManager {
 		}
 
 		// Comprobamos el valor establecido para la clase de cifrado
-		if (config != null) {
-			if (config.containsKey(PARAM_CIPHER_CLASS)) {
-				final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
-				if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
-					try {
-						final Class<?> decipherClass = Class.forName(decipherClassname);
-						final Object decipher = decipherClass.getConstructor().newInstance();
-						if (PropertyDecipher.class.isInstance(decipher)) {
-							decipherImpl = (PropertyDecipher) decipher;
-						}
+		if (config != null && config.containsKey(PARAM_CIPHER_CLASS)) {
+			final String decipherClassname = config.getProperty(PARAM_CIPHER_CLASS);
+			if (decipherClassname != null && !decipherClassname.trim().isEmpty()) {
+				try {
+					final Class<?> decipherClass = Class.forName(decipherClassname);
+					final Object decipher = decipherClass.getConstructor().newInstance();
+					if (decipher instanceof PropertyDecipher) {
+						decipherImpl = (PropertyDecipher) decipher;
 					}
-					catch (final Exception e) {
-						LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
-					}
+				}
+				catch (final Exception e) {
+					LOGGER.log(Level.WARNING, "Se ha definido una clase de descifrado no valida", e); //$NON-NLS-1$
 				}
 			}
 		}
@@ -971,7 +969,7 @@ public class ConfigManager {
 		final String base64Text = text.substring(idx1 + PREFIX_CIPHERED_TEXT.length(), idx2).trim();
 
 		return text.substring(0, idx1) +
-				decipherImpl.decipher(Base64.decode(base64Text)) +
+				decipherImpl.decipher(Base64.getDecoder().decode(base64Text)) +
 				text.substring(idx2 + SUFIX_CIPHERED_TEXT.length());
 	}
 

@@ -12,7 +12,7 @@ public enum SignOperation {
 	/** Contrafirma. */
 	COUNTERSIGN("countersign"); //$NON-NLS-1$
 
-	private String op;
+	private final String op;
 
 	SignOperation(final String op) {
 		this.op = op;
@@ -31,7 +31,9 @@ public enum SignOperation {
 				}
 			}
 		}
-		return null;
+		throw new IllegalArgumentException(
+				"Tipo de operacion (suboperation) de firma no soportado: " + opName //$NON-NLS-1$
+			);
 	}
 
 	/**

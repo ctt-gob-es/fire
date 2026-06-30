@@ -27,6 +27,7 @@ import es.gob.fire.server.services.FIReDocumentManagerFactory;
 import es.gob.fire.server.services.FIReError;
 import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
+import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.signature.ConfigManager;
 import es.gob.fire.upgrade.UpgraderUtils;
 
@@ -95,8 +96,8 @@ public class AddDocumentBatchManager {
     	try {
     		config = getParticularConfig(params, documentConfig);
     	}
-    	catch (final IOException e) {
-    		LOGGER.warning(logF.f("Se ha proporcionado un extraParam mal formado: ") + e); //$NON-NLS-1$
+    	catch (final IllegalArgumentException e) {
+    		LOGGER.warning(logF.f("Parametros de firma mal formados: ") + e); //$NON-NLS-1$
     		Responser.sendError(response, FIReError.PARAMETER_SIGNATURE_PARAMS_INVALID);
     		return;
 		}
@@ -171,7 +172,7 @@ public class AddDocumentBatchManager {
 
     	// Obtenemos el tamano de la transaccion
 		final Object transactionSizeObject = session.getObject(ServiceParams.SESSION_PARAM_TRANSACTION_SIZE);
-		long transactionSize = transactionSizeObject != null && transactionSizeObject instanceof Long
+		long transactionSize = transactionSizeObject instanceof Long
 				? transactionSize = ((Long) transactionSizeObject).longValue()
 				: 0;
 
@@ -249,10 +250,10 @@ public class AddDocumentBatchManager {
      * aunque puede serlo para la validaci&oacute;n y mejora.
      * @return Configuraci&oacute;n de firma particular o {@code null} si no
      * se defini&oacute;.
-     * @throws IOException Si se configuran extraParams y no son un Base 64 bien formado.
+     * @throws IllegalArgumentException Si alg&uacute;n par&aacute;metro de firma est&aacute; mal formado.
      */
 	private static SignBatchConfig getParticularConfig(final RequestParameters params,
-			final Properties docConfig) throws IOException {
+			final Properties docConfig) throws IllegalArgumentException {
 
 		// Comprobamos si se ha establecido configuracion particular
 		if (!params.containsKey(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION) &&
@@ -262,10 +263,17 @@ public class AddDocumentBatchManager {
 			return null;
 		}
 
+		final SignOperation signOperation = SignOperation.parse(
+				params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION));
+
 		final SignBatchConfig config = new SignBatchConfig();
-		config.setCryptoOperation(params.getParameter(ServiceParams.HTTP_PARAM_CRYPTO_OPERATION));
+		config.setSignOperation(signOperation);
 		config.setFormat(params.getParameter(ServiceParams.HTTP_PARAM_FORMAT));
-		config.setExtraParamsB64(params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM));
+		try {
+			config.setExtraParamsB64(params.getParameter(ServiceParams.HTTP_PARAM_EXTRA_PARAM));
+		} catch (final Exception e) {
+			throw new IllegalArgumentException("Los extraParams no se han proporcionado como un Base 64 valido", e); //$NON-NLS-1$
+		}
 		config.setUpgrade(params.getParameter(ServiceParams.HTTP_PARAM_UPGRADE));
 		config.setUpgradeConfig(UpgraderUtils.extractUpdaterProperties(docConfig));
 

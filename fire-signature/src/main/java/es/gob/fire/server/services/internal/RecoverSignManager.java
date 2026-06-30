@@ -25,6 +25,9 @@ import javax.servlet.http.HttpServletResponse;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.signvalidation.SignValider;
+import es.gob.afirma.signvalidation.SignValiderFactory;
+import es.gob.afirma.signvalidation.SignValidity;
 import es.gob.fire.alarms.Alarm;
 import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
@@ -219,6 +222,16 @@ public class RecoverSignManager {
         	return;
         }
 
+        final SignOperation signOperation;
+        try {
+        	signOperation = SignOperation.parse(cop);
+        }
+        catch (final Exception e) {
+        	LOGGER.severe(logF.f("La operacion criptografica encontrada en la sesion no es valida: " + e)); //$NON-NLS-1$
+        	sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
+        	return;
+		}
+
     	// Recuperamos la firma parcial o los datos (segun el proveedor utilizado)
         // del temporal en el que lo almacenamos
     	byte[] partialResult;
@@ -249,6 +262,9 @@ public class RecoverSignManager {
     			sendError(response, session, FIReError.INTERNAL_ERROR, trAux);
     			return;
     		}
+
+
+            LOGGER.info(" ============= TriphaseData antes del PKCS#1 con certificado en la nube:\n" + td.toString());
 
     		// Realizamos la segunda fase de la firma trifasica
     		LOGGER.info(logF.f("Se solicita el PKCS#1 al proveedor " + providerName)); //$NON-NLS-1$
@@ -290,11 +306,16 @@ public class RecoverSignManager {
     			return;
 			}
 
+
+
+            LOGGER.info(" ============= TriphaseData antes de la postfirma:\n" + td.toString());
+
     		// Realizamos la tercera fase de la firma trifasica
     		LOGGER.info(logF.f("Se completa el proceso de firma")); //$NON-NLS-1$
+
     		try {
-    			partialResult = FIReTriHelper.getPostSign(cop, format, algorithm, extraParams,
-    					signingCert, partialResult, td, logF);
+    			partialResult = FIReTriHelper.getPostSign(signOperation, format, algorithm, extraParams,
+    					new X509Certificate[] { signingCert }, partialResult, td, logF);
     		}
     		catch (final Exception e) {
     			LOGGER.log(Level.SEVERE, logF.f("Error durante la postfirma"), e); //$NON-NLS-1$
@@ -302,6 +323,18 @@ public class RecoverSignManager {
     			sendError(response, session, FIReError.SIGNING, trAux);
     			return;
     		}
+
+
+			final StringBuilder buffer = new StringBuilder();
+			final SignValider valider = SignValiderFactory.getSignValider(partialResult);
+			try {
+				for (final SignValidity signValidity : valider.validate(partialResult)) {
+					buffer.append(signValidity.toString()).append("\n");
+				}
+				LOGGER.info(" ============= Comprobaciones de validez tras la contrafirma con certificado en la nube:\n" + buffer);
+			} catch (final Exception e) {
+				LOGGER.warning(" ============= No se pudo comprobar la validez tras la contrafirma con certificado en la nube");
+			}
     	}
 
 		// Se actualiza o valida la firma si se ha solicitado
@@ -310,7 +343,7 @@ public class RecoverSignManager {
 
     		// Comprobamos si es necesaria la validacion de la firma
         	final boolean signValidationNeeded = needValidation(
-        			ConfigManager.isSecureProvider(providerName), cop, format, logF);
+        			ConfigManager.isSecureProvider(providerName), signOperation, format, logF);
 
         	final PostProcessResult postProcessResult;
     		try {
@@ -647,10 +680,15 @@ public class RecoverSignManager {
 	 * @return {@code true} si es necesario validar las firmas que se soliciten, {@code false} en
 	 * caso contrario.
 	 */
-	static boolean needValidation(final boolean secureProvider, final String signOperation, final String signFormat, final LogTransactionFormatter logF) {
+	static boolean needValidation(final boolean secureProvider, final SignOperation signOperation, final String signFormat, final LogTransactionFormatter logF) {
 		try {
+			// Validaremos cuando se de alguna de estas opciones:
+			// - El proveedor de firma no se considere seguro (podria usar un certificado que no sea de confianza, caducado o revocado)
+			// - Si la operacion no fue de firma (al hacer cofirma o contrafirma habria firmas previas que podrian no ser validas).
+			// - Si la firma es PAdES (podria haber firmas previas, ya que cada firma es independiente)
+
 			return !secureProvider ||
-					SignOperation.parse(signOperation) != SignOperation.SIGN ||
+					signOperation != SignOperation.SIGN ||
 					AOSignConstants.SIGN_FORMAT_PADES.equals(signFormat);
 		}
 		catch (final Exception e) {

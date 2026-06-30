@@ -142,7 +142,7 @@ public class RecoverBatchResultManager {
         // componer la propia firma
         final String tdB64			= session.getString(ServiceParams.SESSION_PARAM_TRIPHASE_DATA);
         final String certB64		= session.getString(ServiceParams.SESSION_PARAM_CERT);
-        final String signOperation	= session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
+        final String cop	= session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String algorithm		= session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
         final String format			= session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final Properties extraParams = (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
@@ -193,6 +193,20 @@ public class RecoverBatchResultManager {
     	batchResult.setSigningCertificate(signingCert);
     	batchResult.setProviderName(providerName);
 
+        final SignOperation signOperation;
+        try {
+        	signOperation = SignOperation.parse(cop);
+        }
+        catch (final Exception e) {
+    		final String errorMessage = "La operacion criptografica encontrada en la sesion no es valida: " + e; //$NON-NLS-1$
+    		LOGGER.severe(logF.f(errorMessage));
+    		TRANSLOGGER.register(session, false);
+    		AUDITTRANSLOGGER.register(session, false, errorMessage);
+    		SessionCollector.removeSession(session, trAux);
+    		Responser.sendError(response, FIReError.INTERNAL_ERROR);
+        	return;
+		}
+
     	// En el caso de la firma con certificado local, ya se habra realizado la firma completa
         // del lote y actualizado su estado en la sesion, por lo que solo registrar que esta firmado y devolverlo
     	if (ProviderManager.PROVIDER_NAME_LOCAL.equals(providerName)) {
@@ -205,7 +219,7 @@ public class RecoverBatchResultManager {
         	if (signsFailed == BatchResult.WITHOUT_ERRORS || signsFailed == BatchResult.ANY_FAILED && !stopOnError) {
 
         		final SignBatchConfig defaultSignConfig = new SignBatchConfig();
-        		defaultSignConfig.setCryptoOperation(signOperation);
+        		defaultSignConfig.setSignOperation(signOperation);
         		defaultSignConfig.setFormat(format);
         		defaultSignConfig.setExtraParams(extraParams);
         		defaultSignConfig.setUpgrade(defaultUpgrade);
@@ -253,7 +267,7 @@ public class RecoverBatchResultManager {
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
-        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,
         				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error de codificacion en los datos de firma trifasica proporcionados");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendError(response, FIReError.PROVIDER_ERROR);
         		return;
@@ -322,7 +336,7 @@ public class RecoverBatchResultManager {
         		TRANSLOGGER.register(session, false);
         		AUDITTRANSLOGGER.register(session, false, errorMessage);
         		SessionCollector.removeSession(session, trAux);
-        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+        		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,
         				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Ocurrio un error durante la operacion de firma de lote en la nube");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
         		Responser.sendError(response, FIReError.PROVIDER_ERROR);
         		return;
@@ -341,7 +355,7 @@ public class RecoverBatchResultManager {
             		TRANSLOGGER.register(session, false);
             		AUDITTRANSLOGGER.register(session, false, errorMessage);
             		SessionCollector.removeSession(session, trAux);
-            		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,  
+            		AlarmsManager.notify(Alarm.EXTERNAL_PLATFORM_ERROR,
             				AlarmInternalMessages.getString("Alarm.13", appId) + " - "  + "Error de integridad. Uno de los PKCS#1 recibido no se genero con el certificado indicado");  //$NON-NLS-1$//$NON-NLS-2$ //$NON-NLS-3$
             		Responser.sendError(response, FIReError.PROVIDER_ERROR);
             		return;
@@ -388,7 +402,7 @@ public class RecoverBatchResultManager {
         		SignBatchConfig signConfig = batchResult.getSignConfig(docId);
         		if (signConfig == null) {
         			signConfig = new SignBatchConfig();
-        			signConfig.setCryptoOperation(signOperation);
+        			signConfig.setSignOperation(signOperation);
         			signConfig.setFormat(format);
         			signConfig.setExtraParams(extraParams);
         			signConfig.setUpgrade(defaultUpgrade);
@@ -400,7 +414,7 @@ public class RecoverBatchResultManager {
         		// Verificamos que es necesaria la validacion segun el tipo de firma a realizar (las cofirmas
         		// y contrafirmas deben validarse porque no sabemos de la validez de firmas anteriores).
         		final boolean signValidationNeeded = needValidation(
-        				secureProvider, signConfig.getCryptoOperation(), signConfig.getFormat(), logF);
+        				secureProvider, signOperation, signConfig.getFormat(), logF);
         		// Configuramos el objeto para la composicion de las firmas
     			final PostSignBatchRecover signRecover = new CloudPostSignBatchRecover(
     					docId, algorithm, signConfig, ret, td, batchResult, logF);
@@ -592,17 +606,17 @@ public class RecoverBatchResultManager {
 	 * cuando se ha solicitado que se haga. Si este m&eacute;todo devuelve {@code false} se
 	 * ignorar&aacute;n las peticiones de validaci&oacute;n.
 	 * @param secureProvider Indica si se considera que el proveedor es seguro.
-	 * @param signOperation Operacion criptogr&aacute;fica.
+	 * @param signOperation Operaci&oacute;n de firma.
 	 * @param signFormat Formato de firma.
 	 * @param logF Objeto para el formateo de logs.
 	 * @return {@code true} si es necesario validar las firmas que se soliciten, {@code false} en
 	 * caso contrario.
 	 */
-	static boolean needValidation(final boolean secureProvider, final String signOperation, final String signFormat,
+	static boolean needValidation(final boolean secureProvider, final SignOperation signOperation, final String signFormat,
 			final LogTransactionFormatter logF) {
 		try {
 			return !secureProvider ||
-					SignOperation.parse(signOperation) != SignOperation.SIGN ||
+					signOperation != SignOperation.SIGN ||
 					AOSignConstants.SIGN_FORMAT_PADES.equals(signFormat);
 		}
 		catch (final Exception e) {

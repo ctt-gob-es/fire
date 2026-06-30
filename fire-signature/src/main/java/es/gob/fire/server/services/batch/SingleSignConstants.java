@@ -26,48 +26,6 @@ import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
 public final class SingleSignConstants {
 
-	/** Tipo de operaci&oacute;n de firma. */
-	public enum SignSubOperation {
-
-		/** Firma. */
-		SIGN("sign"), //$NON-NLS-1$
-
-		/** Cofirma. */
-		COSIGN("cosign"), //$NON-NLS-1$
-
-		/** Contrafirma. */
-		COUNTERSIGN("countersign"); //$NON-NLS-1$
-
-		private final String name;
-
-		SignSubOperation(final String n) {
-			this.name = n;
-		}
-
-		@Override
-		public String toString() {
-			return this.name;
-		}
-
-		/** Obtiene el tipo de operaci&oacute;n de firma a partir de su nombre.
-		 * @param name Nombre del tipo de operaci&oacute;n de firma.
-		 * @return Tipo de operaci&oacute;n de firma. */
-		public static SignSubOperation getSubOperation(final String name) {
-			if (SIGN.toString().equalsIgnoreCase(name)) {
-				return SIGN;
-			}
-			if (COSIGN.toString().equalsIgnoreCase(name)) {
-				return COSIGN;
-			}
-			if (COUNTERSIGN.toString().equalsIgnoreCase(name)) {
-				return COUNTERSIGN;
-			}
-			throw new IllegalArgumentException(
-				"Tipo de operacion (suboperation) de firma no soportado: " + name //$NON-NLS-1$
-			);
-		}
-	}
-
 	/** Formato de firma. */
 	public enum SignFormat {
 

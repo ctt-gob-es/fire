@@ -1,9 +1,10 @@
 
+<%@page import="es.gob.afirma.core.SignaturePolicyIncompatibilityException"%>
+<%@page import="es.gob.fire.server.services.SignOperation"%>
 <%@page import="es.gob.fire.server.services.internal.ErrorManager"%>
 <%@page import="java.util.logging.Logger"%>
 <%@page import="es.gob.fire.server.services.Responser"%>
 <%@page import="es.gob.fire.server.services.FIReError"%>
-<%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor.IncompatiblePolicyException"%>
 <%@page import="es.gob.afirma.core.signers.ExtraParamsProcessor"%>
 <%@page import="es.gob.fire.server.services.internal.PropertiesUtils"%>
 <%@page import="es.gob.fire.server.services.internal.TransactionAuxParams"%>
@@ -90,6 +91,19 @@
 	String upgrade = fireSession.getString(ServiceParams.SESSION_PARAM_UPGRADE);
 	Properties upgradeConfig = (Properties) fireSession.getObject(ServiceParams.SESSION_PARAM_UPGRADE_CONFIG);
 	
+	SignOperation signOperation;
+	try {
+		signOperation = SignOperation.parse(cop);
+	}
+	catch (IllegalArgumentException e) {
+		String errorMessage = "El codigo de operacion de firma no es valido"; //$NON-NLS-1$
+		FIReError error = FIReError.PARAMETER_SIGNATURE_PARAMS_INVALID;
+		Logger.getLogger("es.gob.fire").severe(trAux.getLogFormatter().f( //$NON-NLS-1$
+				"Error %d - " + errorMessage, error)); //$NON-NLS-1$
+				ErrorManager.setErrorToSession(fireSession, error, true, errorMessage, trAux);
+		Responser.redirectToExternalUrl(errorUrl, request, response, trAux);
+		return;
+	}
 	
 	// AutoFirma es estricto al validar los atributos de los extraParams, asi que los expandimos
 	// nostros previamente y no cancelamos la operacion en caso de no poder expandir alguno 
@@ -100,7 +114,7 @@
 				format
 				);
 	}
-	catch (final IncompatiblePolicyException e) {
+	catch (SignaturePolicyIncompatibilityException e) {
 		// Eliminamos el parametro extra de politica si no fuese compatible
 		extraParams.remove(EXTRA_PARAM_EXP_POLICY);
 	}
@@ -121,7 +135,7 @@
 	SignBatchConfig defaultConfig = null;
 	if (isBatchOperation) {
 		defaultConfig = new SignBatchConfig();
-		defaultConfig.setCryptoOperation(cop);
+		defaultConfig.setSignOperation(signOperation);
 		defaultConfig.setFormat(format);
 		defaultConfig.setExtraParams(extraParams);
 		defaultConfig.setUpgrade(upgrade);
@@ -217,12 +231,11 @@
 			function prepareBatch() {
 				AutoScript.createBatch( "<%= algorithm %>", 
 						"<%= defaultConfig.getFormat() %>", 
-						"<%= defaultConfig.getCryptoOperation() %>", 
-						"<%= extraParamsPlain %>"
+						"<%=defaultConfig.getSignOperation()%>", 
+						"<%=extraParamsPlain%>"
 						);
 				
-		<%		
-				final Iterator<String> it = batchResult.iterator();
+		<%final Iterator<String> it = batchResult.iterator();
 				while (it.hasNext()) {
 					final String docId = it.next();
 					final String dataReference = batchResult.getDocumentReference(docId);
@@ -237,13 +250,11 @@
 						singleExtraParams.setProperty("upgradeFormat", signConfig.getUpgrade()); //$NON-NLS-1$
 					}
 					
-					String singleExtraParamsPlain = PropertiesUtils.properties2String(signConfig.getExtraParams()).replace("\n", "\\n");  //$NON-NLS-1$ //$NON-NLS-2$
-					
-		%>
-					AutoScript.addDocumentToBatch("<%= docId %>",
-													"<%= dataReference %>",
-													"<%= signConfig.getFormat() %>",
-													"<%= signConfig.getCryptoOperation() %>",
+					String singleExtraParamsPlain = PropertiesUtils.properties2String(signConfig.getExtraParams()).replace("\n", "\\n");  //$NON-NLS-1$ //$NON-NLS-2$%>
+					AutoScript.addDocumentToBatch("<%=docId%>",
+													"<%=dataReference%>",
+													"<%=signConfig.getFormat()%>",
+													"<%=signConfig.getSignOperation()%>",
 													"<%= singleExtraParamsPlain %>"
 													);
 		<% 

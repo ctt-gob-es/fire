@@ -24,9 +24,9 @@ import es.gob.afirma.core.AOException;
 import es.gob.afirma.core.misc.AOUtil;
 import es.gob.afirma.core.misc.LoggerUtil;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.batch.SingleSignConstants.SignFormat;
-import es.gob.fire.server.services.batch.SingleSignConstants.SignSubOperation;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.internal.TempDocumentsManager;
 
@@ -42,7 +42,7 @@ public final class SingleSign {
 
 	protected String id;
 
-	protected SignSubOperation subOperation;
+	protected SignOperation subOperation;
 
 	private ProcessResult processResult = new ProcessResult(ProcessResult.Result.NOT_STARTED, null, false);
 
@@ -90,7 +90,7 @@ public final class SingleSign {
 	public SingleSign(final String id,
 			          final String dataSrc,
 			          final SignFormat fmt,
-			          final SignSubOperation subOp,
+			          final SignOperation subOp,
 			          final Properties xParams) {
 
 		if (dataSrc == null) {
@@ -281,11 +281,11 @@ public final class SingleSign {
 		return this.id;
 	}
 
-	public SignSubOperation getSubOperation() {
+	public SignOperation getSubOperation() {
 		return this.subOperation;
 	}
 
-	public void setSubOperation(final SignSubOperation subOperation) {
+	public void setSubOperation(final SignOperation subOperation) {
 		this.subOperation = subOperation;
 	}
 

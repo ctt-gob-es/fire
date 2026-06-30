@@ -13,6 +13,7 @@ import java.io.IOException;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
+import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
 import java.security.cert.CertificateEncodingException;
 import java.security.cert.X509Certificate;
@@ -24,25 +25,20 @@ import java.util.logging.Logger;
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
 
+import es.gob.afirma.core.RuntimeConfigNeededException;
 import es.gob.afirma.core.misc.Base64;
 import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
-import es.gob.afirma.triphase.signer.processors.CAdESASiCSTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.CAdESTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.FacturaETriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.PAdESTriPhasePreProcessor;
+import es.gob.afirma.triphase.signer.processors.PreProcessorFactory;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.XAdESASiCSTriPhasePreProcessor;
-import es.gob.afirma.triphase.signer.processors.XAdESTriPhasePreProcessor;
 import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.crypto.CryptoHelper;
 import es.gob.fire.server.services.internal.BatchDocument;
 import es.gob.fire.server.services.internal.BatchResult;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
-import es.gob.fire.server.services.internal.Pkcs1TriPhasePreProcessor;
 import es.gob.fire.server.services.internal.SignBatchConfig;
 import es.gob.fire.signature.ConfigManager;
 
@@ -82,11 +78,11 @@ public final class FIReTriHelper {
     /**
      * Ejecuta una operaci&oacute;n de prefirma dentro de un proceso de firma
      * trif&aacute;sica.
-     * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
+     * @param signOperation Operaci&oacute;n de firma a realizar.
      * @param format Formato de firma.
      * @param digestAlgorithm Algoritmo de huella que aplicar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
-     * @param signerCert Certificado con el que se debe firmar.
+     * @param certChain Cadena de certificacion del certificado de firma.
      * @param docBytes Datos que se firman/multifirman.
      * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
@@ -95,11 +91,11 @@ public final class FIReTriHelper {
      * informaci&oacute;n de la prefirma.
      * @throws UnsupportedOperationException Cuando se configura una operaci&oacute;n no soportada.
      */
-    public static TriphaseData getPreSign(final String criptoOperation,
+    public static TriphaseData getPreSign(final SignOperation signOperation,
                                          final String format,
                                          final String digestAlgorithm,
                                          final Properties extraParams,
-                                         final X509Certificate signerCert,
+                                         final X509Certificate[] certChain,
                                          final byte[] docBytes,
                                          final LogTransactionFormatter logF)
                                         		 throws FIReSignatureException,
@@ -123,15 +119,16 @@ public final class FIReTriHelper {
         }
 
         final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
-        		digestAlgorithm, signerCert.getPublicKey().getAlgorithm());
+        		digestAlgorithm, certChain[0].getPublicKey().getAlgorithm());
 
         TriphaseData preRes;
-        if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            try {
+        switch (signOperation) {
+		case SIGN:
+			try {
                 preRes = prep.preProcessPreSign(
             		docBytes,
             		signAlgorithm,
-                    new X509Certificate[] { signerCert },
+            		certChain,
                     expandedParams,
                     false
                 );
@@ -141,13 +138,13 @@ public final class FIReTriHelper {
             		"Error en la prefirma: " + e.getMessage(), e //$NON-NLS-1$
                 );
             }
-        }
-        else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            try {
+			break;
+		case COSIGN:
+			try {
                 preRes = prep.preProcessPreCoSign(
             		docBytes,
             		signAlgorithm,
-                    new X509Certificate[] { signerCert },
+            		certChain,
                     expandedParams,
                     false
                 );
@@ -157,9 +154,9 @@ public final class FIReTriHelper {
                     "Error en la precofirma: " + e.getMessage(),  e //$NON-NLS-1$
                 );
             }
-        }
-        else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            CounterSignTarget target = CounterSignTarget.LEAFS;
+			break;
+		case COUNTERSIGN:
+			CounterSignTarget target = CounterSignTarget.LEAFS;
             if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
                 final String targetValue = expandedParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
                 if (CounterSignTarget.TREE.toString().equalsIgnoreCase(targetValue)) {
@@ -171,7 +168,7 @@ public final class FIReTriHelper {
                 preRes = prep.preProcessPreCounterSign(
             		docBytes,
             		signAlgorithm,
-                    new X509Certificate[] { signerCert },
+            		certChain,
                     expandedParams,
                     target,
                     false
@@ -191,12 +188,16 @@ public final class FIReTriHelper {
             // se proporcionen varios datos con el mismo ID, los modificaremos para que sean distintos
             // y, posteriormente, desharemos el cambio para ejecutar la postfirma
             preRes = FIReTriSignIdProcessor.make(preRes);
-        }
-        else {
+			break;
+		default:
             throw new FIReSignatureException(
-                "No se reconoce el codigo de sub-operacion: " + criptoOperation //$NON-NLS-1$
-            );
-        }
+                    "No se reconoce el codigo de sub-operacion: " + signOperation //$NON-NLS-1$
+                );
+		}
+
+        LOGGER.info(" ============= TriphaseData de la prefirma:\n" + preRes.toString());
+
+
         // Asignamos a la firma la informacion del documento que firma para permitir que
         // posteriormente el conector la procese
         DocInfo.addDocInfoToSign(preRes.getSign(0), docInfo);
@@ -206,7 +207,7 @@ public final class FIReTriHelper {
 
     /**
      * Ejecuta la prefirma de los documentos de un lote.
-     * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign") por defecto.
+     * @param signOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign") por defecto.
      * @param format Formato de firma por defecto.
      * @param digestAlgorithm Algoritmo de huella que aplicar por defecto en las firmas.
      * @param extraParams Configuraci&oacute;n de firma por defecto.
@@ -217,7 +218,7 @@ public final class FIReTriHelper {
      * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
      */
-    public static TriphaseData getPreSign(final String criptoOperation,
+    public static TriphaseData getPreSign(final SignOperation signOperation,
                                          final String format,
                                          final String digestAlgorithm,
                                          final Properties extraParams,
@@ -248,7 +249,7 @@ public final class FIReTriHelper {
         	}
 
         	final SignBatchConfig signConfig = doc.getConfig();
-        	final String cop = signConfig != null ? signConfig.getCryptoOperation() : criptoOperation;
+        	final SignOperation cop = signConfig != null ? signConfig.getSignOperation() : signOperation;
         	final String frmt = signConfig != null ? signConfig.getFormat() : format;
         	final Properties params = signConfig != null ? signConfig.getExtraParams() : extraParams;
 
@@ -289,7 +290,9 @@ public final class FIReTriHelper {
         	}
 
         	TriphaseData preRes;
-        	if (SignOperation.SIGN.toString().equalsIgnoreCase(cop)) {
+        	switch (cop) {
+        	case SIGN:
+
         		try {
         			preRes = prep.preProcessPreSign(
         					doc.getData(),
@@ -300,16 +303,16 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-                    LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
-            		if (stopOnError) {
-            			stopOperation = true;
-					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
-            		doc.setErrorMessage(e.getMessage());
+        			LOGGER.warning(logF.f("Error en la prefirma: ") + e); //$NON-NLS-1$
+        			if (stopOnError) {
+        				stopOperation = true;
+        			}
+        			doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+        			doc.setErrorMessage(e.getMessage());
         			continue;
         		}
-        	}
-        	else if (SignOperation.COSIGN.toString().equalsIgnoreCase(cop)) {
+        		break;
+        	case COSIGN:
 
         		try {
         			preRes = prep.preProcessPreCoSign(
@@ -321,16 +324,16 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-                    LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
+        			LOGGER.warning(logF.f("Error en la prefirma al cofirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
-					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
-            		doc.setErrorMessage(e.getMessage());
+        			}
+        			doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+        			doc.setErrorMessage(e.getMessage());
         			continue;
         		}
-        	}
-        	else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(cop)) {
+        		break;
+        	case COUNTERSIGN:
 
         		CounterSignTarget target = CounterSignTarget.LEAFS;
         		if (expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
@@ -351,29 +354,29 @@ public final class FIReTriHelper {
         					);
         		}
         		catch (final Throwable e) {
-                    LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
+        			LOGGER.warning(logF.f("Error en la prefirma al contrafirmar: ") + e); //$NON-NLS-1$
         			if (stopOnError) {
         				stopOperation = true;
-					}
-            		doc.setBatchResult(BatchResult.PRESIGN_ERROR);
-            		doc.setErrorMessage(e.getMessage());
+        			}
+        			doc.setBatchResult(BatchResult.PRESIGN_ERROR);
+        			doc.setErrorMessage(e.getMessage());
         			continue;
         		}
 
         		// El core del cliente @firma devuelve todas las firmas de una contrafirma con el mismo
-                // ID para despues poder asociarlas. Como esto no esta permitido por algunos proveedores,
-                // modificaremos los ID para garantizar que son distintos y, antes de ejecutar la postfirma,
-                // desharemos el cambio
+        		// ID para despues poder asociarlas. Como esto no esta permitido por algunos proveedores,
+        		// modificaremos los ID para garantizar que son distintos y, antes de ejecutar la postfirma,
+        		// desharemos el cambio
         		preRes = FIReTriSignIdProcessor.make(preRes);
-        	}
-        	else {
-                LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
+        		break;
+        	default:
+        		LOGGER.warning(logF.f("Operacion no soportada")); //$NON-NLS-1$
         		if (stopOnError) {
         			stopOperation = true;
         		}
         		doc.setBatchResult(BatchResult.INVALID_SIGNATURE_OPERATION);
         		doc.setErrorMessage("Operacion no soportada");
-    			continue;
+        		continue;
         	}
 
         	// Agregamos todas las firmas individuales al lote global.
@@ -416,6 +419,12 @@ public final class FIReTriHelper {
 
         for (final TriSign triSign : td.getTriSigns()) {
         	if (signId.equals(triSign.getId())) {
+        		try {
+        			LOGGER.info(" ================ Hash del PRE: " + Base64.encode(MessageDigest.getInstance("SHA-256").digest(Base64.decode(triSign.getProperty("PRE")))));
+        		}
+        		catch (final Exception e) {
+        			LOGGER.info(" ===== Error al calcular el hash de la prefirma");
+        		}
         		triSign.addProperty(PROPERTY_NAME_PKCS1_SIGN, Base64.encode(pkcs1));
         		break;
         	}
@@ -425,7 +434,7 @@ public final class FIReTriHelper {
     /**
      * Ejecuta una operaci&oacute;n de postfirma dentro de un proceso de firma
      * trif&aacute;sica para una firma trif&aacute;sica concreta.
-     * @param criptoOperation Operaci&oacute;n de firma a realizar ("sign", "cosign" o "countersign").
+     * @param signOperation Operaci&oacute;n de firma a realizar.
      * @param format Formato de firma.
      * @param digestAlgorithm Algoritmo de huella que utilizar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
@@ -435,19 +444,53 @@ public final class FIReTriHelper {
      * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
      * @param logF Objeto para el formateo del log.
      * @return Firma electr&oacute;nica resultante.
+     * @throws RuntimeConfigNeededException Cuando se requiere intervenci&oacute;n del usuario para firmar.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
      */
-    public static byte[] getPostSign(final String criptoOperation,
+    public static byte[] getPostSign(final SignOperation signOperation,
                                     final String format,
                                     final String digestAlgorithm,
                                     final Properties extraParams,
-                                    final X509Certificate signerCert,
+                                    final X509Certificate[] certChain,
                                     final byte[] docBytes,
                                     final TriphaseData triphaseData,
-                                    final LogTransactionFormatter logF) throws FIReSignatureException {
+                                    final LogTransactionFormatter logF)
+                                    		throws RuntimeConfigNeededException, FIReSignatureException {
 
         // Instanciamos el preprocesador adecuado
         final TriPhasePreProcessor prep = getTriPhasePreProcessor(format);
+
+        return getPostSign(prep, signOperation, format, digestAlgorithm, extraParams, certChain,
+        		docBytes, triphaseData, logF);
+    }
+
+    /**
+     * Ejecuta una operaci&oacute;n de postfirma dentro de un proceso de firma
+     * trif&aacute;sica para una firma trif&aacute;sica concreta.
+     * @param prep Procesador que maneja la prefirma y postfirma para un formato concreto.
+     * @param signOperation Operaci&oacute;n de firma a realizar.
+     * @param format Formato de firma.
+     * @param digestAlgorithm Algoritmo de huella que utilizar en la firma.
+     * @param extraParams Configuraci&oacute;n de firma.
+     * @param signerCert Certificado con el que se debe firmar.
+     * @param docBytes Datos que se firman/multifirman.
+     * @param triphaseData Conjunto de datos de la firma trif&aacute;sico obtenido de la
+     * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
+     * @param logF Objeto para el formateo del log.
+     * @return Firma electr&oacute;nica resultante.
+     * @throws RuntimeConfigNeededException Cuando se requiere intervenci&oacute;n del usuario para firmar.
+     * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
+     */
+    public static byte[] getPostSign(final TriPhasePreProcessor prep,
+    								final SignOperation signOperation,
+                                    final String format,
+                                    final String digestAlgorithm,
+                                    final Properties extraParams,
+                                    final X509Certificate[] certChain,
+                                    final byte[] docBytes,
+                                    final TriphaseData triphaseData,
+                                    final LogTransactionFormatter logF)
+                                    		throws RuntimeConfigNeededException, FIReSignatureException {
 
         Properties expandedParams = extraParams;
         if (expandedParams != null) {
@@ -458,74 +501,60 @@ public final class FIReTriHelper {
         	}
         }
 
-        final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
-        		digestAlgorithm, signerCert.getPublicKey().getAlgorithm());
+        byte[] signature;
+        try {
+        	switch (signOperation) {
+        	case SIGN:
+        		signature = prep.preProcessPostSign(
+        				docBytes,
+        				digestAlgorithm,
+        				certChain,
+        				extraParams,
+        				triphaseData
+        				);
+        		break;
+        	case COSIGN:
+        		signature = prep.preProcessPostCoSign(
+        				docBytes,
+        				digestAlgorithm,
+        				certChain,
+        				extraParams,
+        				triphaseData
+        				);
+        		break;
+        	case COUNTERSIGN:
+        		CounterSignTarget target = CounterSignTarget.LEAFS;
+        		if (extraParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
+        			final String targetValue = extraParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
+        			if (CounterSignTarget.TREE.toString().equalsIgnoreCase(targetValue)) {
+        				target = CounterSignTarget.TREE;
+        			}
+        		}
+        		signature = prep.preProcessPostCounterSign(
+        				docBytes,
+        				digestAlgorithm,
+        				certChain,
+        				extraParams,
+        				triphaseData,
+        				target
+        				);
 
-        if (SignOperation.SIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            try {
-                return prep.preProcessPostSign(
-            		docBytes,
-            		signAlgorithm,
-                    new X509Certificate[] { signerCert },
-                    expandedParams,
-                    triphaseData
-                );
-            }
-            catch (final Exception e) {
-                throw new FIReSignatureException(
-            		"Error en la postfirma: " + e, e //$NON-NLS-1$
-                );
-            }
+        		break;
+        	default:
+        		throw new FIReSignatureException(
+        				"No se reconoce el tipo de operacion de firma: " + signOperation); //$NON-NLS-1$
+        	}
         }
-        else if (SignOperation.COSIGN.toString().equalsIgnoreCase(criptoOperation)) {
-            try {
-                return prep.preProcessPostCoSign(
-            		docBytes,
-            		signAlgorithm,
-                    new X509Certificate[] { signerCert },
-                    expandedParams,
-                    triphaseData
-                );
-            }
-            catch (final Exception e) {
-                throw new FIReSignatureException(
-                    "Error en la postcofirma: " + e, e //$NON-NLS-1$
-                );
-            }
-        }
-        else if (SignOperation.COUNTERSIGN.toString().equalsIgnoreCase(criptoOperation)) {
+		catch (final RuntimeConfigNeededException e) {
+			throw e;
+		}
+        catch (final Exception e) {
+			throw new FIReSignatureException(
+					"Error al postprocesar la firma (Operacion " + signOperation + ")", e //$NON-NLS-1$ //$NON-NLS-2$
+					);
+		}
 
-            CounterSignTarget target = CounterSignTarget.LEAFS;
-            if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
-                final String targetValue = expandedParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
-                if (CounterSignTarget.TREE.toString().equalsIgnoreCase(targetValue)) {
-                    target = CounterSignTarget.TREE;
-                }
-            }
-
-            // La postfirma se invoca deshaciendo previamente el cambio que garantizaba que
-            // los ID de las firmas eran distintos
-            try {
-                return prep.preProcessPostCounterSign(
-            		docBytes,
-            		signAlgorithm,
-                    new X509Certificate[] { signerCert },
-                    expandedParams,
-                    FIReTriSignIdProcessor.unmake(triphaseData),
-                    target
-                );
-            }
-            catch (final Exception e) {
-                throw new FIReSignatureException(
-                    "Error en la postcontrafirma: " + e, e //$NON-NLS-1$
-                );
-            }
-        }
-        else {
-            throw new FIReSignatureException(
-                "No se reconoce el tipo de operacion de firma: " + criptoOperation //$NON-NLS-1$
-            );
-        }
+        return signature;
     }
 
     /**
@@ -538,39 +567,13 @@ public final class FIReTriHelper {
      */
     public static TriPhasePreProcessor getTriPhasePreProcessor(final String format) throws FIReSignatureException {
     	final TriPhasePreProcessor prep;
-    	if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_PADES_TRI.equalsIgnoreCase(format)) {
-    		prep = new PAdESTriPhasePreProcessor();
+    	try {
+    		prep = PreProcessorFactory.getPreProcessor(format);
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_CADES.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_CADES_TRI.equalsIgnoreCase(format)) {
-    		prep = new CAdESTriPhasePreProcessor();
+    	catch (final Exception e) {
+    		throw new FIReSignatureException("No se soporta el formato " + format); //$NON-NLS-1$
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_CADES_ASIC_S.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_CADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-    		prep = new CAdESASiCSTriPhasePreProcessor();
-    	}
-    	else if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_XADES_TRI.equalsIgnoreCase(format)) {
-    		prep = new XAdESTriPhasePreProcessor();
-    	}
-    	else if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_FACTURAE_TRI.equalsIgnoreCase(format)) {
-    		prep = new FacturaETriPhasePreProcessor();
-    	}
-    	else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format)
-    			|| AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI.equalsIgnoreCase(format)) {
-    		prep = new XAdESASiCSTriPhasePreProcessor();
-    	}
-    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format) ||
-    			AOSignConstants.SIGN_FORMAT_PKCS1_TRI.equalsIgnoreCase(format)) {
-    		prep = new Pkcs1TriPhasePreProcessor();
-    	}
-    	else {
-    		throw new FIReSignatureException(
-    				"No se soporta el formato " + format //$NON-NLS-1$
-    				);
-    	}
+
     	return prep;
     }
 
@@ -585,22 +588,22 @@ public final class FIReTriHelper {
     	if (AOSignConstants.SIGN_FORMAT_PADES.equalsIgnoreCase(format)) {
     		return AOSignConstants.SIGN_FORMAT_PADES_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_CADES.equalsIgnoreCase(format)) {
+		if (AOSignConstants.SIGN_FORMAT_CADES.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_CADES_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_CADES_ASIC_S.equalsIgnoreCase(format)) {
+    	if (AOSignConstants.SIGN_FORMAT_CADES_ASIC_S.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_CADES_ASIC_S_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format)) {
+    	if (AOSignConstants.SIGN_FORMAT_FACTURAE.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_FACTURAE_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format)) {
+    	if (AOSignConstants.SIGN_FORMAT_XADES.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_XADES_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format)) {
+    	if (AOSignConstants.SIGN_FORMAT_XADES_ASIC_S.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_XADES_ASIC_S_TRI;
     	}
-    	else if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format)) {
+    	if (AOSignConstants.SIGN_FORMAT_PKCS1.equalsIgnoreCase(format)) {
         	return AOSignConstants.SIGN_FORMAT_PKCS1_TRI;
     	}
     	return format;

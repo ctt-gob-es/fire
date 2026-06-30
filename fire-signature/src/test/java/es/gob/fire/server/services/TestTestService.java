@@ -87,10 +87,10 @@ public final class TestTestService {
 		config.setProperty("redirectErrorUrl", "http://www.ibm.com"); //$NON-NLS-1$ //$NON-NLS-2$
 		nbh.init(config);
 
-		final X509Certificate cert = nbh.getCertificates("00001")[0]; //$NON-NLS-1$
+		final X509Certificate[] certChain = nbh.getCertificates("00001"); //$NON-NLS-1$
 
 		System.out.println();
-		System.out.println(AOUtil.getCN(cert));
+		System.out.println(AOUtil.getCN(certChain[0]));
 		System.out.println();
 
 		final Properties extraParams = new Properties();
@@ -99,11 +99,11 @@ public final class TestTestService {
 		final LogTransactionFormatter logF = new LogTransactionFormatter("Test"); //$NON-NLS-1$
 
 		final TriphaseData td = FIReTriHelper.getPreSign(
-			SignOperation.SIGN.toString(),
+			SignOperation.SIGN,
 			"XAdES", //$NON-NLS-1$
 			"SHA1withRSA", //$NON-NLS-1$
 			extraParams,
-			cert,
+			certChain,
 			"Hola mundo!".getBytes(), //$NON-NLS-1$
 			logF
 		);
@@ -116,7 +116,7 @@ public final class TestTestService {
 			"00001", //$NON-NLS-1$
 			"SHA1withRSA", //$NON-NLS-1$
 			FIReTriHelper.fromTriPhaseDataAfirmaToFire(td),
-			cert
+			certChain[0]
 		);
 
 		System.out.println(res);
@@ -145,11 +145,11 @@ public final class TestTestService {
 
 		// Ya con el TriphaseData relleno, hacemos la postfirma
 		final byte[] signature = FIReTriHelper.getPostSign(
-				SignOperation.SIGN.toString(),
+				SignOperation.SIGN,
 				"CAdES", //$NON-NLS-1$
 				"SHA1withRSA", //$NON-NLS-1$
 				extraParams,
-				cert,
+				certChain,
 				"Hola mundo!".getBytes(), //$NON-NLS-1$
 				td,
 				logF

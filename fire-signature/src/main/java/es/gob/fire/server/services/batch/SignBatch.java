@@ -26,6 +26,7 @@ import javax.json.JsonObjectBuilder;
 import javax.json.JsonReader;
 
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.batch.ProcessResult.Result;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 
@@ -60,7 +61,7 @@ public abstract class SignBatch {
 
 	protected String extraParams;
 
-	protected SingleSignConstants.SignSubOperation subOperation = null;
+	protected SignOperation subOperation = null;
 
 	protected SingleSignConstants.SignFormat format = null;
 
@@ -139,7 +140,7 @@ public abstract class SignBatch {
 		}
 
 		if (jsonObject.containsKey(JSON_ELEMENT_SUBOPERATION)) {
-			this.subOperation = SingleSignConstants.SignSubOperation.getSubOperation(
+			this.subOperation = SignOperation.parse(
 									jsonObject.getString(JSON_ELEMENT_SUBOPERATION)
 								);
 		} else {
@@ -186,7 +187,7 @@ public abstract class SignBatch {
 									: this.format);
 
 					singleSign.setSubOperation(jsonSingleSign.containsKey(JSON_ELEMENT_SUBOPERATION)
-							? SingleSignConstants.SignSubOperation.getSubOperation(jsonSingleSign.getString(JSON_ELEMENT_SUBOPERATION))
+							? SignOperation.parse(jsonSingleSign.getString(JSON_ELEMENT_SUBOPERATION))
 									: this.subOperation);
 
 					try {

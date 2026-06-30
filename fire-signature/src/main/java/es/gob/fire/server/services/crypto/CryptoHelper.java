@@ -1,6 +1,7 @@
 package es.gob.fire.server.services.crypto;
 
 import java.security.PublicKey;
+import java.util.Base64;
 import java.util.logging.Logger;
 
 import javax.crypto.Cipher;
@@ -36,7 +37,8 @@ public class CryptoHelper {
 
     		final Cipher cipher = Cipher.getInstance(publicKey.getAlgorithm());
     		cipher.init(Cipher.DECRYPT_MODE, publicKey);
-    		cipher.doFinal(signatureValue);
+    		final byte[] md = cipher.doFinal(signatureValue);
+    		LOGGER.info(" ================ PKCS#1 descifrado: " + Base64.getEncoder().encodeToString(md));
     	}
     	catch (final Exception e) {
     		throw new SecurityException("El PKCS#1 de la firma no se ha generado con el certificado indicado", e); //$NON-NLS-1$

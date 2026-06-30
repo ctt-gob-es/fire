@@ -1,10 +1,10 @@
 package es.gob.fire.server.services.internal;
 
+import java.security.cert.X509Certificate;
 import java.util.Map;
 
 import es.gob.afirma.core.signers.TriphaseData;
 import es.gob.afirma.core.signers.TriphaseData.TriSign;
-import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.FIReTriHelper;
 import es.gob.fire.server.services.FIReTriSignIdProcessor;
 import es.gob.fire.signature.LogUtils;
@@ -69,19 +69,19 @@ public class CloudPostSignBatchRecover implements PostSignBatchRecover {
     	byte[] signature;
     	try {
     		signature = FIReTriHelper.getPostSign(
-    				this.signConfig.getCryptoOperation(),
+    				this.signConfig.getSignOperation(),
     				this.signConfig.getFormat(),
     				this.algorithm,
     				this.signConfig.getExtraParams(),
-    				this.batchResult.getSigningCertificate(),
+    				new X509Certificate[] { this.batchResult.getSigningCertificate() },
     				data,
     				currentTd,
     				this.logF);
     	}
-    	catch (final FIReSignatureException e) {
+    	catch (final Exception e) {
     		throw new BatchRecoverException(String.format(
     				"Error durante la postfirma. Verifique el codigo de operacion (%1s) y el formato (%2s)", //$NON-NLS-1$
-					LogUtils.cleanText(this.signConfig.getCryptoOperation()), LogUtils.cleanText(this.signConfig.getFormat())), e,
+					this.signConfig.getSignOperation(), LogUtils.cleanText(this.signConfig.getFormat())), e,
     				BatchResult.POSTSIGN_ERROR);
     	}
 

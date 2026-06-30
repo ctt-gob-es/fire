@@ -15,6 +15,7 @@ import java.io.PrintWriter;
 import java.net.HttpURLConnection;
 import java.nio.charset.Charset;
 import java.nio.charset.StandardCharsets;
+import java.security.MessageDigest;
 import java.security.cert.CertificateFactory;
 import java.security.cert.X509Certificate;
 import java.util.Properties;
@@ -33,7 +34,11 @@ import es.gob.afirma.core.signers.AOSignConstants;
 import es.gob.afirma.core.signers.CounterSignTarget;
 import es.gob.afirma.core.signers.ExtraParamsProcessor;
 import es.gob.afirma.core.signers.TriphaseData;
+import es.gob.afirma.core.signers.TriphaseData.TriSign;
 import es.gob.afirma.signers.xml.XmlDSigProviderHelper;
+import es.gob.afirma.signvalidation.SignValider;
+import es.gob.afirma.signvalidation.SignValiderFactory;
+import es.gob.afirma.signvalidation.SignValidity;
 import es.gob.afirma.triphase.signer.processors.PreProcessorFactory;
 import es.gob.afirma.triphase.signer.processors.TriPhasePreProcessor;
 import es.gob.fire.server.services.FIReError;
@@ -42,6 +47,7 @@ import es.gob.fire.server.services.RequestParameters;
 import es.gob.fire.server.services.Responser;
 import es.gob.fire.server.services.SignOperation;
 import es.gob.fire.server.services.TriServiceErrorCode;
+import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.PropertiesUtils;
 import es.gob.fire.server.services.triphase.document.DocumentManager;
 import es.gob.fire.server.services.triphase.document.FIReLocalDocumentManager;
@@ -138,8 +144,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 		}
 
 		// Obtenemos el codigo de operacion
-		final SignOperation cryptoOperation = SignOperation.parse(params.getParameter(PARAM_NAME_CRYPTO_OPERATION));
-		if (cryptoOperation == null) {
+		final SignOperation signOperation = SignOperation.parse(params.getParameter(PARAM_NAME_CRYPTO_OPERATION));
+		if (signOperation == null) {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.MISSING_PARAM_CRYPTO_OPERATION));
 			return;
 		}
@@ -171,7 +177,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
         // Evitamos que se interrumpa la operacion en caso de estar cofirmandose o
         // contrafirmandose una firma longeva
-        if (SignOperation.SIGN != cryptoOperation) {
+        if (SignOperation.SIGN != signOperation) {
         	extraParams.setProperty(EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES, Boolean.TRUE.toString());
         }
 
@@ -264,6 +270,8 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 			return;
 		}
 
+		final LogTransactionFormatter logF = new LogTransactionFormatter();
+
 		// Instanciamos el preprocesador adecuado
 		final TriPhasePreProcessor prep;
 		if (AOSignConstants.SIGN_FORMAT_AUTO.equalsIgnoreCase(format)) {
@@ -274,7 +282,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				prep = PreProcessorFactory.getPreProcessor(format);
 			}
 			catch (final IllegalArgumentException e) {
-				LOGGER.severe("Formato de firma no soportado: " + format); //$NON-NLS-1$
+				LOGGER.severe(logF.f("Formato de firma no soportado: " + format)); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_SIGNATURE_FORMAT));
 				return;
 			}
@@ -282,14 +290,14 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 		if (PARAM_VALUE_OPERATION_PRESIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.info(" == PREFIRMA en servidor: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
+			LOGGER.info(logF.f(" == PREFIRMA en servidor: " + LoggerUtil.getTrimStr(docId))); //$NON-NLS-1$
 
 			// En FIRe, nunca se solicitara comprobar las firmas previas en este punto del proceso
 	        final boolean checkSignatures = false;
 
 			final TriphaseData preRes;
 			try {
-				switch (cryptoOperation) {
+				switch (signOperation) {
 				case SIGN:
 					preRes = prep.preProcessPreSign(
 							docBytes,
@@ -327,23 +335,18 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					);
 					break;
 				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation, TriServiceErrorCode.Request.CRYPTO_OPERATION_NOT_FOUND); //$NON-NLS-1$
+					throw new AOException("No se reconoce el codigo de sub-operacion: " + signOperation, TriServiceErrorCode.Request.CRYPTO_OPERATION_NOT_FOUND); //$NON-NLS-1$
 				}
 
-				LOGGER.fine("Se ha calculado el resultado de la prefirma y se devuelve"); //$NON-NLS-1$
+				LOGGER.fine(logF.f("Se ha calculado el resultado de la prefirma y se devuelve")); //$NON-NLS-1$
 			}
-			catch (final UnsupportedOperationException e) {
-				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la prefirma de los datos", e); //$NON-NLS-1$
-				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
-				return;
-			}
-			catch (final RuntimeConfigNeededException e) {
-				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la prefirma de los datos", e); //$NON-NLS-1$
+			catch (final UnsupportedOperationException | RuntimeConfigNeededException e) {
+				LOGGER.log(Level.SEVERE, logF.f("Se requiere intervencion del usuario para la prefirma de los datos"), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error en la prefirma: " + e, e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Error en la prefirma: " + e), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_PRESIGNING) + ": " + e); //$NON-NLS-1$
 				return;
 			}
@@ -356,7 +359,7 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					FIReTriHelper.addVerificationCodes(preRes, signerCertChain[0]);
 				}
 				catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, "Error al generar los codigos de verificacion de las firmas: " + e, e); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, logF.f("Error al generar los codigos de verificacion de las firmas: " + e), e); //$NON-NLS-1$
 					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_GENERATING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
@@ -364,18 +367,18 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			sendResponse(response, Base64.encode(preRes.toString().getBytes(StandardCharsets.UTF_8), true));
 
-			LOGGER.info("== FIN PREFIRMA: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
+			LOGGER.info(logF.f("== FIN PREFIRMA: " + LoggerUtil.getTrimStr(docId))); //$NON-NLS-1$
 		}
 		else if (PARAM_VALUE_OPERATION_POSTSIGN.equalsIgnoreCase(operation)) {
 
-			LOGGER.info(" == POSTFIRMA en servidor: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
+			LOGGER.info(logF.f(" == POSTFIRMA en servidor: " + LoggerUtil.getTrimStr(docId))); //$NON-NLS-1$
 
 			TriphaseData triphaseData;
 			try {
 				triphaseData = TriphaseData.parser(sessionData);
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "El formato de los parametros de operacion requeridos incorrecto", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("El formato de los parametros de operacion requeridos incorrecto"), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.INVALID_SESSION_DATA) + ": " + e); //$NON-NLS-1$
 				return;
 			}
@@ -390,12 +393,12 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 					FIReTriHelper.checkSignaturesIntegrity(triphaseData, signerCertChain[0], null);
 				}
 				catch (final SecurityException e) {
-					LOGGER.log(Level.SEVERE, "Error de integridad. Las prefirmas y/o el certificado obtenido no se corresponden con los generados en la prefirma", e); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, logF.f("Error de integridad. Las prefirmas y/o el certificado obtenido no se corresponden con los generados en la prefirma"), e); //$NON-NLS-1$
 					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_CHECKING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
 				catch (final Exception e) {
-					LOGGER.log(Level.SEVERE, "Error al comprobar los codigos de verificacion de las firmas", e); //$NON-NLS-1$
+					LOGGER.log(Level.SEVERE, logF.f("Error al comprobar los codigos de verificacion de las firmas"), e); //$NON-NLS-1$
 					sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_CHECKING_PKCS1_HMAC) + ": " + e); //$NON-NLS-1$
 					return;
 				}
@@ -403,53 +406,16 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 
 			final byte[] signedDoc;
 			try {
-				switch (cryptoOperation) {
-				case SIGN:
-					signedDoc = prep.preProcessPostSign(
-							docBytes,
-							algorithm,
-							signerCertChain,
-							extraParams,
-							triphaseData
-							);
-					break;
-				case COSIGN:
-					signedDoc = prep.preProcessPostCoSign(
-							docBytes,
-							algorithm,
-							signerCertChain,
-							extraParams,
-							triphaseData
-							);
-					break;
-				case COUNTERSIGN:
-					CounterSignTarget target = CounterSignTarget.LEAFS;
-					if (extraParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
-						final String targetValue = extraParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
-						if (CounterSignTarget.TREE.toString().equalsIgnoreCase(targetValue)) {
-							target = CounterSignTarget.TREE;
-						}
-					}
-					signedDoc = prep.preProcessPostCounterSign(
-							docBytes,
-							algorithm,
-							signerCertChain,
-							extraParams,
-							triphaseData,
-							target
-							);
-					break;
-				default:
-					throw new AOException("No se reconoce el codigo de sub-operacion: " + cryptoOperation, TriServiceErrorCode.Request.CRYPTO_OPERATION_NOT_FOUND); //$NON-NLS-1$
-				}
+				signedDoc = FIReTriHelper.getPostSign(prep, signOperation, format, algorithm,
+						extraParams, signerCertChain, docBytes, triphaseData, logF);
 			}
 			catch (final RuntimeConfigNeededException e) {
-				LOGGER.log(Level.SEVERE, "Se requiere intervencion del usuario para la postfirma de los datos", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Se requiere intervencion del usuario para la postfirma de los datos"), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.CONFIGURATION_NEEDED) + ": " + e); //$NON-NLS-1$
 				return;
 			}
 			catch (final Exception e) {
-				LOGGER.log(Level.SEVERE, "Error en la postfirma: " + e, e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Error en la postfirma: " + e), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_POSTSIGNING) + ": " + e); //$NON-NLS-1$
 				return;
 			}
@@ -459,24 +425,24 @@ public final class ClienteAfirmaSignatureService extends HttpServlet {
 				extraParams.setProperty(PARAM_NAME_FORMAT, format);
 			}
 
-			LOGGER.fine(" Se ha calculado el resultado de la postfirma y se devuelve. Numero de bytes: " + signedDoc.length); //$NON-NLS-1$
+			LOGGER.fine(logF.f(" Se ha calculado el resultado de la postfirma y se devuelve. Numero de bytes: " + signedDoc.length)); //$NON-NLS-1$
 
 			// Devolvemos al servidor documental el documento firmado
-			LOGGER.fine("Almacenamos la firma mediante el DocumentManager"); //$NON-NLS-1$
+			LOGGER.fine(logF.f("Almacenamos la firma mediante el DocumentManager")); //$NON-NLS-1$
 			final String newDocId;
 			try {
 				newDocId = DOC_MANAGER.storeDocument(docId, signerCertChain, signedDoc, extraParams);
 			}
 			catch(final Throwable e) {
-				LOGGER.log(Level.SEVERE, "Error al almacenar el documento", e); //$NON-NLS-1$
+				LOGGER.log(Level.SEVERE, logF.f("Error al almacenar el documento"), e); //$NON-NLS-1$
 				sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.ERROR_STORAGING_SIGNATURE) + ": " + e); //$NON-NLS-1$
 				return;
 			}
-			LOGGER.fine("Documento almacenado"); //$NON-NLS-1$
+			LOGGER.fine(logF.f("Documento almacenado")); //$NON-NLS-1$
 
 			sendResponse(response, SUCCESS + newDocId);
 
-			LOGGER.info("== FIN POSTFIRMA: " + LoggerUtil.getTrimStr(docId)); //$NON-NLS-1$
+			LOGGER.info(logF.f("== FIN POSTFIRMA: " + LoggerUtil.getTrimStr(docId))); //$NON-NLS-1$
 		}
 		else {
 			sendResponse(response, ErrorManager.getErrorMessage(ErrorManager.UNSUPPORTED_TRIPHASE_OPERATION));

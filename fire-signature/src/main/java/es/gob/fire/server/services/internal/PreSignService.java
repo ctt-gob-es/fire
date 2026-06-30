@@ -162,7 +162,7 @@ public final class PreSignService extends HttpServlet {
 		final String userId         = session.getString(ServiceParams.SESSION_PARAM_SUBJECT_ID);
         final String algorithm      = session.getString(ServiceParams.SESSION_PARAM_ALGORITHM);
         Properties extraParams 		= (Properties) session.getObject(ServiceParams.SESSION_PARAM_EXTRA_PARAM);
-        final String cryptoOperation   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
+        final String cop   = session.getString(ServiceParams.SESSION_PARAM_CRYPTO_OPERATION);
         final String format         = session.getString(ServiceParams.SESSION_PARAM_FORMAT);
         final String providerName	= session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN);
     	final boolean originForced  = Boolean.parseBoolean(session.getString(ServiceParams.SESSION_PARAM_CERT_ORIGIN_FORCED));
@@ -191,12 +191,23 @@ public final class PreSignService extends HttpServlet {
             return;
         }
 
-        if (cryptoOperation == null || cryptoOperation.isEmpty()) {
+        if (cop == null || cop.isEmpty()) {
             LOGGER.warning(logF.f("No se encontro en la sesion la operacion de firma a realizar")); //$NON-NLS-1$
             ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
             Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
             return;
         }
+
+        final SignOperation signOperation;
+        try {
+        	signOperation = SignOperation.parse(cop);
+        }
+        catch (final Exception e) {
+        	LOGGER.severe(logF.f("La operacion criptografica encontrada en la sesion no es valida: " + e)); //$NON-NLS-1$
+            ErrorManager.setErrorToSession(session, FIReError.INTERNAL_ERROR, trAux);
+            Responser.redirectToExternalUrl(redirectErrorUrl, request, response, trAux);
+        	return;
+		}
 
         if (format == null || format.isEmpty()) {
             LOGGER.warning(logF.f("No se encontro en la sesion el formato de firma")); //$NON-NLS-1$
@@ -207,13 +218,12 @@ public final class PreSignService extends HttpServlet {
 
         // Evitamos que se interrumpa la operacion en caso de estar cofirmandose o
         // contrafirmandose una firma longeva
-        if (!SignOperation.SIGN.toString().equalsIgnoreCase(cryptoOperation)) {
+        if (signOperation != SignOperation.SIGN) {
         	if (extraParams == null) {
         		extraParams = new Properties();
         	}
         	extraParams.setProperty(EXTRA_PARAM_ALLOW_SIGN_LTS_SIGNATURES, Boolean.TRUE.toString());
         }
-
 
         // Decodificamos el certificado de firma
         final X509Certificate signerCert;
@@ -254,11 +264,11 @@ public final class PreSignService extends HttpServlet {
 
         	try {
                 td = FIReTriHelper.getPreSign(
-                    cryptoOperation,
+                    signOperation,
                     format,
                     algorithm,
                     extraParams,
-        			signerCert,
+        			new X509Certificate[] { signerCert },
                     data,
                     logF
         		);
@@ -334,7 +344,7 @@ public final class PreSignService extends HttpServlet {
 
             try {
                 td = FIReTriHelper.getPreSign(
-                    cryptoOperation,
+                    signOperation,
                     format,
                     algorithm,
                     extraParams,

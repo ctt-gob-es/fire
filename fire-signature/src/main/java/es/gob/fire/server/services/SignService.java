@@ -32,7 +32,6 @@ import es.gob.fire.alarms.AlarmInternalMessages;
 import es.gob.fire.server.connector.FIReConnector;
 import es.gob.fire.server.connector.FIReConnectorFactoryException;
 import es.gob.fire.server.connector.FIReConnectorNetworkException;
-import es.gob.fire.server.connector.FIReSignatureException;
 import es.gob.fire.server.services.internal.AlarmsManager;
 import es.gob.fire.server.services.internal.LogTransactionFormatter;
 import es.gob.fire.server.services.internal.PropertiesUtils;
@@ -187,7 +186,7 @@ public final class SignService extends HttpServlet {
     		return;
 		}
 
-        final String op         = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
+        final String subOperation = params.getParameter(PARAMETER_NAME_OPERATION).toLowerCase();
         final String format     = params.getParameter(PARAMETER_NAME_FORMAT);
         final String algorithm  = params.getParameter(PARAMETER_NAME_ALGORITHM);
         final String extraParamsB64 = params.getParameter(PARAMETER_NAME_EXTRA_PARAM);
@@ -203,6 +202,17 @@ public final class SignService extends HttpServlet {
     				"No se han proporcionado los datos a firmar"); //$NON-NLS-1$
     		return;
     	}
+
+        final SignOperation signOperation;
+        try {
+        	signOperation = SignOperation.parse(subOperation);
+        }
+        catch (final Exception e) {
+        	LOGGER.severe(logF.f("La operacion de firma encontrada en la sesion no es valida: " + e)); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "La operacion de firma encontrada en la sesion no es valida"); //$NON-NLS-1$
+        	return;
+		}
 
         final Properties config;
         try {
@@ -297,20 +307,20 @@ public final class SignService extends HttpServlet {
         byte[] signResult;
         try {
             signResult = FIReTriHelper.getPostSign(
-                    op,
+                    signOperation,
                     format,
                     algorithm,
                     config,
-                    signerCert,
+                    new X509Certificate[] { signerCert },
                     data,
                     td,
                     logF
             );
         }
-        catch (final FIReSignatureException e) {
+        catch (final Exception e) {
             LOGGER.log(Level.WARNING,
-            		logF.f("Error durante la operacion. Verifique el codigo de operacion (" + op + //$NON-NLS-1$
-                    ") y el formato (" + format + ")"), e); //$NON-NLS-1$ //$NON-NLS-2$
+            		logF.f("Error durante la operacion. Verifique el codigo de operacion (" + signOperation + //$NON-NLS-1$
+                    ") y el formato (" + LogUtils.cleanText(format) + ")"), e); //$NON-NLS-1$ //$NON-NLS-2$
             Responser.sendError(response, HttpServletResponse.SC_INTERNAL_SERVER_ERROR,
                 "Error durante la operacion. Verifique el codigo de operacion y el formato"); //$NON-NLS-1$
             return;

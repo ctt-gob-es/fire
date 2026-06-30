@@ -209,6 +209,17 @@ public final class LoadService extends HttpServlet {
             return;
         }
 
+        final SignOperation signOperation;
+        try {
+        	signOperation = SignOperation.parse(subOperation);
+        }
+        catch (final Exception e) {
+        	LOGGER.severe(logF.f("La operacion de firma encontrada en la sesion no es valida: " + e)); //$NON-NLS-1$
+            Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
+                    "No se ha indicado la operacion de firma a realizar"); //$NON-NLS-1$
+        	return;
+		}
+
         if (format == null || format.isEmpty()) {
             LOGGER.warning(logF.f("No se ha indicado el formato de firma")); //$NON-NLS-1$
             Responser.sendError(response, HttpServletResponse.SC_BAD_REQUEST,
@@ -239,11 +250,11 @@ public final class LoadService extends HttpServlet {
         final TriphaseData td;
         try {
             td = FIReTriHelper.getPreSign(
-                subOperation,
+            	signOperation,
                 format,
                 algorithm,
                 extraParamsB64 != null ? PropertiesUtils.base642Properties(extraParamsB64) : null,
-    			signerCert,
+    			new X509Certificate[] { signerCert },
                 Base64.decode(dataB64, true),
                 logF
     		);
