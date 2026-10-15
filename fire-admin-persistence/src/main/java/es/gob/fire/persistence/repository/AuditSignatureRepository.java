@@ -21,7 +21,7 @@ public interface AuditSignatureRepository extends JpaRepository<AuditSignature, 
 	
 	/**
 	 * Method that obtains from the persistence a petition identified by its primary key.
-	 * @param idAuditSignature Integer that represents the primary key of the application in the persistence.
+	 * @param idAuditSignature String that represents the primary key of the application in the persistence.
 	 * @return Object that represents a petition from the persistence.
 	 */
 	List<AuditSignature> findByIdTransaction(String idTransaction);

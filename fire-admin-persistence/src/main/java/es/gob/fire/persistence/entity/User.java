@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -243,6 +244,7 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #root}.
 	 */
    @Column(name = "USU_DEFECTO", nullable = false)
+   @Convert(converter = BooleanNumericConverter.class)
    public Boolean getRoot() {
 	return this.root;
    }
@@ -295,6 +297,7 @@ public class User implements Serializable {
 	 * @return the value of the attribute {@link #restPassword}.
 	 */
    @Column(name = "REST_CLAVE", nullable = false)
+   @Convert(converter = BooleanNumericConverter.class)
    public Boolean getRestPassword() {
 	return this.restPassword;
    }

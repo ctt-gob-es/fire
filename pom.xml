@@ -85,6 +85,47 @@
 			</activation>
 
 			<modules>
+				<!-- Módulos core -->
+				<module>fire-admin-commons-util</module>
+				<module>fire-admin-core</module>
+				<module>fire-admin-i18n</module>
+				<module>fire-admin-persistence</module>
+				<module>fire-alarms</module>
+				<module>fire-alarms-graylog</module>
+				<module>fire-alarms-mail</module>
+				<module>fire-client-java</module>
+				<module>fire-log-handlers</module>
+				<module>fire-signature-common-libraries</module>
+				<module>fire-signature-connector</module>
+				<module>fire-signature-connector-clavefirma-test</module>
+				<module>fire-signature-decipher</module>
+				<module>fire-signature-document</module>
+				<module>fire-signature-i18n</module>
+				<module>fire-statistics-cmd</module>
+				<module>fire-statistics-common</module>
+				<module>fire-upgrade</module>
+				<module>fire-upgrade-afirma</module>
+				<module>fire-mail</module>
+				<module>log-consumer-api</module>
+				<module>log-consumer-register</module>
+
+				<!-- Módulos de servicios -->
+				<module>fire-admin-web</module>
+				<module>fire-admin-web-jakarta</module>
+				<module>clavefirma-test-services</module>
+				<module>clavefirma-test-services-jakarta</module>
+				<module>fire-signature</module>
+				<module>fire-signature-jakarta</module>
+				<module>fire-test-jsp</module>
+				<module>fire-test-jsp-jakarta</module>
+				<module>log-consumer-service</module>
+			</modules>
+		</profile>
+
+		<profile>
+			<id>core</id>	 <!-- Este perfil contiene los modulos core de FIRe -->
+
+			<modules>
 				<module>fire-admin-commons-util</module>
 				<module>fire-admin-core</module>
 				<module>fire-admin-i18n</module>
@@ -115,9 +156,13 @@
 
 			<modules>
 				<module>fire-admin-web</module>
+				<module>fire-admin-web-jakarta</module>
 				<module>clavefirma-test-services</module>
+				<module>clavefirma-test-services-jakarta</module>
 				<module>fire-signature</module>	
+				<module>fire-signature-jakarta</module>
 				<module>fire-test-jsp</module>
+				<module>fire-test-jsp-jakarta</module>
 				<module>log-consumer-service</module>
 			</modules>
 		</profile>

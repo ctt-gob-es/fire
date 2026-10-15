@@ -9,11 +9,9 @@
  */
 package es.gob.fire.upgrade.afirma;
 
-import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.util.Properties;
 
-import es.gob.fire.upgrade.ConnectionException;
 import es.gob.fire.upgrade.afirma.ws.WSServiceInvokerException;
 import es.gob.fire.upgrade.afirma.ws.WebServiceInvoker;
 import es.gob.fire.upgrade.afirma.ws.WebServiceInvokerConfig;
@@ -71,10 +69,7 @@ public final class AfirmaConnector {
      * @param serviceName Nombre del servicio.
      * @param operation M&eacute;todo del servicio.
      * @return Respuesta del servicio.
-     * @throws ConnectionException Cuando ocurre un error en la llamada al servicio.
-     * @throws PlatformWsException Cuando ocurre un error la procesar la petici&oacute;n.
-     * @throws IOException Cuando el endpoint o el nombre del servicio no tienen un formato v&aacute;lido.
-     * @throws WSServiceInvokerException
+     * @throws WSServiceInvokerException Cuando ocurre un error en la llamada al servicio.
      */
     byte[] doPlatformCall(final String inputDss, final String serviceName, final String operation)
             throws WSServiceInvokerException {
@@ -100,8 +95,6 @@ public final class AfirmaConnector {
 
     /**
      * Method that updates the system properties used to define the truststore for the secure connections.
-     * @param truststorePath Parameter that represents the path to the truststore.
-     * @param truststorePass Parameter that represents the password of the truststore.
      */
     private void configSslTruststore() {
     	if (this.trustStorePath != null && !this.trustStorePath.equals(System.getProperty(TRUSTSTORE_PATH_PROPERTY))) {

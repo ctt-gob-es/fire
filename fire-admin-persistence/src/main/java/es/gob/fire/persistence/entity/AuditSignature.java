@@ -1,6 +1,7 @@
 package es.gob.fire.persistence.entity;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -200,6 +201,7 @@ public class AuditSignature {
 	 * @return the value of the attribute {@link #result}.
 	 */
 	@Column(name = "RESULTADO", nullable = false)
+	@Convert(converter = BooleanNumericConverter.class)
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getResult() {
 		return result;

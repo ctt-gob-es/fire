@@ -91,6 +91,11 @@ public class JpaConfig {
 	 */
 	@Value("${hibernate.showSQL}")
 	private boolean showSQL;
+	/**
+	 * Attribute that enables Hibernate's pagination handler for pre-12c Oracle.
+	 */
+	@Value("${hibernate.legacy_limit_handler:false}")
+	private boolean legacyLimitHandler;
 
 	/**
 	 * Method that configures the data source.
@@ -139,6 +144,7 @@ public class JpaConfig {
 		jpaProperties.put(AvailableSettings.DIALECT, this.dialect);
 
 		jpaProperties.put(AvailableSettings.SHOW_SQL, this.showSQL);
+		jpaProperties.put("hibernate.legacy_limit_handler", this.legacyLimitHandler);
 
 		entityManagerFactoryBean.setJpaProperties(jpaProperties);
 		entityManagerFactoryBean.afterPropertiesSet();

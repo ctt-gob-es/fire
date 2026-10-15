@@ -1,0 +1,104 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+
+	<modelVersion>4.0.0</modelVersion>
+
+	<parent>
+		<groupId>es.gob.fire</groupId>
+		<artifactId>fire-artifacts</artifactId>
+		<version>3.1</version>
+	</parent>
+
+	<groupId>es.gob.clavefirma</groupId>
+	<artifactId>clavefirma-test-services-jakarta</artifactId>
+	<packaging>war</packaging>
+	<name>clavefirma-test-services-jakarta</name>
+	<description>Variante Jakarta EE del simulador de Cl@ve Firma para Tomcat 10.1</description>
+
+	<properties>
+		<jdk.version>11</jdk.version>
+		<jakartaee-migration.version>1.0.8</jakartaee-migration.version>
+		<clavefirma.source>${project.build.directory}/clavefirma-test-services-source.war</clavefirma.source>
+	</properties>
+
+	<dependencies>
+		<dependency>
+			<groupId>es.gob.clavefirma</groupId>
+			<artifactId>clavefirma-test-services</artifactId>
+			<version>${project.version}</version>
+			<type>war</type>
+		</dependency>
+	</dependencies>
+
+	<build>
+		<plugins>
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-war-plugin</artifactId>
+				<configuration>
+					<skip>true</skip>
+				</configuration>
+			</plugin>
+
+			<plugin>
+				<groupId>org.apache.maven.plugins</groupId>
+				<artifactId>maven-dependency-plugin</artifactId>
+				<executions>
+					<execution>
+						<id>copy-clavefirma-test-services</id>
+						<phase>prepare-package</phase>
+						<goals>
+							<goal>copy</goal>
+						</goals>
+						<configuration>
+							<artifactItems>
+								<artifactItem>
+									<groupId>es.gob.clavefirma</groupId>
+									<artifactId>clavefirma-test-services</artifactId>
+									<version>${project.version}</version>
+									<type>war</type>
+									<outputDirectory>${project.build.directory}</outputDirectory>
+									<destFileName>clavefirma-test-services-source.war</destFileName>
+								</artifactItem>
+							</artifactItems>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+
+			<plugin>
+				<groupId>org.codehaus.mojo</groupId>
+				<artifactId>exec-maven-plugin</artifactId>
+				<version>3.5.0</version>
+				<dependencies>
+					<dependency>
+						<groupId>org.apache.tomcat</groupId>
+						<artifactId>jakartaee-migration</artifactId>
+						<version>${jakartaee-migration.version}</version>
+					</dependency>
+				</dependencies>
+				<executions>
+					<execution>
+						<id>migrate-clavefirma-test-services-to-jakarta</id>
+						<phase>package</phase>
+						<goals>
+							<goal>java</goal>
+						</goals>
+						<configuration>
+							<mainClass>org.apache.tomcat.jakartaee.MigrationCLI</mainClass>
+							<includePluginDependencies>true</includePluginDependencies>
+							<includeProjectDependencies>false</includeProjectDependencies>
+							<arguments>
+								<argument>-profile=EE</argument>
+								<argument>${clavefirma.source}</argument>
+								<argument>${project.build.directory}/${project.build.finalName}.war</argument>
+							</arguments>
+						</configuration>
+					</execution>
+				</executions>
+			</plugin>
+		</plugins>
+	</build>
+</project>

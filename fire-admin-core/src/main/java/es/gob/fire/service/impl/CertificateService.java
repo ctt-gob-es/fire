@@ -48,6 +48,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Properties;
 
+import es.gob.fire.persistence.dto.ApplicationCertDTO;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -141,7 +142,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.service.services.ICertificateService#getCertificatetByCertificateId(java.lang.Long)
+	 * @see es.gob.fire.service.ICertificateService#getCertificateByCertificateId(Long) 
 	 */
 	@Override
 	public Certificate getCertificateByCertificateId(final Long idCertificado) {
@@ -150,7 +151,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.service.services.ICertificateService#updateCertificateFromTaskValidation(es.gob.fire.persistence.entity.Certificate)
+	 * @see es.gob.fire.service.ICertificateService#updateCertificateFromTaskValidation(Certificate, X509Certificate) 
 	 */
 	@Override
 	public Certificate saveCertificate(final Certificate certificate) {
@@ -159,7 +160,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.service.services.ICertificateService#deleteCertificate(java.lang.Long)
+	 * @see es.gob.fire.service.ICertificateService#deleteCertificate(java.lang.Long)
 	 */
 	@Override
 	@Transactional
@@ -169,7 +170,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.service.services.ICertificateService#getAllCertificate()
+	 * @see es.gob.fire.service.ICertificateService#getAllCertificate()
 	 */
 	@Override
 	public List<Certificate> getAllCertificate() {
@@ -216,7 +217,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.service.services.ICertificateService#getCertificateByCertificateName(java.lang.String)
+	 * @see es.gob.fire.service.ICertificateService#getCertificateByCertificateName(java.lang.String)
 	 */
 	@Override
 	public Certificate getCertificateByCertificateName(final String nombre_cert) {
@@ -456,7 +457,7 @@ public class CertificateService implements ICertificateService{
 
 	/**
 	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.IApplicationService#obtainZipWithCertificatesApp(java.util.List<Certificate>)
+	 * @see es.gob.fire.persistence.service.IApplicationService#obtainZipWithCertificatesApp(ApplicationCertDTO, List) 
 	 */
 	@Override
 	public List<CertificateDTO> obtainAllCertificateToDTO(final List<Certificate> listCertificate) {
@@ -490,10 +491,6 @@ public class CertificateService implements ICertificateService{
 		return listCertificateDTO;
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @see es.gob.fire.persistence.services.ICertificateService#validateStatusCertificateInAfirmaWS(final X509Certificate x509Certificate)
-	 */
 	@Override
 	public VerifyAfirmaCertificateResponse validateStatusCertificateInAfirmaWS(final X509Certificate x509Certificate)
 	        throws CertificateEncodingException, PlatformWsException, WSServiceInvokerException, AfirmaConfigurationException {
@@ -584,7 +581,7 @@ public class CertificateService implements ICertificateService{
 	    // 5) Autorizacion / stores en funcion del método de autenticacion
 	    if (safeEquals(authType, AUTH_BST)) {
 	        cfg.setProperty("webservices.authorization.method", "BinarySecurityToken");
-	        LOGGER.info("[validateStatusCertificateInAfirmaWS] Auth: BST");
+	        LOGGER.info("[validateStatusCertificateInAfirmaWS] Auth: BinarySecurityToken");
 
 	        // --- Keystore ---
 	        if (sa.getKsBlob() != null && sa.getKsBlob().length > 0 && baseDir != null) {
@@ -692,6 +689,7 @@ public class CertificateService implements ICertificateService{
 	            try {
 	                final String dec = AESCipher.getInstance().decryptMessageBC(sa.getPassword());
 	                cfg.setProperty("webservices.authorization.user.password", dec);
+					cfg.setProperty("webservices.authorization.user.passwordType", "digest");
 	            } catch (final Exception ex) {
 	                LOGGER.warn("[validateStatusCertificateInAfirmaWS] No se pudo descifrar la password de UsernameToken", ex);
 	            }

@@ -3,6 +3,7 @@ package es.gob.fire.persistence.entity;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
@@ -321,6 +322,7 @@ public class AuditTransaction {
 	 * @return the value of the attribute {@link #forcedProvider}.
 	 */
 	@Column(name = "PROVEEDOR_FORZADO", nullable = false)
+	@Convert(converter = BooleanNumericConverter.class)
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getForcedProvider() {
 		return this.forcedProvider;
@@ -375,6 +377,7 @@ public class AuditTransaction {
 	 * @return the value of the attribute {@link #result}.
 	 */
 	@Column(name = "RESULTADO", nullable = false)
+	@Convert(converter = BooleanNumericConverter.class)
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getResult() {
 		return this.result;

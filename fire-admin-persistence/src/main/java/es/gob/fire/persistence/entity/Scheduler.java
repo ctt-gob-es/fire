@@ -24,6 +24,7 @@ import java.io.Serializable;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -180,6 +181,7 @@ public class Scheduler implements Serializable {
      * @return el valor del atributo {@link #active}.
      */
     @Column(name = "ESTA_ACTIVO", nullable = false)
+    @Convert(converter = BooleanNumericConverter.class)
     public boolean isActive() {
         return this.active;
     }

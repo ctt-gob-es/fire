@@ -28,6 +28,7 @@ import java.io.Serializable;
 import java.util.Date;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -230,6 +231,7 @@ public class Transaction implements Serializable {
 	 * @return the value of the attribute {@link #forcedProvider}.
 	 */
 	@Column(name = "PROVEEDOR_FORZADO", nullable = false, precision = 1)
+	@Convert(converter = BooleanNumericConverter.class)
 	@NotNull
 	public Boolean getForcedProvider() {
 		return this.forcedProvider;
@@ -248,6 +250,7 @@ public class Transaction implements Serializable {
 	 * @return the value of the attribute {@link #correct}.
 	 */
 	@Column(name = "CORRECTA", nullable = false, precision = 1)
+	@Convert(converter = BooleanNumericConverter.class)
 	@NotNull
 	@JsonView(DataTablesOutput.View.class)
 	public Boolean getCorrect() {

@@ -6,6 +6,7 @@ import java.util.List;
 
 import javax.persistence.CascadeType;
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.FetchType;
 import javax.persistence.GeneratedValue;
@@ -176,6 +177,7 @@ public class Application implements Serializable{
 	 * @return the value of the attribute {@link #habilitado}.
 	 */
 	@Column(name = "HABILITADO", nullable = false)
+	@Convert(converter = BooleanNumericConverter.class)
 	@JsonView(DataTablesOutput.View.class)
 	public boolean isHabilitado() {
 		return this.habilitado;
@@ -279,6 +281,7 @@ public class Application implements Serializable{
      * @return the value of the attribute {@link #customProvider}.
      */
 	@Column(name = "PROVEEDOR_PERSONALIZADO")
+	@Convert(converter = BooleanNumericConverter.class)
 	 public boolean isCustomProvider() {
         return customProvider;
     }
@@ -296,6 +299,7 @@ public class Application implements Serializable{
      * @return the value of the attribute {@link #customSize}.
      */
 	@Column(name = "TAMANO_PERSONALIZADO")
+	@Convert(converter = BooleanNumericConverter.class)
     public boolean isCustomSize() {
         return customSize;
     }

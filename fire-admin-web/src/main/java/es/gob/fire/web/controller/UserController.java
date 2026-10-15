@@ -193,11 +193,18 @@ public class UserController {
 	 */
 	@RequestMapping(value = "userLastAccess", method = { RequestMethod.GET })
 	public String getUserLastAccessModal(final Model model) {
-		// Obtain the date
-	    String formattedLastAccessDate = userLoggedDTO.getFecUltimoAcceso().split(" ")[0];
-	    
-	    // Obtain the time
-	    String formattedLastAccessTime = userLoggedDTO.getFecUltimoAcceso().split(" ")[1];
+
+		String formattedLastAccessDate;
+		String formattedLastAccessTime;
+
+		String fecUltimoAcceso = userLoggedDTO.getFecUltimoAcceso();
+		if (fecUltimoAcceso != null && !fecUltimoAcceso.isEmpty()) {
+			formattedLastAccessDate = fecUltimoAcceso.split(" ")[0];
+			formattedLastAccessTime = fecUltimoAcceso.contains(" ") ? fecUltimoAcceso.split(" ")[1] : "N/A";
+		} else {
+			formattedLastAccessDate = "N/A";
+			formattedLastAccessTime = "N/A";
+		}
 
 	    //Format the user name
 	    String userName = userLoggedDTO.getName() + " " + userLoggedDTO.getSurnames();

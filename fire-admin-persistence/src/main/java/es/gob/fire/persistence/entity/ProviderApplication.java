@@ -3,6 +3,7 @@ package es.gob.fire.persistence.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.IdClass;
@@ -26,9 +27,11 @@ public class ProviderApplication implements Serializable {
     private Application application;
 
     @Column(name = "OBLIGATORIO", nullable = false)
+    @Convert(converter = BooleanNumericConverter.class)
     private boolean mandatory;
 
     @Column(name = "HABILITADO", nullable = false)
+    @Convert(converter = BooleanNumericConverter.class)
     private boolean enabled;
 
     @Column(name = "ORDEN", nullable = false)

@@ -25,7 +25,6 @@ import javax.xml.crypto.dsig.XMLSignature;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.handlers.AbstractHandler;
-import org.apache.axis2.saaj.util.SAAJUtil;
 import org.w3c.dom.Document;
 import org.w3c.dom.Element;
 import org.w3c.dom.NodeList;
@@ -69,7 +68,7 @@ public class ResponseHandler extends AbstractHandler {
 		Document doc = null;
 		try {
 			// Obtencion del documento XML que representa la peticion SOAP.
-			doc = SAAJUtil.getDocumentFromSOAPEnvelope(msgContext.getEnvelope());
+			doc = SoapDocumentUtil.getDocument(msgContext.getEnvelope());
 
 			// Obtenemos el objeto signature.
 			Element sigElement = null;

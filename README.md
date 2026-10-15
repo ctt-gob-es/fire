@@ -3,7 +3,7 @@ FIRe es una solución que simplifica la integración de procesos de firma electr
 
 ## Licencia
 
-FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) y [EUPL 1.1](http://ec.europa.eu/idabc/servlets/Docb4f4.pdf). Puede consular más información sobre el producto en el  [Portal de Administración electrónica](https://administracionelectronica.gob.es/ctt/fire).
+FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html) y [EUPL 1.1](https://interoperable-europe.ec.europa.eu/sites/default/files/custom-page/attachment/eupl1.1.-licence-es_0.pdf). Puede consular más información sobre el producto en el  [Portal de Administración electrónica](https://administracionelectronica.gob.es/ctt/fire).
 
 ## Notas de construcción
 
@@ -47,19 +47,24 @@ FIRe es software libre y se publica con licencia [GPL 2+](https://www.gnu.org/li
 
 ## Arquitectura
 
-El sistema FIRe está compuesto principalmente por dos elementos:
+El sistema FIRe está compuesto por una serie de servicios y un API cliente:
 
-1. Componente central
+1. Servicios de FIRe
 
-   Es el servidor en el que las aplicaciones delegan todas las labores de firma. Está a su vez compuesto por varios subcomponentes que se despliegan en un contenedor de aplicaciones java
+   Son el conjunto de servicios que componen FIRe:
    
-    - Componente de firma **(fire-signature)**
-    - Simulador de Cl@veFirma **(clavefirma-test-services)**
-    - Aplicación de administración **(fire-admin-web)**
+    - Componente central **(fire-signature)**. Es el núcleo del sistema y el encargado de realizar las operaciones de firma. Se encarga de la comunicación con los proveedores de firma en la nube, integra la lógica de firma con certificado local y gestiona el acceso de los clientes que solicitan la firma.
+    - Simulador de Cl@veFirma **(clavefirma-test-services)**. Es un servicio de prueba que simula el comportamiento del sistema de custodia de certificados de Cl@veFirma. Permite a los desarrolladores probar la integración con FIRe sin necesidad de disponer de un certificado real.
+    - Aplicación de administración **(fire-admin-web)**. Es una aplicación web que permite la administración del sistema FIRe. Permite la gestión de aplicaciones, usuarios y certificados, así como la visualización de estadísticas.
    
-2. Cliente distruido
+2. API Cliente
 
-   Está formado por las librerías de integración **(fire-client)** que utilizan las aplicaciones para conectarse al componente central. Las librerías se proporcionan en los lenguajes Java, .Net y PHP.
+   Es el API con el que las aplicaciones pueden solicitar al componente central la realización de firmas. Existen 3 implementaciones de este API:
+
+    - Cliente Java **(fire-client-java)**.
+    - Cliente .Net **(fire-client-dotnet)**.
+    - Cliente PHP **(fire-client-php)**.
+
    
 Junto a estos elementos se distribuye una aplicación de prueba en lenguaje java **(fire-test-jsp)** que permite demostrar las funcionalidades del sistema y que puede servir de ejemplo para desarrollos propios. También se pueden encontrar páginas de prueba ASP y PHP en los módulos de los correspondientes componentes distribuidos (**fire-client-dotnet** y **fire-client-php**).
    

@@ -12,15 +12,19 @@ package es.gob.fire;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.security.cert.CertificateFactory;
+import java.security.cert.X509Certificate;
 import java.util.Properties;
 
 import org.junit.Before;
 import org.junit.Ignore;
 import org.junit.Test;
+import org.junit.Assume;
 
 import es.gob.fire.upgrade.VerifyResult;
 import es.gob.fire.upgrade.afirma.AfirmaConnector;
 import es.gob.fire.upgrade.afirma.Verify;
+import es.gob.fire.upgrade.afirma.VerifyAfirmaCertificateResponse;
 
 /** Prueba de mejora de firma.
  * @author Tom&aacute;s Garc&iacute;a-Mer&aacute;s. */
@@ -74,4 +78,52 @@ public final class TestVerify {
 
 		System.out.println("Firma correcta: " + result.isOk()); //$NON-NLS-1$
 	}
+
+	/** Verifica el estado de un certificado contra el servicio local con UsernameToken. */
+	@Test
+	public void testVerifyCertificateWithUsernameToken() throws Exception {
+
+		final String username = getTestCredential("afirma.test.username", "AFIRMA_TEST_USERNAME");
+		final String password = getTestCredential("afirma.test.password", "AFIRMA_TEST_PASSWORD");
+		Assume.assumeTrue("Defina afirma.test.username/afirma.test.password para ejecutar la prueba", //$NON-NLS-1$
+				username != null && password != null);
+
+		this.config.setProperty("webservices.endpoint", "http://localhost:8081/afirmaws/services/"); //$NON-NLS-1$
+		this.config.setProperty("webservices.service.verifyCertificate", "DSSAfirmaVerifyCertificate"); //$NON-NLS-1$
+		this.config.setProperty("webservices.authorization.method", "UsernameToken"); //$NON-NLS-1$
+		this.config.setProperty("webservices.authorization.user.name", username); //$NON-NLS-1$
+		this.config.setProperty("webservices.authorization.user.password", password); //$NON-NLS-1$
+		this.config.remove("webservices.authorization.ks.path"); //$NON-NLS-1$
+		this.config.remove("webservices.authorization.ks.type"); //$NON-NLS-1$
+		this.config.remove("webservices.authorization.ks.password"); //$NON-NLS-1$
+		this.config.remove("webservices.authorization.ks.cert.alias"); //$NON-NLS-1$
+		this.config.remove("webservices.authorization.ks.cert.password"); //$NON-NLS-1$
+		this.config.remove("webservices.authentication.ts.path"); //$NON-NLS-1$
+		this.config.remove("webservices.authentication.ts.password"); //$NON-NLS-1$
+		this.config.remove("webservices.authentication.ts.type"); //$NON-NLS-1$
+		this.config.remove("webservices.authentication.cert.alias"); //$NON-NLS-1$
+
+		this.conn.init(this.config);
+
+		final X509Certificate certificate;
+		try (InputStream is = TestVerify.class.getResourceAsStream("/redsara.es.der")) { //$NON-NLS-1$
+			Assume.assumeTrue("No se encuentra el certificado de prueba", is != null); //$NON-NLS-1$
+			certificate = (X509Certificate) CertificateFactory.getInstance("X.509").generateCertificate(is); //$NON-NLS-1$
+		}
+
+		final VerifyAfirmaCertificateResponse result = Verify.verifyCertificate(
+				this.conn, certificate, this.config.getProperty(PROP_APPID));
+
+		org.junit.Assert.assertNotNull("La respuesta de @Firma no puede ser nula", result); //$NON-NLS-1$
+	}
+
+	private static String getTestCredential(final String propertyName, final String environmentName) {
+		final String propertyValue = System.getProperty(propertyName);
+		if (propertyValue != null && !propertyValue.trim().isEmpty()) {
+			return propertyValue.trim();
+		}
+		final String environmentValue = System.getenv(environmentName);
+		return environmentValue == null || environmentValue.trim().isEmpty() ? null : environmentValue.trim();
+	}
+
 }

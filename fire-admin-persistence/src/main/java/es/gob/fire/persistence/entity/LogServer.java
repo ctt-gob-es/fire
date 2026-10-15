@@ -27,6 +27,7 @@ package es.gob.fire.persistence.entity;
 import java.io.Serializable;
 
 import javax.persistence.Column;
+import javax.persistence.Convert;
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
@@ -170,6 +171,7 @@ public class LogServer implements Serializable {
 	 * @return the value of the attribute {@link #verifySSL}.
 	 */
    @Column(name = "VERIFICAR_SSL", nullable = false, precision = 1)
+   @Convert(converter = BooleanNumericConverter.class)
    @NotNull
    @JsonView(DataTablesOutput.View.class)
    public Boolean getVerifySSL() {

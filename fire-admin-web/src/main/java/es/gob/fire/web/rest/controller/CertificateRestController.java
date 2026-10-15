@@ -334,20 +334,17 @@ public class CertificateRestController {
 				    json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				} catch (final AfirmaConfigurationException e) {
-					// No se ha establecido la configuracion de conexion con @firma
-					LOGGER.error(e);
+					LOGGER.error("No se ha establecido la configuracion de conexion con @firma", e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC018);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				} catch (final PlatformWsException e) {
-					// Se ha producido un fallo en la peticion o respuesta del SOAP
-					LOGGER.error(e);
+					LOGGER.error("Se ha producido un fallo en la peticion o respuesta del SOAP", e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC003);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());
 				} catch (final WSServiceInvokerException e) {
-					// Se ha producido un fallo en la peticion o respuesta del SOAP
-					LOGGER.error(e);
+					LOGGER.error("Se ha producido un fallo en la peticion o respuesta del SOAP", e);
 					msgerror = Language.getResWebAdminGeneral(IWebAdminGeneral.LOG_MC016);
 					json.put(KEY_JS_ERROR_SAVE_CERT, msgerror);
 					dtOutput.setError(json.toString());

@@ -23,11 +23,10 @@ import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.security.KeyStore;
-import java.security.Provider;
-import java.security.Security;
 import java.security.cert.Certificate;
 import java.security.cert.X509Certificate;
 import java.util.Iterator;
+import java.util.logging.Logger;
 
 import javax.xml.soap.MessageFactory;
 import javax.xml.soap.SOAPException;
@@ -42,20 +41,20 @@ import org.apache.axiom.om.OMElement;
 import org.apache.axiom.om.OMFactory;
 import org.apache.axiom.om.OMNamespace;
 import org.apache.axiom.soap.SOAPBody;
+import org.apache.axiom.soap.SOAPEnvelope;
 import org.apache.axis2.AxisFault;
 import org.apache.axis2.context.MessageContext;
 import org.apache.axis2.saaj.SOAPElementImpl;
 import org.apache.axis2.saaj.SOAPHeaderElementImpl;
 import org.apache.axis2.saaj.TextImplEx;
-import org.apache.axis2.saaj.util.SAAJUtil;
 import org.apache.wss4j.common.crypto.Crypto;
 import org.apache.wss4j.common.ext.WSSecurityException;
 import org.apache.wss4j.dom.WSConstants;
 import org.apache.wss4j.dom.message.WSSecHeader;
 import org.apache.wss4j.dom.message.WSSecSignature;
 import org.apache.wss4j.dom.message.WSSecUsernameToken;
+import org.jspecify.annotations.NonNull;
 import org.w3c.dom.Document;
-import org.w3c.dom.Element;
 import org.w3c.dom.NamedNodeMap;
 
 /**
@@ -110,11 +109,6 @@ class ClientHandler extends AbstractCommonHandler {
 		}
 	}
 
-	/**
-	 * {@inheritDoc}
-	 * @return
-	 * @see org.apache.axis.Handler#invoke(org.apache.axis.MessageContext)
-	 */
 	@Override
 	public InvocationResponse invoke(final MessageContext msgContext) throws AxisFault {
 		SOAPMessage secMsg;
@@ -124,20 +118,20 @@ class ClientHandler extends AbstractCommonHandler {
 
 		try {
 			// Obtencion del documento XML que representa la peticion SOAP.
-			doc = SAAJUtil.getDocumentFromSOAPEnvelope(msgContext.getEnvelope());
+			doc = SoapDocumentUtil.getDocument(msgContext.getEnvelope());
 			// Securizacion de la peticion SOAP segun la opcion de seguridad
 			// configurada
 			if (this.securityOption.equalsIgnoreCase(USERNAMEOPTION)) {
-				secMsg = createUserNameToken(doc);
+				secMsg = secureWithUsernameToken(doc);
 			} else if (this.securityOption.equalsIgnoreCase(CERTIFICATEOPTION)) {
 
-				// Obtenemos el certificado cargardo proveniente del platform.properties
-				final KeyStore ks = KeyStore.getInstance(this.getKeystoreType());
-				try (InputStream ksIs = new FileInputStream(this.getKeystore())) {
-					ks.load(ksIs, this.getKeystorePass().toCharArray());
+				// Obtenemos el certificado proveniente del platform.properties
+				final KeyStore ks = KeyStore.getInstance(getKeystoreType());
+				try (InputStream ksIs = new FileInputStream(getKeystore())) {
+					ks.load(ksIs, getKeystorePass().toCharArray());
 				}
-				final X509Certificate cert = (X509Certificate) ks.getCertificate(this.getUserAlias());
-            	secMsg = this.createBinarySecurityToken(doc, cert);
+				final X509Certificate cert = (X509Certificate) ks.getCertificate(getUserAlias());
+            	secMsg = secureWithBinaryToken(doc, cert);
 			}
 
 			if (!this.securityOption.equals(NONEOPTION) && secMsg != null) {
@@ -159,6 +153,28 @@ class ClientHandler extends AbstractCommonHandler {
 			throw AxisFault.makeFault(e);
 		}
 		return InvocationResponse.CONTINUE;
+	}
+
+	private String soapEnvelopToString(SOAPEnvelope envelope) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			envelope.serialize(baos);
+			return baos.toString("UTF-8");
+		} catch (Exception e) {
+			Logger.getLogger(ClientHandler.class.getName()).severe("Error al convertir el envelope SOAP a String: " + e.getMessage());
+			return null;
+		}
+	}
+
+	private String soapMessageToString(SOAPMessage secMsg) {
+		try {
+			ByteArrayOutputStream baos = new ByteArrayOutputStream();
+			secMsg.writeTo(baos);
+			return baos.toString("UTF-8");
+		} catch (Exception e) {
+			Logger.getLogger(ClientHandler.class.getName()).severe("Error al convertir el mensaje SOAP a String: " + e.getMessage());
+			return null;
+		}
 	}
 
 	private static boolean isElipticCurveCert(Certificate cert) {
@@ -212,61 +228,38 @@ class ClientHandler extends AbstractCommonHandler {
 	 * @throws SOAPException If the message is invalid.
 	 * @throws WSSecurityException If the method fails.
 	 */
-	private SOAPMessage createUserNameToken(final Document soapEnvelopeRequest) throws TransformerException, IOException, SOAPException, WSSecurityException {
-		ByteArrayOutputStream baos;
-		Document secSOAPReqDoc;
-		DOMSource source;
-		Element element;
-		SOAPMessage res;
-		StreamResult streamResult;
-		String secSOAPReq;
-		WSSecUsernameToken wsSecUsernameToken;
-		WSSecHeader wsSecHeader;
+	private SOAPMessage secureWithUsernameToken(final Document soapEnvelopeRequest) throws TransformerException, IOException, SOAPException, WSSecurityException {
 
-		// Eliminamos el provider ApacheXMLDSig de la lista de provider para que
-		// no haya conflictos con el nuestro.
-		final Provider apacheXMLDSigProvider = Security.getProvider("ApacheXMLDSig"); //$NON-NLS-1$
-		Security.removeProvider("ApacheXMLDSig"); //$NON-NLS-1$
-
-		try {
 			// Insercion del tag wsse:Security y userNameToken
-			wsSecHeader = new WSSecHeader(null, false, soapEnvelopeRequest);
-			wsSecUsernameToken = new WSSecUsernameToken(wsSecHeader);
-			wsSecUsernameToken.setPasswordType(getPasswordType());
-			wsSecUsernameToken.setUserInfo(getUserAlias(), getPassword());
-			wsSecHeader.insertSecurityHeader();
-			wsSecUsernameToken.prepare();
-			// Anadimos una marca de tiempo indicando la fecha de creacion del tag
-			wsSecUsernameToken.addCreated();
-			wsSecUsernameToken.addNonce();
-			// Modificacion de la peticion
-			secSOAPReqDoc = wsSecUsernameToken.build();
-			element = secSOAPReqDoc.getDocumentElement();
+			Document securedRequest = addUsernameToken(soapEnvelopeRequest);
 
-			// Transformacion del elemento DOM a String
-			source = new DOMSource(element);
-			baos = new ByteArrayOutputStream();
-			streamResult = new StreamResult(baos);
-			SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
-			secSOAPReq = new String(baos.toByteArray());
+			return buildSecureMessage(securedRequest);
+	}
 
-			// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
-			// securizado formado
-			final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
-			res = mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
+	private @NonNull Document addUsernameToken(Document soapEnvelopeRequest) throws WSSecurityException {
+		WSSecHeader wsSecHeader = new WSSecHeader(null, false, soapEnvelopeRequest);
+		wsSecHeader.insertSecurityHeader();
+		WSSecUsernameToken wsSecUsernameToken = new WSSecUsernameToken(wsSecHeader);
+		wsSecUsernameToken.setPasswordType(getPasswordType());
+		wsSecUsernameToken.setUserInfo(getUserAlias(), getPassword());
+		// Anadimos una marca de tiempo indicando la fecha de creacion del tag
+		wsSecUsernameToken.addCreated();
+		wsSecUsernameToken.addNonce();
+		// Modificacion de la peticion. build() prepara el token con todas las
+		// opciones configuradas y lo inserta en la cabecera de seguridad.
+		return wsSecUsernameToken.build();
+	}
 
-		} finally {
-			// Restauramos el provider ApacheXMLDSig eliminado inicialmente.
-			if (apacheXMLDSigProvider != null) {
-				// Eliminamos de nuevo el provider por si se ha anadido otra
-				// version durante la generacion de la peticion.
-				Security.removeProvider("ApacheXMLDSig"); //$NON-NLS-1$
-				// Anadimos el provider.
-				Security.insertProviderAt(apacheXMLDSigProvider, 1);
-			}
-		}
+	private SOAPMessage buildSecureMessage(Document securedRequest) throws TransformerException, SOAPException, IOException {
+		DOMSource source = new DOMSource(securedRequest.getDocumentElement());
+		ByteArrayOutputStream baos = new ByteArrayOutputStream();
+		StreamResult streamResult = new StreamResult(baos);
+		SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
 
-		return res;
+		// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
+		// securizado formado
+		final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
+		return mf.createMessage(null, new ByteArrayInputStream(baos.toByteArray()));
 	}
 
 	/**
@@ -278,51 +271,42 @@ class ClientHandler extends AbstractCommonHandler {
 	 * @throws SOAPException May be thrown if the message is invalid.
 	 * @throws WSSecurityException If the method fails.
 	 */
-	private SOAPMessage createBinarySecurityToken(final Document soapEnvelopeRequest, final X509Certificate cert) throws TransformerException, IOException, SOAPException, WSSecurityException {
+	private SOAPMessage secureWithBinaryToken(final Document soapEnvelopeRequest, final X509Certificate cert) throws TransformerException, IOException, SOAPException, WSSecurityException {
+
+		final Document secSOAPReqDoc = addBinaryToken(soapEnvelopeRequest, cert);
+
+		return buildSecureMessage(secSOAPReqDoc);
+	}
+
+	private @NonNull Document addBinaryToken(final Document soapEnvelopeRequest, final X509Certificate cert) throws WSSecurityException {
 
 		// Insercion del tag wsse:Security y BinarySecurityToken
 		final WSSecHeader wsSecHeader = new WSSecHeader(null, false, soapEnvelopeRequest);
-	    wsSecHeader.insertSecurityHeader();
-				
+		wsSecHeader.insertSecurityHeader();
+
 		final WSSecSignature wsSecSignature = new WSSecSignature(wsSecHeader);
-		final Crypto crypto = getCryptoInstance();
 
 		// Indicacion para que inserte el tag BinarySecurityToken
-	    wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
-	    
-	    wsSecSignature.setSignatureAlgorithm(isElipticCurveCert(cert)
-	    		? WSConstants.ECDSA_SHA256
-	    		: WSConstants.RSA_SHA256);
-	    
-	    wsSecSignature.setX509Certificate(cert);
-	    wsSecSignature.setUserInfo(getUserAlias(), getPassword());	    
+		wsSecSignature.setKeyIdentifierType(WSConstants.BST_DIRECT_REFERENCE);
 
-	    wsSecSignature.prepare(crypto);
+		wsSecSignature.setSignatureAlgorithm(isElipticCurveCert(cert)
+				? WSConstants.ECDSA_SHA256
+				: WSConstants.RSA_SHA256);
 
-		// Modificacion y firma de la peticion
-		final Document secSOAPReqDoc = wsSecSignature.build(crypto);
-		final Element element = secSOAPReqDoc.getDocumentElement();
+		wsSecSignature.setX509Certificate(cert);
+		wsSecSignature.setUserInfo(getUserAlias(), getPassword());
 
-		// Transformacion del elemento DOM a String
-		final DOMSource source = new DOMSource(element);
-		final ByteArrayOutputStream baos = new ByteArrayOutputStream();
-		final StreamResult streamResult = new StreamResult(baos);
-		SecureXmlBuilder.getSecureTransformer().transform(source, streamResult);
-		final String secSOAPReq = new String(baos.toByteArray());
-
-		// Creacion de un nuevo mensaje SOAP a partir del mensaje SOAP
-		// securizado formado
-		final MessageFactory mf = new org.apache.axis2.saaj.MessageFactoryImpl();
-		return mf.createMessage(null, new ByteArrayInputStream(secSOAPReq.getBytes()));
+		final Crypto crypto = getCryptoInstance();
+		return wsSecSignature.build(crypto);
 	}
 
 	/**
-     * Method that transform a given set of child elements into a OMElement.
-     *
-     * @param sh Child to transform.
-     * @param fac Object Model factory.
-     * @return a new OMElement object that represents the set of child elements.
-     */
+	 * Method that transform a given set of child elements into a OMElement.
+	 *
+	 * @param sh Child to transform.
+	 * @param fac Object Model factory.
+	 * @return a new OMElement object that represents the set of child elements.
+	 */
 	public static OMElement parseElements(final SOAPElementImpl<?> sh, final OMFactory fac) {
 
 		// Creamos el namespace.
