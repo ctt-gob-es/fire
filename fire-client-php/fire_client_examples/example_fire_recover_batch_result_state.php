@@ -15,9 +15,9 @@
 	$fireClient = new FireClient($appId);
 
 	// Recuperamos el estado de la operacion de firma de lote
-	$signatureB64;
+	$state;
 	try {
-		$signatureB64 = $fireClient->recoverBatchResultState(
+		$state = $fireClient->recoverBatchResultState(
 			$subjectId,			// DNI de la persona
 			$transactionId		// Identificador de transaccion
 		);
@@ -28,7 +28,7 @@
 	}
 
 	// Mostramos los datos obtenidos
-	echo "<br><b>Firma:</b><br>", $signatureB64;
+	echo "<br><b>Estado:</b><br>", $state;
  ?>
  </body>
 </html>

@@ -7,18 +7,19 @@
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_api.php';
 	
-	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	$subjectId = $_GET["sid"];		// DNI de la persona
-	$transactionId = $_GET["trid"];	// Identificador de la transaccion
+	session_start();
+	$appId = $_SESSION["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_SESSION["sid"];		// DNI de la persona
+	$transactionId = $_SESSION["trid"];	// Identificador de la transaccion
 
-	// Funcion del API de FIRe para iniciar la firma de un lote
-	$signatureB64;
+	// Iniciamos la firma del lote
+	$transaction;
 	try {
-		$signatureB64 = signBatch(
+		$transaction = signBatch(
 			$appId,				// Identificador de la aplicacion (dada de alta previamente en el sistema)
 			$subjectId,			// DNI de la persona
-			$transactionId,		// Identificador de la transaccion (recuperado de la operacion createBatch)
-			false				//Detener en caso de error
+			$transactionId,		// Identificador de la transaccion (obtenido de la operacion createBatch)
+			false				// Detener en caso de error 
 		);
 	}
 	catch(Exception $e) {
@@ -26,8 +27,8 @@
 		return;
 	}
 	
-	echo "<b>Id transaccion:</b><br>".$signatureB64->transactionId."<br><br><br>";
-	echo "<b>URL de redireccion:</b><br><a href=\"".$signatureB64->redirectUrl."\">".$signatureB64->redirectUrl."</a><br><br><br>";
+	echo "<b>Id transaccion:</b><br>".$transaction->transactionId."<br><br><br>";
+	echo "<b>URL de redireccion:</b><br><a href=\"".$transaction->redirectUrl."\">".$transaction->redirectUrl."</a><br><br><br>";
  ?>
  </body>
 </html>

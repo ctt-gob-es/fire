@@ -6,21 +6,22 @@
  <?php 
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_api.php';
-	
-	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	$subjectId = $_GET["sid"];		// DNI de la persona
-	
+
 	session_start();
+	$appId = $_SESSION["appid"];		// Identificador de la aplicacion dada de alta previamente en el sistema
+	$subjectId = $_SESSION["sid"];		// DNI de la persona
 	$transactionId = $_SESSION["trid"]; // Identificador de la transaccion
+		
+	// Damos por finalizada la transaccion
 	unset($_SESSION["trid"]);
 	
-	// Funcion del API de FIRe para recuperar informacion del error producido en la transaccion
+	// Recuperar informacion del error producido en la transaccion
 	$error;
 	try {
 		$error = recoverError(
 			$appId,			// Identificador de la aplicacion (dada de alta previamente en el sistema)
-			$subjectId,		// DNI de la persona
-			$transactionId	// Identificador de transaccion recuperado en la operacion sign()
+			$subjectId,			// DNI de la persona
+			$transactionId		// Identificador de transaccion
 		);
 	}
 	catch(Exception $e) {

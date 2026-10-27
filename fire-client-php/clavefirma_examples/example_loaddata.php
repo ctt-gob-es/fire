@@ -8,7 +8,6 @@
 	include '../clavefirma.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	//$appId = "7BA5453995EC";	// Entorno preproduccion
 	$appId = "B244E473466F";	// Entorno local
 	
 	$subjectId = "00001";	// DNI de la persona

@@ -16,9 +16,9 @@
 	$fireClient = new FireClient($appId);
 
 	// Iniciamos la firma del lote
-	$signatureB64;
+	$transaction;
 	try {
-		$signatureB64 = $fireClient->signBatch(
+		$transaction = $fireClient->signBatch(
 			$subjectId,			// DNI de la persona
 			$transactionId,		// Identificador de la transaccion (obtenido de la operacion createBatch)
 			false				// Detener en caso de error 
@@ -29,8 +29,8 @@
 		return;
 	}
 	
-	echo "<b>Id transaccion:</b><br>".$signatureB64->transactionId."<br><br><br>";
-	echo "<b>URL de redireccion:</b><br><a href=\"".$signatureB64->redirectUrl."\">".$signatureB64->redirectUrl."</a><br><br><br>";
+	echo "<b>Id transaccion:</b><br>".$transaction->transactionId."<br><br><br>";
+	echo "<b>URL de redireccion:</b><br><a href=\"".$transaction->redirectUrl."\">".$transaction->redirectUrl."</a><br><br><br>";
  ?>
  </body>
 </html>

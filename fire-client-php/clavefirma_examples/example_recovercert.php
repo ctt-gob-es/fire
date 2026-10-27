@@ -8,7 +8,6 @@
 	include '../clavefirma.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	//$appId = "7BA5453995EC";	// Entorno preproduccion
 	$appId = "B244E473466F";	// Entorno local
 	
 	$transactionId = "0acdbf53-22cf-452e-928f-05f1a6103567";	// Identificador de transaccion

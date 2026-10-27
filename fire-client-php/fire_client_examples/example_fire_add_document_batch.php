@@ -18,7 +18,6 @@
 	
 	// Agregamos un documento al lote usando la configuracion por defecto del lote
 	$documentB64 = base64_encode("Hola Mundo!!");				// Simulacion de documento para agregarlo al lote
-	$generateResult;
 	try {
 		$fireClient->addDocumentToBatch(
 			$subjectId,		// DNI de la persona

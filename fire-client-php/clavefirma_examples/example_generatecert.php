@@ -8,7 +8,6 @@
 	include '../clavefirma.php';
 	
 	// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	//$appId = "7BA5453995EC";	// Entorno preproduccion
 	$appId = "B244E473466F";	// Entorno local
 	
 	$conf = "redirectOkUrl=http://www.google.es"."\n".	// URL a la que llegara si el usuario se autentica correctamente

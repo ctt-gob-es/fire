@@ -9,7 +9,7 @@
 	
 	$appId = "87B35606B6A1";	// Identificador de la aplicacion (dada de alta previamente en el sistema)
 	$subjectId = "00001";		// DNI de la persona
-		
+
 	// Calculamos la URL base de la web para poder configurar las URL de retorno
 	$urlBase = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on') ? "https://" : "http://";   
     $urlBase.= $_SERVER['HTTP_HOST'];   
@@ -22,7 +22,6 @@
 	$conf = "redirectOkUrl=".$urlBase."example_fire_recover_sign.php\n".	// URL a la que llegara si el usuario se autentica correctamente
 			"redirectErrorUrl=".$urlBase."example_fire_recover_error.php";		// URL a la que llegara si ocurre algun error o el usuario no se autentica correctamente		
 	$confB64 = base64_encode($conf);
-
 
 	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
 	
