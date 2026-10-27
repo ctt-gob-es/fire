@@ -87,8 +87,6 @@ public final class FIReTriHelper {
      * @param logF Objeto para el formateo del log.
      * @return Informaci&oacute;n de prefirma generada.
      * @throws FIReSignatureException Cuando ocurre un error durante la operaci&oacute;n.
-     * @throws IOException Cuando ocurre un error al componer la estructura con la
-     * informaci&oacute;n de la prefirma.
      * @throws UnsupportedOperationException Cuando se configura una operaci&oacute;n no soportada.
      */
     public static TriphaseData getPreSign(final SignOperation signOperation,
@@ -99,7 +97,6 @@ public final class FIReTriHelper {
                                          final byte[] docBytes,
                                          final LogTransactionFormatter logF)
                                         		 throws FIReSignatureException,
-                                        		 	IOException,
                                         		 	UnsupportedOperationException {
 
         // Instanciamos el preprocesador adecuado
@@ -270,7 +267,7 @@ public final class FIReTriHelper {
 
         	// Expandimos la configuracion teniendo en cuenta que puede variar
         	// el resultado segun los datos a los que aplica
-        	Properties expandedParams = null;
+        	Properties expandedParams;
         	if (params != null) {
         		try {
         			expandedParams = ExtraParamsProcessor.expandProperties((Properties) params.clone(), doc.getData(), frmt);
@@ -438,7 +435,7 @@ public final class FIReTriHelper {
      * @param format Formato de firma.
      * @param digestAlgorithm Algoritmo de huella que utilizar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
-     * @param signerCert Certificado con el que se debe firmar.
+     * @param certChain Cadena de certificaci&oacute;n del certificado de firma.
      * @param docBytes Datos que se firman/multifirman.
      * @param triphaseData Conjunto de datos de la firma trif&aacute;sico obtenido de la
      * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
@@ -472,7 +469,7 @@ public final class FIReTriHelper {
      * @param format Formato de firma.
      * @param digestAlgorithm Algoritmo de huella que utilizar en la firma.
      * @param extraParams Configuraci&oacute;n de firma.
-     * @param signerCert Certificado con el que se debe firmar.
+	 * @param certChain Cadena de certificaci&oacute;n del certificado de firma.
      * @param docBytes Datos que se firman/multifirman.
      * @param triphaseData Conjunto de datos de la firma trif&aacute;sico obtenido de la
      * ejecuci&oacute;n de la prefirma y a&ntilde;adido de la firma.
@@ -501,40 +498,43 @@ public final class FIReTriHelper {
         	}
         }
 
+		final String signAlgorithm = AOSignConstants.composeSignatureAlgorithmName(
+				digestAlgorithm, certChain[0].getPublicKey().getAlgorithm());
+
         byte[] signature;
         try {
         	switch (signOperation) {
         	case SIGN:
         		signature = prep.preProcessPostSign(
         				docBytes,
-        				digestAlgorithm,
+						signAlgorithm,
         				certChain,
-        				extraParams,
+						expandedParams,
         				triphaseData
         				);
         		break;
         	case COSIGN:
         		signature = prep.preProcessPostCoSign(
         				docBytes,
-        				digestAlgorithm,
+						signAlgorithm,
         				certChain,
-        				extraParams,
+						expandedParams,
         				triphaseData
         				);
         		break;
         	case COUNTERSIGN:
         		CounterSignTarget target = CounterSignTarget.LEAFS;
-        		if (extraParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
-        			final String targetValue = extraParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
+        		if (expandedParams != null && expandedParams.containsKey(PARAM_NAME_TARGET_TYPE)) {
+        			final String targetValue = expandedParams.getProperty(PARAM_NAME_TARGET_TYPE).trim();
         			if (CounterSignTarget.TREE.toString().equalsIgnoreCase(targetValue)) {
         				target = CounterSignTarget.TREE;
         			}
         		}
         		signature = prep.preProcessPostCounterSign(
         				docBytes,
-        				digestAlgorithm,
+						signAlgorithm,
         				certChain,
-        				extraParams,
+						expandedParams,
         				triphaseData,
         				target
         				);
