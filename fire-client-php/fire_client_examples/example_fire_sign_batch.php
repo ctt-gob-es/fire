@@ -7,18 +7,20 @@
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
 
-	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	$subjectId = $_GET["sid"];		// DNI de la persona
-	$transactionId = $_GET["trid"];	// Identificador de la transaccion
+	session_start();
+	$appId = $_SESSION["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
+	$subjectId = $_SESSION["sid"];		// DNI de la persona
+	$transactionId = $_SESSION["trid"];	// Identificador de la transaccion
 	
-	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	// Creamos el cliente (tambien podriamos reutilizar uno anterior si lo tuviesemos ya creado)
+	$fireClient = new FireClient($appId);
 
-	// Funcion del API de FIRe para iniciar la firma de un lote
+	// Iniciamos la firma del lote
 	$signatureB64;
 	try {
 		$signatureB64 = $fireClient->signBatch(
 			$subjectId,			// DNI de la persona
-			$transactionId,		// Identificador de la transaccion (recuperado de la operacion createBatch)
+			$transactionId,		// Identificador de la transaccion (obtenido de la operacion createBatch)
 			false				// Detener en caso de error 
 		);
 	}

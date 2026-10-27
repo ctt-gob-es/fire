@@ -17,11 +17,9 @@
 	
 	// Definimos los parametros de conexion SSL (https://curl.haxx.se/libcurl/c/easy_setopt_options.html)
 	$client_ssl_curl_options = array(
-		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_public_cert.pem",
-		CURLOPT_SSLCERTTYPE => "PEM",
-		CURLOPT_SSLKEY => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/client_ssl_new_private_key.pem",
-		CURLOPT_SSLKEYTYPE => "PEM",
-		CURLOPT_KEYPASSWD => "12341234",
+		CURLOPT_SSLCERT => "C:/Users/carlos.gamuci/Documents/FIRe/Ficheros_Despliegue/ESPANOL_NIEPRUEBAS_PRUEBAS___X0000000T_1234.p12",
+		CURLOPT_SSLCERTTYPE => "P12",
+		CURLOPT_KEYPASSWD => "1234",
 		CURLOPT_SSL_VERIFYPEER => 0
 	);
 	
@@ -36,7 +34,7 @@
 	 * @param $op Operacion a realizar ('sign', 'cosign' o 'countersign').
 	 * @param $ft Formato de firma ('CAdES', 'XAdES', 'PAdES'...)
 	 * @param $algth Algoritmo de firma (Debe estar soportado por el servicio de custodia de claves).
-	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams del MiniApplet @firma.
+	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams de Autofirma.
 	 * @param $dataB64 Datos en base 64 que se desean firmar.
 	 * @param $confB64 Configuracion del servicio. Se debe indicar al menos las URL de redireccion en caso
 	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
@@ -207,7 +205,7 @@
 	 * @param $op Operacion a realizar ('sign', 'cosign' o 'countersign').
 	 * @param $ft Formato de firma ('CAdES', 'XAdES', 'PAdES'...)
 	 * @param $algth Algoritmo de firma (Debe estar soportado por el servicio de custodia de claves).
-	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams del MiniApplet @firma.
+	 * @param $propB64 Configuracion de la operacion de firma. Equivalente al extraParams de Autofirma.
 	 * @param $upgrade Actualizacion.
 	 * @param $confB64 Configuracion del servicio. Se debe indicar al menos las URL de redireccion en caso
 	 * de exito y error ("redirectOkUrl" y "redirectErrorUrl", respectivamente).
@@ -330,7 +328,7 @@
 	 * @param $op Operacion a realizar ('sign', 'cosign' o 'countersign').
 	 * @param $ft Formato de firma ('CAdES', 'XAdES', 'PAdES'...)
 	 * @param $propB64 Configuracion de la operacion de firma codificada en base 64. Equivalente al extraParams
-	 * del MiniApplet @firma.
+	 * de Autofirma.
 	 * @param $upgrade Actualizacion.
      * @param $confB64 Configuracion de la operacion particular codificada en base 64.
 	 * @throws InvalidArgumentException Cuando no se indica un parametro obligatorio.
@@ -667,8 +665,6 @@
 		
 		$response = curl_exec($ch);
 		$httpResponse = new HttpResponse($response, $ch);
-			
-		curl_close($ch);
 
 		if (!$httpResponse->isOk()) {
 			throwCustomException($httpResponse);

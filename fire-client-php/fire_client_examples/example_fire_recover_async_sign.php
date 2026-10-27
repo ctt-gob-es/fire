@@ -1,6 +1,6 @@
 <html>
  <head>
-  <title>Recuperar firma</title>
+  <title>Recuperar firma actualizada de forma asincrona</title>
  </head>
  <body>
  <?php 
@@ -9,11 +9,11 @@
 
 	$docId = "1573460420268258223";	// Identificador de la transaccion	
 	
-	//$appId = "7BA5453995EC";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - PREPRODUCCION
-	$appId = "B244E473466F";	// Identificador de la aplicacion (dada de alta previamente en el sistema) - LOCAL
+	$appId = "B244E473466F";	// Identificador de la aplicacion dada de alta previamente en el sistema
 	$upgradeFormat = "ES-T";	//Formato de firma longeva (T-LEVEL, LT-LEVEL...)
 
-	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	// Creamos el cliente
+	$fireClient = new FireClient($appId);
 	$transactionResult;
 	try {
 		$transactionResult = $fireClient->recoverAsyncSign(

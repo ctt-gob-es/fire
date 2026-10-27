@@ -11,14 +11,15 @@
 	$subjectId = "00001";		// DNI de la persona
 	$transactionId = "cebe6a97-be7d-4b4c-a069-321d798076b5";	// Identificador de la transaccion
 
-	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	// Creamos el cliente (tambien podriamos reutilizar uno anterior si lo tuviesemos ya creado)
+	$fireClient = new FireClient($appId);
 
-	// Funcion del API de FIRe para recuperar el estado de la operacion de firma de lote
+	// Recuperamos el estado de la operacion de firma de lote
 	$signatureB64;
 	try {
 		$signatureB64 = $fireClient->recoverBatchResultState(
 			$subjectId,			// DNI de la persona
-			$transactionId		// Identificador de transaccion recuperado en la operacion sign()
+			$transactionId		// Identificador de transaccion
 		);
 	}
 	catch(Exception $e) {

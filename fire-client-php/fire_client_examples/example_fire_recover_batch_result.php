@@ -7,16 +7,18 @@
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
 
-	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	$subjectId = $_GET["sid"];		// DNI de la persona
-	
 	session_start();
+	$appId = $_SESSION["appid"];		// Identificador de la aplicacion dada de alta previamente en el sistema
+	$subjectId = $_SESSION["sid"];		// DNI de la persona
 	$transactionId = $_SESSION["trid"]; // Identificador de la transaccion
-	unset($_SESSION["trid"]);
 	
+	// Damos por finalizada la transaccion (aunque aun utilizaremos este valor para recuperar los resultados)
+	unset($_SESSION["trid"]);	
+	
+	// Creamos el cliente (tambien podriamos reutilizar uno anterior si lo tuviesemos ya creado)
 	$fireClient = new FireClient($appId);
 
-	// Funcion del API de FIRe para recuperar el resultado de un lote de firma
+	// Recuperamos el resultado de un lote de firma
 	$batchResult;
 	try {
 		$batchResult = $fireClient->recoverBatchResult(
@@ -44,7 +46,7 @@
 		}
 	}
 
-	echo "<br><br><br><a href=\"example_fire_recover_batch_sign.php?appid=", $appId, "&sid=", $subjectId, "&trid=", $transactionId, "\">Recuperar firmas >></a>";
+	echo "<br><br><br><a href=\"example_fire_recover_batch_sign.php?trid=", $transactionId, "\">Recuperar firmas >></a>";
  ?>
  </body>
 </html>

@@ -7,19 +7,22 @@
 	// Cargamos el componente distribuido de FIRe
 	include '../fire_client.php';
 	
-	$appId = $_GET["appid"];		// Identificador de la aplicacion (dada de alta previamente en el sistema)
-	$subjectId = $_GET["sid"];		// DNI de la persona
 	$transactionId = $_GET["trid"];	// Identificador de la transaccion
 	
-	$fireClient = new FireClient($appId); // Identificador de la aplicacion (dada de alta previamente en el sistema)
+	session_start();
+	$appId = $_SESSION["appid"];		// Identificador de la aplicacion dada de alta previamente en el sistema
+	$subjectId = $_SESSION["sid"];		// DNI de la persona
 	
-	// Resultado de la primera firma
-	$docId = "0001";
+	// Creamos el cliente (tambien podriamos reutilizar uno anterior si lo tuviesemos ya creado)
+	$fireClient = new FireClient($appId);
+	
+	// Recuperamos la primera firma del lote
+	$docId = "0001";	// Identificador que se le asigno a la primera firma
 	try {
-		// Funcion del API de FIRe para recuperar una firma de un lote
+		// Recuperamos la firma del lote
 		$transactionResult = $fireClient->recoverBatchSign(
 			$subjectId,			// DNI de la persona
-			$transactionId,		// Identificador de transaccion recuperado en la operacion createBatch()
+			$transactionId,		// Identificador de transaccion
 			$docId				// Identificador del documento
 		);
 		// Mostramos los datos obtenidos
@@ -30,11 +33,11 @@
 	}
 
 	// Resultado de la segunda firma
-	$docId = "0002";
+	$docId = "0002";	// Identificador que se le asigno a la segunda firma
 	try {
 		$transactionResult = $fireClient->recoverBatchSign(
 			$subjectId,			// DNI de la persona
-			$transactionId,		// Identificador de transaccion recuperado en la operacion createBatch()
+			$transactionId,		// Identificador de transaccion
 			$docId				// Identificador del documento
 		);
 		// Mostramos los datos obtenidos
@@ -44,7 +47,7 @@
 		echo "<b>Error al recuperar el documento ", $docId, ":</b><br>Error ", $e->getCode(), ": ", $e->getMessage(), "<br>";   
 	}
 	
-	echo "<br><br><br><a href=\"example_fire_create_batch.php\">Volver >></a>";
+	echo "<br><br><br><a href=\"example_fire_create_batch.php\">Iniciar nueva transaccion >></a>";
  ?>
  </body>
 </html>
