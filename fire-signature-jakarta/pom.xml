@@ -33,16 +33,11 @@
 
 	<build>
 		<plugins>
-			<!-- The WAR is produced by the Jakarta EE migration step below. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-war-plugin</artifactId>
-				<configuration>
-					<skip>true</skip>
-				</configuration>
 			</plugin>
 
-			<!-- Copy the already-built javax WAR without copying or duplicating its sources. -->
 			<plugin>
 				<groupId>org.apache.maven.plugins</groupId>
 				<artifactId>maven-dependency-plugin</artifactId>
@@ -69,7 +64,6 @@
 				</executions>
 			</plugin>
 
-			<!-- Transform servlet APIs, descriptors and application dependencies to Jakarta EE. -->
 			<plugin>
 				<groupId>org.codehaus.mojo</groupId>
 				<artifactId>exec-maven-plugin</artifactId>
