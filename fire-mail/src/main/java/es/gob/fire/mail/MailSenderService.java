@@ -113,16 +113,6 @@ public class MailSenderService {
 			return;
 		}
 
-		final StringBuilder buffer = new StringBuilder();
-		buffer.append(" ======= Enviamos correo electronico ========")
-		 .append("\n\tEmisor: ").append(this.properties.getProperty(ConstantsMail.MAIL_SMTP_MAIL_SENDER))
-		 .append("\n\tReceptores: ").append(Arrays.toString(addresses))
-		 .append("\n\tAsunto: ").append(subject)
-		 .append("\n\tMensaje:\n\t").append(bodyMessage.toString())
-		 .append("\n=============================================");
-		 LOGGER.info(buffer.toString());
-
-
 		Transport transport = null;
 
 	    try {
